@@ -4,9 +4,11 @@
     logrotate:
         daysToKeep: 7
         numToKeep: 10
+
     properties:
       - heavy-job:
           weight: 1
+
     parameters:
       - string:
           name: ISO_FILE
@@ -34,6 +36,7 @@
    venvpath: '/home/jenkins/venv-nailgun-tests-2.9'
    runner-name: '{version-id}.{id}.vcenter.runner'
    runner-properties: 'properties'
+   cleaner-name: '{version-id}.{id}.vcenter.cleaner'
    mail-to: "rkhozinov@mirantis.com"
    default_pool: '10.109.0.0/16:24'
    nodes-count: '9'
@@ -65,6 +68,7 @@
        - vcenter_ha_nova_vlan_multiple_clusters
    jobs:
      - '{runner-name}'
+     - '{cleaner-name}'
      - '{version-id}.{id}.{testgroup}'
 
 - job-template:
@@ -79,28 +83,60 @@
             - vsphere
           option: category
     builders:
-        - copyartifact:
-            project: '{runner-name}'
-            which-build: upstream-build
-            filter: '{runner-properties}'
-        - inject:
-            properties-file: '{runner-properties}'
-        - inject:
-            properties-content: |
-                NODES_COUNT={nodes-count}
-                VENV_PATH={venvpath}
-                VERSION_ID={version-id}
-                OPENSTACK_RELEASE={openstack-release}
-                ENV_PREFIX={version-id}_{id}_vcenter
-                VCENTER_SNAPSHOT={vcenter-snapshot}
-        - shell:
-            !include-raw-escape builders/systest.vcenter.sh
+      - copyartifact:
+          project: download_iso
+          which-build: last-successful
+          filter: latest_isos.txt
+      - inject:
+          properties-content: |
+              NODES_COUNT={nodes-count}
+              VENV_PATH={venvpath}
+              VERSION_ID={version-id}
+              OPENSTACK_RELEASE={openstack-release}
+              ENV_PREFIX={version-id}_{id}_vcenter
+              VCENTER_SNAPSHOT={vcenter-snapshot}
+              ISO_FILE=$ISO_FILE
+      - shell:
+          !include-raw-escape builders/systest.vcenter.sh
     publishers:
-        - xunit:
-            types:
-              - junit:
-                  pattern: '**/nosetest.xml'
-                  skip-if-no-test-files: true
+      - xunit:
+          types:
+            - junit:
+                pattern: '**/nosetest.xml'
+                skip-if-no-test-files: true
+
+## Cleaner: cleans deployes fuel envs
+- job-template:
+    name: '{cleaner-name}'
+    concurrent: false
+    node: 'vsphere'
+    properties:
+      - throttle:
+          max-per-node: 0
+          max-total: 0
+          categories:
+            - vsphere
+          option: category
+
+    builders:
+      - copyartifact:
+          project: 'download_iso'
+          which-build: 'last-successful'
+          filter: 'latest_isos.txt'
+      - inject:
+          properties-file: 'latest_isos.txt'
+      - inject:
+          properties-content: |
+              VENV_PATH={venvpath}
+              VERSION_ID={version-id}
+              OPENSTACK_RELEASE={openstack-release}
+              ENV_PREFIX={version-id}_{id}_vcenter
+              VCENTER_SNAPSHOT={vcenter-snapshot}
+      - shell:
+          !include-raw-escape builders/systest.vcenter.cleaner.sh
+    publishers:
+      - email:
+          recipients: '{mail-to}'
 
 # multijob configuration
 # for each of testgroups a job was created early in this script.
@@ -111,113 +147,120 @@
     description: "System tests for vcenter feature"
     node: runner
     builders:
-        - inject:
-            properties-file: latest_isos.txt
-            properties-content: 'properties_file={runner-properties}'
-        - copyartifact:
-            project: download_iso
-            which-build: last-successful
-            filter: latest_isos.txt
-        - shell:
-            !include-raw-escape builders/systest.vcenter.runner.sh
-        - multijob:
-            name: 'System tests for vcenter'
-            condition: COMPLETED
-            projects:
-              - name: '8.0.systest.vcenter_smoke'
-                current-parameters: true
-                kill-phase-on: NEVER
+      - copyartifact:
+          project: 'download_iso'
+          filter: 'latest_isos.txt'
+          which-build: 'last-successful'
 
-              - name: '8.0.systest.vcenter_bvt'
-                current-parameters: true
-                kill-phase-on: NEVER
+      - inject:
+          properties-file: latest_isos.txt
 
-              - name: '8.0.systest.vcenter_cindervmdk'
-                current-parameters: true
-                kill-phase-on: NEVER
+      - shell:
+          !include-raw-escape builders/systest.vcenter.runner.sh
 
-              - name: '8.0.systest.vcenter_computevmware'
-                current-parameters: true
-                kill-phase-on: NEVER
+      - multijob:
+          name: 'Prepare envs for vcenter system tests'
+          condition: COMPLETED
+          projects:
+            - name: '{cleaner-name}'
+              current-parameters: true
+              kill-phase-on: NEVER
 
-              - name: '8.0.systest.vcenter_cindervmdk_and_computevmware'
-                current-parameters: true
-                kill-phase-on: NEVER
+#      - multijob:
+#          name: 'System tests for vcenter'
+#          condition: COMPLETED
+#          projects:
+#            - name: '8.0.systest.vcenter_bvt'
+#              current-parameters: true
+#              kill-phase-on: NEVER
+#
+#            - name: '8.0.systest.vcenter_cindervmdk'
+#              current-parameters: true
+#              kill-phase-on: NEVER
+#
+#            - name: '8.0.systest.vcenter_computevmware'
+#              current-parameters: true
+#              kill-phase-on: NEVER
+#
+#            - name: '8.0.systest.vcenter_cindervmdk_and_computevmware'
+#              current-parameters: true
+#              kill-phase-on: NEVER
+#
+#            - name: '8.0.systest.vcenter_glance_backend'
+#              current-parameters: true
+#              kill-phase-on: NEVER
+#
+#            - name: '8.0.systest.vcenter_multiple_cluster_with_computevmware'
+#              current-parameters: true
+#              kill-phase-on: NEVER
+#
+#            - name: '8.0.systest.vcenter_ceph'
+#              current-parameters: true
+#              kill-phase-on: NEVER
+#
+#            - name: '8.0.systest.vcenter_computevmware_and_ceph'
+#              current-parameters: true
+#              kill-phase-on: NEVER
+#
+#            - name: '8.0.systest.vcenter_multiroles_cindervmdk_and_ceph'
+#              current-parameters: true
+#              kill-phase-on: NEVER
+#
+#            - name: '8.0.systest.vcenter_multiroles_cindervmdk_and_cinder'
+#              current-parameters: true
+#              kill-phase-on: NEVER
+#
+#            - name: '8.0.systest.vcenter_ceilometer'
+#              current-parameters: true
+#              kill-phase-on: NEVER
+#
+#            - name: '8.0.systest.vcenter_ceilometer_and_computevmware'
+#              current-parameters: true
+#              kill-phase-on: NEVER
+#
+#            - name: '8.0.systest.vcenter_multiroles_ceilometer'
+#              current-parameters: true
+#              kill-phase-on: NEVER
+#
+#            - name: '8.0.systest.vcenter_add_delete_nodes'
+#              current-parameters: true
+#              kill-phase-on: NEVER
+#
+#            - name: '8.0.systest.vcenter_delete_controler'
+#              current-parameters: true
+#              kill-phase-on: NEVER
+#
+#            - name: '8.0.systest.vcenter_ha_ceph'
+#              current-parameters: true
+#              kill-phase-on: NEVER
+#
+#            - name: '8.0.systest.vcenter_ha_cinder_and_ceph'
+#              current-parameters: true
+#              kill-phase-on: NEVER
+#
+#            - name: '8.0.systest.vcenter_ha_glance_backend_multiple_cluster'
+#              current-parameters: true
+#              kill-phase-on: NEVER
+#
+#            - name: '8.0.systest.vcenter_ha_multiroles_cindervmdk_and_ceph'
+#              current-parameters: true
+#              kill-phase-on: NEVER
+#
+#            - name: '8.0.systest.vcenter_ha_multiroles_cindervmdk_and_cinder'
+#              current-parameters: true
+#              kill-phase-on: NEVER
+#
+#            - name: '8.0.systest.vcenter_ha_nova_flat_multiple_clusters'
+#              current-parameters: true
+#              kill-phase-on: NEVER
+#
+#            - name: '8.0.systest.vcenter_ha_nova_vlan_multiple_clusters'
+#              current-parameters: true
+#              kill-phase-on: NEVER
 
-              - name: '8.0.systest.vcenter_glance_backend'
-                current-parameters: true
-                kill-phase-on: NEVER
-
-              - name: '8.0.systest.vcenter_multiple_cluster_with_computevmware'
-                current-parameters: true
-                kill-phase-on: NEVER
-
-              - name: '8.0.systest.vcenter_ceph'
-                current-parameters: true
-                kill-phase-on: NEVER
-
-              - name: '8.0.systest.vcenter_computevmware_and_ceph'
-                current-parameters: true
-                kill-phase-on: NEVER
-
-              - name: '8.0.systest.vcenter_multiroles_cindervmdk_and_ceph'
-                current-parameters: true
-                kill-phase-on: NEVER
-
-              - name: '8.0.systest.vcenter_multiroles_cindervmdk_and_cinder'
-                current-parameters: true
-                kill-phase-on: NEVER
-
-              - name: '8.0.systest.vcenter_ceilometer'
-                current-parameters: true
-                kill-phase-on: NEVER
-
-              - name: '8.0.systest.vcenter_ceilometer_and_computevmware'
-                current-parameters: true
-                kill-phase-on: NEVER
-
-              - name: '8.0.systest.vcenter_multiroles_ceilometer'
-                current-parameters: true
-                kill-phase-on: NEVER
-
-              - name: '8.0.systest.vcenter_add_delete_nodes'
-                current-parameters: true
-                kill-phase-on: NEVER
-
-              - name: '8.0.systest.vcenter_delete_controler'
-                current-parameters: true
-                kill-phase-on: NEVER
-
-              - name: '8.0.systest.vcenter_ha_ceph'
-                current-parameters: true
-                kill-phase-on: NEVER
-
-              - name: '8.0.systest.vcenter_ha_cinder_and_ceph'
-                current-parameters: true
-                kill-phase-on: NEVER
-
-              - name: '8.0.systest.vcenter_ha_glance_backend_multiple_cluster'
-                current-parameters: true
-                kill-phase-on: NEVER
-
-              - name: '8.0.systest.vcenter_ha_multiroles_cindervmdk_and_ceph'
-                current-parameters: true
-                kill-phase-on: NEVER
-
-              - name: '8.0.systest.vcenter_ha_multiroles_cindervmdk_and_cinder'
-                current-parameters: true
-                kill-phase-on: NEVER
-
-              - name: '8.0.systest.vcenter_ha_nova_flat_multiple_clusters'
-                current-parameters: true
-                kill-phase-on: NEVER
-
-              - name: '8.0.systest.vcenter_ha_nova_vlan_multiple_clusters'
-                current-parameters: true
-                kill-phase-on: NEVER
     publishers:
         - archive:
-            artifacts: '**/nosetests.xml,logs/*,{runner-properties}'
+            artifacts: '**/nosetests.xml,logs/*'
             allow-empty: false
             fingerprint: true
         - xunit:
