@@ -1,0 +1,10 @@
+- job:
+    name: simple
+    project-typ: freestyle
+    builders:
+        - shell: 'echo "Hello world!"'
+          
+- project:
+    name: vcenter
+    jobs:
+        - 'simple'

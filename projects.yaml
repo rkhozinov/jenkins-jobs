@@ -1,0 +1,10 @@
+- project:
+    name: vcenter2
+    jobs:
+        - 'vcenter.bvt'    
+        
+- job:
+    name: vcenter.bvt
+    project-type: freestyle
+    builders:
+        - shell: 'make test'    
