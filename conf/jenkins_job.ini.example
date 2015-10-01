@@ -1,8 +1,9 @@
 [jenkins]
-user=my_username
-password=my_secret_password
-url=https://my.jenkins.com/
+#user=
+#password=
+url=https://jenkins-tpi.bud.mirantis.net:8080/
 
 [job_builder]
 ignore_cache=True
 keep_descriptions=False
+recursive=True

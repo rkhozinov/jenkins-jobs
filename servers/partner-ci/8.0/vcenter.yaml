@@ -1,395 +1,229 @@
----
-- parameter:
-    name: plugin-specific-parameters
-    parameters:
-    - string:
-        name: PLUGIN_VERSION
-        default: '{plugin-version}'
-- project:
-    name: 'predefined_parameters'
-    fuel-release: '8.0'
-    plugin-version: '2.0.0'
-    plugin-name: 'vcenter'
-    build-name: '{fuel-release}.dvs.build'
-    regression-name: '{fuel-release}.{plugin-name}.regression'
-    nightly-name: '{fuel-release}.{plugin-name}.nightly'
-    custom-name: '{fuel-release}.{plugin-name}.custom'
-    reporter-name: '{fuel-release}.{plugin-name}.reporter'
-    admin_node_memory: '8192'
-    slave_node_memory: '8192'
-    admin_node_cpu: '4'
-    slave_node_cpu: '4'
-    pkg_job_name: '{fuel-release}.dvs.build'
-    nightly_timer: 'H 22 * * *'
-    regression_timer: 'H 18 * * *'
-    nightly_disabled: true
-    regression_disabled: true
-    force_erase: true
-    recreate_venv: false
-    ws_norevert: false
-    nfs_clean: true
-    disable_ssl: true
-    kvm_use: false
-    update_master: true
-    enable_proposed: false
-    debug: true
-    publish_results: true
-    multijob_build_pkg: true
-    testjob_build_pkg: false
-    runner_timeout: 600
-    test_timeout: 300
-    iso_file: 'MirantisOpenStack-8.0.iso'
-    iso_storage: '/storage/downloads'
-    snapshots_id: 'released'
-    gerrit_repo: 'fuel-qa'
-    gerrit_branch: 'stable/8.0'
-    email_to: 'rkhozinov@mirantis.com ibumarskov@mirantis.com'
-    released_plugin_path: '/storage/dvs/released/2.0/fuel-plugin-vmware-dvs-2.0-2.0.0-1.noarch.rpm'
-    scm_submodule_disabled: true
-    scm_wipe_workspace: false
-    skip_vote_successfull: false
-    skip_vote_failed: false
-
-    testrail_project: "Mirantis OpenStack"
-    testrail_milestone: "{fuel-release}"
-    testrail_suite: "[8.0][PCE] vCenter"
-    testrail_suite_desc: "Suite description"
-    testrail_plan: "$TREP_TESTRAIL_MILESTONE snapshot #${{SNAPSHOTS_ID}}"
-    testrail_plan_desc: "Test plan description"
-    testrail_run: "$TREP_TESTRAIL_SUITE"
-    testrail_run_desc: "Test run description"
-    testrail_item_case: "$TEST_GROUP"
-    trep_results_source: "xunit_items"
-    trep_debug_level: "DEBUG"
-
-    testgroup_parameter_type: string
-    testgroup_value_type: default
-    testgroup_value: '{testgroup}'
-
-    testgroup:
-      - vcenter_add_cindervmware
-      - vcenter_add_controller
-      - vcenter_ceilometer_and_computevmware
-      - vcenter_ceph_and_computevmware
-      - vcenter_cindervmdk_and_computevmware
-      - vcenter_computevmware
-      - vcenter_dvs_bvt
-      - vcenter_dvs_smoke
-      - vcenter_glance_backend_and_computevmware
-      - vcenter_ha_ceilometer
-      - vcenter_ha_ceph
-      - vcenter_ha_cinder_and_ceph
-      - vcenter_ha_multiple_clusters
-      - vcenter_multiroles_ceilometer
-      - vcenter_multiroles_cindervmdk_and_ceph
-      - vcenter_multiroles_cindervmdk_and_cinder
-      - vcenter_delete_controller
-      - vcenter_delete_cindervmware
-    jobs:
-      - '{nightly-name}':
-          multijob_build_pkg: true
-
-      - '{custom-name}.qa':
-          publish_results: false
-          scm_submodule_disabled: false
-
-      - '{custom-name}.dev':
-          scm_submodule_disabled: false
-          publish_results: false
-          testgroup_parameter_type: choice
-          testgroup_value_type: choices
-          testgroup_value: '{obj:testgroup}'
-
-      - '{reporter-name}'
-
-      - '{fuel-release}.{plugin-name}.{testgroup}':
-          scm_submodule_disabled: false
-
-      - '{regression-name}':
-          iso_file: 'MirantisOpenStack-8.0.iso'
-          iso_storage: '/storage/downloads'        
-          pkg_job_name: ''
-          iso_job_name: ''
-          multijob_build_pkg: false
-          testrail_suite: "[8.0][PCE] vCenter Smoke/BVT"
-          testrail_suite_desc: "Suite description"
-          testrail_plan: "$TREP_TESTRAIL_SUITE #${{DATE}}"
-          testrail_plan_desc: "Test plan description"
-          testrail_run: "$TREP_TESTRAIL_SUITE"
-          testrail_run_desc: "Test run description"
-
-      - '{fuel-release}.{plugin-name}.regression.test':
-          scm_submodule_disabled: false
-
-# parameters for smoke, bvt and nightly multijobs
-- runner-parameters: &runner-parameters
-    name: 'runner-parameters'
-    parameters:
-      - bool:
-          name: MJ_BUILD_PKG
-          default: '{multijob_build_pkg}'
-          description: "Triggers build of pkg of $PKG_JOB_NAME before run of tests"
-      - common-parameters:
-          publish_results:      '{publish_results}'
-          debug:                '{debug}'
-          disable_ssl:          '{disable_ssl}'
-          force_erase:          '{force_erase}'
-          recreate_venv:        '{recreate_venv}'
-          ws_norevert:          '{ws_norevert}'
-          nfs_clean:            '{nfs_clean}'
-          iso_file:             '{iso_file}'
-          gerrit_branch:        '{gerrit_branch}'
-          env_prefix:           '{fuel-release}.{plugin-name}'
-          pkg_job_name:         '{pkg_job_name}'
-          admin_node_memory:    '{admin_node_memory}'
-          slave_node_memory:    '{slave_node_memory}'
-          admin_node_cpu:       '{admin_node_cpu}'
-          slave_node_cpu:       '{slave_node_cpu}'
-          testrail_suite:       '{testrail_suite}'
-          testrail_suite_desc:  '{testrail_suite_desc}'
-          testrail_plan:        '{testrail_plan}'
-          testrail_plan_desc:   '{testrail_plan_desc}'
-          skip_vote_successfull: '{skip_vote_successfull}'
-          skip_vote_failed:     '{skip_vote_failed}'
-          enable_proposed:      '{enable_proposed}'
-          update_master:        '{update_master}'
-          kvm_use:              '{kvm_use}'
-          iso_storage:          '{iso_storage}'
-          snapshots_id:         '{snapshots_id}'
-      - plugin-specific-parameters
-
-# parameters for jobs created per test-group and custom test job
-- test-parameters: &test-parameters
-    name: 'test-parameters'
-    parameters:
-      - label:
-          name: node
-          default: 'vcenter'
-          description: "The node on which to run the job"
-      - bool:
-          name: BUILD_PKG
-          default: '{testjob_build_pkg}'
-          description: "Triggers build of pkg from $PKG_JOB_NAME (only for custom)"
-      - '{testgroup_parameter_type}':
-          name: TEST_GROUP
-          '{testgroup_value_type}': '{obj:testgroup_value}'
-          description: "test-group name"
-      - string:
-          name: TEST_GROUP_PREFIX
-          default: system_test.vcenter.deploy_vcenter_dvs_run_ostf
-      - string:
-          name: PROGRESS_TO_STOP
-      - string:
-          name: TEST_GROUP_CONFIG
-          default: '${{TEST_GROUP}}'
-      - common-parameters:
-          publish_results: '{publish_results}'
-          debug:           '{debug}'
-          disable_ssl:     '{disable_ssl}'
-          force_erase:     '{force_erase}'
-          recreate_venv:   '{recreate_venv}'
-          ws_norevert:     '{ws_norevert}'
-          nfs_clean:       '{nfs_clean}'
-          iso_file:        '{iso_file}'
-          gerrit_branch:   '{gerrit_branch}'
-          env_prefix:      '{fuel-release}.{plugin-name}'
-          pkg_job_name:    '{pkg_job_name}'
-          admin_node_memory:    '{admin_node_memory}'
-          slave_node_memory:    '{slave_node_memory}'
-          admin_node_cpu:       '{admin_node_cpu}'
-          slave_node_cpu:       '{slave_node_cpu}'
-          testrail_suite:       '{testrail_suite}'
-          testrail_suite_desc:  '{testrail_suite_desc}'
-          testrail_plan:        '{testrail_plan}'
-          testrail_plan_desc:   '{testrail_plan_desc}'
-          skip_vote_successfull: '{skip_vote_successfull}'
-          skip_vote_failed:     '{skip_vote_failed}'
-          enable_proposed:      '{enable_proposed}'
-          update_master:        '{update_master}'
-          kvm_use:              '{kvm_use}'
-          iso_storage:          '{iso_storage}'
-          snapshots_id:         '{snapshots_id}'
-      - plugin-specific-parameters
-
+# jobs for test-group
 - defaults:
     name: global
-    disabled: false
-    node: vcenter
-    <<: *test-parameters
+    logrotate:
+        daysToKeep: 7
+        numToKeep: 10
+    properties:
+      - heavy-job:
+          weight: 1
+    parameters:
+      - string:
+          name: ISO_FILE
+          default: ''
+          description: "The fuel iso name, downloded by the 'download_iso' job to tpi-s1 storage"
     scm:
-      - common-scm:
-          scm_submodule_disabled: '{scm_submodule_disabled}'
-          scm_wipe_workspace: '{scm_wipe_workspace}'
-          gerrit_repo: '{gerrit_repo}'
-          skip_vote_successfull: '{skip_vote_successfull}'
-          skip_vote_failed: '{skip_vote_failed}'
+      - git:
+          url: '{repourl}'
+          branches:
+              - '{repobranch}'
     wrappers:
-      - test-wrapper:
-          test_timeout: '{test_timeout}'
+      - ansicolor:
+          colormap: xterm
+      - timeout:
+          fail: true
+          timeout: 6000
+- project:
+   name: '8.0.vcenter.systest'
+   description: '8.0 vcenter system tests'
+   version-id: '8.0'
+   id: 'systest'
+   repobranch: 'origin/master'
+   reponame: 'fuel-qa'
+   repourl: 'https://github.com/stackforge/{reponame}.git'
+   venvpath: '/home/jenkins/venv-nailgun-tests-2.9'
+   runner-name: '{version-id}.{id}.vcenter.runner'
+   runner-properties: 'properties'
+   mail-to: "rkhozinov@mirantis.com"
+   default_pool: '10.109.0.0/16:24'
+   nodes-count: '9'
+   openstack-release: 'ubuntu'
+   vcenter-snapshot: 'vcenterha'
+   testgroup:
+       - vcenter_smoke
+       - vcenter_bvt
+       - vcenter_cindervmdk
+       - vcenter_computevmware
+       - vcenter_cindervmdk_and_computevmware
+       - vcenter_glance_backend
+       - vcenter_multiple_cluster_with_computevmware
+       - vcenter_ceph
+       - vcenter_computevmware_and_ceph
+       - vcenter_multiroles_cindervmdk_and_ceph
+       - vcenter_multiroles_cindervmdk_and_cinder
+       - vcenter_ceilometer
+       - vcenter_ceilometer_and_computevmware
+       - vcenter_multiroles_ceilometer
+       - vcenter_add_delete_nodes
+       - vcenter_delete_controler
+       - vcenter_ha_ceph
+       - vcenter_ha_cinder_and_ceph
+       - vcenter_ha_glance_backend_multiple_cluster
+       - vcenter_ha_multiroles_cindervmdk_and_ceph
+       - vcenter_ha_multiroles_cindervmdk_and_cinder
+       - vcenter_ha_nova_flat_multiple_clusters
+       - vcenter_ha_nova_vlan_multiple_clusters
+   jobs:
+     - '{runner-name}'
+     - '{version-id}.{id}.{testgroup}'
+
+- job-template:
+    name: '{version-id}.{id}.{testgroup}'
+    concurrent: false
+    node: 'vsphere'
     properties:
-      - test-property
+      - throttle:
+          max-per-node: 0
+          max-total: 0
+          categories:
+            - vsphere
+          option: category
     builders:
-      - inject:
-          properties-content: |
-            ENV_PREFIX={fuel-release}.{plugin-name}
-            OPENSTACK_RELEASE=Ubuntu
-            NODES_COUNT=10
-            DESTROY_ENV_AFTER=0
-            ADMIN_NODE_MEMORY={admin_node_memory}
-            SLAVE_NODE_MEMORY={slave_node_memory}
-            ADMIN_NODE_CPU={admin_node_cpu}
-            SLAVE_NODE_CPU={slave_node_cpu}
-            TREP_TESTRAIL_SUITE={testrail_suite}
-            TREP_TESTRAIL_SUITE_DESCRIPTION={testrail_suite_desc}
-            TREP_TESTRAIL_PLAN={testrail_plan}
-            TREP_TESTRAIL_PLAN_DESCRIPTION={testrail_plan_desc}
-            SNAPSHOT_OUTPUT_FILE=extra_repos.sh
-            SNAPSHOT_ARTIFACTS_FILE=snapshots.params
-            ESXI_PASSWORD=swordfish
-            ESXI_USER=root
-            ESXI_HOSTS=172.16.0.250 172.16.0.252 172.16.0.253
-            NFS_SERVER=172.16.0.1
-            NFS_SHARES=nfs nfs2
-            VSPHERE_VERSION=5.5
-            WORKSTATION_SNAPSHOT=doubledvs
-            WORKSTATION_IFS=vmnet2,vmnet3,vmnet4
-            WORKSTATION_NODES=esxi1 esxi2 esxi3 vcenter
-            VCENTER_IP=172.16.0.145
-            VCENTER_USERNAME=openstack
-            VCENTER_PASSWORD=vmware
-            VCENTER_GLANCE_IP=172.16.0.145
-            VCENTER_GLANCE_USERNAME=openstack
-            VCENTER_GLANCE_PASSWORD=vmware
-            VCENTER_DATACENTER=Datacenter
-            VCENTER_DATASTORE=nfs
-            VCENTER_CLUSTERS=Cluster1,Cluster2
-            #DVS_NAME=Cluster1:Cluster1;Cluster2:Cluster2
-            VCENTER_USE=true
-            VC_IMAGE_DIR=openstack_glance
-            VMWARE_IMG_NAME=shaker.vmdk
-            VMWARE_IMG_URL="http://pce-storage.bud.mirantis.net:5000/distr/$VMWARE_IMG_NAME"
-            VMWARE_IMG_LOGIN=root
-            VMWARE_IMG_PASSWORD=r00tme
-            CLEAN_IPTABLES=true
-            DISABLE_STP=true
-            VCENTER_GLANCE_CERT_URL="http://tpi-s2.bud.mirantis.net:5000/downloads/certs/server.pem"
-            VCENTER_GLANCE_CERT_BYPASS=True
-            VCENTER_CERT_URL="http://tpi-s2.bud.mirantis.net:5000/downloads/certs/server.pem"
-            VCENTER_CERT_BYPASS=True
-      - conditional-step:
-          condition-kind: shell
-          condition-command: |
-            [ ! -z ${{PKG_JOB_NAME}}         ] && \
-            [   -z ${{PKG_JOB_BUILD_NUMBER}} ] && \
-            [   -z ${{DVS_PLUGIN_PATH}}      ]
-          steps:
-            - copyartifact:
-                project: ${{PKG_JOB_NAME}}
-                which-build: last-successful
-      - conditional-step:
-          condition-kind: shell
-          condition-command: |
-            [ ! -z ${{PKG_JOB_NAME}}         ] && \
-            [ ! -z ${{PKG_JOB_BUILD_NUMBER}} ] && \
-            [   -z ${{DVS_PLUGIN_PATH}}      ]
-          steps:
-            - copyartifact:
-                project: ${{PKG_JOB_NAME}}
-                which-build: specific-build
-                build-number: ${{PKG_JOB_BUILD_NUMBER}}
-      - shell:
-          !include-raw-escape: ../builders/common.prepare.sh
-      - shell:
-          !include-raw-escape: ../builders/workstation.sh
-      - shell:
-          !include-raw-escape: ../builders/vcenter.test.sh
+        - copyartifact:
+            project: '{runner-name}'
+            which-build: upstream-build
+            filter: '{runner-properties}'
+        - inject:
+            properties-file: '{runner-properties}'
+        - inject:
+            properties-content: |
+                NODES_COUNT={nodes-count}
+                VENV_PATH={venvpath}
+                VERSION_ID={version-id}
+                OPENSTACK_RELEASE={openstack-release}
+                ENV_PREFIX={version-id}_{id}_vcenter
+                VCENTER_SNAPSHOT={vcenter-snapshot}
+        - shell:
+            !include-raw-escape builders/systest.vcenter.sh
     publishers:
-      - runner-publisher:
-          properties_name: properties
-          email_to: '{email_to}'
-      - test-publisher:
-          reporter_name: '{reporter-name}'
+        - xunit:
+            types:
+              - junit:
+                  pattern: '**/nosetest.xml'
+                  skip-if-no-test-files: true
 
+# multijob configuration
+# for each of testgroups a job was created early in this script.
+# and this job is needed to create the one run point for the all created jobs
 - job-template:
-    name: '{fuel-release}.{plugin-name}.{testgroup}'
-    description: 'The test "{testgroup}" for {fuel-release}.{plugin-name}.{plugin-version}'
-    concurrent: true
-
-- job-template:
-    name: '{fuel-release}.{plugin-name}.regression.test'
-    description: 'The regression test for {fuel-release}.{plugin-name}.{plugin-version}'
-    concurrent: true
-
-- job-template:
-    name: '{custom-name}.qa'
-    description: 'The custom test for {fuel-release}.{plugin-name}.{plugin-version}'
-    concurrent: true
-
-- job-template:
-    name: '{custom-name}.dev'
-    description: 'The custom test for {fuel-release}.{plugin-name}.{plugin-version}'
-    concurrent: true
-
-- job-template:
-    name: '{regression-name}'
-    description: 'The regression test for {fuel-release}.{plugin-name}.{plugin-version}'
-    disabled: '{obj:regression_disabled}'
-    concurrent: true
     project-type: multijob
+    name: '{runner-name}'
+    description: "System tests for vcenter feature"
     node: runner
-    <<: *runner-parameters
-    scm: []
-    triggers:
-      - timed: '{regression_timer}'
-    properties:
-      - runner-property:
-          build-name: '{build-name}'
-    wrappers:
-      - runner-wrapper
-    publishers:
-      - runner-publisher:
-          properties_name: regression.properties
-          email_to: '{email_to}'
     builders:
-      - shell: |
-          #!/bin/bash
-          echo "TEST_GROUP=vcenter_dvs_bvt" > property
-          echo "TEST_GROUP_CONFIG=${{TEST_GROUP}}" >> property
-          echo "DVS_PLUGIN_PATH={released_plugin_path}" >> property
-          echo "PLUGIN_VERSION={plugin-version}" >> property
-          echo "PKG_JOB_BUILD_NUMBER=released" >> property
-      - multijob:
-          name: '1st phase - regression test'
-          condition: COMPLETED
-          projects:
-            - name: '{fuel-release}.{plugin-name}.regression.test'
-             #predefined-parameters: |
-             #  TEST_GROUP=vcenter_dvs_bvt
-             #  TEST_GROUP_CONFIG=${{TEST_GROUP}}
-             #  DVS_PLUGIN_PATH={released_plugin_path}
-             #  PLUGIN_VERSION={plugin-version}
-             #  PKG_JOB_BUILD_NUMBER=released
-              property-file: property
-              current-parameters: true
-              kill-phase-on: NEVER
+        - inject:
+            properties-file: latest_isos.txt
+            properties-content: 'properties_file={runner-properties}'
+        - copyartifact:
+            project: download_iso
+            which-build: last-successful
+            filter: latest_isos.txt
+        - shell:
+            !include-raw-escape builders/systest.vcenter.runner.sh
+        - multijob:
+            name: 'System tests for vcenter'
+            condition: COMPLETED
+            projects:
+              - name: '8.0.systest.vcenter_smoke'
+                current-parameters: true
+                kill-phase-on: NEVER
 
-- job-template:
-    name: '{nightly-name}'
-    project-type: multijob
-    disabled: '{obj:nightly_disabled}'
-    node: runner
-    <<: *runner-parameters
-    scm: []
-    triggers:
-      - timed: '{nightly_timer}'
-    properties:
-      - runner-property:
-          build-name: '{build-name}'
-    wrappers:
-      - runner-wrapper
+              - name: '8.0.systest.vcenter_bvt'
+                current-parameters: true
+                kill-phase-on: NEVER
+
+              - name: '8.0.systest.vcenter_cindervmdk'
+                current-parameters: true
+                kill-phase-on: NEVER
+
+              - name: '8.0.systest.vcenter_computevmware'
+                current-parameters: true
+                kill-phase-on: NEVER
+
+              - name: '8.0.systest.vcenter_cindervmdk_and_computevmware'
+                current-parameters: true
+                kill-phase-on: NEVER
+
+              - name: '8.0.systest.vcenter_glance_backend'
+                current-parameters: true
+                kill-phase-on: NEVER
+
+              - name: '8.0.systest.vcenter_multiple_cluster_with_computevmware'
+                current-parameters: true
+                kill-phase-on: NEVER
+
+              - name: '8.0.systest.vcenter_ceph'
+                current-parameters: true
+                kill-phase-on: NEVER
+
+              - name: '8.0.systest.vcenter_computevmware_and_ceph'
+                current-parameters: true
+                kill-phase-on: NEVER
+
+              - name: '8.0.systest.vcenter_multiroles_cindervmdk_and_ceph'
+                current-parameters: true
+                kill-phase-on: NEVER
+
+              - name: '8.0.systest.vcenter_multiroles_cindervmdk_and_cinder'
+                current-parameters: true
+                kill-phase-on: NEVER
+
+              - name: '8.0.systest.vcenter_ceilometer'
+                current-parameters: true
+                kill-phase-on: NEVER
+
+              - name: '8.0.systest.vcenter_ceilometer_and_computevmware'
+                current-parameters: true
+                kill-phase-on: NEVER
+
+              - name: '8.0.systest.vcenter_multiroles_ceilometer'
+                current-parameters: true
+                kill-phase-on: NEVER
+
+              - name: '8.0.systest.vcenter_add_delete_nodes'
+                current-parameters: true
+                kill-phase-on: NEVER
+
+              - name: '8.0.systest.vcenter_delete_controler'
+                current-parameters: true
+                kill-phase-on: NEVER
+
+              - name: '8.0.systest.vcenter_ha_ceph'
+                current-parameters: true
+                kill-phase-on: NEVER
+
+              - name: '8.0.systest.vcenter_ha_cinder_and_ceph'
+                current-parameters: true
+                kill-phase-on: NEVER
+
+              - name: '8.0.systest.vcenter_ha_glance_backend_multiple_cluster'
+                current-parameters: true
+                kill-phase-on: NEVER
+
+              - name: '8.0.systest.vcenter_ha_multiroles_cindervmdk_and_ceph'
+                current-parameters: true
+                kill-phase-on: NEVER
+
+              - name: '8.0.systest.vcenter_ha_multiroles_cindervmdk_and_cinder'
+                current-parameters: true
+                kill-phase-on: NEVER
+
+              - name: '8.0.systest.vcenter_ha_nova_flat_multiple_clusters'
+                current-parameters: true
+                kill-phase-on: NEVER
+
+              - name: '8.0.systest.vcenter_ha_nova_vlan_multiple_clusters'
+                current-parameters: true
+                kill-phase-on: NEVER
     publishers:
-      - runner-publisher:
-          properties_name: nightly.properties
-          email_to: '{email_to}'
-    builders:
-      !include: vcenter-nightly.yaml.inc
+        - archive:
+            artifacts: '**/nosetests.xml,logs/*,{runner-properties}'
+            allow-empty: false
+            fingerprint: true
+        - xunit:
+            types:
+              - junit:
+                  pattern: '**/nosetest.xml'
+                  skip-if-no-test-files: true
+        - email:
+            recipients: '{mail-to}'
