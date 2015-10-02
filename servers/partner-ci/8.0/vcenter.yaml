@@ -1,3 +1,4 @@
+# TODO: make ISO_VERSION global > add to job's properties : for valid job-build description
 # jobs for test-group
 - defaults:
     name: global
