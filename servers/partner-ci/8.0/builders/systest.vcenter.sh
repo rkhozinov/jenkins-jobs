@@ -72,18 +72,26 @@ free_space=$(df -h | grep '/$' | awk '{print $4}' | tr -d G)
 # activate a python virtual env#
 source $VENV 
 
+[ -z $VIRTUAL_ENV ] && exit 1
+
 # free space
-#[ $free_space_exist ] && delete_systest_envs || delete_envs 
-#
-## poweroff all envs
-#destroy_envs
+[ $free_space_exist ] && delete_systest_envs || delete_envs 
+
+# poweroff all envs
+destroy_envs
 
 # TODO: add test run
 echo "Description string: ${TEST_GROUP} on ${NODE_NAME}: ${ENV_NAME}"
 
-#bash -x /btsync/tpi_systest.sh -i $ISO_PATH -d $OPENSTACK_RELEASE -t $TEST_GROUP -n $NODES_COUNT $systest_parameters
-dos.py list | tail -n +3
 
-# deactivate the python virtual env
-deactivate
+file='run_test.sh'
+
+touch $file; chmod +x $file
+
+echo "source $VENV" > $file
+echo "/bin/bash -x  /btsync/tpi_systest.sh -i $ISO_PATH -d $OPENSTACK_RELEASE -t $TEST_GROUP -n $NODES_COUNT $systest_parameters" >> $file
+
+/bin/bash -x run_test.sh
+
+
 

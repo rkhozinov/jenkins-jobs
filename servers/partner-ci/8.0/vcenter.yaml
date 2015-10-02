@@ -17,13 +17,15 @@
       - bool:
           name: USE_SNAPSHOTS
           default: true
-          descrition: 'Will be used existing environment (ex. "vcenter_systest_8.0-4")'
+          descrition: 'Will be used existing environment'
       - bool:
           name: SHUTDOWN_AFTER
           default: true
+          decsription: 'The env will be powered off after test'
       - bool:
           name: ERASE_AFTER
           default: false
+          description: 'The env will be erased after test'
     wrappers:
       - ansicolor:
           colormap: xterm
@@ -44,7 +46,7 @@
    mail-to: 'rkhozinov@mirantis.com'
    default_pool: '10.109.0.0/16:24'
    nodes-count: '9'
-   openstack-release: 'ubuntu'
+   openstack-release: 'Ubuntu'
    vcenter-snapshot: 'vcenterha'
    iso-storage: '/storage/downloads'
    testgroup:
@@ -75,6 +77,7 @@
      - '{runner-name}'
      - '{fuel-release}.{id}.{testgroup}'
 
+## Jobs for system tests by testgroup
 - job-template:
     name: '{fuel-release}.{id}.{testgroup}'
     concurrent: false
@@ -90,7 +93,7 @@
       - git:
           url: '{repourl}'
           branches:
-              - '{repobranch}'
+            - '{repobranch}'
     builders:
       - inject:
           properties-content: |
@@ -103,7 +106,7 @@
               ISO_STORAGE={iso-storage}
               TEST_GROUP={testgroup}
       - shell:
-          !include-raw-escape: builders/systest.vcenter.sh
+          !include-raw-escape builders/systest.vcenter.sh
     publishers:
       - description-setter:
           description: '$ISO_VERSION'
@@ -130,9 +133,9 @@
           properties-file: latest_isos.txt
       - inject:
           properties-content: |
-              properties_file={runner-properties}
+            properties_file={runner-properties}
       - shell:
-          !include-raw-escape: builders/systest.vcenter.runner.sh
+          !include-raw-escape builders/systest.vcenter.runner.sh
       - multijob:
           name: 'System tests for vcenter'
           condition: COMPLETED
@@ -142,110 +145,110 @@
               property-file: '{runner-properties}'
               kill-phase-on: NEVER
 
-            - name: '8.0.systest.vcenter_cindervmdk'
-              current-parameters: true
-              property-file: '{runner-properties}'
-              kill-phase-on: NEVER
-
-            - name: '8.0.systest.vcenter_computevmware'
-              current-parameters: true
-              property-file: '{runner-properties}'
-              kill-phase-on: NEVER
-
-            - name: '8.0.systest.vcenter_cindervmdk_and_computevmware'
-              current-parameters: true
-              property-file: '{runner-properties}'
-              kill-phase-on: NEVER
-
-            - name: '8.0.systest.vcenter_glance_backend'
-              current-parameters: true
-              property-file: '{runner-properties}'
-              kill-phase-on: NEVER
-
-            - name: '8.0.systest.vcenter_multiple_cluster_with_computevmware'
-              current-parameters: true
-              property-file: '{runner-properties}'
-              kill-phase-on: NEVER
-
-            - name: '8.0.systest.vcenter_ceph'
-              current-parameters: true
-              property-file: '{runner-properties}'
-              kill-phase-on: NEVER
-
-            - name: '8.0.systest.vcenter_computevmware_and_ceph'
-              current-parameters: true
-              property-file: '{runner-properties}'
-              kill-phase-on: NEVER
-
-            - name: '8.0.systest.vcenter_multiroles_cindervmdk_and_ceph'
-              current-parameters: true
-              property-file: '{runner-properties}'
-              kill-phase-on: NEVER
-
-            - name: '8.0.systest.vcenter_multiroles_cindervmdk_and_cinder'
-              current-parameters: true
-              property-file: '{runner-properties}'
-              kill-phase-on: NEVER
-
-            - name: '8.0.systest.vcenter_ceilometer'
-              current-parameters: true
-              property-file: '{runner-properties}'
-              kill-phase-on: NEVER
-
-            - name: '8.0.systest.vcenter_ceilometer_and_computevmware'
-              current-parameters: true
-              property-file: '{runner-properties}'
-              kill-phase-on: NEVER
-
-            - name: '8.0.systest.vcenter_multiroles_ceilometer'
-              current-parameters: true
-              property-file: '{runner-properties}'
-              kill-phase-on: NEVER
-
-            - name: '8.0.systest.vcenter_add_delete_nodes'
-              current-parameters: true
-              property-file: '{runner-properties}'
-              kill-phase-on: NEVER
-
-            - name: '8.0.systest.vcenter_delete_controler'
-              current-parameters: true
-              property-file: '{runner-properties}'
-              kill-phase-on: NEVER
-
-            - name: '8.0.systest.vcenter_ha_ceph'
-              current-parameters: true
-              property-file: '{runner-properties}'
-              kill-phase-on: NEVER
-
-            - name: '8.0.systest.vcenter_ha_cinder_and_ceph'
-              current-parameters: true
-              property-file: '{runner-properties}'
-              kill-phase-on: NEVER
-
-            - name: '8.0.systest.vcenter_ha_glance_backend_multiple_cluster'
-              current-parameters: true
-              property-file: '{runner-properties}'
-              kill-phase-on: NEVER
-
-            - name: '8.0.systest.vcenter_ha_multiroles_cindervmdk_and_ceph'
-              current-parameters: true
-              property-file: '{runner-properties}'
-              kill-phase-on: NEVER
-
-            - name: '8.0.systest.vcenter_ha_multiroles_cindervmdk_and_cinder'
-              current-parameters: true
-              property-file: '{runner-properties}'
-              kill-phase-on: NEVER
-
-            - name: '8.0.systest.vcenter_ha_nova_flat_multiple_clusters'
-              current-parameters: true
-              property-file: '{runner-properties}'
-              kill-phase-on: NEVER
-
-            - name: '8.0.systest.vcenter_ha_nova_vlan_multiple_clusters'
-              current-parameters: true
-              property-file: '{runner-properties}'
-              kill-phase-on: NEVER
+#            - name: '8.0.systest.vcenter_cindervmdk'
+#              current-parameters: true
+#              property-file: '{runner-properties}'
+#              kill-phase-on: NEVER
+#
+#            - name: '8.0.systest.vcenter_computevmware'
+#              current-parameters: true
+#              property-file: '{runner-properties}'
+#              kill-phase-on: NEVER
+#
+#            - name: '8.0.systest.vcenter_cindervmdk_and_computevmware'
+#              current-parameters: true
+#              property-file: '{runner-properties}'
+#              kill-phase-on: NEVER
+#
+#            - name: '8.0.systest.vcenter_glance_backend'
+#              current-parameters: true
+#              property-file: '{runner-properties}'
+#              kill-phase-on: NEVER
+#
+#            - name: '8.0.systest.vcenter_multiple_cluster_with_computevmware'
+#              current-parameters: true
+#              property-file: '{runner-properties}'
+#              kill-phase-on: NEVER
+#
+#            - name: '8.0.systest.vcenter_ceph'
+#              current-parameters: true
+#              property-file: '{runner-properties}'
+#              kill-phase-on: NEVER
+#
+#            - name: '8.0.systest.vcenter_computevmware_and_ceph'
+#              current-parameters: true
+#              property-file: '{runner-properties}'
+#              kill-phase-on: NEVER
+#
+#            - name: '8.0.systest.vcenter_multiroles_cindervmdk_and_ceph'
+#              current-parameters: true
+#              property-file: '{runner-properties}'
+#              kill-phase-on: NEVER
+#
+#            - name: '8.0.systest.vcenter_multiroles_cindervmdk_and_cinder'
+#              current-parameters: true
+#              property-file: '{runner-properties}'
+#              kill-phase-on: NEVER
+#
+#            - name: '8.0.systest.vcenter_ceilometer'
+#              current-parameters: true
+#              property-file: '{runner-properties}'
+#              kill-phase-on: NEVER
+#
+#            - name: '8.0.systest.vcenter_ceilometer_and_computevmware'
+#              current-parameters: true
+#              property-file: '{runner-properties}'
+#              kill-phase-on: NEVER
+#
+#            - name: '8.0.systest.vcenter_multiroles_ceilometer'
+#              current-parameters: true
+#              property-file: '{runner-properties}'
+#              kill-phase-on: NEVER
+#
+#            - name: '8.0.systest.vcenter_add_delete_nodes'
+#              current-parameters: true
+#              property-file: '{runner-properties}'
+#              kill-phase-on: NEVER
+#
+#            - name: '8.0.systest.vcenter_delete_controler'
+#              current-parameters: true
+#              property-file: '{runner-properties}'
+#              kill-phase-on: NEVER
+#
+#            - name: '8.0.systest.vcenter_ha_ceph'
+#              current-parameters: true
+#              property-file: '{runner-properties}'
+#              kill-phase-on: NEVER
+#
+#            - name: '8.0.systest.vcenter_ha_cinder_and_ceph'
+#              current-parameters: true
+#              property-file: '{runner-properties}'
+#              kill-phase-on: NEVER
+#
+#            - name: '8.0.systest.vcenter_ha_glance_backend_multiple_cluster'
+#              current-parameters: true
+#              property-file: '{runner-properties}'
+#              kill-phase-on: NEVER
+#
+#            - name: '8.0.systest.vcenter_ha_multiroles_cindervmdk_and_ceph'
+#              current-parameters: true
+#              property-file: '{runner-properties}'
+#              kill-phase-on: NEVER
+#
+#            - name: '8.0.systest.vcenter_ha_multiroles_cindervmdk_and_cinder'
+#              current-parameters: true
+#              property-file: '{runner-properties}'
+#              kill-phase-on: NEVER
+#
+#            - name: '8.0.systest.vcenter_ha_nova_flat_multiple_clusters'
+#              current-parameters: true
+#              property-file: '{runner-properties}'
+#              kill-phase-on: NEVER
+#
+#            - name: '8.0.systest.vcenter_ha_nova_vlan_multiple_clusters'
+#              current-parameters: true
+#              property-file: '{runner-properties}'
+#              kill-phase-on: NEVER
 
     publishers:
         - archive:
