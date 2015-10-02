@@ -1,125 +1,19 @@
-#- build-gerrit-events: &build-gerrit-events
-#    name: 'build-gerrit-events'
-#    trigger-on:
-#      - change-merged-event
-#      - draft-published-event
-#      - patchset-created-event:
-#          exclude-trivial-rebase: true
-#          exclude-no-code-change: true
-#
-### configuration of gerrit event for the smoke multijob
-### smoke multijob should run on patchset, draft events
-#- smoke-gerrit-events: &smoke-gerrit-events
-#    name: 'smoke-gerrit-events'
-#    trigger-on:
-#      - draft-published-event
-#      - patchset-created-event:
-#          exclude-trivial-rebase: true
-#          exclude-no-code-change: true
-#
-### configuration of gerrit event for the bvt multijob
-### bvt multijob should run only on merge event
-#- bvt-gerrit-events: &bvt-gerrit-events
-#    name: 'bvt-gerrit-events'
-#    trigger-on:
-#      - change-merged-event
-#
-### the main part of gerrit section as yaml anchor
-#- generic-gerrit-projects: &generic-gerrit-projects
-#    name: 'generic-gerrit-projects'
-#    projects:
-#      - project-compare-type: 'PLAIN'
-#        project-pattern: 'openstack/{gerrit-repo}'
-#        branches:
-#          - branch-compare-type: 'ANT'
-#            branch-pattern: '{gerrit-branch}'
-#        forbidden-file-paths:
-#          - compare-type: 'ANT'
-#            pattern: 'docs/*'
-#          - compare-type: 'ANT'
-#            pattern: 'specs/*'
-#    silent: false
-#    override-votes: true
-#    server-name: 'review.openstack.org'
-#    custom-url: '* $JOB_NAME $BUILD_URL'
-#    escape-quotes: true
-#    readable-message: true
-#    skip-vote:
-#      successfull: false
-#      failed: false
-#      unstable: true
-#      notbuilt: true
-#
-### properties for smoke, bvt and nightly multijobs
-#- runner-properties: &runner-properties
-#    name: 'runner-properties'
-#    properties:
-#      - heavy-job:
-#          weight: 1
+# jobs for test-group
+- defaults:
+    name: global
+    logrotate:
+        daysToKeep: 7
+        numToKeep: 10
 
-## parameters for smoke, bvt and nightly multijobs
-- runner-parameters: &runner-parameters
-    name: 'runner-parameters'
+    properties:
+      - heavy-job:
+          weight: 1
+
     parameters:
       - string:
           name: ISO_FILE
-          default: '{iso-file}'
-          description: 'ISO file name that is on the tpi-s1 in /storage/downloads'
-      - bool:
-          name: UPDATE_MASTER
-          default: true
-          description: 'turns update fuel master node to maintenance update'
-      - string:
-          name: UPDATE_FUEL_MIRROR
-          default: 'http://mirror.fuel-infra.org/mos-repos/centos/mos7.0-centos6-fuel/proposed/x86_64/ http://mirror.fuel-infra.org/mos-repos/centos/mos7.0-centos6-fuel/security/x86_64/ http://mirror.fuel-infra.org/mos-repos/centos/mos7.0-centos6-fuel/updates/x86_64/'
-          description: 'proposed repositories to update fuel master node'
-      - string:
-          name: MIRROR_UBUNTU
-          default: 'deb http://mirror.seed-cz1.fuel-infra.org/pkgs/ubuntu-latest/ trusty main universe multiverse|deb http://mirror.seed-cz1.fuel-infra.org/pkgs/ubuntu-latest/ trusty-updates main universe multiverse|deb http://mirror.seed-cz1.fuel-infra.org/pkgs/ubuntu-latest/ trusty-security main universe multiverse'
-          description: 'proposed repositories to update ubuntu cluster'
-      - string:
-          name: EXTRA_DEB_REPOS
-          default: 'mos-updates-2,deb http://mirror.seed-cz1.fuel-infra.org/mos-repos/ubuntu/snapshots/7.0-latest mos7.0-updates main restricted|mos-security-2,deb http://mirror.seed-cz1.fuel-infra.org/mos-repos/ubuntu/snapshots/7.0-latest mos7.0-security main restricted'
-          description: 'proposed repositories to update ubuntu cluster'
-      - string:
-          name: OPENSTACK_RELEASE
-          default: 'Ubuntu'
-          description: 'Openstack release (CentOS, Ubuntu)'
-      - string:
-          name: ISO_VERSION
-          description: 'Contrainer for storing an iso build number to output it as job name'
-      - string:
-          name: GERRIT_REFSPEC
-          default: 'refs/heads/{gerrit-branch}'
-          description: 'Refspecs for commits in fuel-qa gerrit separated with spaces'
-      - string:
-          name: GERRIT_BRANCH
-          default: 'origin/{gerrit-branch}'
-          description: 'The branch for fuel-qa gerrit'
-      - string:
-          name: NODES_COUNT
-          default: '10'
-          description: 'Amount of nodes in a virtual cluster'
-      - string:
-          name: ADMIN_NODE_MEMORY
-          default: '4096'
-          description: 'Amount of virtual memory for the master node'
-      - string:
-          name: SLAVE_NODE_MEMORY
-          default: '4096'
-          description: 'Amount of vitrual memory per slave node'
-      - string:
-          name: ADMIN_NODE_CPU
-          default: '4'
-          description: 'Amount of vitrual CPUs for admin node'
-      - string:
-          name: SLAVE_NODE_CPU
-          default: '4'
-          description: 'Amount of vitrual CPUs per slave node'
-      - string:
-          name: ENV_PREFIX
-          default: '{fuel-release}.vcenter'
-          description: 'The name of devops env. Needed to properly work of existing mode of devops'
+          default: ''
+          description: "The fuel iso name, downloded by the 'download_iso' job to tpi-s1 storage"
       - bool:
           name: USE_SNAPSHOTS
           default: true
@@ -132,134 +26,33 @@
           name: ERASE_AFTER
           default: false
           description: 'The env will be erased after test'
-
-#- common-scm: &common-scm
-#    name: 'common-scm'
-#    scm:
-#      - git:
-#          name: ''
-#          url: 'https://review.openstack.org/openstack/{gerrit-repo}'
-#          refspec: $GERRIT_REFSPEC
-#          branches:
-#            - $GERRIT_BRANCH
-#          choosing-strategy: gerrit
-#          submodule:
-#            disable: false
-#            tracking: true
-#            recursive: true
-#          clean:
-#            before: false
-#          wipe-workspace: true
-### publishers for smoke, bvt, build and nithly jobs
-### arcives rpm, pkg_properties and email conf
-#- runner-publishers: &runner-publishers
-#    name: 'runner-publishers'
-#    publishers:
-#      - archive:
-#          artifacts: 'pkg_properties'
-#          allow-empty: false
-#      - archive:
-#          artifacts: '*.rpm'
-#          allow-empty: false
-#      - email:
-#          recipients: '{email-to}'
-#
-### properties for test jobs
-#- test-properties: &test-properties
-#    name: 'test-properties'
-#    properties:
-#      - heavy-job:
-#          weight: 1
-#      - throttle:
-#          max-per-node: 0
-#          max-total: 0
-#          categories:
-#            - vcenter
-#            - dvs
-#            - nsx
-#            - contrail
-#          option: category
-
-## parameters for jobs created per test-group and custom test job
-- test-parameters: &test-parameters
-    name: 'test-parameters'
-    parameters:
-      - string:
-          name: TEST_GROUP
-          default: '{testgroup}'
-      - string:
-          name: VCENTER_SNAPSHOT
-          default: 'vcenterha'
-          description: 'Snapshot name for vcenter lab'
-      - string:
-          name: ISO_FILE
-          default: '{iso-file}'
-          description: 'ISO file name that is on the tpi-s1 in /storage/downloads'
-      - string:
-          name: ISO_STORAGE
-          default: '/storage/downloads'
-          description: 'Storage for iso files'
-      - string:
-          name: OPENSTACK_RELEASE
-          default: 'Ubuntu'
-          description: 'Openstack release (CentOS, Ubuntu)'
-      - string:
-          name: GERRIT_REFSPEC
-          default: 'refs/heads/{gerrit-branch}'
-          description: 'Refspecs for commits in fuel-qa gerrit separated with spaces'
-      - string:
-          name: GERRIT_BRANCH
-          default: 'origin/{gerrit-branch}'
-          description: 'The branch for fuel-qa gerrit'
-      - string:
-          name: NODES_COUNT
-          default: '9'
-          description: 'Amount of nodes in the test lab'
-      - string:
-          name: ADMIN_NODE_MEMORY
-          default: '4096'
-          description: 'Amount of vitrual RAM for admin node'
-      - string:
-          name: SLAVE_NODE_MEMORY
-          default: '4096'
-          description: 'Amount of vitrual RAM per slave node'
-      - string:
-          name: ADMIN_NODE_CPU
-          default: '4'
-          description: 'Amount of vitrual CPUs for admin node'
-      - string:
-          name: SLAVE_NODE_CPU
-          default: '4'
-          description: 'Amount of vitrual CPUs per slave node'
-      - string:
-          name: ENV_PREFIX
-          default: '{fuel-release}.vcenter'
-          description: 'The name of devops env. Needed to properly work of existing mode of devops'
-      - bool:
-          name: USE_SNAPSHOTS
-          default: true
-          descrition: 'Will be used existing environment'
-      - bool:
-          name: SHUTDOWN_AFTER
-          default: true
-          decsription: 'The env will be powered off after test'
-      - bool:
-          name: ERASE_AFTER
-          default: false
-          description: 'The env will be erased after test'
-
+    wrappers:
+      - ansicolor:
+          colormap: xterm
+      - timeout:
+          fail: true
+          timeout: 6000
 - project:
-   name: 'predefined_parameters'
+   name: '7.0.vcenter.systest'
+   description: '7.0 vcenter system tests'
    fuel-release: '7.0'
-   gerrit-branch: 'stable/7.0'
-   gerrit-repo: 'fuel-qa'
-   repourl: 'https://review.openstack.org/openstack/{gerrit-repo}.git'
-   iso-file: 'fuel-7.0-301-2015-09-22_20-01-53.iso'
-   nightly-name: '{fuel-release}.vcenter.nightly'
-#   mail-to: 'rkhozinov@mirantis.com'
-
-
+   id: 'systest'
+   repobranch: 'origin/stable/7.0'
+   reponame: 'fuel-qa'
+   repourl: 'https://github.com/stackforge/{reponame}.git'
+   venvpath: '/home/jenkins/venv-nailgun-tests-2.9'
+   runner-name: '{fuel-release}.{id}.vcenter.runner'
+   runner-properties: 'properties'
+   mail-to: 'rkhozinov@mirantis.com'
+   default_pool: '10.109.0.0/16:24'
+   nodes-count: '9'
+   openstack-release: 'Ubuntu'
+   vcenter-snapshot: 'vcenterha'
+   iso-storage: '/storage/downloads'
+   env-prefix: '{fuel-release}.vcenter'
    testgroup:
+       - vcenter_smoke
+       - vcenter_bvt
        - vcenter_cindervmdk
        - vcenter_computevmware
        - vcenter_cindervmdk_and_computevmware
@@ -282,43 +75,42 @@
        - vcenter_ha_nova_flat_multiple_clusters
        - vcenter_ha_nova_vlan_multiple_clusters
    jobs:
-     - '{nightly-name}'
-     - '{fuel-release}.{testgroup}'
+     - '{runner-name}'
+     - '{fuel-release}.{id}.{testgroup}'
 
-- defaults:
-    name: global
-    disabled: true
-    node: 'vcenter'
-#    <<: *test-properties
-    <<: *test-parameters
-#    <<: *common-scm
+## Jobs for system tests by testgroup
+- job-template:
+    name: '{fuel-release}.{id}.{testgroup}'
+    concurrent: false
+    node: 'vsphere'
     properties:
-      - build-discarder:
-          days-to-keep: 7
-          num-to-keep: 10
-          artifact-days-to-keep: 7
-          artifact-num-to-keep: 10
+      - throttle:
+          max-per-node: 0
+          max-total: 0
+          categories:
+            - vsphere
+          option: category
+    scm:
+      - git:
+          url: '{repourl}'
+          branches:
+            - '{repobranch}'
     builders:
-#      - copyartifact:
-#          project: '{bvt-name}'
-#          which-build: last-successful
       - inject:
-          properties-file: 'pkg_properties'
-#      - shell:
-#          !include-raw-escape builders/vcenter.prepare.sh
+          properties-content: |
+              NODES_COUNT={nodes-count}
+              VENV_PATH={venvpath}
+              FUEL_RELEASE={fuel-release}
+              OPENSTACK_RELEASE={openstack-release}
+              ENV_PREFIX={env-prefix}
+              ENV_NAME=''
+              VCENTER_SNAPSHOT={vcenter-snapshot}
+              ISO_STORAGE={iso-storage}
+              TEST_GROUP={testgroup}
       - shell:
-          !include-raw-escape builders/vcenter.test.sh
-
-    wrappers:
-      - inject-passwords:
-          global: true
-          mask-password-params: true
-      - ansicolor:
-          colormap: xterm
-      - timeout:
-          fail: true
-          timeout: 6000
-
+          !include-raw-escape builders/systest.vcenter.prepare.sh
+      - shell:
+          !include-raw-escape builders/systest.vcenter.sh
     publishers:
       - description-setter:
           description: '$ISO_VERSION'
@@ -328,249 +120,152 @@
             - junit:
                 pattern: '**/nosetest.xml'
                 skip-if-no-test-files: true
-#      - email:
-#          recipients: '{email-to}'
-
-## Jobs for system tests by testgroup
-- job-template:
-    name: '{fuel-release}.{testgroup}'
-    # with throttle configuration we can run some concurrent tests 
-    concurrent: true
-    node: vcenter
 
 # multijob configuration
 # for each of testgroups a job was created early in this script.
 # and this job is needed to create the one run point for the all created jobs
 - job-template:
     project-type: multijob
-    name: '{nightly-name}'
+    name: '{runner-name}'
     description: "System tests for vcenter feature"
-    node: runner    
-    scm: []
+    node: runner
     triggers:
         - timed: 'H 19  * * *'
-    <<: *runner-parameters
-#    <<: *runner-properties
     builders:
+      - copyartifact:
+          project: 'download_iso'
+          filter: 'latest_isos.txt'
+          which-build: 'last-successful'
+      - inject:
+          properties-file: latest_isos.txt
+      - inject:
+          properties-content: |
+            properties_file={runner-properties}
+      - shell:
+          !include-raw-escape builders/systest.vcenter.runner.sh
       - multijob:
-          name: 'System tests for vcenter with vcenter5'
+          name: 'System tests for vcenter'
           condition: COMPLETED
           projects:
-            - name: '{fuel-release}.vcenter_cindervmdk'
+            - name: '7.0.systest.vcenter_bvt'
               current-parameters: true
-              predefined-parameters: VCENTER_SNAPSHOT=vcenterha
+              property-file: '{runner-properties}'
               kill-phase-on: NEVER
 
-            - name: '{fuel-release}.vcenter_computevmware'
+            - name: '7.0.systest.vcenter_cindervmdk'
               current-parameters: true
-              predefined-parameters: VCENTER_SNAPSHOT=vcenterha
+              property-file: '{runner-properties}'
               kill-phase-on: NEVER
 
-            - name: '{fuel-release}.vcenter_cindervmdk_and_computevmware'
+            - name: '7.0.systest.vcenter_computevmware'
               current-parameters: true
-              predefined-parameters: VCENTER_SNAPSHOT=vcenterha
+              property-file: '{runner-properties}'
               kill-phase-on: NEVER
 
-            - name: '{fuel-release}.vcenter_glance_backend'
+            - name: '7.0.systest.vcenter_cindervmdk_and_computevmware'
               current-parameters: true
-              predefined-parameters: VCENTER_SNAPSHOT=vcenterha
+              property-file: '{runner-properties}'
               kill-phase-on: NEVER
 
-            - name: '{fuel-release}.vcenter_multiple_cluster_with_computevmware'
+            - name: '7.0.systest.vcenter_glance_backend'
               current-parameters: true
-              predefined-parameters: VCENTER_SNAPSHOT=vcenterha
+              property-file: '{runner-properties}'
               kill-phase-on: NEVER
 
-            - name: '{fuel-release}.vcenter_ceph'
+            - name: '7.0.systest.vcenter_multiple_cluster_with_computevmware'
               current-parameters: true
-              predefined-parameters: VCENTER_SNAPSHOT=vcenterha
+              property-file: '{runner-properties}'
               kill-phase-on: NEVER
 
-            - name: '{fuel-release}.vcenter_computevmware_and_ceph'
+            - name: '7.0.systest.vcenter_ceph'
               current-parameters: true
-              predefined-parameters: VCENTER_SNAPSHOT=vcenterha
+              property-file: '{runner-properties}'
               kill-phase-on: NEVER
 
-            - name: '{fuel-release}.vcenter_multiroles_cindervmdk_and_ceph'
+            - name: '7.0.systest.vcenter_computevmware_and_ceph'
               current-parameters: true
-              predefined-parameters: VCENTER_SNAPSHOT=vcenterha
+              property-file: '{runner-properties}'
               kill-phase-on: NEVER
 
-            - name: '{fuel-release}.vcenter_multiroles_cindervmdk_and_cinder'
+            - name: '7.0.systest.vcenter_multiroles_cindervmdk_and_ceph'
               current-parameters: true
-              predefined-parameters: VCENTER_SNAPSHOT=vcenterha
+              property-file: '{runner-properties}'
               kill-phase-on: NEVER
 
-            - name: '{fuel-release}.vcenter_ceilometer'
+            - name: '7.0.systest.vcenter_multiroles_cindervmdk_and_cinder'
               current-parameters: true
-              predefined-parameters: VCENTER_SNAPSHOT=vcenterha
+              property-file: '{runner-properties}'
               kill-phase-on: NEVER
 
-            - name: '{fuel-release}.vcenter_ceilometer_and_computevmware'
+            - name: '7.0.systest.vcenter_ceilometer'
               current-parameters: true
-              predefined-parameters: VCENTER_SNAPSHOT=vcenterha
+              property-file: '{runner-properties}'
               kill-phase-on: NEVER
 
-            - name: '{fuel-release}.vcenter_multiroles_ceilometer'
+            - name: '7.0.systest.vcenter_ceilometer_and_computevmware'
               current-parameters: true
-              predefined-parameters: VCENTER_SNAPSHOT=vcenterha
+              property-file: '{runner-properties}'
               kill-phase-on: NEVER
 
-            - name: '{fuel-release}.vcenter_add_delete_nodes'
+            - name: '7.0.systest.vcenter_multiroles_ceilometer'
               current-parameters: true
-              predefined-parameters: VCENTER_SNAPSHOT=vcenterha
+              property-file: '{runner-properties}'
               kill-phase-on: NEVER
 
-            - name: '{fuel-release}.vcenter_delete_controler'
+            - name: '7.0.systest.vcenter_add_delete_nodes'
               current-parameters: true
-              predefined-parameters: VCENTER_SNAPSHOT=vcenterha
+              property-file: '{runner-properties}'
               kill-phase-on: NEVER
 
-            - name: '{fuel-release}.vcenter_ha_ceph'
+            - name: '7.0.systest.vcenter_delete_controler'
               current-parameters: true
-              kill-phase-on: NEVER
-              predefined-parameters: VCENTER_SNAPSHOT=vcenterha
-              current-parameters: true
-
-            - name: '{fuel-release}.vcenter_ha_cinder_and_ceph'
-              current-parameters: true
-              predefined-parameters: VCENTER_SNAPSHOT=vcenterha
+              property-file: '{runner-properties}'
               kill-phase-on: NEVER
 
-            - name: '{fuel-release}.vcenter_ha_glance_backend_multiple_cluster'
+            - name: '7.0.systest.vcenter_ha_ceph'
               current-parameters: true
-              predefined-parameters: VCENTER_SNAPSHOT=vcenterha
+              property-file: '{runner-properties}'
               kill-phase-on: NEVER
 
-            - name: '{fuel-release}.vcenter_ha_multiroles_cindervmdk_and_ceph'
+            - name: '7.0.systest.vcenter_ha_cinder_and_ceph'
               current-parameters: true
-              predefined-parameters: VCENTER_SNAPSHOT=vcenterha
+              property-file: '{runner-properties}'
               kill-phase-on: NEVER
 
-            - name: '{fuel-release}.vcenter_ha_multiroles_cindervmdk_and_cinder'
+            - name: '7.0.systest.vcenter_ha_glance_backend_multiple_cluster'
               current-parameters: true
-              predefined-parameters: VCENTER_SNAPSHOT=vcenterha
+              property-file: '{runner-properties}'
               kill-phase-on: NEVER
 
-            - name: '{fuel-release}.vcenter_ha_nova_flat_multiple_clusters'
+            - name: '7.0.systest.vcenter_ha_multiroles_cindervmdk_and_ceph'
               current-parameters: true
-              predefined-parameters: VCENTER_SNAPSHOT=vcenterha
+              property-file: '{runner-properties}'
               kill-phase-on: NEVER
 
-            - name: '{fuel-release}.vcenter_ha_nova_vlan_multiple_clusters'
+            - name: '7.0.systest.vcenter_ha_multiroles_cindervmdk_and_cinder'
               current-parameters: true
-              predefined-parameters: VCENTER_SNAPSHOT=vcenterha
+              property-file: '{runner-properties}'
               kill-phase-on: NEVER
 
-#      - multijob:
-#          name: 'System tests for vcenter with vcenter6'
-#          condition: COMPLETED
-#          projects:
-#            - name: '{fuel-release}.vcenter_cindervmdk'
-#              current-parameters: true
-#              predefined-parameters: VCENTER_SNAPSHOT=vcenter6
-#              kill-phase-on: NEVER
-#
-#            - name: '{fuel-release}.vcenter_computevmware'
-#              current-parameters: true
-#              predefined-parameters: VCENTER_SNAPSHOT=vcenter6
-#              kill-phase-on: NEVER
-#
-#            - name: '{fuel-release}.vcenter_cindervmdk_and_computevmware'
-#              current-parameters: true
-#              predefined-parameters: VCENTER_SNAPSHOT=vcenter6
-#              kill-phase-on: NEVER
-#
-#            - name: '{fuel-release}.vcenter_glance_backend'
-#              current-parameters: true
-#              predefined-parameters: VCENTER_SNAPSHOT=vcenter6
-#              kill-phase-on: NEVER
-#
-#            - name: '{fuel-release}.vcenter_multiple_cluster_with_computevmware'
-#              current-parameters: true
-#              predefined-parameters: VCENTER_SNAPSHOT=vcenter6
-#              kill-phase-on: NEVER
-#
-#            - name: '{fuel-release}.vcenter_ceph'
-#              current-parameters: true
-#              predefined-parameters: VCENTER_SNAPSHOT=vcenter6
-#              kill-phase-on: NEVER
-#
-#            - name: '{fuel-release}.vcenter_computevmware_and_ceph'
-#              current-parameters: true
-#              predefined-parameters: VCENTER_SNAPSHOT=vcenter6
-#              kill-phase-on: NEVER
-#
-#            - name: '{fuel-release}.vcenter_multiroles_cindervmdk_and_ceph'
-#              current-parameters: true
-#              predefined-parameters: VCENTER_SNAPSHOT=vcenter6
-#              kill-phase-on: NEVER
-#
-#            - name: '{fuel-release}.vcenter_multiroles_cindervmdk_and_cinder'
-#              current-parameters: true
-#              predefined-parameters: VCENTER_SNAPSHOT=vcenter6
-#              kill-phase-on: NEVER
-#
-#            - name: '{fuel-release}.vcenter_ceilometer'
-#              current-parameters: true
-#              predefined-parameters: VCENTER_SNAPSHOT=vcenter6
-#              kill-phase-on: NEVER
-#
-#            - name: '{fuel-release}.vcenter_ceilometer_and_computevmware'
-#              current-parameters: true
-#              predefined-parameters: VCENTER_SNAPSHOT=vcenter6
-#              kill-phase-on: NEVER
-#
-#            - name: '{fuel-release}.vcenter_multiroles_ceilometer'
-#              current-parameters: true
-#              predefined-parameters: VCENTER_SNAPSHOT=vcenter6
-#              kill-phase-on: NEVER
-#
-#            - name: '{fuel-release}.vcenter_add_delete_nodes'
-#              current-parameters: true
-#              predefined-parameters: VCENTER_SNAPSHOT=vcenter6
-#              kill-phase-on: NEVER
-#
-#            - name: '{fuel-release}.vcenter_delete_controler'
-#              current-parameters: true
-#              predefined-parameters: VCENTER_SNAPSHOT=vcenter6
-#              kill-phase-on: NEVER
-#
-#            - name: '{fuel-release}.vcenter_ha_ceph'
-#              current-parameters: true
-#              predefined-parameters: VCENTER_SNAPSHOT=vcenter6
-#              kill-phase-on: NEVER
-#
-#            - name: '{fuel-release}.vcenter_ha_cinder_and_ceph'
-#              current-parameters: true
-#              predefined-parameters: VCENTER_SNAPSHOT=vcenter6
-#              kill-phase-on: NEVER
-#
-#            - name: '{fuel-release}.vcenter_ha_glance_backend_multiple_cluster'
-#              current-parameters: true
-#              predefined-parameters: VCENTER_SNAPSHOT=vcenter6
-#              kill-phase-on: NEVER
-#
-#            - name: '{fuel-release}.vcenter_ha_multiroles_cindervmdk_and_ceph'
-#              current-parameters: true
-#              predefined-parameters: VCENTER_SNAPSHOT=vcenter6
-#              kill-phase-on: NEVER
-#
-#            - name: '{fuel-release}.vcenter_ha_multiroles_cindervmdk_and_cinder'
-#              current-parameters: true
-#              predefined-parameters: VCENTER_SNAPSHOT=vcenter6
-#              kill-phase-on: NEVER
-#
-#            - name: '{fuel-release}.vcenter_ha_nova_flat_multiple_clusters'
-#              current-parameters: true
-#              predefined-parameters: VCENTER_SNAPSHOT=vcenter6
-#              kill-phase-on: NEVER
-#
-#            - name: '{fuel-release}.vcenter_ha_nova_vlan_multiple_clusters'
-#              current-parameters: true
-#              predefined-parameters: VCENTER_SNAPSHOT=vcenter6
-#              kill-phase-on: NEVER
-#    publishers:
-#        - email: 
-#            recipients: '{mail-to}'
+            - name: '7.0.systest.vcenter_ha_nova_flat_multiple_clusters'
+              current-parameters: true
+              property-file: '{runner-properties}'
+              kill-phase-on: NEVER
 
+            - name: '7.0.systest.vcenter_ha_nova_vlan_multiple_clusters'
+              current-parameters: true
+              property-file: '{runner-properties}'
+              kill-phase-on: NEVER
+
+    publishers:
+        - archive:
+            artifacts: '**/nosetests.xml,logs/*'
+            allow-empty: true
+            fingerprint: true
+        - xunit:
+            types:
+              - junit:
+                  pattern: '**/nosetest.xml'
+                  skip-if-no-test-files: true
+        - email:
+            recipients: '{mail-to}'

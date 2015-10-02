@@ -1,6 +1,6 @@
 #!/bin/bash
-[ -z $ISO_FILE ] && export ISO_FILE=${ISO_FILE_80}
-#export ISO_VERSION=`cut -d'-' -f2-3 <<< $ISO_FILE`
+[ -z $ISO_FILE ] && export ISO_FILE=${ISO_FILE_80-kilo}
+#export ISO_VERSION=`cut -d'-' -f4-4 <<< $ISO_FILE`
 export ISO_VERSION=$(cat iso_version.txt)
 
 echo iso $ISO_VERSION: $ISO_FILE
