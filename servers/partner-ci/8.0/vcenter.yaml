@@ -4,6 +4,8 @@
     logrotate:
         daysToKeep: 7
         numToKeep: 10
+        artifactDaysToKeep: 7  
+        artifactNumToKeep: 10 
 
     properties:
       - heavy-job:
@@ -42,42 +44,48 @@
    repourl: 'https://github.com/stackforge/{reponame}.git' 
    venvpath: '/home/jenkins/venv-nailgun-tests-2.9'
    runner-name: '{fuel-release}.{id}.vcenter.runner'   
+   custom-name: '{fuel-release}.{id}.vcenter.custom'   
    runner-properties: 'properties'
    mail-to: 'rkhozinov@mirantis.com'
    default_pool: '10.109.0.0/16:24'
    nodes-count: '9'
+   admin-node-memory: 4096
+   slave-node-memory: 4096
+   admin-node-cpu: 4
+   slave-node-cpu: 4
    openstack-release: 'Ubuntu'
    vcenter-snapshot: 'vcenterha'
    iso-storage: '/storage/downloads'
+   env-prefix: '{fuel-release}.vcenter'
    testgroup:
-       - vcenter_smoke
+#       - vcenter_smoke
        - vcenter_bvt
-       - vcenter_cindervmdk
-       - vcenter_computevmware
-       - vcenter_cindervmdk_and_computevmware
-       - vcenter_glance_backend
-       - vcenter_multiple_cluster_with_computevmware
-       - vcenter_ceph
-       - vcenter_computevmware_and_ceph
-       - vcenter_multiroles_cindervmdk_and_ceph
-       - vcenter_multiroles_cindervmdk_and_cinder
-       - vcenter_ceilometer
-       - vcenter_ceilometer_and_computevmware
-       - vcenter_multiroles_ceilometer
-       - vcenter_add_delete_nodes
-       - vcenter_delete_controler
-       - vcenter_ha_ceph
-       - vcenter_ha_cinder_and_ceph
-       - vcenter_ha_glance_backend_multiple_cluster
-       - vcenter_ha_multiroles_cindervmdk_and_ceph
-       - vcenter_ha_multiroles_cindervmdk_and_cinder
-       - vcenter_ha_nova_flat_multiple_clusters
-       - vcenter_ha_nova_vlan_multiple_clusters
+#       - vcenter_cindervmdk
+#       - vcenter_computevmware
+#       - vcenter_cindervmdk_and_computevmware
+#       - vcenter_glance_backend
+#       - vcenter_multiple_cluster_with_computevmware
+#       - vcenter_ceph
+#       - vcenter_computevmware_and_ceph
+#       - vcenter_multiroles_cindervmdk_and_ceph
+#       - vcenter_multiroles_cindervmdk_and_cinder
+#       - vcenter_ceilometer
+#       - vcenter_ceilometer_and_computevmware
+#       - vcenter_multiroles_ceilometer
+#       - vcenter_add_delete_nodes
+#       - vcenter_delete_controler
+#       - vcenter_ha_ceph
+#       - vcenter_ha_cinder_and_ceph
+#       - vcenter_ha_glance_backend_multiple_cluster
+#       - vcenter_ha_multiroles_cindervmdk_and_ceph
+#       - vcenter_ha_multiroles_cindervmdk_and_cinder
+#       - vcenter_ha_nova_flat_multiple_clusters
+#       - vcenter_ha_nova_vlan_multiple_clusters
    jobs:
      - '{runner-name}'
      - '{fuel-release}.{id}.{testgroup}'
+     - '{custom-name}'
 
-## Jobs for system tests by testgroup
 - job-template:
     name: '{fuel-release}.{id}.{testgroup}'
     concurrent: false
@@ -98,18 +106,103 @@
       - inject:
           properties-content: |
               NODES_COUNT={nodes-count}
+              ADMIN_NODE_MEMORY={admin-node-memory}
+              SLAVE_NODE_MEMORY={slave-node-memory}
+              ADMIN_NODE_CPU={admin-node-cpu} 
+              SLAVE_NODE_CPU={slave-node-cpu}
               VENV_PATH={venvpath}
               FUEL_RELEASE={fuel-release}
               OPENSTACK_RELEASE={openstack-release}
-              ENV_PREFIX={id}_vcenter
+              ENV_PREFIX={env-prefix}
               VCENTER_SNAPSHOT={vcenter-snapshot}
               ISO_STORAGE={iso-storage}
               TEST_GROUP={testgroup}
+              ENV_NAME=''
+      - shell:
+          !include-raw-escape builders/systest.vcenter.prepare.sh
       - shell:
           !include-raw-escape builders/systest.vcenter.sh
     publishers:
       - description-setter:
           description: '$ISO_VERSION'
+          description-for-failed: '$ISO_VERSION'
+      - xunit:
+          types:
+            - junit:
+                pattern: '**/nosetest.xml'
+                skip-if-no-test-files: true
+
+- job-template:
+    name: '{custom-name}'
+    concurrent: true
+    node: 'vsphere'
+    parameters:
+      - string:
+          name: ISO_FILE
+          descrition: 'You must define iso file. Our storage for iso: {iso-storage}'
+      - string:
+          name: TEST_GROUP
+          description: 'Enter the name of the test group'
+      - bool:
+          name: USE_SNAPSHOTS
+          default: true
+          descrition: 'Will be used existing environment'
+      - bool:
+          name: MAKE_SNAPSHOT
+          default: false
+      - bool:
+          name: SHUTDOWN_AFTER
+          default: true
+          decsription: 'The env will be powered off after test'
+      - bool:
+          name: ERASE_AFTER
+          default: false
+          description: 'The env will be erased after test'
+      - string:
+          name: FUEL_QA_COMMIT
+          default: 'master'
+      - string:
+          name: FUEL_QA_GERRIT_COMMIT
+          default: ''
+          description: 'Refspecs for commits in fuel-qa gerrit separated with spaces. For example, refs/changes/10/55310/1 refs/changes/10/55310/2'
+      - string:
+          name: ENV_PREFIX
+          default: '{env-prefix}'
+          description: 'Define env prefix name. This parameter should not be changed'
+
+    properties:
+      - throttle:
+          max-per-node: 0
+          max-total: 0
+          categories:
+            - vsphere
+          option: category
+    scm:       
+      - git:
+          url: '{repourl}'
+          branches: 
+            - 'origin/$FUEL_QA_COMMIT'
+    builders:
+      - inject:
+          properties-content: |
+              NODES_COUNT={nodes-count}
+              ADMIN_NODE_MEMORY={admin-node-memory}
+              SLAVE_NODE_MEMORY={slave-node-memory}
+              ADMIN_NODE_CPU={admin-node-cpu} 
+              SLAVE_NODE_CPU={slave-node-cpu}
+              VENV_PATH={venvpath}
+              FUEL_RELEASE={fuel-release}
+              OPENSTACK_RELEASE={openstack-release}
+              VCENTER_SNAPSHOT={vcenter-snapshot}
+              ISO_STORAGE={iso-storage}
+      - shell:
+          !include-raw-escape builders/systest.vcenter.prepare.sh
+      - shell:
+          !include-raw-escape builders/systest.vcenter.custom.sh
+    publishers:
+      - description-setter:
+          description: '$ISO_VERSION'
+          description-for-failed: '$ISO_VERSION'
       - xunit:
           types:
             - junit:
@@ -124,6 +217,8 @@
     name: '{runner-name}'
     description: "System tests for vcenter feature"
     node: runner    
+    triggers:
+        - timed: 'H 19  * * *'
     builders:
       - copyartifact:
           project: 'download_iso'
