@@ -2,6 +2,7 @@
 # jobs for test-group
 - defaults:
     name: global
+    disabled: true
     logrotate:
         daysToKeep: 7
         numToKeep: 10
@@ -36,19 +37,25 @@
           fail: true
           timeout: 6000
 - project:
-   name: '8.0.vcenter.systest'
-   description: '8.0 vcenter system tests'
    fuel-release: '8.0'
+   name: '{fuel-release}.vcenter.systest'
+   description: '{fuel-release} vcenter system tests'
    id: 'systest'
    repobranch: 'origin/master'
    reponame: 'fuel-qa'
    repourl: 'https://github.com/stackforge/{reponame}.git' 
    venvpath: '/home/jenkins/venv-nailgun-tests-2.9'
-   runner-name: '{fuel-release}.{id}.vcenter.runner'   
-   custom-name: '{fuel-release}.{id}.vcenter.custom'   
-   runner-properties: 'properties'
+   systest-name: '{fuel-release}.vcenter.{id}.runner'   
+   custom-name: '{fuel-release}.vcenter.{id}.custom'   
+#  download-name: '{fuel-release}.download'
+   smoke-bvt-name: '{fuel-release}.vcenter.smoke-bvt.runner'
+
+   systest-props-file: 'properties'
+   smoke-bvt-props-file: 'properties'
+#  download-props-file: 'properties'    
+
    mail-to: 'rkhozinov@mirantis.com'
-   default_pool: '10.109.0.0/16:24'
+
    nodes-count: '9'
    admin-node-memory: 4096
    slave-node-memory: 4096
@@ -58,9 +65,11 @@
    vcenter-snapshot: 'vcenterha'
    iso-storage: '/storage/downloads'
    env-prefix: '{fuel-release}.vcenter'
+
    testgroup:
-#       - vcenter_smoke
+       - vcenter_smoke
        - vcenter_bvt
+       - vcenter_add_delete_nodes
 #       - vcenter_cindervmdk
 #       - vcenter_computevmware
 #       - vcenter_cindervmdk_and_computevmware
@@ -73,7 +82,6 @@
 #       - vcenter_ceilometer
 #       - vcenter_ceilometer_and_computevmware
 #       - vcenter_multiroles_ceilometer
-#       - vcenter_add_delete_nodes
 #       - vcenter_delete_controler
 #       - vcenter_ha_ceph
 #       - vcenter_ha_cinder_and_ceph
@@ -83,8 +91,9 @@
 #       - vcenter_ha_nova_flat_multiple_clusters
 #       - vcenter_ha_nova_vlan_multiple_clusters
    jobs:
-     - '{runner-name}'
+     - '{systest-name}'
      - '{fuel-release}.{id}.{testgroup}'
+     - '{smoke-bvt-name}'
      - '{custom-name}'
 
 - job-template:
@@ -97,6 +106,8 @@
           max-total: 0
           categories:
             - vsphere
+            - dvs
+            - nsx
           option: category
     scm:       
       - git:
@@ -125,8 +136,8 @@
           !include-raw-escape builders/systest.vcenter.sh
     publishers:
       - description-setter:
-          description: '$ISO_VERSION'
-          description-for-failed: '$ISO_VERSION'
+          description: 'release: $fuel_release, build: $iso_version'
+          description-for-failed: 'release: $fuel_release, build: $iso_version'
       - xunit:
           types:
             - junit:
@@ -177,6 +188,8 @@
           max-total: 0
           categories:
             - vsphere
+            - dvs
+            - nsx
           option: category
     scm:       
       - git:
@@ -202,21 +215,18 @@
           !include-raw-escape builders/systest.vcenter.custom.sh
     publishers:
       - description-setter:
-          description: '$ISO_VERSION'
-          description-for-failed: '$ISO_VERSION'
+          description: 'release: $fuel_release, build: $iso_version'
+          description-for-failed: 'release: $fuel_release, build: $iso_version'
       - xunit:
           types:
             - junit:
                 pattern: '**/nosetest.xml'
                 skip-if-no-test-files: true
 
-# multijob configuration
-# for each of testgroups a job was created early in this script.
-# and this job is needed to create the one run point for the all created jobs
 - job-template:
-    project-type: multijob
-    name: '{runner-name}'
+    name: '{systest-name}'
     description: "System tests for vcenter feature"
+    project-type: multijob
     node: runner    
     triggers:
         - timed: 'H 19  * * *'
@@ -229,122 +239,170 @@
           properties-file: latest_isos.txt
       - inject: 
           properties-content: |
-            properties_file={runner-properties}
+              properties_file={systest-props-file}
       - shell:
           !include-raw-escape builders/systest.vcenter.runner.sh
       - multijob:
           name: 'System tests for vcenter'
           condition: COMPLETED
           projects:
-            - name: '8.0.systest.vcenter_bvt'
+            - name: '{fuel-release}.{id}.vcenter_add_delete_nodes'
               current-parameters: true
-              property-file: '{runner-properties}'
+              property-file: '{systest-props-file}'
               kill-phase-on: NEVER
 
 #            - name: '8.0.systest.vcenter_cindervmdk'
 #              current-parameters: true
-#              property-file: '{runner-properties}'
+#              property-file: '{systest-props-file}'
 #              kill-phase-on: NEVER
 #
 #            - name: '8.0.systest.vcenter_computevmware'
 #              current-parameters: true
-#              property-file: '{runner-properties}'
+#              property-file: '{systest-props-file}'
 #              kill-phase-on: NEVER
 #
 #            - name: '8.0.systest.vcenter_cindervmdk_and_computevmware'
 #              current-parameters: true
-#              property-file: '{runner-properties}'
+#              property-file: '{systest-props-file}'
 #              kill-phase-on: NEVER
 #
 #            - name: '8.0.systest.vcenter_glance_backend'
 #              current-parameters: true
-#              property-file: '{runner-properties}'
+#              property-file: '{systest-props-file}'
 #              kill-phase-on: NEVER
 #
 #            - name: '8.0.systest.vcenter_multiple_cluster_with_computevmware'
 #              current-parameters: true
-#              property-file: '{runner-properties}'
+#              property-file: '{systest-props-file}'
 #              kill-phase-on: NEVER
 #
 #            - name: '8.0.systest.vcenter_ceph'
 #              current-parameters: true
-#              property-file: '{runner-properties}'
+#              property-file: '{systest-props-file}'
 #              kill-phase-on: NEVER
 #
 #            - name: '8.0.systest.vcenter_computevmware_and_ceph'
 #              current-parameters: true
-#              property-file: '{runner-properties}'
+#              property-file: '{systest-props-file}'
 #              kill-phase-on: NEVER
 #
 #            - name: '8.0.systest.vcenter_multiroles_cindervmdk_and_ceph'
 #              current-parameters: true
-#              property-file: '{runner-properties}'
+#              property-file: '{systest-props-file}'
 #              kill-phase-on: NEVER
 #
 #            - name: '8.0.systest.vcenter_multiroles_cindervmdk_and_cinder'
 #              current-parameters: true
-#              property-file: '{runner-properties}'
+#              property-file: '{systest-props-file}'
 #              kill-phase-on: NEVER
 #
 #            - name: '8.0.systest.vcenter_ceilometer'
 #              current-parameters: true
-#              property-file: '{runner-properties}'
+#              property-file: '{systest-props-file}'
 #              kill-phase-on: NEVER
 #
 #            - name: '8.0.systest.vcenter_ceilometer_and_computevmware'
 #              current-parameters: true
-#              property-file: '{runner-properties}'
+#              property-file: '{systest-props-file}'
 #              kill-phase-on: NEVER
 #
 #            - name: '8.0.systest.vcenter_multiroles_ceilometer'
 #              current-parameters: true
-#              property-file: '{runner-properties}'
+#              property-file: '{systest-props-file}'
 #              kill-phase-on: NEVER
 #
 #            - name: '8.0.systest.vcenter_add_delete_nodes'
 #              current-parameters: true
-#              property-file: '{runner-properties}'
+#              property-file: '{systest-props-file}'
 #              kill-phase-on: NEVER
 #
 #            - name: '8.0.systest.vcenter_delete_controler'
 #              current-parameters: true
-#              property-file: '{runner-properties}'
+#              property-file: '{systest-props-file}'
 #              kill-phase-on: NEVER
 #
 #            - name: '8.0.systest.vcenter_ha_ceph'
 #              current-parameters: true
-#              property-file: '{runner-properties}'
+#              property-file: '{systest-props-file}'
 #              kill-phase-on: NEVER
 #
 #            - name: '8.0.systest.vcenter_ha_cinder_and_ceph'
 #              current-parameters: true
-#              property-file: '{runner-properties}'
+#              property-file: '{systest-props-file}'
 #              kill-phase-on: NEVER
 #
 #            - name: '8.0.systest.vcenter_ha_glance_backend_multiple_cluster'
 #              current-parameters: true
-#              property-file: '{runner-properties}'
+#              property-file: '{systest-props-file}'
 #              kill-phase-on: NEVER
 #
 #            - name: '8.0.systest.vcenter_ha_multiroles_cindervmdk_and_ceph'
 #              current-parameters: true
-#              property-file: '{runner-properties}'
+#              property-file: '{systest-props-file}'
 #              kill-phase-on: NEVER
 #
 #            - name: '8.0.systest.vcenter_ha_multiroles_cindervmdk_and_cinder'
 #              current-parameters: true
-#              property-file: '{runner-properties}'
+#              property-file: '{systest-props-file}'
 #              kill-phase-on: NEVER
 #
 #            - name: '8.0.systest.vcenter_ha_nova_flat_multiple_clusters'
 #              current-parameters: true
-#              property-file: '{runner-properties}'
+#              property-file: '{systest-props-file}'
 #              kill-phase-on: NEVER
 #
 #            - name: '8.0.systest.vcenter_ha_nova_vlan_multiple_clusters'
 #              current-parameters: true
-#              property-file: '{runner-properties}'
+#              property-file: '{systest-props-file}'
 #              kill-phase-on: NEVER
+
+    publishers:
+      - archive:
+          artifacts: '**/nosetests.xml,logs/*'
+          allow-empty: true
+          fingerprint: true
+      - xunit:
+          types:
+            - junit:
+                pattern: '**/nosetest.xml'
+                skip-if-no-test-files: true
+      - email: 
+          recipients: '{mail-to}'
+
+- job-template:
+    name: '{smoke-bvt-name}'
+    project-type: multijob
+    description: "Smoke/BVT tests for vcenter feature per fuel-build"
+    node: runner    
+    triggers:
+        - reverse:
+            jobs: 'download_iso'
+            result: 'success'
+    builders:
+      - copyartifact:
+          project: 'download_iso'
+          filter: 'latest_isos.txt'
+          which-build: 'last-successful'
+      - inject:
+          properties-file: latest_isos.txt
+      - inject: 
+          properties-content: |
+              properties_file={smoke-bvt-props-file}
+      - shell:
+          !include-raw-escape builders/systest.vcenter.runner.sh
+      - multijob:
+          name: 'Smoke/BVT tests for vcenter'
+          condition: COMPLETED
+          projects:
+            - name: '{fuel-release}.{id}.vcenter_smoke'
+              current-parameters: true
+              property-file: '{smoke-bvt-props-file}'
+              kill-phase-on: NEVER
+
+            - name: '{fuel-release}.{id}.vcenter_bvt'
+              current-parameters: true
+              property-file: '{smoke-bvt-props-file}'
+              kill-phase-on: NEVER
 
     publishers:
         - archive:
@@ -358,3 +416,30 @@
                   skip-if-no-test-files: true
         - email: 
             recipients: '{mail-to}'
+
+#- job-template:
+#    name: '{download-name}'
+#    project-type: freestyle
+#    node: runner 
+#    concurrent: true
+#    parameters:
+#      - string: 
+#          name: RELEASE 
+#          default: '{fuel-release}' 
+#    builders:
+#      - inject:  
+#          properties-content: |
+#              properties_file={download-props-file}
+#              ISO_FILE=''
+#      - shell:
+#          !include-raw-escape builders/download.sh
+#    publishers:
+#      - archive:
+#          artifacts: '{download-props-file}'
+#          allow-empty: true
+#          fingerprint: true
+#      - email: 
+#          recipients: '{mail-to}'
+#      - description-setter:
+#          description: 'iso: $ISO_FILE'
+#          description-for-failed: 'iso: $ISO_FILE'
