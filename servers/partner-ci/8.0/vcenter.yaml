@@ -1,8 +1,19 @@
-# TODO: make ISO_VERSION global > add to job's properties : for valid job-build description
+- builder:                                 
+    name: 'runner-builder'                 
+    builders:                              
+      - copyartifact:                      
+          project: 'download_iso'          
+          filter: '*.txt'                  
+          which-build: 'last-successful'   
+      - inject:                            
+          properties-file: latest_isos.txt 
+      - inject:                            
+          properties-file: iso_version.txt 
+
 # jobs for test-group
 - defaults:
     name: global
-    disabled: true
+    disabled: false
     logrotate:
         daysToKeep: 7
         numToKeep: 10
@@ -231,12 +242,7 @@
     triggers:
         - timed: 'H 19  * * *'
     builders:
-      - copyartifact:
-          project: 'download_iso'
-          filter: 'latest_isos.txt'
-          which-build: 'last-successful'
-      - inject:
-          properties-file: latest_isos.txt
+      - runner-builder
       - inject: 
           properties-content: |
               properties_file={systest-props-file}
@@ -379,12 +385,7 @@
             jobs: 'download_iso'
             result: 'success'
     builders:
-      - copyartifact:
-          project: 'download_iso'
-          filter: 'latest_isos.txt'
-          which-build: 'last-successful'
-      - inject:
-          properties-file: latest_isos.txt
+      - runner-builder
       - inject: 
           properties-content: |
               properties_file={smoke-bvt-props-file}
@@ -398,11 +399,13 @@
               current-parameters: true
               property-file: '{smoke-bvt-props-file}'
               kill-phase-on: NEVER
+              enable-condition: '"${{ISO_VERSION}}" == "{fuel-release}"' 
 
             - name: '{fuel-release}.{id}.vcenter_bvt'
               current-parameters: true
               property-file: '{smoke-bvt-props-file}'
               kill-phase-on: NEVER
+              enable-condition: '"${{ISO_VERSION}}" == "{fuel-release}"' 
 
     publishers:
         - archive:
