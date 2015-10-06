@@ -1,0 +1,196 @@
+- project:
+    fuel_version: 6.1
+    contrail_version: 2.2 
+    name: '{fuel_version}.contrail.{contrail_version}' #Your plugin mame
+    path_to_fuel_iso: $PWD #Path to FuelISO
+    plugin_repo: fuel-plugin-contrail 
+    email_to: rkhozinov@mirantis.com #List of emails separated by comma
+    test_group: test_group #Test group in fuel-qa for deployment tests of your plugin
+    properties: 
+        - heavy-jobs:
+            weight: 1
+    wrappers:
+     - raw:
+          xml: |
+            <matrixtieparent.BuildWrapperMtp plugin="matrixtieparent@1.2">
+            <labelName>runner</labelName> 
+            </matrixtieparent.BuildWrapperMtp>
+    jobs:
+      - '{name}.build'
+      - '{name}.bvt':
+            test_group:
+                - test_group.bvt1
+      - '{name}.custom':
+            test_group:
+                - test_group.custom1
+                - test_group.custom2
+      - '{name}.nightly':
+            test_group:
+                - test_group.nightly1
+                - test_group.nightly2
+
+- job-template:
+    name: '{name}.build'
+    builders:
+      - shell:
+          !include-raw-escape './builders/syntax-build-plugin.sh'
+    description: |
+        '<a href=https://github.com/stackforge/{plugin_repo}>
+        Build {name} plugin from fuel-plugins project</a>'
+    heavy-job:
+        weight: 1    
+    throttle:
+        max-total: 1    
+        categories:
+            - contrail    
+    logrotate:
+      numToKeep: 10
+    parameters:
+      - string:
+          name: 'GERRIT_REFSPEC'
+          default: 'refs/heads/master'
+    scm:
+      - git:
+          branches:
+            - $GERRIT_BRANCH
+          name: ''
+          refspec: $GERRIT_REFSPEC
+          url: 'https://review.openstack.org/stackforge/{plugin_repo}'
+          choosing-strategy: gerrit
+          clean:
+            before: true
+    triggers:
+      - gerrit:
+          trigger-on:
+            - patchset-created-event #Trigger plugin build for every gerrit patchset
+          projects:
+            - project-compare-type: 'PLAIN'
+              project-pattern: '{plugin_repo}'
+              branches:
+                - branch-compare-type: 'ANT'
+                  branch-pattern: '**'
+          silent: true
+          server-name: 'review.openstack.org'
+    publishers:
+      - archive:
+          artifacts: '*.rpm'
+      - email:
+          notify-every-unstable-build: true
+          recipients: '{email_to}'
+
+- job-template:
+    name: '{name}.bvt'
+    builders:
+      - copyartifact:
+          project: '{name}.build'
+          which-build: last-successful
+      - inject:
+          properties-content: |
+            OPENSTACK_RELEASE=ubuntu
+            TEST_GROUP={test_group}
+            ISO_PATH={path_to_fuel_iso}
+      - shell:
+          !include-raw-escape './builders/prepare_env.sh'
+      - shell:
+          !include-raw-escape './builders/deploy-plugin.sh'
+    description: 'fuel-qa system test for {name}'
+    logrotate:
+      numToKeep: 10
+    parameters:
+      - string:
+          name: 'GERRIT_REFSPEC'
+          default: 'refs/heads/master'
+    scm:
+      - git:
+          branches:
+            - $GERRIT_BRANCH
+          refspec: $GERRIT_REFSPEC
+          url: 'https://review.openstack.org/stackforge/fuel-qa'
+          choosing-strategy: gerrit
+          clean:
+            before: true
+          wipe-workspace: false
+    publishers:
+      - archive:
+          artifacts: 'logs/$BUILD_NUMBER/*'
+      - email:
+          notify-every-unstable-build: true
+          recipients: '{email_to}'
+
+- job-template:
+    name: '{name}.custom'
+    builders:
+      - copyartifact:
+          project: '{name}.build'
+          which-build: last-successful
+      - inject:
+          properties-content: |
+            OPENSTACK_RELEASE=ubuntu
+            TEST_GROUP={test_group}
+            ISO_PATH={path_to_fuel_iso}
+      - shell:
+          !include-raw-escape './builders/prepare_env.sh'
+      - shell:
+          !include-raw-escape './builders/deploy-plugin.sh'
+    description: 'fuel-qa system test for {name}'
+    logrotate:
+      numToKeep: 10
+    parameters:
+      - string:
+          name: 'GERRIT_REFSPEC'
+          default: 'refs/heads/master'
+    scm:
+      - git:
+          branches:
+            - $GERRIT_BRANCH
+          refspec: $GERRIT_REFSPEC
+          url: 'https://review.openstack.org/stackforge/fuel-qa'
+          choosing-strategy: gerrit
+          clean:
+            before: true
+          wipe-workspace: false
+    publishers:
+      - archive:
+          artifacts: 'logs/$BUILD_NUMBER/*'
+      - email:
+          notify-every-unstable-build: true
+          recipients: '{email_to}'
+
+- job-template:
+    name: '{name}.nightly'
+    builders:
+      - copyartifact:
+          project: '{name}.build'
+          which-build: last-successful
+      - inject:
+          properties-content: |
+            OPENSTACK_RELEASE=ubuntu
+            TEST_GROUP={test_group}
+            ISO_PATH={path_to_fuel_iso}
+      - shell:
+          !include-raw-escape './builders/prepare_env.sh'
+      - shell:
+          !include-raw-escape './builders/deploy-plugin.sh'
+    description: 'fuel-qa system test for {name}'
+    logrotate:
+      numToKeep: 10
+    parameters:
+      - string:
+          name: 'GERRIT_REFSPEC'
+          default: 'refs/heads/master'
+    scm:
+      - git:
+          branches:
+            - $GERRIT_BRANCH
+          refspec: $GERRIT_REFSPEC
+          url: 'https://review.openstack.org/stackforge/fuel-qa'
+          choosing-strategy: gerrit
+          clean:
+            before: true
+          wipe-workspace: false
+    publishers:
+      - archive:
+          artifacts: 'logs/$BUILD_NUMBER/*'
+      - email:
+          notify-every-unstable-build: true
+          recipients: '{email_to}'

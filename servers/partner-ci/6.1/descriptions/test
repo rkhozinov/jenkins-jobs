@@ -1,0 +1,20 @@
+#!/bin/bash -e
+RELEASE=$1
+#VERSION=`echo $MAGNET_LINK | cut -d'-' -f2-3`
+VERSION=$RELEASE
+
+FUEL_RELEASE=$(echo $VERSION | tr -d . )
+echo fuel release $FUEL_RELEASE, version $VERSION
+echo "Description string: $NODE_NAME $VERSION"
+ISO_FILE="fuel-kilo-8.0-125-2015-10-06_10-23-00.iso"
+echo $ISO_FILE > iso_file.txt
+echo $VERSION > iso_version.txt
+
+sed -i '' -e "/ISO_FILE_${FUEL_RELEASE}.*/d" latest_isos.txt 
+echo ISO_FILE_${FUEL_RELEASE}=${ISO_FILE} >> latest_isos.txt
+
+
+
+
+
+
