@@ -1,4 +1,3 @@
-# TODO: make ISO_VERSION global > add to job's properties : for valid job-build description
 - builder:
     name: 'runner-builder'
     builders:
@@ -10,8 +9,7 @@
           properties-file: latest_isos.txt
       - inject:
           properties-file: iso_version.txt
-#
-# jobs for test-group
+
 - defaults:
     name: global
     disabled: false
@@ -46,6 +44,7 @@
       - timeout:
           fail: true
           timeout: 6000
+
 - project:
    fuel-release: '8.0-kilo'
    name: '{fuel-release}.vcenter.systest'
@@ -54,7 +53,6 @@
    repobranch: 'origin/master'
    reponame: 'fuel-qa'
    repourl: 'https://github.com/stackforge/{reponame}.git' 
-   venvpath: '/home/jenkins/venv-nailgun-tests-2.9'
    systest-name: '{fuel-release}.vcenter.{id}.runner'   
    custom-name: '{fuel-release}.vcenter.{id}.custom'   
 #  download-name: '{fuel-release}.download'
@@ -66,6 +64,7 @@
 
    mail-to: 'rkhozinov@mirantis.com'
 
+   venvpath: '/home/jenkins/venv-nailgun-tests-2.9'
    nodes-count: '9'
    admin-node-memory: 4096
    slave-node-memory: 4096
@@ -191,7 +190,6 @@
           name: ENV_PREFIX
           default: '{env-prefix}'
           description: 'Define env prefix name. This parameter should not be changed'
-
     properties:
       - throttle:
           max-per-node: 0
