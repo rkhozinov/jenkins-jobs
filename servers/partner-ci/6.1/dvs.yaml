@@ -1,61 +1,79 @@
+- defaults:
+    name: global
+    disabled: false
+    logrotate:
+      daysToKeep: 7         
+      numToKeep: 10
+      artifactDaysToKeep: 7
+      artifactNumToKeep: 10
+    properties:
+      - heavy-job:
+          weight: 1           
+
 - project:
-    fuel_version: 6.1
-    contrail_version: 2.2 
-    name: '{fuel_version}.contrail.{contrail_version}' #Your plugin mame
-    path_to_fuel_iso: $PWD #Path to FuelISO
-    plugin_repo: fuel-plugin-contrail 
-    email_to: rkhozinov@mirantis.com #List of emails separated by comma
-    test_group: test_group #Test group in fuel-qa for deployment tests of your plugin
-    properties: 
-        - heavy-jobs:
-            weight: 1
-    wrappers:
-     - raw:
-          xml: |
-            <matrixtieparent.BuildWrapperMtp plugin="matrixtieparent@1.2">
-            <labelName>runner</labelName> 
-            </matrixtieparent.BuildWrapperMtp>
+    fuel-release: 6.1
+    plugin-version: 1.0-1
+    plugin-name: dvs 
+    name: '{fuel-release}.{plugin-name}.{plugin-version}.project'
+    build-name: '{fuel-release}.{plugin-name}.{plugin-version}.build'
+    bvt-name: '{fuel-release}.{plugin-name}.{plugin-version}.bvt'
+    iso-file: fuel-6.1-525-2015-06-19_13-02-31.iso
+    gerrit-repo: fuel-plugin-vmware-dvs
+    gerrit-branch: stable/6.1
+    email-to: rkhozinov@mirantis.com #List of emails separated by comma
+
+    nodes-count: '9'
+    admin-node-memory: 4096
+    slave-node-memory: 4096
+    admin-node-cpu: 4
+    slave-node-cpu: 4
+    openstack-release: 'Ubuntu'
+    vcenter-snapshot: 'vcenterha'
+    iso-storage: '/storage/downloads'
+
+    testgroup:
+      - dvs_vcenter_bvt
+      - dvs_vcenter_smoke
+      - dvs_vcenter_ha_mode
+      - dvs_vcenter_ceph
+      - dvs_vcenter_ceilometer
+      - dvs_vcenter_add_delete_nodes
+      - dvs_vcenter_plugin
+      - dvs_vcenter_multiroles
+      - dvs_vcenter_add_delete_controller
+      - dvs_vcenter_5_instances
+      - dvs_vcenter_networks
+      - dvs_vcenter_reset_controller
+      - dvs_vcenter_diff_networks
+      - dvs_vcenter_multiple_nics
+      - dvs_vcenter_uninstall
+      - dvs_vcenter_tenants_isolation
+      - dvs_vcenter_system
+      - dvs_vcenter_same_ip
+      - dvs_vcenter_security
     jobs:
-      - '{name}.build'
-      - '{name}.bvt':
-            test_group:
-                - test_group.bvt1
-      - '{name}.custom':
-            test_group:
-                - test_group.custom1
-                - test_group.custom2
-      - '{name}.nightly':
-            test_group:
-                - test_group.nightly1
-                - test_group.nightly2
+      - {build-name}
 
 - job-template:
-    name: '{name}.build'
+    name: '{build-name}'
+    node: 'runner'
     builders:
       - shell:
-          !include-raw-escape './builders/syntax-build-plugin.sh'
+          !include-raw-escape './builders/build-plugin.sh'
     description: |
-        '<a href=https://github.com/stackforge/{plugin_repo}>
+        '<a href=https://github.com/stackforge/{gerrit-repo}>
         Build {name} plugin from fuel-plugins project</a>'
-    heavy-job:
-        weight: 1    
-    throttle:
-        max-total: 1    
-        categories:
-            - contrail    
-    logrotate:
-      numToKeep: 10
     parameters:
       - string:
           name: 'GERRIT_REFSPEC'
-          default: 'refs/heads/master'
+          default: 'refs/heads/{gerrit-branch}'
     scm:
       - git:
           branches:
             - $GERRIT_BRANCH
           name: ''
           refspec: $GERRIT_REFSPEC
-          url: 'https://review.openstack.org/stackforge/{plugin_repo}'
+          url: 'https://review.openstack.org/stackforge/{gerrit-repo}'
           choosing-strategy: gerrit
           clean:
             before: true
@@ -65,7 +83,7 @@
             - patchset-created-event #Trigger plugin build for every gerrit patchset
           projects:
             - project-compare-type: 'PLAIN'
-              project-pattern: '{plugin_repo}'
+              project-pattern: '{gerrit-repo}'
               branches:
                 - branch-compare-type: 'ANT'
                   branch-pattern: '**'
@@ -79,27 +97,58 @@
           recipients: '{email_to}'
 
 - job-template:
-    name: '{name}.bvt'
+    name: '{fuel-release}.{plugin-name}.{plugin-version}.{testgroup}'
+    description: 'The test "{testgroup}" for {fuel-release}.{plugin-name}.{plugin-version}'
+    parameters:
+      #TODO: add env prefix
+      #TODO: USE_SNAPSHOTS
+      #TODO: SHUTDOWN_AFTER
+      #TODO: ERASE_AFTER
+      - string:
+          name: ISO_FILE
+          default: {iso-file} 
+          description: 'ISO file name that is on the tpi-s1 in /storage/downloads'
+      - string:
+          name: GERRIT_REFSPEC
+          default: 'refs/heads/{gerrit-branch}'
+          description: 'Refspecs for commits in fuel-qa gerrit separated with spaces'
+      - string:
+          name: GERRIT_BRANCH
+          default: 'origin/{gerrit-branch}'
+          description: 'The branch for fuel-qa gerrit'
+
     builders:
       - copyartifact:
-          project: '{name}.build'
+          project: {build-name} 
           which-build: last-successful
       - inject:
           properties-content: |
-            OPENSTACK_RELEASE=ubuntu
-            TEST_GROUP={test_group}
-            ISO_PATH={path_to_fuel_iso}
+              NODES_COUNT={nodes-count}
+              ADMIN_NODE_MEMORY={admin-node-memory}
+              SLAVE_NODE_MEMORY={slave-node-memory}
+              ADMIN_NODE_CPU={admin-node-cpu} 
+              SLAVE_NODE_CPU={slave-node-cpu}
+              VENV_PATH={venvpath}
+              FUEL_RELEASE={fuel-release}
+              OPENSTACK_RELEASE={openstack-release}
+              ENV_PREFIX={env-prefix}
+              VCENTER_SNAPSHOT={vcenter-snapshot}
+              ISO_STORAGE={iso-storage}
+              TEST_GROUP={testgroup}
+              ENV_NAME=''
       - shell:
-          !include-raw-escape './builders/prepare_env.sh'
+          !include-raw-escape builders/dvs.prepare.sh
       - shell:
-          !include-raw-escape './builders/deploy-plugin.sh'
-    description: 'fuel-qa system test for {name}'
-    logrotate:
-      numToKeep: 10
-    parameters:
-      - string:
-          name: 'GERRIT_REFSPEC'
-          default: 'refs/heads/master'
+          !include-raw-escape builders/dvs.systest.sh
+    properties:
+      - throttle:
+          max-per-node: 0
+          max-total: 0
+          categories:
+            - vsphere      
+            - dvs          
+            - nsx
+          option: category 
     scm:
       - git:
           branches:
@@ -110,7 +159,10 @@
           clean:
             before: true
           wipe-workspace: false
+            
+    #TODO: add wrappers        
     publishers:
+      #TODO: add description-setter
       - archive:
           artifacts: 'logs/$BUILD_NUMBER/*'
       - email:
