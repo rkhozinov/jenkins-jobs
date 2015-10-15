@@ -1,0 +1,76 @@
+
+      - name: '{fuel-release}.{plugin-name}.{plugin-version}.dvs_vcenter_bvt'     
+        current-parameters: true                      
+        kill-phase-on: NEVER
+
+      - name: '{fuel-release}.{plugin-name}.{plugin-version}.dvs_vcenter_smoke'     
+        current-parameters: true                      
+        kill-phase-on: NEVER
+
+      - name: '{fuel-release}.{plugin-name}.{plugin-version}.dvs_vcenter_ha_mode'     
+        current-parameters: true                      
+        kill-phase-on: NEVER
+
+      - name: '{fuel-release}.{plugin-name}.{plugin-version}.dvs_vcenter_ceph'     
+        current-parameters: true                      
+        kill-phase-on: NEVER
+
+      - name: '{fuel-release}.{plugin-name}.{plugin-version}.dvs_vcenter_ceilometer'     
+        current-parameters: true                      
+        kill-phase-on: NEVER
+
+      - name: '{fuel-release}.{plugin-name}.{plugin-version}.dvs_vcenter_add_delete_nodes'     
+        current-parameters: true                      
+        kill-phase-on: NEVER
+
+      - name: '{fuel-release}.{plugin-name}.{plugin-version}.dvs_vcenter_plugin'     
+        current-parameters: true                      
+        kill-phase-on: NEVER
+
+      - name: '{fuel-release}.{plugin-name}.{plugin-version}.dvs_vcenter_multiroles'     
+        current-parameters: true                      
+        kill-phase-on: NEVER
+
+      - name: '{fuel-release}.{plugin-name}.{plugin-version}.dvs_vcenter_add_delete_controller'     
+        current-parameters: true                      
+        kill-phase-on: NEVER
+
+      - name: '{fuel-release}.{plugin-name}.{plugin-version}.dvs_vcenter_5_instances'     
+        current-parameters: true                      
+        kill-phase-on: NEVER
+
+      - name: '{fuel-release}.{plugin-name}.{plugin-version}.dvs_vcenter_networks'     
+        current-parameters: true                      
+        kill-phase-on: NEVER
+
+      - name: '{fuel-release}.{plugin-name}.{plugin-version}.dvs_vcenter_reset_controller'     
+        current-parameters: true                      
+        kill-phase-on: NEVER
+
+      - name: '{fuel-release}.{plugin-name}.{plugin-version}.dvs_vcenter_diff_networks'     
+        current-parameters: true                      
+        kill-phase-on: NEVER
+
+      - name: '{fuel-release}.{plugin-name}.{plugin-version}.dvs_vcenter_multiple_nics'     
+        current-parameters: true                      
+        kill-phase-on: NEVER
+
+      - name: '{fuel-release}.{plugin-name}.{plugin-version}.dvs_vcenter_uninstall'     
+        current-parameters: true                      
+        kill-phase-on: NEVER
+
+      - name: '{fuel-release}.{plugin-name}.{plugin-version}.dvs_vcenter_tenants_isolation'     
+        current-parameters: true                      
+        kill-phase-on: NEVER
+
+      - name: '{fuel-release}.{plugin-name}.{plugin-version}.dvs_vcenter_system'     
+        current-parameters: true                      
+        kill-phase-on: NEVER
+
+      - name: '{fuel-release}.{plugin-name}.{plugin-version}.dvs_vcenter_same_ip'     
+        current-parameters: true                      
+        kill-phase-on: NEVER
+
+      - name: '{fuel-release}.{plugin-name}.{plugin-version}.dvs_vcenter_security'     
+        current-parameters: true                      
+        kill-phase-on: NEVER
