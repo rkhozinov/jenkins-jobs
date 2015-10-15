@@ -420,29 +420,3 @@
         - email:
             recipients: '{mail-to}'
 
-#- job-template:
-#    name: '{download-name}'
-#    project-type: freestyle
-#    node: runner
-#    concurrent: true
-#    parameters:
-#      - string:
-#          name: RELEASE
-#          default: '{fuel-release}'
-#    builders:
-#      - inject:
-#          properties-content: |
-#              properties_file={download-props-file}
-#              ISO_FILE=''
-#      - shell:
-#          !include-raw-escape builders/download.sh
-#    publishers:
-#      - archive:
-#          artifacts: '{download-props-file}'
-#          allow-empty: true
-#          fingerprint: true
-#      - email:
-#          recipients: '{mail-to}'
-#      - description-setter:
-#          description: 'iso: $ISO_FILE'
-#          description-for-failed: 'iso: $ISO_FILE'
