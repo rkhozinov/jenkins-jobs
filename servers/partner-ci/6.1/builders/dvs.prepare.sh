@@ -6,12 +6,13 @@
 rm -f nosetests.xml   
 rm -rf logs/*      
 
-export ISO_VERSION=$(cut -d'-' -f3-3 <<< $ISO_FILE)
+export ISO_VERSION=$(cut -d'-' -f3-3<<< $ISO_FILE)
 echo $ISO_VERSION
 export REQUIRED_FREE_SPACE=200
 export ISO_PATH="$ISO_STORAGE/$ISO_FILE"
 export REQS_PATH="fuelweb_test/requirements.txt"
-export VENV_SYMLINK="$HOME/venv-nailgun-tests"
+export FUEL_RELEASE=$(cut -d'-' -f2-2<<< $ISO_FILE | tr -d .) 
+export VENV_PATH="${HOME}/${FUEL_RELEASE}-venv"
 
 ###############################################################################
 
@@ -46,7 +47,7 @@ function delete_systest_envs {
 
 function prepare_venv {
     #rm -rf "${VENV_PATH}"
-    [ ! -d $VENV_PATH ] && virtualenv --system-site-packages "${VENV_PATH}"
+    [ ! -d $VENV_PATH ] && virtualenv --system-site-packages "${VENV_PATH}" || echo "${VENV_PATH} already exist"
     source "${VENV_PATH}/bin/activate"
     pip --version 
     [ $? -ne 0 ] && easy_install -U pip
@@ -54,7 +55,6 @@ function prepare_venv {
     django-admin.py syncdb --settings=devops.settings --noinput
     django-admin.py migrate devops --settings=devops.settings --noinput
     deactivate
-    [ ! -s $VENV_SYMLINK ] && ln -s $VENV_PATH $VENV_SYMLINK || true 
 }
 
 
