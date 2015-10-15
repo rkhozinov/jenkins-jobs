@@ -1,6 +1,7 @@
 - defaults:
     name: global
     disabled: false
+    node: 'dvs'
     logrotate:
       daysToKeep: 7         
       numToKeep: 10
@@ -12,11 +13,13 @@
 
 - project:
     fuel-release: 6.1
-    plugin-version: 1.0-1
+    plugin-version: 1.0
     plugin-name: dvs 
     name: '{fuel-release}.{plugin-name}.{plugin-version}.project'
     build-name: '{fuel-release}.{plugin-name}.{plugin-version}.build'
-    bvt-name: '{fuel-release}.{plugin-name}.{plugin-version}.bvt'
+    custom-name: '{fuel-release}.{plugin-name}.{plugin-version}.custom'
+    smoke-bvt-name: '{fuel-release}.{plugin-name}.{plugin-version}.smoke-bvt'
+    nightly-name: '{fuel-release}.{plugin-name}.{plugin-version}.nightly'
     iso-file: fuel-6.1-525-2015-06-19_13-02-31.iso
     gerrit-repo: fuel-plugin-vmware-dvs
     gerrit-branch: stable/6.1
@@ -52,9 +55,14 @@
       - dvs_vcenter_same_ip
       - dvs_vcenter_security
     jobs:
-      - {build-name}
-
+      - '{build-name}'
+      - '{smoke-bvt-name}'
+      - '{nightly-name}'
+      - '{custom-name}'
+      - '{fuel-release}.{plugin-name}.{plugin-version}.{testgroup}'
+                
 - job-template:
+  # TODO: add dependencies for smoke-bvt or for multi-job for smoke-bvt 
     name: '{build-name}'
     node: 'runner'
     builders:
@@ -94,19 +102,15 @@
           artifacts: '*.rpm'
       - email:
           notify-every-unstable-build: true
-          recipients: '{email_to}'
+          recipients: '{email-to}'
 
 - job-template:
     name: '{fuel-release}.{plugin-name}.{plugin-version}.{testgroup}'
     description: 'The test "{testgroup}" for {fuel-release}.{plugin-name}.{plugin-version}'
     parameters:
-      #TODO: add env prefix
-      #TODO: USE_SNAPSHOTS
-      #TODO: SHUTDOWN_AFTER
-      #TODO: ERASE_AFTER
       - string:
           name: ISO_FILE
-          default: {iso-file} 
+          default: '{iso-file}'
           description: 'ISO file name that is on the tpi-s1 in /storage/downloads'
       - string:
           name: GERRIT_REFSPEC
@@ -116,30 +120,23 @@
           name: GERRIT_BRANCH
           default: 'origin/{gerrit-branch}'
           description: 'The branch for fuel-qa gerrit'
+      - string:
+          name: ENV_PREFIX
+          default: '{fuel-release}.{plugin-name}.{plugin-version}'
+          description: 'The name of devops env. Needed to properly work of existing mode of devops'
+      - bool:
+          name: USE_SNAPSHOTS
+          default: true
+          descrition: 'Will be used existing environment'
+      - bool:
+          name: SHUTDOWN_AFTER
+          default: true
+          decsription: 'The env will be powered off after test'
+      - bool:
+          name: ERASE_AFTER
+          default: false
+          description: 'The env will be erased after test'
 
-    builders:
-      - copyartifact:
-          project: {build-name} 
-          which-build: last-successful
-      - inject:
-          properties-content: |
-              NODES_COUNT={nodes-count}
-              ADMIN_NODE_MEMORY={admin-node-memory}
-              SLAVE_NODE_MEMORY={slave-node-memory}
-              ADMIN_NODE_CPU={admin-node-cpu} 
-              SLAVE_NODE_CPU={slave-node-cpu}
-              VENV_PATH={venvpath}
-              FUEL_RELEASE={fuel-release}
-              OPENSTACK_RELEASE={openstack-release}
-              ENV_PREFIX={env-prefix}
-              VCENTER_SNAPSHOT={vcenter-snapshot}
-              ISO_STORAGE={iso-storage}
-              TEST_GROUP={testgroup}
-              ENV_NAME=''
-      - shell:
-          !include-raw-escape builders/dvs.prepare.sh
-      - shell:
-          !include-raw-escape builders/dvs.systest.sh
     properties:
       - throttle:
           max-per-node: 0
@@ -149,6 +146,27 @@
             - dvs          
             - nsx
           option: category 
+
+    builders:
+      - copyartifact:
+          project: '{build-name}'
+          which-build: last-successful
+      - inject:
+          properties-content: |
+              NODES_COUNT={nodes-count}
+              ADMIN_NODE_MEMORY={admin-node-memory}
+              SLAVE_NODE_MEMORY={slave-node-memory}
+              ADMIN_NODE_CPU={admin-node-cpu} 
+              SLAVE_NODE_CPU={slave-node-cpu}
+              FUEL_RELEASE={fuel-release}
+              OPENSTACK_RELEASE={openstack-release}
+              VCENTER_SNAPSHOT={vcenter-snapshot}
+              ISO_STORAGE={iso-storage}
+              TEST_GROUP={testgroup}
+      - shell:
+          !include-raw-escape builders/dvs.prepare.sh
+      - shell:
+          !include-raw-escape builders/dvs.systest.sh
     scm:
       - git:
           branches:
@@ -160,37 +178,92 @@
             before: true
           wipe-workspace: false
             
-    #TODO: add wrappers        
+    wrappers:
+      - ansicolor: 
+          colormap: xterm
+      - timeout:
+          fail: true
+          timeout: 6000
+
     publishers:
-      #TODO: add description-setter
       - archive:
           artifacts: 'logs/$BUILD_NUMBER/*'
+      - xunit:
+          types:
+            - junit:
+                pattern: '**/nosetest.xml'
+                skip-if-no-test-files: true
       - email:
           notify-every-unstable-build: true
-          recipients: '{email_to}'
+          recipients: '{email-to}'
+
 
 - job-template:
-    name: '{name}.custom'
+    name: '{custom-name}'
+    description: 'The custom test for {fuel-release}.{plugin-name}.{plugin-version}'
+    concurrent: true
+    node: 'dvs'
+    properties:
+      - throttle:
+          max-per-node: 0
+          max-total: 0
+          categories:
+            - vsphere
+            - dvs
+            - nsx
+          option: category
+    parameters:
+      - string:
+          name: TEST_GROUP
+          description: 'The name of a custom test group'
+      - string:
+          name: ISO_FILE
+          default: '{iso-file}'
+          description: 'ISO file name that is on the tpi-s1 in /storage/downloads'
+      - string:
+          name: GERRIT_REFSPEC
+          default: 'refs/heads/{gerrit-branch}'
+          description: 'Refspecs for commits in fuel-qa gerrit separated with spaces'
+      - string:
+          name: GERRIT_BRANCH
+          default: 'origin/{gerrit-branch}'
+          description: 'The branch for fuel-qa gerrit'
+      - string:
+          name: ENV_PREFIX
+          default: '{fuel-release}.{plugin-name}.{plugin-version}'
+          description: 'The name of devops env. Needed to properly work of existing mode of devops'
+      - bool:
+          name: USE_SNAPSHOTS
+          default: true
+          descrition: 'Will be used existing environment'
+      - bool:
+          name: SHUTDOWN_AFTER
+          default: true
+          decsription: 'The env will be powered off after test'
+      - bool:
+          name: ERASE_AFTER
+          default: false
+          description: 'The env will be erased after test'
+
     builders:
       - copyartifact:
-          project: '{name}.build'
+          project: '{build-name}'
           which-build: last-successful
       - inject:
           properties-content: |
-            OPENSTACK_RELEASE=ubuntu
-            TEST_GROUP={test_group}
-            ISO_PATH={path_to_fuel_iso}
+              NODES_COUNT={nodes-count}
+              ADMIN_NODE_MEMORY={admin-node-memory}
+              SLAVE_NODE_MEMORY={slave-node-memory}
+              ADMIN_NODE_CPU={admin-node-cpu} 
+              SLAVE_NODE_CPU={slave-node-cpu}
+              FUEL_RELEASE={fuel-release}
+              OPENSTACK_RELEASE={openstack-release}
+              VCENTER_SNAPSHOT={vcenter-snapshot}
+              ISO_STORAGE={iso-storage}
       - shell:
-          !include-raw-escape './builders/prepare_env.sh'
+          !include-raw-escape builders/dvs.prepare.sh
       - shell:
-          !include-raw-escape './builders/deploy-plugin.sh'
-    description: 'fuel-qa system test for {name}'
-    logrotate:
-      numToKeep: 10
-    parameters:
-      - string:
-          name: 'GERRIT_REFSPEC'
-          default: 'refs/heads/master'
+          !include-raw-escape builders/dvs.systest.sh
     scm:
       - git:
           branches:
@@ -201,48 +274,138 @@
           clean:
             before: true
           wipe-workspace: false
+            
+    wrappers:
+      - ansicolor: 
+          colormap: xterm
+      - timeout:
+          fail: true
+          timeout: 6000
+
     publishers:
       - archive:
           artifacts: 'logs/$BUILD_NUMBER/*'
+      - xunit:
+          types:
+            - junit:
+                pattern: '**/nosetest.xml'
+                skip-if-no-test-files: true
       - email:
           notify-every-unstable-build: true
-          recipients: '{email_to}'
+          recipients: '{email-to}'
 
 - job-template:
-    name: '{name}.nightly'
+    name: '{smoke-bvt-name}'
+    project-type: multijob
+    description: 'Smoke/BVT tests for {fuel-release}.{plugin-name}.{plugin-version}'
+    node: runner    
+    triggers:
+        - reverse:
+            jobs: '{build-name}'
+            result: 'success'
     builders:
-      - copyartifact:
-          project: '{name}.build'
-          which-build: last-successful
-      - inject:
-          properties-content: |
-            OPENSTACK_RELEASE=ubuntu
-            TEST_GROUP={test_group}
-            ISO_PATH={path_to_fuel_iso}
-      - shell:
-          !include-raw-escape './builders/prepare_env.sh'
-      - shell:
-          !include-raw-escape './builders/deploy-plugin.sh'
-    description: 'fuel-qa system test for {name}'
-    logrotate:
-      numToKeep: 10
-    parameters:
-      - string:
-          name: 'GERRIT_REFSPEC'
-          default: 'refs/heads/master'
-    scm:
-      - git:
-          branches:
-            - $GERRIT_BRANCH
-          refspec: $GERRIT_REFSPEC
-          url: 'https://review.openstack.org/stackforge/fuel-qa'
-          choosing-strategy: gerrit
-          clean:
-            before: true
-          wipe-workspace: false
+      - multijob:
+          name: 'Smoke/BVT tests for {fuel-release}.{plugin-name}.{plugin-version}'
+          condition: COMPLETED
+          projects:
+            #- name: '{fuel-release}.{plugin-name}.{plugin-version}.dvs_vcenter_bvt'
+            #  current-parameters: true
+            #  kill-phase-on: NEVER
+
+            - name: '{fuel-release}.{plugin-name}.{plugin-version}.dvs_vcenter_smoke'
+              current-parameters: true
+              kill-phase-on: NEVER
+
     publishers:
-      - archive:
-          artifacts: 'logs/$BUILD_NUMBER/*'
-      - email:
-          notify-every-unstable-build: true
-          recipients: '{email_to}'
+        - archive:
+            artifacts: '**/nosetests.xml,logs/*'
+            allow-empty: true
+            fingerprint: true
+        - xunit:
+            types:
+              - junit:
+                  pattern: '**/nosetest.xml'
+                  skip-if-no-test-files: true
+        - email: 
+            recipients: '{email-to}'
+
+- job-template:
+    name: '{nightly-name}'
+    description: 'System tests dvs feature'
+    project-type: multijob
+    node: runner    
+    triggers:
+        - timed: 'H 19  * * *'
+    builders:
+      - multijob:
+          name: 'System tests for vcenter'
+          condition: COMPLETED
+          projects:
+
+           - name: '{fuel-release}.{plugin-name}.{plugin-version}.dvs_vcenter_ha_mode'     
+             current-parameters: true                      
+             kill-phase-on: NEVER
+
+           - name: '{fuel-release}.{plugin-name}.{plugin-version}.dvs_vcenter_ceph'     
+             current-parameters: true                      
+             kill-phase-on: NEVER
+
+           - name: '{fuel-release}.{plugin-name}.{plugin-version}.dvs_vcenter_ceilometer'     
+             current-parameters: true                      
+             kill-phase-on: NEVER
+
+           - name: '{fuel-release}.{plugin-name}.{plugin-version}.dvs_vcenter_add_delete_nodes'     
+             current-parameters: true                      
+             kill-phase-on: NEVER
+
+           - name: '{fuel-release}.{plugin-name}.{plugin-version}.dvs_vcenter_plugin'     
+             current-parameters: true                      
+             kill-phase-on: NEVER
+
+           - name: '{fuel-release}.{plugin-name}.{plugin-version}.dvs_vcenter_multiroles'     
+             current-parameters: true                      
+             kill-phase-on: NEVER
+
+           - name: '{fuel-release}.{plugin-name}.{plugin-version}.dvs_vcenter_add_delete_controller'     
+             current-parameters: true                      
+             kill-phase-on: NEVER
+
+           - name: '{fuel-release}.{plugin-name}.{plugin-version}.dvs_vcenter_5_instances'     
+             current-parameters: true                      
+             kill-phase-on: NEVER
+
+           - name: '{fuel-release}.{plugin-name}.{plugin-version}.dvs_vcenter_networks'     
+             current-parameters: true                      
+             kill-phase-on: NEVER
+
+           - name: '{fuel-release}.{plugin-name}.{plugin-version}.dvs_vcenter_reset_controller'     
+             current-parameters: true                      
+             kill-phase-on: NEVER
+
+           - name: '{fuel-release}.{plugin-name}.{plugin-version}.dvs_vcenter_diff_networks'     
+             current-parameters: true                      
+             kill-phase-on: NEVER
+
+           - name: '{fuel-release}.{plugin-name}.{plugin-version}.dvs_vcenter_multiple_nics'     
+             current-parameters: true                      
+             kill-phase-on: NEVER
+
+           - name: '{fuel-release}.{plugin-name}.{plugin-version}.dvs_vcenter_uninstall'     
+             current-parameters: true                      
+             kill-phase-on: NEVER
+
+           - name: '{fuel-release}.{plugin-name}.{plugin-version}.dvs_vcenter_tenants_isolation'     
+             current-parameters: true                      
+             kill-phase-on: NEVER
+
+           - name: '{fuel-release}.{plugin-name}.{plugin-version}.dvs_vcenter_system'     
+             current-parameters: true                      
+             kill-phase-on: NEVER
+
+           - name: '{fuel-release}.{plugin-name}.{plugin-version}.dvs_vcenter_same_ip'     
+             current-parameters: true                      
+             kill-phase-on: NEVER
+
+           - name: '{fuel-release}.{plugin-name}.{plugin-version}.dvs_vcenter_security'     
+             current-parameters: true                      
+             kill-phase-on: NEVER
