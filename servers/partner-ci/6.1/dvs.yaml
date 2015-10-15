@@ -166,7 +166,7 @@
       - shell:
           !include-raw-escape builders/dvs.prepare.sh
       - shell:
-          !include-raw-escape builders/dvs.systest.sh
+          !include-raw-escape builders/dvs.nightly.sh
     scm:
       - git:
           branches:
@@ -263,7 +263,7 @@
       - shell:
           !include-raw-escape builders/dvs.prepare.sh
       - shell:
-          !include-raw-escape builders/dvs.systest.sh
+          !include-raw-escape builders/dvs.nightly.sh
     scm:
       - git:
           branches:
