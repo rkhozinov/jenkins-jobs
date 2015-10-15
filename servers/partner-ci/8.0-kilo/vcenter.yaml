@@ -12,7 +12,7 @@
 
 - defaults:
     name: global
-    disabled: false
+    disabled: true
     logrotate:
       daysToKeep: 7
       numToKeep: 10
