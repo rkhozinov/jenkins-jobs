@@ -166,9 +166,9 @@
           !include-raw-escape builders/dvs.nightly.sh
     scm:
       - git:
+          url: 'https://review.openstack.org/stackforge/{tests-repo}'
           branches:
             - $GERRIT_BRANCH
-          url: 'https://review.openstack.org/stackforge/{tests-repo}'
           clean:
             before: true
           wipe-workspace: false
