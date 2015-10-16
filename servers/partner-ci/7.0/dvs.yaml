@@ -21,8 +21,10 @@
     smoke-bvt-name: '{fuel-release}.{plugin-name}.{plugin-version}.smoke-bvt'
     nightly-name: '{fuel-release}.{plugin-name}.{plugin-version}.nightly'
     iso-file: fuel-7.0-301-2015-09-22_20-01-53.iso
-    gerrit-repo: fuel-plugin-vmware-dvs
-    gerrit-branch: stable/7.01
+    plugin-repo: fuel-plugin-vmware-dvs
+    plugin-gerrit-branch: master
+    tests-repo: fuel-qa
+    tests-branch: stable/7.0
     email-to: rkhozinov@mirantis.com #List of emails separated by comma
 
     nodes-count: '9'
@@ -68,19 +70,19 @@
       - shell:
           !include-raw-escape './builders/build-plugin.sh'
     description: |
-        '<a href=https://github.com/stackforge/{gerrit-repo}>
+        '<a href=https://github.com/stackforge/{plugin-repo}>
         Build {name} plugin from fuel-plugins project</a>'
     parameters:
       - string:
           name: 'GERRIT_REFSPEC'
-          default: 'refs/heads/{gerrit-branch}'
+          default: 'refs/heads/{plugin-gerrit-branch}'
     scm:
       - git:
           branches:
             - $GERRIT_BRANCH
           name: ''
           refspec: $GERRIT_REFSPEC
-          url: 'https://review.openstack.org/stackforge/{gerrit-repo}'
+          url: 'https://review.openstack.org/stackforge/{plugin-repo}'
           choosing-strategy: gerrit
           clean:
             before: true
@@ -90,7 +92,7 @@
             - patchset-created-event #Trigger plugin build for every gerrit patchset
           projects:
             - project-compare-type: 'PLAIN'
-              project-pattern: '{gerrit-repo}'
+              project-pattern: '{plugin-repo}'
               branches:
                 - branch-compare-type: 'ANT'
                   branch-pattern: '**'
@@ -112,12 +114,8 @@
           default: '{iso-file}'
           description: 'ISO file name that is on the tpi-s1 in /storage/downloads'
       - string:
-          name: GERRIT_REFSPEC
-          default: 'refs/heads/{gerrit-branch}'
-          description: 'Refspecs for commits in fuel-qa gerrit separated with spaces'
-      - string:
           name: GERRIT_BRANCH
-          default: 'origin/{gerrit-branch}'
+          default: 'origin/{tests-branch}'
           description: 'The branch for fuel-qa gerrit'
       - string:
           name: ENV_PREFIX
@@ -170,9 +168,7 @@
       - git:
           branches:
             - $GERRIT_BRANCH
-          refspec: $GERRIT_REFSPEC
-          url: 'https://review.openstack.org/stackforge/fuel-qa'
-          choosing-strategy: gerrit
+          url: 'https://review.openstack.org/stackforge/{tests-repo}'
           clean:
             before: true
           wipe-workspace: false
@@ -220,11 +216,11 @@
           description: 'ISO file name that is on the tpi-s1 in /storage/downloads'
       - string:
           name: GERRIT_REFSPEC
-          default: 'refs/heads/{gerrit-branch}'
+          default: 'refs/heads/{tests-branch}'
           description: 'Refspecs for commits in fuel-qa gerrit separated with spaces'
       - string:
           name: GERRIT_BRANCH
-          default: 'origin/{gerrit-branch}'
+          default: 'origin/{tests-branch}'
           description: 'The branch for fuel-qa gerrit'
       - string:
           name: ENV_PREFIX
@@ -267,7 +263,7 @@
           branches:
             - $GERRIT_BRANCH
           refspec: $GERRIT_REFSPEC
-          url: 'https://review.openstack.org/stackforge/fuel-qa'
+          url: 'https://review.openstack.org/stackforge/{tests-repo}'
           choosing-strategy: gerrit
           clean:
             before: true
