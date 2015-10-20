@@ -1,4 +1,4 @@
-#!/bin/bash -ex 
+#!/bin/bash -e 
 # for manually run of this job
 [ -z  $ISO_FILE ] && export ISO_FILE=${ISO_FILE}  
 
