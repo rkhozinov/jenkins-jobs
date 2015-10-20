@@ -1,7 +1,7 @@
 #!/bin/bash -ex 
 
 export ISO_PATH="${ISO_STORAGE}/${ISO_FILE}"
-export ISO_VERSION=$(cut -d'-' -f2-3 <<< $ISO_FILE) 
+export ISO_VERSION=$(cut -d'-' -f3-3 <<< $ISO_FILE) 
 export ENV_NAME="${ENV_PREFIX}.${ISO_VERSION}"
 export DVS_PLUGIN_PATH=$(ls ${WORKSPACE}/fuel-plugin-vmware-dvs*.rpm)
 
