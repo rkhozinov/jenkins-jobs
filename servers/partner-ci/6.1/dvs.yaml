@@ -88,23 +88,21 @@
     scm:
       - git:
           branches:
-            - $GERRIT_BRANCH
-          refspec: $GERRIT_REFSPEC
-          url: 'https://review.openstack.org/openstack/fuel-qa'
+            - '{test-branch}'
+          #refspec: $GERRIT_REFSPEC
+          url: 'https://review.openstack.org/openstack/{test-repo}'
           #TODO: test another strategy 
-          choosing-strategy: gerrit
+          #choosing-strategy: gerrit
           #TODO: test without full clean 
           clean:
-            before: true
+            before: false
           wipe-workspace: false
-            
     wrappers:
       - ansicolor: 
           colormap: xterm
       - timeout:
           fail: true
           timeout: 6000
-
     publishers:
       - archive:
           artifacts: '**/nosetests.xml,logs/*'
@@ -126,12 +124,14 @@
     name: '{fuel-release}.{plugin-name}.project'
     build-name: '{fuel-release}.{plugin-name}.build'
     custom-name: '{fuel-release}.{plugin-name}.custom'
-    smoke-bvt-name: '{fuel-release}.{plugin-name}.smoke-bvt'
+    smoke-name: '{fuel-release}.{plugin-name}.dvs_vcenter_smoke'
     nightly-name: '{fuel-release}.{plugin-name}.nightly'
     iso-file: fuel-6.1-525-2015-06-19_13-02-31.iso
     gerrit-repo: fuel-plugin-vmware-dvs
     gerrit-branch: stable/6.1
-    email-to: rkhozinov@mirantis.com #List of emails separated by comma
+    test-branch: stable/6.1
+    test-repo: fuel-qa
+    email-to: rkhozinov@mirantis.com
 
     nodes-count: '9'
     admin-node-memory: 4096
@@ -142,7 +142,6 @@
     iso-storage: '/storage/downloads'
 
     testgroup:
-      - dvs_vcenter_smoke
       - dvs_vcenter_ha_mode
       - dvs_vcenter_ceph
       - dvs_vcenter_ceilometer
@@ -161,6 +160,7 @@
       - '{build-name}'
       - '{nightly-name}'
       - '{custom-name}'
+      - '{smoke-name}'
       - '{fuel-release}.{plugin-name}.{testgroup}'
                 
 - job-template:
@@ -170,10 +170,12 @@
     builders:
       - shell:
           !include-raw-escape './builders/build-plugin.sh'
-      - trigger-builds:
-         - project: '{fuel-release}.{plugin-name}.dvs_vcenter_smoke'
-           block: true
-           failure-threshold: 'FAILURE'
+      - shell:
+          !include-raw-escape './builders/rpm-check.sh'
+      #- trigger-builds:
+      #   - project: '{fuel-release}.{plugin-name}.dvs_vcenter_smoke'
+      #     block: true
+      #     failure-threshold: 'FAILURE'
              
     description: |
         '<a href=https://github.com/openstack/{gerrit-repo}>
@@ -185,6 +187,10 @@
     properties:
       - heavy-job:
           weight: 1           
+      - build-blocker:
+          use-build-blocker: true
+          blocking-jobs:
+            - '{smoke-name}' 
     scm:
       - git:
           branches:
@@ -192,16 +198,14 @@
           name: ''
           refspec: $GERRIT_REFSPEC
           url: 'https://review.openstack.org/openstack/{gerrit-repo}'
-          choosing-strategy: gerrit
+          #choosing-strategy: gerrit
           clean:
             before: true
     triggers:
       - gerrit:
           trigger-on:
             - patchset-created-event
-          #TODO: add exclude-no-code-change
             - draft-published-event
-          #TODO: change-merged-event for bvt test
             - change-merged-event
           projects:
             - project-compare-type: 'PLAIN'
@@ -213,8 +217,9 @@
                 - compare-type: 'ANT'
                   pattern: 'docs/*'
           silent: false
+          override-votes: true
           server-name: 'review.openstack.org'
-          #custom-url: '* $JOB_NAME $BUILD_URL'
+          custom-url: '* $JOB_NAME $BUILD_URL'
           #successful-message: 'Plugin is built sucessfully'
           #failure-message: 'Plugin is built with failure'
           escape-quotes: true
@@ -232,6 +237,38 @@
           recipients: '{email-to}'
 
 - job-template:
+    name: '{smoke-name}'
+    description: 'The Smoke test for {fuel-release}.{plugin-name}.{plugin-version}'
+    concurrent: true
+    triggers:
+      - gerrit:
+          trigger-on:
+            - patchset-created-event
+            - draft-published-event
+          projects:
+            - project-compare-type: 'PLAIN'
+              project-pattern: 'openstack/{gerrit-repo}'
+              branches:
+                - branch-compare-type: 'ANT'
+                  branch-pattern: '{gerrit-branch}'
+              forbidden-file-paths:
+                - compare-type: 'ANT'
+                  pattern: 'docs/*'
+          silent: false
+          override-votes: true
+          server-name: 'review.openstack.org'
+          custom-url: '* $JOB_NAME $BUILD_URL'
+          #successful-message: 'Smoke test is SUCCESSFUL'
+          #failure-message: 'Smoke test is FAILURE'
+          escape-quotes: true
+          readable-message: true
+          skip-vote:
+            successfull: false  
+            failed: false
+            unstable: true
+            notbuilt: true
+
+- job-template:
     name: '{fuel-release}.{plugin-name}.{testgroup}'
     description: 'The test "{testgroup}" for {fuel-release}.{plugin-name}.{plugin-version}'
     concurrent: true
@@ -240,30 +277,6 @@
     name: '{custom-name}'
     description: 'The custom test for {fuel-release}.{plugin-name}.{plugin-version}'
     concurrent: true
-
-#- job-template:
-#    name: '{smoke-bvt-name}'
-#    project-type: multijob
-#    description: 'Smoke/BVT tests for {fuel-release}.{plugin-name}.{plugin-version}'
-#    node: runner    
-#    properties:
-#      - heavy-job:
-#          weight: 1           
-#    #triggers:
-#    #    - reverse:
-#    #        jobs: '{build-name}'
-#    #        result: 'success'
-#    publishers:
-#      - multijob-publisher
-#    builders:
-#      - multijob:
-#          name: 'Smoke/BVT tests for {fuel-release}.{plugin-name}.{plugin-version}'
-#          condition: COMPLETED
-#          projects:
-#            - name: '{fuel-release}.{plugin-name}.dvs_vcenter_smoke'
-#              current-parameters: true
-#              kill-phase-on: NEVER
-
 
 - job-template:
     name: '{nightly-name}'
