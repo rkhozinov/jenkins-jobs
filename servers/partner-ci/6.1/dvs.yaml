@@ -107,7 +107,9 @@
 
     publishers:
       - archive:
-          artifacts: 'logs/$BUILD_NUMBER/*'
+          artifacts: '**/nosetests.xml,logs/*'
+          allow-empty: true
+          fingerprint: true
       - xunit:
           types:
             - junit:
@@ -157,7 +159,6 @@
       - dvs_vcenter_security
     jobs:
       - '{build-name}'
-        #      - '{smoke-bvt-name}'
       - '{nightly-name}'
       - '{custom-name}'
       - '{fuel-release}.{plugin-name}.{testgroup}'
@@ -165,12 +166,15 @@
 - job-template:
     name: '{build-name}'
     node: 'runner'
+    concurrent: true
     builders:
       - shell:
           !include-raw-escape './builders/build-plugin.sh'
       - trigger-builds:
-         - project:
-            - '{fuel-release}.{plugin-name}.dvs_vcenter_smoke'
+         - project: '{fuel-release}.{plugin-name}.dvs_vcenter_smoke'
+           block: true
+           failure-threshold: 'FAILURE'
+             
     description: |
         '<a href=https://github.com/openstack/{gerrit-repo}>
         Build {name} plugin from fuel-plugins project</a>'
@@ -195,19 +199,24 @@
       - gerrit:
           trigger-on:
             - patchset-created-event
+          #TODO: add exclude-no-code-change
             - draft-published-event
+          #TODO: change-merged-event for bvt test
             - change-merged-event
           projects:
             - project-compare-type: 'PLAIN'
               project-pattern: 'openstack/{gerrit-repo}'
               branches:
                 - branch-compare-type: 'ANT'
-                  branch-pattern: '**'
-          silent: true
+                  branch-pattern: '{gerrit-branch}'
+              forbidden-file-paths:
+                - compare-type: 'ANT'
+                  pattern: 'docs/*'
+          silent: false
           server-name: 'review.openstack.org'
-          custom-url: '* $JOB_NAME $BUILD_URL'
-          successful-message: 'Plugin is built sucessfully'
-          failure-message: 'Plugin is built with failure'
+          #custom-url: '* $JOB_NAME $BUILD_URL'
+          #successful-message: 'Plugin is built sucessfully'
+          #failure-message: 'Plugin is built with failure'
           escape-quotes: true
           readable-message: true
           skip-vote:
@@ -215,7 +224,6 @@
             failed: false
             unstable: true
             notbuilt: true
-
     publishers:
       - archive:
           artifacts: '*.rpm'
@@ -226,6 +234,7 @@
 - job-template:
     name: '{fuel-release}.{plugin-name}.{testgroup}'
     description: 'The test "{testgroup}" for {fuel-release}.{plugin-name}.{plugin-version}'
+    concurrent: true
 
 - job-template:
     name: '{custom-name}'
@@ -271,58 +280,58 @@
           condition: COMPLETED
           projects:
 
-           - name: '{fuel-release}.{plugin-name}.{plugin-version}.dvs_vcenter_ha_mode'     
-             current-parameters: true                      
+           - name: '{fuel-release}.{plugin-name}.dvs_vcenter_ha_mode'     
+             current-parameters: true            
              kill-phase-on: NEVER
 
-           - name: '{fuel-release}.{plugin-name}.{plugin-version}.dvs_vcenter_ceph'     
-             current-parameters: true                      
+           - name: '{fuel-release}.{plugin-name}.dvs_vcenter_ceph'     
+             current-parameters: true            
              kill-phase-on: NEVER
 
-           - name: '{fuel-release}.{plugin-name}.{plugin-version}.dvs_vcenter_ceilometer'     
-             current-parameters: true                      
+           - name: '{fuel-release}.{plugin-name}.dvs_vcenter_ceilometer'     
+             current-parameters: true            
              kill-phase-on: NEVER
 
-           - name: '{fuel-release}.{plugin-name}.{plugin-version}.dvs_vcenter_add_delete_nodes'     
-             current-parameters: true                      
+           - name: '{fuel-release}.{plugin-name}.dvs_vcenter_add_delete_nodes'     
+             current-parameters: true            
              kill-phase-on: NEVER
 
-           - name: '{fuel-release}.{plugin-name}.{plugin-version}.dvs_vcenter_multiroles'     
-             current-parameters: true                      
+           - name: '{fuel-release}.{plugin-name}.dvs_vcenter_multiroles'     
+             current-parameters: true            
              kill-phase-on: NEVER
 
-           - name: '{fuel-release}.{plugin-name}.{plugin-version}.dvs_vcenter_add_delete_controller'     
-             current-parameters: true                      
+           - name: '{fuel-release}.{plugin-name}.dvs_vcenter_add_delete_controller'     
+             current-parameters: true            
              kill-phase-on: NEVER
 
-           - name: '{fuel-release}.{plugin-name}.{plugin-version}.dvs_vcenter_5_instances'     
-             current-parameters: true                      
+           - name: '{fuel-release}.{plugin-name}.dvs_vcenter_5_instances'     
+             current-parameters: true            
              kill-phase-on: NEVER
 
-           - name: '{fuel-release}.{plugin-name}.{plugin-version}.dvs_vcenter_networks'     
-             current-parameters: true                      
+           - name: '{fuel-release}.{plugin-name}.dvs_vcenter_networks'     
+             current-parameters: true            
              kill-phase-on: NEVER
 
-           - name: '{fuel-release}.{plugin-name}.{plugin-version}.dvs_vcenter_reset_controller'     
-             current-parameters: true                      
+           - name: '{fuel-release}.{plugin-name}.dvs_vcenter_reset_controller'     
+             current-parameters: true            
              kill-phase-on: NEVER
 
-           - name: '{fuel-release}.{plugin-name}.{plugin-version}.dvs_vcenter_diff_networks'     
-             current-parameters: true                      
+           - name: '{fuel-release}.{plugin-name}.dvs_vcenter_diff_networks'     
+             current-parameters: true            
              kill-phase-on: NEVER
 
-           - name: '{fuel-release}.{plugin-name}.{plugin-version}.dvs_vcenter_uninstall'     
-             current-parameters: true                      
+           - name: '{fuel-release}.{plugin-name}.dvs_vcenter_uninstall'     
+             current-parameters: true            
              kill-phase-on: NEVER
 
-           - name: '{fuel-release}.{plugin-name}.{plugin-version}.dvs_vcenter_tenants_isolation'     
-             current-parameters: true                      
+           - name: '{fuel-release}.{plugin-name}.dvs_vcenter_tenants_isolation'     
+             current-parameters: true            
              kill-phase-on: NEVER
 
-           - name: '{fuel-release}.{plugin-name}.{plugin-version}.dvs_vcenter_same_ip'     
-             current-parameters: true                      
+           - name: '{fuel-release}.{plugin-name}.dvs_vcenter_same_ip'     
+             current-parameters: true            
              kill-phase-on: NEVER
 
-           - name: '{fuel-release}.{plugin-name}.{plugin-version}.dvs_vcenter_security'     
+           - name: '{fuel-release}.{plugin-name}.dvs_vcenter_security'     
              current-parameters: true                      
              kill-phase-on: NEVER
