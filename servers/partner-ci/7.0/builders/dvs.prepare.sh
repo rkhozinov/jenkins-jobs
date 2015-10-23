@@ -1,4 +1,4 @@
-#!/bin/bash -ex 
+#!/bin/bash -e 
 # for manually run of this job
 [ -z  $ISO_FILE ] && export ISO_FILE=${ISO_FILE}  
 
@@ -10,7 +10,7 @@ export ISO_VERSION=$(cut -d'-' -f3-3<<< $ISO_FILE)
 echo $ISO_VERSION
 export REQUIRED_FREE_SPACE=200
 export ISO_PATH="$ISO_STORAGE/$ISO_FILE"
-export REQS_PATH="fuelweb_test/requirements.txt"
+export REQS_PATH="plugin_test/fuel-qa/fuelweb_test/requirements.txt"
 export FUEL_RELEASE=$(cut -d'-' -f2-2<<< $ISO_FILE | tr -d .) 
 export VENV_PATH="${HOME}/${FUEL_RELEASE}-venv"
 
