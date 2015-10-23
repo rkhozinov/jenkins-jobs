@@ -1,21 +1,6 @@
-- publisher:
-    name: multijob-publisher
-    publishers:
-     - archive:
-         artifacts: '**/nosetests.xml,logs/*'
-         allow-empty: true
-         fingerprint: true
-     - xunit:
-         types:
-           - junit:
-               pattern: '**/nosetest.xml'
-               skip-if-no-test-files: true
-     - email: 
-         recipients: '{email-to}'
-
 - defaults:
     name: global
-    disabled: false
+    disabled: true
     node: 'dvs'
     logrotate:
       daysToKeep: 7         
@@ -55,6 +40,10 @@
           name: ERASE_AFTER
           default: false
           description: 'The env will be erased after test'
+      - string:
+          name: VCENTER_SNAPSHOT
+          default: '{vcenter-snapshot}'
+          description: 'Snapshot name for vsphere lab'
     properties:
       - heavy-job:
           weight: 1           
@@ -62,41 +51,45 @@
           max-per-node: 0
           max-total: 0
           categories:
-            - vsphere      
-            - dvs          
+            - vsphere
+            - dvs
             - nsx
-          option: category 
+          option: category
     builders:
-      - copyartifact:
-          project: '{build-name}'
-          which-build: last-successful
       - inject:
           properties-content: |
-              TEST_GROUP={testgroup}
-              NODES_COUNT={nodes-count}
-              ADMIN_NODE_MEMORY={admin-node-memory}
-              SLAVE_NODE_MEMORY={slave-node-memory}
-              ADMIN_NODE_CPU={admin-node-cpu} 
-              SLAVE_NODE_CPU={slave-node-cpu}
-              FUEL_RELEASE={fuel-release}
-              VCENTER_SNAPSHOT={vcenter-snapshot}
-              ISO_STORAGE={iso-storage}
+            TEST_GROUP={testgroup}
+            NODES_COUNT={nodes-count}
+            ADMIN_NODE_MEMORY={admin-node-memory}
+            SLAVE_NODE_MEMORY={slave-node-memory}
+            ADMIN_NODE_CPU={admin-node-cpu} 
+            SLAVE_NODE_CPU={slave-node-cpu}
+            FUEL_RELEASE={fuel-release}
+            ISO_STORAGE={iso-storage}
+      - copyartifact:
+          project: '{smoke-name}'
+          which-build: last-successful
+      - inject:
+          properties-file: 'pkg_properties'
       - shell:
           !include-raw-escape builders/dvs.prepare.sh
       - shell:
-          !include-raw-escape builders/dvs.nightly.sh
+          !include-raw-escape builders/dvs.test.sh
     scm:
       - git:
+          name: ''
+          url: 'https://review.openstack.org/openstack/{gerrit-repo}'
+          refspec: $GERRIT_REFSPEC
           branches:
-            - '{test-branch}'
-          #refspec: $GERRIT_REFSPEC
-          url: 'https://review.openstack.org/openstack/{test-repo}'
-          #TODO: test another strategy 
+            - $GERRIT_BRANCH
           #choosing-strategy: gerrit
-          #TODO: test without full clean 
+          submodule:
+            disable: false
+            tracking: true
+            recursive: true
           clean:
             before: false
-          wipe-workspace: false
+          wipe-workspace: true
     wrappers:
       - ansicolor: 
           colormap: xterm
@@ -113,25 +106,22 @@
             - junit:
                 pattern: '**/nosetest.xml'
                 skip-if-no-test-files: true
-      - email:
-          notify-every-unstable-build: true
+      - email: 
           recipients: '{email-to}'
 
 - project:
     fuel-release: 6.1
     plugin-version: 1.0
-    plugin-name: dvs 
+    plugin-name: 'dvs' 
     name: '{fuel-release}.{plugin-name}.project'
     build-name: '{fuel-release}.{plugin-name}.build'
     custom-name: '{fuel-release}.{plugin-name}.custom'
     smoke-name: '{fuel-release}.{plugin-name}.dvs_vcenter_smoke'
     nightly-name: '{fuel-release}.{plugin-name}.nightly'
-    iso-file: fuel-6.1-525-2015-06-19_13-02-31.iso
-    gerrit-repo: fuel-plugin-vmware-dvs
-    gerrit-branch: stable/6.1
-    test-branch: stable/6.1
-    test-repo: fuel-qa
-    email-to: rkhozinov@mirantis.com
+    iso-file: 'fuel-6.1-525-2015-06-19_13-02-31.iso'
+    gerrit-repo: 'fuel-plugin-vmware-dvs'
+    gerrit-branch: 'stable/6.1'
+    email-to: 'rkhozinov@mirantis.com'
 
     nodes-count: '9'
     admin-node-memory: 4096
@@ -167,44 +157,27 @@
     name: '{build-name}'
     node: 'runner'
     concurrent: true
-    builders:
-      - shell:
-          !include-raw-escape './builders/build-plugin.sh'
-      - shell:
-          !include-raw-escape './builders/rpm-check.sh'
-      #- trigger-builds:
-      #   - project: '{fuel-release}.{plugin-name}.dvs_vcenter_smoke'
-      #     block: true
-      #     failure-threshold: 'FAILURE'
-             
-    description: |
-        '<a href=https://github.com/openstack/{gerrit-repo}>
-        Build {name} plugin from fuel-plugins project</a>'
-    parameters:
-      - string:
-          name: 'GERRIT_REFSPEC'
-          default: 'refs/heads/{gerrit-branch}'
-    properties:
-      - heavy-job:
-          weight: 1           
-      - build-blocker:
-          use-build-blocker: true
-          blocking-jobs:
-            - '{smoke-name}' 
     scm:
       - git:
+          name: ''
+          url: 'https://review.openstack.org/openstack/{gerrit-repo}'
+          refspec: $GERRIT_REFSPEC
           branches:
             - $GERRIT_BRANCH
-          name: ''
-          refspec: $GERRIT_REFSPEC
-          url: 'https://review.openstack.org/openstack/{gerrit-repo}'
           #choosing-strategy: gerrit
+          submodule:
+            disable: true
+            tracking: true
+            recursive: true
           clean:
-            before: true
+            before: false
+          wipe-workspace: false
     triggers:
       - gerrit:
           trigger-on:
-            - patchset-created-event
+            - patchset-created-event:
+                exclude-trivial-rebase: true
+                exclude-no-code-change: true
             - draft-published-event
             - change-merged-event
           projects:
@@ -216,12 +189,12 @@
               forbidden-file-paths:
                 - compare-type: 'ANT'
                   pattern: 'docs/*'
+                - compare-type: 'ANT'
+                  pattern: 'specs/*'
           silent: false
           override-votes: true
           server-name: 'review.openstack.org'
           custom-url: '* $JOB_NAME $BUILD_URL'
-          #successful-message: 'Plugin is built sucessfully'
-          #failure-message: 'Plugin is built with failure'
           escape-quotes: true
           readable-message: true
           skip-vote:
@@ -229,9 +202,31 @@
             failed: false
             unstable: true
             notbuilt: true
+    builders:
+      - shell:
+          !include-raw-escape './builders/build-plugin.sh'
+      - shell:
+          !include-raw-escape './builders/rpm-check.sh'
+      - shell: |
+          echo PKG_BUILD_ID=${{BUILD_ID}}  > pkg_properties
+          echo PKG_BUILD_URL=${{BUILD_URL}} >> pkg_properties 
+          pkg=$(ls | grep '.*\.rpm')
+          pkg_checksum=$(md5sum -b $pkg | awk '{{print $1}}')
+          echo PGK_CHECKSUM=$pkg_checksum >> pkg_properties 
+
+    description: |
+      '<a href=https://github.com/openstack/{gerrit-repo}>
+       Build {name} plugin from fuel-plugins project</a>'
+    parameters:
+      - string:
+          name: 'GERRIT_REFSPEC'
+          default: 'refs/heads/{gerrit-branch}'
+    properties:
+      - heavy-job:
+          weight: 1           
     publishers:
       - archive:
-          artifacts: '*.rpm'
+          artifacts: '*.rpm,pkg_properties'
       - email:
           notify-every-unstable-build: true
           recipients: '{email-to}'
@@ -240,11 +235,46 @@
     name: '{smoke-name}'
     description: 'The Smoke test for {fuel-release}.{plugin-name}.{plugin-version}'
     concurrent: true
+    properties:
+      - heavy-job:
+          weight: 1           
+      - build-blocker:
+          use-build-blocker: true
+          blocking-jobs:
+            - '{build-name}'
+          block-level: 'GLOBAL'
+          queue-scanning: 'BUILDABLE'
+    builders:
+      - inject:
+          properties-content: |
+            TEST_GROUP='dvs_vcenter_smoke'
+            NODES_COUNT={nodes-count}
+            ADMIN_NODE_MEMORY={admin-node-memory}
+            SLAVE_NODE_MEMORY={slave-node-memory}
+            ADMIN_NODE_CPU={admin-node-cpu} 
+            SLAVE_NODE_CPU={slave-node-cpu}
+            FUEL_RELEASE={fuel-release}
+            VCENTER_SNAPSHOT={vcenter-snapshot}
+            ISO_STORAGE={iso-storage}
+      - copyartifact:
+          project: '{build-name}'
+          which-build: last-successful
+          stable: true
+      - inject:
+          properties-file: 'pkg_properties'
+      - shell:
+          !include-raw-escape builders/dvs.prepare.sh
+      - shell:
+          !include-raw-escape builders/dvs.test.sh
     triggers:
       - gerrit:
           trigger-on:
-            - patchset-created-event
+            - patchset-created-event:
+                exclude-trivial-rebase: true
+                exclude-no-code-change: true
             - draft-published-event
+          # TODO: if we create a bvt, need to assign merge event to it
+            - change-merged-event
           projects:
             - project-compare-type: 'PLAIN'
               project-pattern: 'openstack/{gerrit-repo}'
@@ -254,12 +284,12 @@
               forbidden-file-paths:
                 - compare-type: 'ANT'
                   pattern: 'docs/*'
+                - compare-type: 'ANT'
+                  pattern: 'specs/*'
           silent: false
           override-votes: true
           server-name: 'review.openstack.org'
           custom-url: '* $JOB_NAME $BUILD_URL'
-          #successful-message: 'Smoke test is SUCCESSFUL'
-          #failure-message: 'Smoke test is FAILURE'
           escape-quotes: true
           readable-message: true
           skip-vote:
@@ -267,6 +297,18 @@
             failed: false
             unstable: true
             notbuilt: true
+    publishers:
+      - archive:
+          artifacts: '**/nosetests.xml,logs/*,*.rpm,pkg_properties'
+          allow-empty: true
+          fingerprint: true
+      - xunit:
+          types:
+            - junit:
+                pattern: '**/nosetest.xml'
+                skip-if-no-test-files: true
+      - email: 
+          recipients: '{email-to}'
 
 - job-template:
     name: '{fuel-release}.{plugin-name}.{testgroup}'
@@ -284,15 +326,13 @@
     project-type: multijob
     node: runner    
     triggers:
-        - timed: 'H 19  * * *'
-    publishers:
-      - multijob-publisher
+      - timed: 'H 19  * * *'
+
     builders:
       - multijob:
           name: 'System tests for vcenter'
           condition: COMPLETED
           projects:
-
            - name: '{fuel-release}.{plugin-name}.dvs_vcenter_ha_mode'     
              current-parameters: true            
              kill-phase-on: NEVER
