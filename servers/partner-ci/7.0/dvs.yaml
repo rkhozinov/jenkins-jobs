@@ -1,11 +1,12 @@
 - project:
+    name: 'predefined_parameters'
     fuel-release: 7.0
     plugin-version: 1.1
     plugin-name: 'dvs'
-    name: '{fuel-release}.{plugin-name}.project'
     build-name: '{fuel-release}.{plugin-name}.build'
     custom-name: '{fuel-release}.{plugin-name}.custom'
-    smoke-name: '{fuel-release}.{plugin-name}.dvs_vcenter_smoke'
+    smoke-name: '{fuel-release}.{plugin-name}.smoke'
+    bvt-name: '{fuel-release}.{plugin-name}.bvt'
     nightly-name: '{fuel-release}.{plugin-name}.nightly'
     iso-file: 'fuel-7.0-301-2015-09-22_20-01-53.iso'
     gerrit-repo: 'fuel-plugin-vmware-dvs'
@@ -22,8 +23,8 @@
 
     testgroup:
       - dvs_vcenter_smoke
-        #      - dvs_vcenter_bvt
-        #      - dvs_vcenter_bvt_2
+      - dvs_vcenter_bvt
+      - dvs_vcenter_bvt_2
       - dvs_vcenter_ha_mode
       - dvs_vcenter_ceph
       - dvs_vcenter_ceph_2
@@ -39,12 +40,13 @@
       - '{build-name}'
       - '{nightly-name}'
       - '{custom-name}'
-        #      - '{smoke-name}'
+      - '{smoke-name}'
+      - '{bvt-name}'
       - '{fuel-release}.{plugin-name}.{testgroup}'
 
 - defaults:
     name: global
-    disabled: true
+    disabled: false
     node: 'dvs'
     logrotate:
       daysToKeep: 7
@@ -113,7 +115,7 @@
             FUEL_RELEASE={fuel-release}
             ISO_STORAGE={iso-storage}
       - copyartifact:
-          project: '{smoke-name}'
+          project: '{build-name}'
           which-build: last-successful
       - inject:
           properties-file: 'pkg_properties'
@@ -234,163 +236,6 @@
           recipients: '{email-to}'
 
 - job-template:
-    name: '{smoke-name}'
-    description: 'The Smoke test for {fuel-release}.{plugin-name}.{plugin-version}'
-    concurrent: true
-    properties:
-      - heavy-job:
-          weight: 1
-      - build-blocker:
-          use-build-blocker: true
-          blocking-jobs:
-            - '{build-name}'
-          block-level: 'GLOBAL'
-          queue-scanning: 'BUILDABLE'
-    triggers:
-      - gerrit:
-          trigger-on:
-            - patchset-created-event:
-                exclude-trivial-rebase: true
-                exclude-no-code-change: true
-            - draft-published-event
-          # TODO: if we create a bvt, need to assign merge event to it
-            - change-merged-event
-          projects:
-            - project-compare-type: 'PLAIN'
-              project-pattern: 'openstack/{gerrit-repo}'
-              branches:
-                - branch-compare-type: 'ANT'
-                  branch-pattern: '{gerrit-branch}'
-              forbidden-file-paths:
-                - compare-type: 'ANT'
-                  pattern: 'docs/*'
-                - compare-type: 'ANT'
-                  pattern: 'specs/*'
-          silent: false
-          override-votes: true
-          server-name: 'review.openstack.org'
-          custom-url: '* $JOB_NAME $BUILD_URL'
-          escape-quotes: true
-          readable-message: true
-          skip-vote:
-            successfull: false
-            failed: false
-            unstable: true
-            notbuilt: true
-    builders:
-      - inject:
-          properties-content: |
-            TEST_GROUP='dvs_vcenter_smoke'
-            NODES_COUNT={nodes-count}
-            ADMIN_NODE_MEMORY={admin-node-memory}
-            SLAVE_NODE_MEMORY={slave-node-memory}
-            ADMIN_NODE_CPU={admin-node-cpu}
-            SLAVE_NODE_CPU={slave-node-cpu}
-            FUEL_RELEASE={fuel-release}
-            VCENTER_SNAPSHOT={vcenter-snapshot}
-            ISO_STORAGE={iso-storage}
-      - copyartifact:
-          project: '{build-name}'
-          which-build: last-successful
-          stable: true
-      - inject:
-          properties-file: 'pkg_properties'
-      - shell:
-          !include-raw-escape builders/dvs.prepare.sh
-      - shell:
-          !include-raw-escape builders/dvs.test.sh
-    publishers:
-      - archive:
-          artifacts: '**/nosetests.xml,logs/*,*.rpm,pkg_properties'
-          allow-empty: true
-          fingerprint: true
-      - xunit:
-          types:
-            - junit:
-                pattern: '**/nosetest.xml'
-                skip-if-no-test-files: true
-      - email:
-          recipients: '{email-to}'
-
-- job-template:
-    name: '{bvt-name}'
-    description: 'The Smoke test for {fuel-release}.{plugin-name}.{plugin-version}'
-    concurrent: true
-    properties:
-      - heavy-job:
-          weight: 1
-      - build-blocker:
-          use-build-blocker: true
-          blocking-jobs:
-            - '{build-name}'
-          block-level: 'GLOBAL'
-          queue-scanning: 'BUILDABLE'
-    builders:
-      - inject:
-          properties-content: |
-            TEST_GROUP='dvs_vcenter_smoke'
-            NODES_COUNT={nodes-count}
-            ADMIN_NODE_MEMORY={admin-node-memory}
-            SLAVE_NODE_MEMORY={slave-node-memory}
-            ADMIN_NODE_CPU={admin-node-cpu}
-            SLAVE_NODE_CPU={slave-node-cpu}
-            FUEL_RELEASE={fuel-release}
-            VCENTER_SNAPSHOT={vcenter-snapshot}
-            ISO_STORAGE={iso-storage}
-      - copyartifact:
-          project: '{build-name}'
-          which-build: last-successful
-          stable: true
-      - inject:
-          properties-file: 'pkg_properties'
-      - shell:
-          !include-raw-escape builders/dvs.prepare.sh
-      - shell:
-          !include-raw-escape builders/dvs.test.sh
-    triggers:
-      - gerrit:
-          trigger-on:
-            - patchset-created-event:
-                exclude-trivial-rebase: true
-                exclude-no-code-change: true
-            - draft-published-event
-          # TODO: if we create a bvt, need to assign merge event to it
-            - change-merged-event
-          projects:
-            - project-compare-type: 'PLAIN'
-              project-pattern: 'openstack/{gerrit-repo}'
-              branches:
-                - branch-compare-type: 'ANT'
-                  branch-pattern: '{gerrit-branch}'
-              forbidden-file-paths:
-                - compare-type: 'ANT'
-                  pattern: 'docs/*'
-                - compare-type: 'ANT'
-                  pattern: 'specs/*'
-          silent: false
-          override-votes: true
-          server-name: 'review.openstack.org'
-          custom-url: '* $JOB_NAME $BUILD_URL'
-          escape-quotes: true
-          readable-message: true
-          skip-vote:
-            successfull: false
-            failed: false
-            unstable: true
-            notbuilt: true
-    publishers:
-      - archive:
-          artifacts: '**/nosetests.xml,logs/*,*.rpm,pkg_properties'
-          allow-empty: true
-          fingerprint: true
-      - xunit:
-          types:
-            - junit:
-                pattern: '**/nosetest.xml'
-                skip-if-no-test-files: true
-      - email:
-          recipients: '{email-to}'
-- job-template:
     name: '{fuel-release}.{plugin-name}.{testgroup}'
     description: 'The test "{testgroup}" for {fuel-release}.{plugin-name}.{plugin-version}'
     concurrent: true
@@ -422,8 +267,6 @@
                 exclude-trivial-rebase: true
                 exclude-no-code-change: true
             - draft-published-event
-          # TODO: if we create a bvt, need to assign merge event to it
-          #  - change-merged-event
           projects:
             - project-compare-type: 'PLAIN'
               project-pattern: 'openstack/{gerrit-repo}'
@@ -446,7 +289,80 @@
             failed: false
             unstable: true
             notbuilt: true
-    scm:
+    scm:  []
+    publishers:
+      - archive:
+          artifacts: 'logs/*,pkg_properties'
+          allow-empty: true
+          fingerprint: true
+      - email:
+          recipients: '{email-to}'
+    builders:
+      - copyartifact:
+          project: '{build-name}'
+          which-build: last-successful
+          stable: true
+      - inject:
+          properties-file: 'pkg_properties'
+      - multijob:
+          name: 'Smoke tests for dvs.vcenter5'
+          condition: SUCCESSFUL
+          projects:
+           - name: '{fuel-release}.{plugin-name}.dvs_vcenter_smoke'
+             current-parameters: true
+             predefined-parameters: VCENTER_SNAPSHOT=vcenterha
+             kill-phase-on: NEVER
+      - multijob:
+          name: 'Smoke tests for dvs.vcenter6'
+          condition: SUCCESSFUL
+          projects:
+           - name: '{fuel-release}.{plugin-name}.dvs_vcenter_smoke'
+             current-parameters: true
+             predefined-parameters: VCENTER_SNAPSHOT=vcenter6
+             kill-phase-on: NEVER
+
+- job-template:
+    name: '{bvt-name}'
+    description: 'The Smoke test for {fuel-release}.{plugin-name}.{plugin-version}'
+    concurent: true
+    project-type: multijob
+    node: runner
+    properties:
+      - heavy-job:
+          weight: 1
+      - build-blocker:
+          use-build-blocker: true
+          blocking-jobs:
+            - '{build-name}'
+          block-level: 'GLOBAL'
+          queue-scanning: 'BUILDABLE'
+    triggers:
+      - gerrit:
+          trigger-on:
+            - change-merged-event
+          projects:
+            - project-compare-type: 'PLAIN'
+              project-pattern: 'openstack/{gerrit-repo}'
+              branches:
+                - branch-compare-type: 'ANT'
+                  branch-pattern: '{gerrit-branch}'
+              forbidden-file-paths:
+                - compare-type: 'ANT'
+                  pattern: 'docs/*'
+                - compare-type: 'ANT'
+                  pattern: 'specs/*'
+          silent: false
+          override-votes: true
+          server-name: 'review.openstack.org'
+          custom-url: '* $JOB_NAME $BUILD_URL'
+          escape-quotes: true
+          readable-message: true
+          skip-vote:
+            successfull: false
+            failed: false
+            unstable: true
+            notbuilt: true
+    scm:  []
     publishers:
       - archive:
           artifacts: 'logs/*,*.rpm,pkg_properties'
@@ -461,85 +377,172 @@
           stable: true
       - inject:
           properties-file: 'pkg_properties'
+
       - multijob:
-          name: 'System tests for dvs'
-          condition: SUCCESSFULL
+          name: 'Smoke tests for dvs.vcenter5'
+          condition: SUCCESSFUL
           projects:
-           - name: '{fuel-release}.{plugin-name}.dvs_vcenter_smoke'
-             current-parameters: true
+           - name: '{fuel-release}.{plugin-name}.dvs_vcenter_bvt'
              predefined-parameters: VCENTER_SNAPSHOT=vcenterha
+             current-parameters: true
              kill-phase-on: NEVER
 
-           - name: '{fuel-release}.{plugin-name}.dvs_vcenter_smoke'
+           - name: '{fuel-release}.{plugin-name}.dvs_vcenter_bvt2'
+             predefined-parameters: VCENTER_SNAPSHOT=vcenterha
              current-parameters: true
+             kill-phase-on: NEVER
+
+      - multijob:
+          name: 'Smoke tests for dvs.vcenter6'
+          condition: SUCCESSFUL
+          projects:
+
+           - name: '{fuel-release}.{plugin-name}.dvs_vcenter_bvt'
              predefined-parameters: VCENTER_SNAPSHOT=vcenter6
+             current-parameters: true
+             kill-phase-on: NEVER
+
+           - name: '{fuel-release}.{plugin-name}.dvs_vcenter_bvt2'
+             predefined-parameters: VCENTER_SNAPSHOT=vcenter6
+             current-parameters: true
              kill-phase-on: NEVER
 
 - job-template:
     name: '{nightly-name}'
-    description: 'System tests dvs feature'
+    description: |
+      "<p>System tests dvs feature runs every day at 19.00 CZ.
+       Multijob copies all artifacts from the {build-name} job
+       and runs to phases. The first phase is for vcenter5, the second
+       phase is for vcenter6. This behaviour is controlled by
+       VCENTER_SNAPSHOT predefined parameter. </p>
+       <p>The tests copy the latest package from the {bvt-name} job.
+       Because the {bvt-name} job's packages more stable.</p>
+       <p>There're a pkg details (that copied withing the package)
+       in pkg_properties file in the root of job's workspace.</p>"
     project-type: multijob
     node: runner
     triggers:
       - timed: 'H 19  * * *'
-
+    properties:
+      - heavy-job:
+          weight: 1
+      - build-blocker:
+          use-build-blocker: true
+          blocking-jobs:
+            - '{bvt-name}'
+          block-level: 'GLOBAL'
+          queue-scanning: 'BUILDABLE'
     builders:
+      - copyartifact:
+          project: '{bvt-name}'
+          which-build: last-successful
+          stable: true
+      - inject:
+          properties-file: 'pkg_properties'
       - multijob:
-          name: 'System tests for dvs'
+          name: 'System tests for dvs. vcenter5'
           condition: COMPLETED
           projects:
-           - name: '{fuel-release}.{plugin-name}.dvs_vcenter_ha_mode'
+           - name: '7.0.dvs.dvs_vcenter_ha_mode'
              current-parameters: true
              kill-phase-on: NEVER
 
-           - name: '{fuel-release}.{plugin-name}.dvs_vcenter_ceph'
+           - name: '7.0.dvs.dvs_vcenter_ceph'
              current-parameters: true
              kill-phase-on: NEVER
 
-           - name: '{fuel-release}.{plugin-name}.dvs_vcenter_ceilometer'
+           - name: '7.0.dvs.dvs_vcenter_ceph_2'
              current-parameters: true
              kill-phase-on: NEVER
 
-           - name: '{fuel-release}.{plugin-name}.dvs_vcenter_add_delete_nodes'
+           - name: '7.0.dvs.dvs_vcenter_ceilometer'
              current-parameters: true
              kill-phase-on: NEVER
 
-           - name: '{fuel-release}.{plugin-name}.dvs_vcenter_multiroles'
+           - name: '7.0.dvs.dvs_vcenter_ceilometer_2'
              current-parameters: true
              kill-phase-on: NEVER
 
-           - name: '{fuel-release}.{plugin-name}.dvs_vcenter_add_delete_controller'
+           - name: '7.0.dvs.dvs_vcenter_add_delete_nodes'
              current-parameters: true
              kill-phase-on: NEVER
 
-           - name: '{fuel-release}.{plugin-name}.dvs_vcenter_5_instances'
+           - name: '7.0.dvs.dvs_vcenter_add_delete_controller'
              current-parameters: true
              kill-phase-on: NEVER
 
-           - name: '{fuel-release}.{plugin-name}.dvs_vcenter_networks'
+           - name: '7.0.dvs.dvs_vcenter_networks'
              current-parameters: true
              kill-phase-on: NEVER
 
-           - name: '{fuel-release}.{plugin-name}.dvs_vcenter_reset_controller'
+           - name: '7.0.dvs.dvs_vcenter_ping_public'
              current-parameters: true
              kill-phase-on: NEVER
 
-           - name: '{fuel-release}.{plugin-name}.dvs_vcenter_diff_networks'
+           - name: '7.0.dvs.dvs_vcenter_5_instances'
              current-parameters: true
              kill-phase-on: NEVER
 
-           - name: '{fuel-release}.{plugin-name}.dvs_vcenter_uninstall'
+           - name: '7.0.dvs.dvs_vcenter_uninstall'
              current-parameters: true
              kill-phase-on: NEVER
 
-           - name: '{fuel-release}.{plugin-name}.dvs_vcenter_tenants_isolation'
+      - multijob:
+          name: 'System tests for dvs.vcenter6'
+          condition: COMPLETED
+          projects:
+
+           - name: '7.0.dvs.dvs_vcenter_ha_mode'
+             predefined-parameters: VCENTER_SNAPSHOT=vcenter6
              current-parameters: true
              kill-phase-on: NEVER
 
-           - name: '{fuel-release}.{plugin-name}.dvs_vcenter_same_ip'
+           - name: '7.0.dvs.dvs_vcenter_ceph'
+             predefined-parameters: VCENTER_SNAPSHOT=vcenter6
              current-parameters: true
              kill-phase-on: NEVER
 
-           - name: '{fuel-release}.{plugin-name}.dvs_vcenter_security'
+           - name: '7.0.dvs.dvs_vcenter_ceph_2'
+             predefined-parameters: VCENTER_SNAPSHOT=vcenter6
+             current-parameters: true
+             kill-phase-on: NEVER
+
+           - name: '7.0.dvs.dvs_vcenter_ceilometer'
+             predefined-parameters: VCENTER_SNAPSHOT=vcenter6
+             current-parameters: true
+             kill-phase-on: NEVER
+
+           - name: '7.0.dvs.dvs_vcenter_ceilometer_2'
+             predefined-parameters: VCENTER_SNAPSHOT=vcenter6
+             current-parameters: true
+             kill-phase-on: NEVER
+
+           - name: '7.0.dvs.dvs_vcenter_add_delete_nodes'
+             predefined-parameters: VCENTER_SNAPSHOT=vcenter6
+             current-parameters: true
+             kill-phase-on: NEVER
+
+           - name: '7.0.dvs.dvs_vcenter_add_delete_controller'
+             predefined-parameters: VCENTER_SNAPSHOT=vcenter6
+             current-parameters: true
+             kill-phase-on: NEVER
+
+           - name: '7.0.dvs.dvs_vcenter_networks'
+             predefined-parameters: VCENTER_SNAPSHOT=vcenter6
+             current-parameters: true
+             kill-phase-on: NEVER
+
+           - name: '7.0.dvs.dvs_vcenter_ping_public'
+             predefined-parameters: VCENTER_SNAPSHOT=vcenter6
+             current-parameters: true
+             kill-phase-on: NEVER
+
+           - name: '7.0.dvs.dvs_vcenter_5_instances'
+             predefined-parameters: VCENTER_SNAPSHOT=vcenter6
+             current-parameters: true
+             kill-phase-on: NEVER
+
+           - name: '7.0.dvs.dvs_vcenter_uninstall'
+             predefined-parameters: VCENTER_SNAPSHOT=vcenter6
              current-parameters: true
              kill-phase-on: NEVER
