@@ -1,0 +1,14 @@
+dvs_vcenter_smoke
+dvs_vcenter_bvt
+dvs_vcenter_bvt_2
+dvs_vcenter_ha_mode
+dvs_vcenter_ceph
+dvs_vcenter_ceph_2
+dvs_vcenter_ceilometer
+dvs_vcenter_ceilometer_2
+dvs_vcenter_add_delete_nodes
+dvs_vcenter_add_delete_controller
+dvs_vcenter_networks
+dvs_vcenter_ping_public
+dvs_vcenter_5_instances
+dvs_vcenter_uninstall
