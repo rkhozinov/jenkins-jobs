@@ -1,3 +1,181 @@
+- build-gerrit-events: &build-gerrit-events
+    name: 'build-gerrit-events'
+    trigger-on:
+      - change-merged-event
+      - draft-published-event
+      - patchset-created-event:
+          exclude-trivial-rebase: true
+          exclude-no-code-change: true
+
+- smoke-gerrit-events: &smoke-gerrit-events
+    name: 'smoke-gerrit-events'
+    trigger-on:
+      - draft-published-event
+      - patchset-created-event:
+          exclude-trivial-rebase: true
+          exclude-no-code-change: true
+
+- bvt-gerrit-events: &bvt-gerrit-events
+    name: 'bvt-gerrit-events'
+    trigger-on:
+      - change-merged-event
+
+- generic-gerrit-projects: &generic-gerrit-projects
+    name: 'generic-gerrit-projects'
+    projects:
+      - project-compare-type: 'PLAIN'
+        project-pattern: 'openstack/{gerrit-repo}'
+        branches:
+          - branch-compare-type: 'ANT'
+            branch-pattern: '{gerrit-branch}'
+        forbidden-file-paths:
+          - compare-type: 'ANT'
+            pattern: 'docs/*'
+          - compare-type: 'ANT'
+            pattern: 'specs/*'
+    silent: false
+    override-votes: true
+    server-name: 'review.openstack.org'
+    custom-url: '* $JOB_NAME $BUILD_URL'
+    escape-quotes: true
+    readable-message: true
+    skip-vote:
+      successfull: false
+      failed: false
+      unstable: true
+      notbuilt: true
+
+- runner-properties: &runner-properties
+    name: 'runner-properties'
+    properties:
+      - heavy-job:
+          weight: 1
+      - build-blocker:
+          use-build-blocker: true
+          blocking-jobs:
+            - '{bvt-name}'
+          block-level: 'GLOBAL'
+          queue-scanning: 'BUILDABLE'
+
+- runner-parameters: &runner-parameters
+    name: 'runner-parameters'
+    parameters:
+      - string:
+          name: ISO_FILE
+          default: '{iso-file}'
+          description: 'ISO file name that is on the tpi-s1 in /storage/downloads'
+      - string:
+          name: OPENSTACK_RELEASE
+          default: 'Ubuntu'
+          description: 'Openstack release (CentOS, Ubuntu)'
+      - string:
+          name: GERRIT_REFSPEC
+          default: 'refs/heads/{gerrit-branch}'
+          description: 'Refspecs for commits in fuel-qa gerrit separated with spaces'
+      - string:
+          name: GERRIT_BRANCH
+          default: 'origin/{gerrit-branch}'
+          description: 'The branch for fuel-qa gerrit'
+      - string:
+          name: NODES_COUNT
+          default: '9'
+          #TODO: description
+      - string:
+          name: ADMIN_NODE_MEMORY
+          default: '4096'
+          #TODO: description
+      - string:
+          name: SLAVE_NODE_MEMORY
+          default: '4096'
+          #TODO: description
+      - string:
+          name: ADMIN_NODE_CPU
+          default: '4'
+          #TODO: description
+      - string:
+          name: SLAVE_NODE_CPU
+          default: '4'
+          #TODO: description
+      - string:
+          name: ENV_PREFIX
+          default: '{fuel-release}.{plugin-name}'
+          description: 'The name of devops env. Needed to properly work of existing mode of devops'
+      - bool:
+          name: USE_SNAPSHOTS
+          default: true
+          descrition: 'Will be used existing environment'
+      - bool:
+          name: SHUTDOWN_AFTER
+          default: true
+          decsription: 'The env will be powered off after test'
+      - bool:
+          name: ERASE_AFTER
+          default: false
+          description: 'The env will be erased after test'
+
+- test-parameters: &test-parameters
+    name: 'test-parameters'
+    parameters:
+      - string:
+          name: TEST_GROUP
+          default: '{testgroup}'
+      - string:
+          name: VCENTER_SNAPSHOT
+          default: 'vcenterha'
+          description: 'Snapshot name for vsphere lab'
+      - string:
+          name: ISO_FILE
+          default: '{iso-file}'
+          description: 'ISO file name that is on the tpi-s1 in /storage/downloads'
+      - string:
+          name: OPENSTACK_RELEASE
+          default: 'Ubuntu'
+          description: 'Openstack release (CentOS, Ubuntu)'
+      - string:
+          name: GERRIT_REFSPEC
+          default: 'refs/heads/{gerrit-branch}'
+          description: 'Refspecs for commits in fuel-qa gerrit separated with spaces'
+      - string:
+          name: GERRIT_BRANCH
+          default: 'origin/{gerrit-branch}'
+          description: 'The branch for fuel-qa gerrit'
+      - string:
+          name: NODES_COUNT
+          default: '9'
+          #TODO: description
+      - string:
+          name: ADMIN_NODE_MEMORY
+          default: '4096'
+          #TODO: description
+      - string:
+          name: SLAVE_NODE_MEMORY
+          default: '4096'
+          #TODO: description
+      - string:
+          name: ADMIN_NODE_CPU
+          default: '4'
+          #TODO: description
+      - string:
+          name: SLAVE_NODE_CPU
+          default: '4'
+          #TODO: description
+      - string:
+          name: ENV_PREFIX
+          default: '{fuel-release}.{plugin-name}'
+          description: 'The name of devops env. Needed to properly work of existing mode of devops'
+      - bool:
+          name: USE_SNAPSHOTS
+          default: true
+          descrition: 'Will be used existing environment'
+      - bool:
+          name: SHUTDOWN_AFTER
+          default: true
+          decsription: 'The env will be powered off after test'
+      - bool:
+          name: ERASE_AFTER
+          default: false
+          description: 'The env will be erased after test'
+
 - project:
     name: 'predefined_parameters'
     fuel-release: 7.0
@@ -12,13 +190,6 @@
     gerrit-repo: 'fuel-plugin-vmware-dvs'
     gerrit-branch: 'master'
     email-to: 'rkhozinov@mirantis.com'
-
-    nodes-count: '9'
-    admin-node-memory: 4096
-    slave-node-memory: 4096
-    admin-node-cpu: 4
-    slave-node-cpu: 4
-    vcenter-snapshot: 'vcenterha'
     iso-storage: '/storage/downloads'
 
     testgroup:
@@ -53,46 +224,6 @@
       numToKeep: 10
       artifactDaysToKeep: 7
       artifactNumToKeep: 10
-    parameters:
-      - string:
-          name: TEST_GROUP
-          default: '{testgroup}'
-      - string:
-          name: ISO_FILE
-          default: '{iso-file}'
-          description: 'ISO file name that is on the tpi-s1 in /storage/downloads'
-      - string:
-          name: OPENSTACK_RELEASE
-          default: 'Ubuntu'
-          description: 'Openstack release (CentOS, Ubuntu)'
-      - string:
-          name: GERRIT_REFSPEC
-          default: 'refs/heads/{gerrit-branch}'
-          description: 'Refspecs for commits in fuel-qa gerrit separated with spaces'
-      - string:
-          name: GERRIT_BRANCH
-          default: 'origin/{gerrit-branch}'
-          description: 'The branch for fuel-qa gerrit'
-      - string:
-          name: ENV_PREFIX
-          default: '{fuel-release}.{plugin-name}'
-          description: 'The name of devops env. Needed to properly work of existing mode of devops'
-      - bool:
-          name: USE_SNAPSHOTS
-          default: true
-          descrition: 'Will be used existing environment'
-      - bool:
-          name: SHUTDOWN_AFTER
-          default: true
-          decsription: 'The env will be powered off after test'
-      - bool:
-          name: ERASE_AFTER
-          default: false
-          description: 'The env will be erased after test'
-      - string:
-          name: VCENTER_SNAPSHOT
-          default: '{vcenter-snapshot}'
-          description: 'Snapshot name for vsphere lab'
     properties:
       - heavy-job:
           weight: 1
@@ -104,14 +235,10 @@
             - dvs
             - nsx
           option: category
+    <<: *test-parameters
     builders:
       - inject:
           properties-content: |
-            NODES_COUNT={nodes-count}
-            ADMIN_NODE_MEMORY={admin-node-memory}
-            SLAVE_NODE_MEMORY={slave-node-memory}
-            ADMIN_NODE_CPU={admin-node-cpu} 
-            SLAVE_NODE_CPU={slave-node-cpu}
             FUEL_RELEASE={fuel-release}
             ISO_STORAGE={iso-storage}
       - copyartifact:
@@ -139,7 +266,7 @@
             before: false
           wipe-workspace: true
     wrappers:
-      - ansicolor: 
+      - ansicolor:
           colormap: xterm
       - timeout:
           fail: true
@@ -154,7 +281,7 @@
             - junit:
                 pattern: '**/nosetest.xml'
                 skip-if-no-test-files: true
-      - email: 
+      - email:
           recipients: '{email-to}'
 
 - job-template:
@@ -176,36 +303,12 @@
           clean:
             before: false
           wipe-workspace: false
+
     triggers:
       - gerrit:
-          trigger-on:
-            - patchset-created-event:
-                exclude-trivial-rebase: true
-                exclude-no-code-change: true
-            - draft-published-event
-            - change-merged-event
-          projects:
-            - project-compare-type: 'PLAIN'
-              project-pattern: 'openstack/{gerrit-repo}'
-              branches:
-                - branch-compare-type: 'ANT'
-                  branch-pattern: '{gerrit-branch}'
-              forbidden-file-paths:
-                - compare-type: 'ANT'
-                  pattern: 'docs/*'
-                - compare-type: 'ANT'
-                  pattern: 'specs/*'
-          silent: false
-          override-votes: true
-          server-name: 'review.openstack.org'
-          custom-url: '* $JOB_NAME $BUILD_URL'
-          escape-quotes: true
-          readable-message: true
-          skip-vote:
-            successfull: false  
-            failed: false
-            unstable: true
-            notbuilt: true
+          <<: *build-gerrit-events
+          <<: *generic-gerrit-projects
+
     builders:
       - shell:
           !include-raw-escape './builders/build-plugin.sh'
@@ -213,10 +316,10 @@
           !include-raw-escape './builders/rpm-check.sh'
       - shell: |
           echo PKG_BUILD_ID=${{BUILD_ID}}  > pkg_properties
-          echo PKG_BUILD_URL=${{BUILD_URL}} >> pkg_properties 
+          echo PKG_BUILD_URL=${{BUILD_URL}} >> pkg_properties
           pkg=$(ls | grep '.*\.rpm')
           pkg_checksum=$(md5sum -b $pkg | awk '{{print $1}}')
-          echo PGK_CHECKSUM=$pkg_checksum >> pkg_properties 
+          echo PGK_CHECKSUM=$pkg_checksum >> pkg_properties
 
     description: |
       '<a href=https://github.com/openstack/{gerrit-repo}>
@@ -251,51 +354,19 @@
     concurrent: true
     project-type: multijob
     node: runner
-    properties:
-      - heavy-job:
-          weight: 1
-      - build-blocker:
-          use-build-blocker: true
-          blocking-jobs:
-            - '{build-name}'
-          block-level: 'GLOBAL'
-          queue-scanning: 'BUILDABLE'
+    <<: *runner-parameters
+    <<: *runner-properties
     triggers:
       - gerrit:
-          trigger-on:
-            - patchset-created-event:
-                exclude-trivial-rebase: true
-                exclude-no-code-change: true
-            - draft-published-event
-          projects:
-            - project-compare-type: 'PLAIN'
-              project-pattern: 'openstack/{gerrit-repo}'
-              branches:
-                - branch-compare-type: 'ANT'
-                  branch-pattern: '{gerrit-branch}'
-              forbidden-file-paths:
-                - compare-type: 'ANT'
-                  pattern: 'docs/*'
-                - compare-type: 'ANT'
-                  pattern: 'specs/*'
-          silent: false
-          override-votes: true
-          server-name: 'review.openstack.org'
-          custom-url: '* $JOB_NAME $BUILD_URL'
-          escape-quotes: true
-          readable-message: true
-          skip-vote:
-            successfull: false  
-            failed: false
-            unstable: true
-            notbuilt: true
+          <<: *smoke-gerrit-events
+          <<: *generic-gerrit-projects
     scm:  []
     publishers:
       - archive:
           artifacts: 'logs/*,pkg_properties'
           allow-empty: true
           fingerprint: true
-      - email: 
+      - email:
           recipients: '{email-to}'
     builders:
       - copyartifact:
@@ -309,7 +380,7 @@
           condition: SUCCESSFUL
           projects:
            - name: '{fuel-release}.{plugin-name}.dvs_vcenter_smoke'
-             current-parameters: true            
+             current-parameters: true
              predefined-parameters: VCENTER_SNAPSHOT=vcenterha
              kill-phase-on: NEVER
       - multijob:
@@ -327,48 +398,19 @@
     concurrent: true
     project-type: multijob
     node: runner
-    properties:
-      - heavy-job:
-          weight: 1
-      - build-blocker:
-          use-build-blocker: true
-          blocking-jobs:
-            - '{build-name}'
-          block-level: 'GLOBAL'
-          queue-scanning: 'BUILDABLE'
+    <<: *runner-parameters
+    <<: *runner-properties
+    scm:  []
     triggers:
       - gerrit:
-          trigger-on:
-            - change-merged-event
-          projects:
-            - project-compare-type: 'PLAIN'
-              project-pattern: 'openstack/{gerrit-repo}'
-              branches:
-                - branch-compare-type: 'ANT'
-                  branch-pattern: '{gerrit-branch}'
-              forbidden-file-paths:
-                - compare-type: 'ANT'
-                  pattern: 'docs/*'
-                - compare-type: 'ANT'
-                  pattern: 'specs/*'
-          silent: false
-          override-votes: true
-          server-name: 'review.openstack.org'
-          custom-url: '* $JOB_NAME $BUILD_URL'
-          escape-quotes: true
-          readable-message: true
-          skip-vote:
-            successfull: false
-            failed: false
-            unstable: true
-            notbuilt: true
-    scm:  []
+          <<: *bvt-gerrit-events
+          <<: *generic-gerrit-projects
     publishers:
       - archive:
           artifacts: 'logs/*,*.rpm,pkg_properties'
           allow-empty: true
           fingerprint: true
-      - email: 
+      - email:
           recipients: '{email-to}'
     builders:
       - copyartifact:
@@ -410,28 +452,22 @@
 - job-template:
     name: '{nightly-name}'
     description: |
-      "<p>System tests dvs feature runs every day at 19.00 CZ.
-       Multijob copies all artifacts from the {build-name} job  
+      <p>System tests dvs feature runs every day at 19.00 CZ.
+       Multijob copies all artifacts from the {build-name} job
        and runs to phases. The first phase is for vcenter5, the second
        phase is for vcenter6. This behaviour is controlled by
        VCENTER_SNAPSHOT predefined parameter. </p>
        <p>The tests copy the latest package from the {bvt-name} job.
        Because the {bvt-name} job's packages more stable.</p>
        <p>There're a pkg details (that copied withing the package)
-       in pkg_properties file in the root of job's workspace.</p>"
+       in pkg_properties file in the root of job's workspace.</p>
     project-type: multijob
     node: runner
+    <<: *runner-parameters
+    <<: *runner-properties
     triggers:
       - timed: 'H 19  * * *'
-    properties:
-      - heavy-job:
-          weight: 1
-      - build-blocker:
-          use-build-blocker: true
-          blocking-jobs:
-            - '{bvt-name}'
-          block-level: 'GLOBAL'
-          queue-scanning: 'BUILDABLE'
+    scm: []
     builders:
       - copyartifact:
           project: '{bvt-name}'
@@ -492,7 +528,7 @@
           condition: COMPLETED
           projects:
 
-           - name: '7.0.dvs.dvs_vcenter_ha_mode'
+           - name: '{fuel-release}.{plugin-name}.dvs_vcenter_ha_mode'
              predefined-parameters: VCENTER_SNAPSHOT=vcenter6
              current-parameters: true
              kill-phase-on: NEVER
