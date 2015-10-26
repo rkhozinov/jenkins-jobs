@@ -248,7 +248,7 @@
 - job-template:
     name: '{smoke-name}'
     description: 'The Smoke test for {fuel-release}.{plugin-name}.{plugin-version}'
-    concurent: true
+    concurrent: true
     project-type: multijob
     node: runner
     properties:
@@ -324,7 +324,7 @@
 - job-template:
     name: '{bvt-name}'
     description: 'The Smoke test for {fuel-release}.{plugin-name}.{plugin-version}'
-    concurent: true
+    concurrent: true
     project-type: multijob
     node: runner
     properties:
@@ -440,50 +440,50 @@
       - inject:
           properties-file: 'pkg_properties'
       - multijob:
-          name: 'System tests for dvs. vcenter5'
+          name: 'System tests for dvs{fuel-release}.{plugin-version} vcenter5'
           condition: COMPLETED
           projects:
-           - name: '7.0.dvs.dvs_vcenter_ha_mode'
+           - name: '{fuel-release}.{plugin-name}.dvs_vcenter_ha_mode'
              current-parameters: true
              kill-phase-on: NEVER
 
-           - name: '7.0.dvs.dvs_vcenter_ceph'
+           - name: '{fuel-release}.{plugin-name}.dvs_vcenter_ceph'
              current-parameters: true
              kill-phase-on: NEVER
 
-           - name: '7.0.dvs.dvs_vcenter_ceph_2'
+           - name: '{fuel-release}.{plugin-name}.dvs_vcenter_ceph_2'
              current-parameters: true
              kill-phase-on: NEVER
 
-           - name: '7.0.dvs.dvs_vcenter_ceilometer'
+           - name: '{fuel-release}.{plugin-name}.dvs_vcenter_ceilometer'
              current-parameters: true
              kill-phase-on: NEVER
 
-           - name: '7.0.dvs.dvs_vcenter_ceilometer_2'
+           - name: '{fuel-release}.{plugin-name}.dvs_vcenter_ceilometer_2'
              current-parameters: true
              kill-phase-on: NEVER
 
-           - name: '7.0.dvs.dvs_vcenter_add_delete_nodes'
+           - name: '{fuel-release}.{plugin-name}.dvs_vcenter_add_delete_nodes'
              current-parameters: true
              kill-phase-on: NEVER
 
-           - name: '7.0.dvs.dvs_vcenter_add_delete_controller'
+           - name: '{fuel-release}.{plugin-name}.dvs_vcenter_add_delete_controller'
              current-parameters: true
              kill-phase-on: NEVER
 
-           - name: '7.0.dvs.dvs_vcenter_networks'
+           - name: '{fuel-release}.{plugin-name}.dvs_vcenter_networks'
              current-parameters: true
              kill-phase-on: NEVER
 
-           - name: '7.0.dvs.dvs_vcenter_ping_public'
+           - name: '{fuel-release}.{plugin-name}.dvs_vcenter_ping_public'
              current-parameters: true
              kill-phase-on: NEVER
 
-           - name: '7.0.dvs.dvs_vcenter_5_instances'
+           - name: '{fuel-release}.{plugin-name}.dvs_vcenter_5_instances'
              current-parameters: true
              kill-phase-on: NEVER
 
-           - name: '7.0.dvs.dvs_vcenter_uninstall'
+           - name: '{fuel-release}.{plugin-name}.dvs_vcenter_uninstall'
              current-parameters: true
              kill-phase-on: NEVER
 
@@ -497,52 +497,52 @@
              current-parameters: true
              kill-phase-on: NEVER
 
-           - name: '7.0.dvs.dvs_vcenter_ceph'
+           - name: '{fuel-release}.{plugin-name}.dvs_vcenter_ceph'
              predefined-parameters: VCENTER_SNAPSHOT=vcenter6
              current-parameters: true
              kill-phase-on: NEVER
 
-           - name: '7.0.dvs.dvs_vcenter_ceph_2'
+           - name: '{fuel-release}.{plugin-name}.dvs_vcenter_ceph_2'
              predefined-parameters: VCENTER_SNAPSHOT=vcenter6
              current-parameters: true
              kill-phase-on: NEVER
 
-           - name: '7.0.dvs.dvs_vcenter_ceilometer'
+           - name: '{fuel-release}.{plugin-name}.dvs_vcenter_ceilometer'
              predefined-parameters: VCENTER_SNAPSHOT=vcenter6
              current-parameters: true
              kill-phase-on: NEVER
 
-           - name: '7.0.dvs.dvs_vcenter_ceilometer_2'
+           - name: '{fuel-release}.{plugin-name}.dvs_vcenter_ceilometer_2'
              predefined-parameters: VCENTER_SNAPSHOT=vcenter6
              current-parameters: true
              kill-phase-on: NEVER
 
-           - name: '7.0.dvs.dvs_vcenter_add_delete_nodes'
+           - name: '{fuel-release}.{plugin-name}.dvs_vcenter_add_delete_nodes'
              predefined-parameters: VCENTER_SNAPSHOT=vcenter6
              current-parameters: true
              kill-phase-on: NEVER
 
-           - name: '7.0.dvs.dvs_vcenter_add_delete_controller'
+           - name: '{fuel-release}.{plugin-name}.dvs_vcenter_add_delete_controller'
              predefined-parameters: VCENTER_SNAPSHOT=vcenter6
              current-parameters: true
              kill-phase-on: NEVER
 
-           - name: '7.0.dvs.dvs_vcenter_networks'
+           - name: '{fuel-release}.{plugin-name}.dvs_vcenter_networks'
              predefined-parameters: VCENTER_SNAPSHOT=vcenter6
              current-parameters: true
              kill-phase-on: NEVER
 
-           - name: '7.0.dvs.dvs_vcenter_ping_public'
+           - name: '{fuel-release}.{plugin-name}.dvs_vcenter_ping_public'
              predefined-parameters: VCENTER_SNAPSHOT=vcenter6
              current-parameters: true
              kill-phase-on: NEVER
 
-           - name: '7.0.dvs.dvs_vcenter_5_instances'
+           - name: '{fuel-release}.{plugin-name}.dvs_vcenter_5_instances'
              predefined-parameters: VCENTER_SNAPSHOT=vcenter6
              current-parameters: true
              kill-phase-on: NEVER
 
-           - name: '7.0.dvs.dvs_vcenter_uninstall'
+           - name: '{fuel-release}.{plugin-name}.dvs_vcenter_uninstall'
              predefined-parameters: VCENTER_SNAPSHOT=vcenter6
              current-parameters: true
              kill-phase-on: NEVER
