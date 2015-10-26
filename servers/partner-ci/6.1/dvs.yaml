@@ -322,7 +322,16 @@
 
 - job-template:
     name: '{nightly-name}'
-    description: 'System tests dvs feature'
+    description: |
+      "<p>System tests dvs feature runs every day at 19.00 CZ.
+       Multijob copies all artifacts from the {build-name} job  
+       and runs to phases. The first phase is for vcenter5, the second
+       phase is for vcenter6. This behaviour is controlled by
+       VCENTER_SNAPSHOT predefined parameter. </p>
+       <p>The tests copy the latest package from the {bvt-name} job.
+       Because the {bvt-name} job's packages more stable.</p>
+       <p>There're a pkg details (that copied withing the package)
+       in pkg_properties file in the root of job's workspace.</p>"
     project-type: multijob
     node: runner
     triggers:
@@ -330,7 +339,7 @@
 
     builders:
       - multijob:
-          name: 'System tests for vcenter'
+          name: 'System tests for dvs{fuel-release}.{plugin-version} vcenter5'
           condition: COMPLETED
           projects:
            - name: '{fuel-release}.{plugin-name}.dvs_vcenter_ha_mode'
