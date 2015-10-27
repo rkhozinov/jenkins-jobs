@@ -311,8 +311,8 @@
     builders:
       - shell:
           !include-raw-escape './builders/build-plugin.sh'
-      - shell:
-          !include-raw-escape './builders/rpm-check.sh'
+#     - shell:
+#         !include-raw-escape './builders/rpm-check.sh'
       - shell: |
           echo PKG_BUILD_ID=${{BUILD_ID}}  > pkg_properties
           echo PKG_BUILD_URL=${{BUILD_URL}} >> pkg_properties
