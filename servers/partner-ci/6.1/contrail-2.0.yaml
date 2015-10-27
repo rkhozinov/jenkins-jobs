@@ -1,88 +1,3 @@
-- project:
-    name: 'predefined_parameters'
-    fuel-release: 6.1
-    plugin-version: 2.0
-    plugin-name: 'contrail'
-
-    build-name: '{fuel-release}.{plugin-name}.{plugin-version}.build'
-    smoke-name: '{fuel-release}.{plugin-name}.{plugin-version}.smoke'
-    bvt-name: '{fuel-release}.{plugin-name}.{plugin-version}.bvt'
-    regression-name: '{fuel-release}.{plugin-name}.{plugin-version}.regression'
-    nightly-name: '{fuel-release}.{plugin-name}.{plugin-version}.nightly'
-    custom-name: '{fuel-release}.{plugin-name}.{plugin-version}.custom'
-
-    nightly-timer: 'H 22 * * *'
-    regression-timer: 'H 18 * * *'
-    
-    nightly-disabled: true  
-
-    use-snapshots: false
-    force-erase: true
-    recreate-venv: false
-    disable-ssl: false
-    bonding: false
-    update-master: true
-    debug: true
-    runner-timeout: 600
-    test-timeout: 500
-
-    iso-file: 'MirantisOpenStack-6.1.iso'
-    gerrit-repo: 'fuel-plugin-contrail'
-    gerrit-branch: 'stable/2.0'
-    email-to: 'rkhozinov@mirantis.com'
-    released-plugin-path: '/storage/contrail/released/contrail-2.0.0.noarch.rpm'
-
-    testgroup:
-      - deploy_contrail
-      - install_contrail
-      - contrail_plugin_add_delete_compute_node
-      - deploy_ha_contrail_plugin
-      - contrail_plugin_add_delete_controller_node
-      - deploy_ha_with_pub_net_all_nodes
-      - check_bonding_with_contrail
-      - deploy_contrail_plugin_with_the_same_names
-    jobs:
-      - '{build-name}'
-      - '{nightly-name}'
-      - '{custom-name}'
-
-      - '{smoke-name}'
-      - '{fuel-release}.{plugin-name}.{plugin-version}.smoke.test.open'
-      - '{fuel-release}.{plugin-name}.{plugin-version}.smoke.test.juniper'
-
-      - '{bvt-name}'
-      - '{fuel-release}.{plugin-name}.{plugin-version}.bvt.test.open'
-      - '{fuel-release}.{plugin-name}.{plugin-version}.bvt.test.juniper'
-
-      - '{regression-name}'
-      - '{fuel-release}.{plugin-name}.{plugin-version}.regression.test.open'
-      - '{fuel-release}.{plugin-name}.{plugin-version}.regression.test.juniper'
-
-      - '{fuel-release}.{plugin-name}.{plugin-version}.{testgroup}.open'
-      - '{fuel-release}.{plugin-name}.{plugin-version}.{testgroup}.juniper'
-
-## common git settings to get sources
-- common-scm: &common-scm
-    name: 'common-scm'
-    scm:
-      - git:
-          name: ''
-          url: 'https://review.openstack.org/openstack/{gerrit-repo}'
-          refspec: $GERRIT_REFSPEC
-          branches:
-            - $GERRIT_BRANCH
-          choosing-strategy: gerrit
-          submodule:
-            disable: false
-            tracking: true
-            recursive: true
-          clean:
-            # we don't clean and re-initialize the repo
-            before: false
-          # we don't clean a workspace, so we need to remove rpms manually
-          wipe-workspace: false
-
-## list of gerrit events to trigger build job
 - build-gerrit-events: &build-gerrit-events
     name: 'build-gerrit-events'
     trigger-on:
@@ -92,8 +7,6 @@
           exclude-trivial-rebase: true
           exclude-no-code-change: true
 
-## configuration of gerrit event for the smoke multijob
-## smoke multijob should run on patchset, draft events
 - smoke-gerrit-events: &smoke-gerrit-events
     name: 'smoke-gerrit-events'
     trigger-on:
@@ -102,14 +15,11 @@
           exclude-trivial-rebase: true
           exclude-no-code-change: true
 
-## configuration of gerrit event for the bvt multijob
-## bvt multijob should run only on merge event
 - bvt-gerrit-events: &bvt-gerrit-events
     name: 'bvt-gerrit-events'
     trigger-on:
       - change-merged-event
 
-## the main part of gerrit section as yaml anchor
 - generic-gerrit-projects: &generic-gerrit-projects
     name: 'generic-gerrit-projects'
     projects:
@@ -120,9 +30,9 @@
             branch-pattern: '{gerrit-branch}'
         forbidden-file-paths:
           - compare-type: 'ANT'
-            pattern: 'docs/**'
+            pattern: 'docs/*'
           - compare-type: 'ANT'
-            pattern: 'specs/**'
+            pattern: 'specs/*'
     silent: false
     override-votes: true
     server-name: 'review.openstack.org'
@@ -135,7 +45,6 @@
       unstable: true
       notbuilt: true
 
-## properties for smoke, bvt and nightly multijobs
 - runner-properties: &runner-properties
     name: 'runner-properties'
     properties:
@@ -144,192 +53,17 @@
       - build-blocker:
           use-build-blocker: true
           blocking-jobs:
-            - '{build-name}'
+            - '{bvt-name}'
           block-level: 'GLOBAL'
           queue-scanning: 'BUILDABLE'
 
-## properties for smoke, bvt and nightly multijobs
-- runner-wrappers: &runner-wrappers
-    name: 'runner-wrappers'
-    wrappers:
-      - ansicolor:
-          colormap: xterm
-
-## properties for smoke, bvt and nightly multijobs
-- test-wrappers: &test-wrappers
-    name: 'test-wrappers'
-    wrappers:
-      - ansicolor:
-          colormap: xterm
-      - timeout:
-          fail: true
-          type: no-activity
-          write-description: "Timeout is exceeded"
-          timeout: '{test-timeout}'
-
-## properties for test jobs
-- test-properties: &test-properties
-    name: 'test-properties'
-    properties:
-      - heavy-job:
-          weight: 1
-      - throttle:
-          max-per-node: 0
-          max-total: 0
-          categories:
-            - vcenter
-            - dvs
-            - nsxv
-            - contrail
-          option: category
-
-## parameters for smoke, bvt and nightly multijobs
 - runner-parameters: &runner-parameters
     name: 'runner-parameters'
     parameters:
-      - bool:
-          name: DEBUG
-          default: '{debug}'
-          description: "Set -x (xtrace) for jobs' bash scripts"
-      - bool:
-          name: DISABLE_SSL
-          default: '{disable-ssl}'
-          description: "Disable ssh for openstack horizon"
-      - bool:
-          name: FORCE_ERASE
-          default: '{force-erase}'
-          description: "Erase all envs before test"
-      - bool:
-          name: RECREATE_VENV
-          default: '{recreate-venv}'
-          description: "Recreate virtual environemnt before tests"
-      - bool:
-          name: UPDATE_MASTER
-          default: '{update-master}'
-          description: 'turns on update fuel master node to maintenance update'
-      - bool:
-          name: BONDING
-          default: '{bonding}'
-      - bool:
-          name: USE_SNAPSHOTS
-          default: '{use-snapshots}'
-          descrition: 'Will be used existing environment'
-      - string:
-          name: MIRROR
-          default: 'http://mirror.seed-cz1.fuel-infra.org'
-          description: 'mirror for package repositories. this mirror is optimized for CZ'
-      - string:
-          name: UPDATE_FUEL_MIRROR
-          default: "${{MIRROR}}/mos/snapshots/centos-6-stable/mos6.1/updates ${{MIRROR}}/mos/snapshots/centos-6-stable/mos6.1/security"
-          description: 'repositories to update fuel master node'
-      - string:
-          name: MIRROR_UBUNTU
-          default: "deb ${{MIRROR}}/pkgs/ubuntu trusty main restricted universe multiverse|deb ${{MIRROR}}/pkgs/ubuntu trusty-updates main restricted universe multiverse|deb ${{MIRROR}}/pkgs/ubuntu trusty-security main restricted universe multiverse"
-          description: 'updates repository to update ubuntu cluster'
-      - string:
-          name: DEB_UPDATES
-          default: "mos-updates,deb ${{MIRROR}}/mos/snapshots/ubuntu-stable mos6.1-updates main restricted"
-          description: 'ubuntu-updates repositories for master ui'
-      - string:
-          name: DEB_SECURITY
-          default: "mos-security,deb ${{MIRROR}}/mos/snapshots/ubuntu-stable mos6.1-security main restricted"
-          description: 'ubuntu-security repositories for master ui'
-      - string:
-          name: CONTRAIL_VERSION
-          default: '2.20'
-          description: 'There is a version of juniper packages stored in common sotrage'
-      - string:
-          name: CONTRAIL_PLUGIN_PATH
-          default: ''
-          description: 'The path to the contrail package on storage'  
-      - string:
-          name: GERRIT_REFSPEC
-          default: 'refs/heads/{gerrit-branch}'
-          description: 'Refspecs for commits in fuel-qa gerrit separated with spaces'
-      - string:
-          name: GERRIT_BRANCH
-          default: 'origin/{gerrit-branch}'
-          description: 'The branch for fuel-qa gerrit'
-      - string:
-          name: ENV_PREFIX
-          default: '{fuel-release}.{plugin-name}'
-          description: 'The name of devops env. Needed to properly work of existing mode of devops'
-
-## parameters for jobs created per test-group and custom test job
-- test-parameters: &test-parameters
-    name: 'test-parameters'
-    parameters:
-      - bool:
-          name: DEBUG
-          default: '{debug}'
-          description: "Set -x (xtrace) for jobs' bash scripts"
-      - bool:
-          name: DISABLE_SSL
-          default: '{disable-ssl}'
-          description: "Disable ssh for openstack horizon"
-      - bool:
-          name: FORCE_ERASE
-          default: '{force-erase}'
-          description: "Erase all envs before test"
-      - bool:
-          name: RECREATE_VENV
-          default: '{recreate-venv}'
-          description: "Recreate virtual environemnt before tests"
-      - bool:
-          name: UPDATE_MASTER
-          default: '{update-master}'
-          description: 'turns on update fuel master node to maintenance update'
-      - bool:
-          name: BONDING
-          default: '{bonding}'
-      - bool:
-          name: USE_SNAPSHOTS
-          default: '{use-snapshots}'
-          descrition: 'Will be used existing environment'
-      - string:
-          name: TEST_GROUP
-          default: '{testgroup}'
       - string:
           name: ISO_FILE
           default: '{iso-file}'
           description: 'ISO file name that is on the tpi-s1 in /storage/downloads'
-      - string:
-          name: ISO_STORAGE
-          default: '/storage/downloads'
-          description: 'Storage for iso files'
-      - string:
-          name: ISO_VERSION
-          description: 'Contrainer for storing an iso build number to output it as job name'
-      - string:
-          name: CONTRAIL_DISTRIBUTION
-          default: ''
-      - string:
-          name: CONTRAIL_VERSION
-          default: '{plugin-version}'
-          description: 'There is a version of juniper packages stored in common storage'
-      - string:
-          name: CONTRAIL_PLUGIN_PATH
-          default: ''
-      - string:
-          name: MIRROR
-          default: 'http://mirror.seed-cz1.fuel-infra.org'
-          description: 'mirror for package repositories. this mirror is optimized for CZ'
-      - string:
-          name: UPDATE_FUEL_MIRROR
-          default: "${{MIRROR}}/mos/snapshots/centos-6-stable/mos6.1/updates ${{MIRROR}}/mos/snapshots/centos-6-stable/mos6.1/security"
-          description: 'repositories to update fuel master node'
-      - string:
-          name: MIRROR_UBUNTU
-          default: "deb ${{MIRROR}}/pkgs/ubuntu trusty main restricted universe multiverse|deb ${{MIRROR}}/pkgs/ubuntu trusty-updates main restricted universe multiverse|deb ${{MIRROR}}/pkgs/ubuntu trusty-security main restricted universe multiverse"
-          description: 'updates repository to update ubuntu cluster'
-      - string:
-          name: DEB_UPDATES
-          default: "mos-updates,deb ${{MIRROR}}/mos/snapshots/ubuntu-stable mos6.1-updates main restricted"
-          description: 'ubuntu-updates repositories for master ui'
-      - string:
-          name: DEB_SECURITY
-          default: "mos-security,deb ${{MIRROR}}/mos/snapshots/ubuntu-stable mos6.1-security main restricted"
-          description: 'ubuntu-security repositories for master ui'
       - string:
           name: OPENSTACK_RELEASE
           default: 'Ubuntu'
@@ -343,84 +77,202 @@
           default: 'origin/{gerrit-branch}'
           description: 'The branch for fuel-qa gerrit'
       - string:
-          name: NODE_VOLUME_SIZE
-          default: '512'
-      - string:
           name: NODES_COUNT
-          default: '10'
-          description: 'Amount of nodes in the test lab'
+          default: '9'
+          #TODO: description
+      - string:
+          name: NODES_VOLUME_SIZE
+          default: '325'
+          #TODO: description
       - string:
           name: ADMIN_NODE_MEMORY
           default: '4096'
-          description: 'Amount of vitrual RAM for admin node'
+          #TODO: description
       - string:
           name: SLAVE_NODE_MEMORY
           default: '4096'
-          description: 'Amount of vitrual RAM per slave node'
+          #TODO: description
       - string:
           name: ADMIN_NODE_CPU
           default: '4'
-          description: 'Amount of vitrual CPUs for admin node'
+          #TODO: description
       - string:
           name: SLAVE_NODE_CPU
           default: '4'
-          description: 'Amount of vitrual CPUs per slave node'
+          #TODO: description
       - string:
           name: ENV_PREFIX
           default: '{fuel-release}.{plugin-name}'
           description: 'The name of devops env. Needed to properly work of existing mode of devops'
+      - bool:
+          name: USE_SNAPSHOTS
+          default: true
+          descrition: 'Will be used existing environment'
+      - bool:
+          name: SHUTDOWN_AFTER
+          default: true
+          decsription: 'The env will be powered off after test'
+      - bool:
+          name: ERASE_AFTER
+          default: false
+          description: 'The env will be erased after test'
+
+- test-parameters: &test-parameters
+    name: 'test-parameters'
+    parameters:
       - string:
-          name: TESTRAIL_PLAN_NAME
-          default: ''
-          description: ''
+          name: CONTRAIL_DISTRIBUTION
+          default: 'open'
       - string:
-          name: TESTRAIL_CONFIGURATION
-          default: ''
-          description: ''
+          name: TEST_GROUP
+          default: '{testgroup}'
+      - string:
+          name: ISO_FILE
+          default: '{iso-file}'
+          description: 'ISO file name that is on the tpi-s1 in /storage/downloads'
+      - string:
+          name: OPENSTACK_RELEASE
+          default: 'Ubuntu'
+          description: 'Openstack release (CentOS, Ubuntu)'
+      - string:
+          name: GERRIT_REFSPEC
+          default: 'refs/heads/{gerrit-branch}'
+          description: 'Refspecs for commits in fuel-qa gerrit separated with spaces'
+      - string:
+          name: GERRIT_BRANCH
+          default: 'origin/{gerrit-branch}'
+          description: 'The branch for fuel-qa gerrit'
+      - string:
+          name: NODES_COUNT
+          default: '9'
+          #TODO: description
+      - string:
+          name: ADMIN_NODE_MEMORY
+          default: '4096'
+          #TODO: description
+      - string:
+          name: SLAVE_NODE_MEMORY
+          default: '4096'
+          #TODO: description
+      - string:
+          name: ADMIN_NODE_CPU
+          default: '4'
+          #TODO: description
+      - string:
+          name: SLAVE_NODE_CPU
+          default: '4'
+          #TODO: description
+      - string:
+          name: ENV_PREFIX
+          default: '{fuel-release}.{plugin-name}'
+          description: 'The name of devops env. Needed to properly work of existing mode of devops'
+      - bool:
+          name: USE_SNAPSHOTS
+          default: true
+          descrition: 'Will be used existing environment'
+      - bool:
+          name: SHUTDOWN_AFTER
+          default: true
+          decsription: 'The env will be powered off after test'
+      - bool:
+          name: ERASE_AFTER
+          default: false
+          description: 'The env will be erased after test'
+
+- project:
+    name: 'predefined_parameters'
+    fuel-release: 6.1
+    plugin-version: 2.0
+    plugin-name: 'contrail'
+    build-name: '{fuel-release}.{plugin-name}.{plugin-version}.build'
+    custom-name: '{fuel-release}.{plugin-name}.{plugin-version}.custom'
+    smoke-name: '{fuel-release}.{plugin-name}.{plugin-version}.smoke'
+    bvt-name: '{fuel-release}.{plugin-name}.{plugin-version}.bvt'
+    nightly-name: '{fuel-release}.{plugin-name}.{plugin-version}.nightly'
+    iso-file: 'fuel-6.1-525-2015-06-19_13-02-31.iso'
+    gerrit-repo: 'fuel-plugin-contrail'
+    gerrit-branch: 'stable/2.0'
+    email-to: 'rkhozinov@mirantis.com'
+    iso-storage: '/storage/downloads'
+
+    testgroup:
+      - install_contrail
+      - deploy_contrail
+      - deploy_controller_compute_contrail
+      - contrail_plugin_add_delete_compute_node
+      - deploy_ha_contrail_plugin
+      - contrail_plugin_add_delete_controller_node
+      - deploy_ha_with_pub_net_all_nodes
+      - check_bonding_with_contrail
+
+    jobs:
+      - '{build-name}'
+      - '{nightly-name}'
+      - '{custom-name}'
+      - '{smoke-name}'
+      - '{bvt-name}'
+      - '{fuel-release}.{plugin-name}.{plugin-version}.{testgroup}'
 
 - defaults:
     name: global
     disabled: false
     node: 'contrail'
-    <<: *test-properties
-    <<: *test-parameters
-    <<: *common-scm
-    <<: *test-wrappers
+    logrotate:
+      daysToKeep: 7
+      numToKeep: 10
+      artifactDaysToKeep: 7
+      artifactNumToKeep: 10
     properties:
-      - build-discarder:
-          days-to-keep: 7
-          num-to-keep: 10
-          artifact-days-to-keep: 7
-          artifact-num-to-keep: 10
+      - heavy-job:
+          weight: 1
+      - throttle:
+          max-per-node: 0
+          max-total: 0
+          categories:
+            - contrail
+            - vsphere
+            - dvs
+            - nsx
+          option: category
+    <<: *test-parameters
     builders:
+      - inject:
+          properties-content: |
+            FUEL_RELEASE={fuel-release}
+            ISO_STORAGE={iso-storage}
       - copyartifact:
           project: '{build-name}'
           which-build: last-successful
+      - inject:
+          properties-file: 'pkg_properties'
       - shell:
-          !include-raw-escape builders/common.prepare.sh
+          !include-raw-escape builders/contrail.prepare.sh
       - shell:
           !include-raw-escape builders/contrail.test.sh
+    scm:
+      - git:
+          name: ''
+          url: 'https://review.openstack.org/openstack/{gerrit-repo}'
+          refspec: $GERRIT_REFSPEC
+          branches:
+            - $GERRIT_BRANCH
+          #choosing-strategy: gerrit
+          submodule:
+            disable: false
+            tracking: true
+            recursive: true
+          clean:
+            before: false
+          wipe-workspace: true
+    wrappers:
+      - ansicolor:
+          colormap: xterm
+      - timeout:
+          fail: true
+          timeout: 6000
     publishers:
-      - postbuildscript:
-          script-only-if-succeeded: False
-          builders:
-            - shell: env > properties
-              # need to delete packages, because we don't wipe workspace,
-              # but packages could be duplicated
-            - shell: rm -f .*rpm.*
-
       - archive:
-          artifacts: 'build.properties'
-          allow-empty: false
-      - archive:
-          artifacts: 'properties'
-          allow-empty: false
-      - archive:
-          artifacts: '**/nosetests.xml'
-          allow-empty: true
-          fingerprint: true
-      - archive:
-          artifacts: 'logs/*'
+          artifacts: '**/nosetests.xml,logs/*'
           allow-empty: true
           fingerprint: true
       - xunit:
@@ -431,20 +283,46 @@
       - email:
           recipients: '{email-to}'
 
-# job for building plugin package
 - job-template:
     name: '{build-name}'
     node: 'runner'
     concurrent: true
-    disabled: false
-    description: |
-      '<a href=https://github.com/openstack/{gerrit-repo}>
-      Build {plugin-name} plugin from fuel-plugins project</a>'
-    <<: *common-scm
+    scm:
+      - git:
+          name: ''
+          url: 'https://review.openstack.org/openstack/{gerrit-repo}'
+          refspec: $GERRIT_REFSPEC
+          branches:
+            - $GERRIT_BRANCH
+          #choosing-strategy: gerrit
+          submodule:
+            disable: true
+            tracking: true
+            recursive: true
+          clean:
+            before: false
+          wipe-workspace: false
+
     triggers:
       - gerrit:
           <<: *build-gerrit-events
           <<: *generic-gerrit-projects
+
+    builders:
+      - shell:
+          !include-raw-escape './builders/build-plugin.sh'
+#     - shell:
+#         !include-raw-escape './builders/rpm-check.sh'
+      - shell: |
+          echo PKG_BUILD_ID=${{BUILD_ID}}  > pkg_properties
+          echo PKG_BUILD_URL=${{BUILD_URL}} >> pkg_properties
+          pkg=$(ls | grep '.*\.rpm')
+          pkg_checksum=$(md5sum -b $pkg | awk '{{print $1}}')
+          echo PGK_CHECKSUM=$pkg_checksum >> pkg_properties
+
+    description: |
+      '<a href=https://github.com/openstack/{gerrit-repo}>
+       Build {name} plugin from fuel-plugins project</a>'
     parameters:
       - string:
           name: 'GERRIT_REFSPEC'
@@ -452,68 +330,16 @@
     properties:
       - heavy-job:
           weight: 1
-    builders:
-      - shell:
-          !include-raw-escape './builders/build-plugin.sh'
-      - shell:
-          !include-raw-escape './builders/rpm-check.sh'
     publishers:
-      - postbuildscript:
-          script-only-if-succeeded: False
-          builders:
-             - shell: env > build.properties
       - archive:
-          artifacts: '*.rpm'
-          allow-empty: false
-      - archive:
-          artifacts: 'build.properties'
-          allow-empty: false
+          artifacts: '*.rpm,pkg_properties'
       - email:
+          notify-every-unstable-build: true
           recipients: '{email-to}'
 
-## jobs for system test
 - job-template:
-    name: '{fuel-release}.{plugin-name}.{plugin-version}.{testgroup}.open'
-    description: 'The test "{testgroup}" for {fuel-release}.{plugin-name}.{plugin-version} open contrail'
-    concurrent: true
-
-# jobs for regression test
-- job-template:
-    name: '{fuel-release}.{plugin-name}.{plugin-version}.{testgroup}.juniper'
-    description: 'The test "{testgroup}" for {fuel-release}.{plugin-name}.{plugin-version} juniper contrail'
-    concurrent: true
-
-## jobs for bvt tests
-- job-template:
-    name: '{fuel-release}.{plugin-name}.{plugin-version}.bvt.test.open'
-    description: 'The test for {fuel-release}.{plugin-name}.{plugin-version} open contrail'
-    concurrent: true
-
-- job-template:
-    name: '{fuel-release}.{plugin-name}.{plugin-version}.bvt.test.juniper'
-    description: 'The test for {fuel-release}.{plugin-name}.{plugin-version} juniper contrail'
-    concurrent: true
-
-## jobs for smoke tests
-- job-template:
-    name: '{fuel-release}.{plugin-name}.{plugin-version}.smoke.test.open'
-    description: 'The test for {fuel-release}.{plugin-name}.{plugin-version} open contrail'
-    concurrent: true
-
-- job-template:
-    name: '{fuel-release}.{plugin-name}.{plugin-version}.smoke.test.juniper'
-    description: 'The test for {fuel-release}.{plugin-name}.{plugin-version} juniper contrail'
-    concurrent: true
-
-## jobs for regression tests
-- job-template:
-    name: '{fuel-release}.{plugin-name}.{plugin-version}.regression.test.open'
-    description: 'The test for {fuel-release}.{plugin-name}.{plugin-version} open contrail'
-    concurrent: true
-
-- job-template:
-    name: '{fuel-release}.{plugin-name}.{plugin-version}.regression.test.juniper'
-    description: 'The test for {fuel-release}.{plugin-name}.{plugin-version} juniper contrail'
+    name: '{fuel-release}.{plugin-name}.{plugin-version}.{testgroup}'
+    description: 'The test "{testgroup}" for {fuel-release}.{plugin-name}.{plugin-version}'
     concurrent: true
 
 - job-template:
@@ -523,252 +349,137 @@
 
 - job-template:
     name: '{smoke-name}'
-    disabled: false
     description: 'The Smoke test for {fuel-release}.{plugin-name}.{plugin-version}'
-    concurrent: true
+    concurent: true
     project-type: multijob
     node: runner
     <<: *runner-parameters
     <<: *runner-properties
-    <<: *runner-wrappers
-    scm:  []
     triggers:
       - gerrit:
           <<: *smoke-gerrit-events
           <<: *generic-gerrit-projects
+    scm:  []
+    publishers:
+      - archive:
+          artifacts: 'logs/*,pkg_properties'
+          allow-empty: true
+          fingerprint: true
+      - email:
+          recipients: '{email-to}'
     builders:
       - copyartifact:
           project: '{build-name}'
           which-build: last-successful
           stable: true
+      - inject:
+          properties-file: 'pkg_properties'
       - multijob:
-          name: 'Smoke tests for open/juniper contrail'
-          condition: COMPLETED
+          name: 'Smoke tests for open contrail'
+          condition: SUCCESSFUL
           projects:
-            - name: '{fuel-release}.{plugin-name}.{plugin-version}.smoke.test.open'
-              current-parameters: true
-              predefined-parameters: |
-                TEST_GROUP=deploy_contrail
-                CONTRAIL_DISTRIBUTION=open
-              kill-phase-on: NEVER
+           - name: '{fuel-release}.{plugin-name}.{plugin-version}.deploy_contrail'
+             current-parameters: true
+             predefined-parameters: VCENTER_SNAPSHOT=open
+             kill-phase-on: NEVER
 
-            - name: '{fuel-release}.{plugin-name}.{plugin-version}.smoke.test.juniper'
-              current-parameters: true
-              predefined-parameters: |
-                TEST_GROUP=deploy_contrail
-                CONTRAIL_DISTRIBUTION=juniper
-              kill-phase-on: NEVER
-    publishers:
-      - postbuildscript:
-          script-only-if-succeeded: False
-          builders:
-            - shell: env > smoke.properties
-      - archive:
-          artifacts: 'build.properties'
-          allow-empty: false
-      - archive:
-          artifacts: 'smoke.properties'
-          allow-empty: false
-      - email:
-          recipients: '{email-to}'
+      - multijob:
+          name: 'Smoke tests for juniper contrail'
+          condition: SUCCESSFUL
+          projects:
+
+           - name: '{fuel-release}.{plugin-name}.{plugin-version}.deploy_contrail'
+             current-parameters: true
+             predefined-parameters: CONTRAIL_DISTRIBUTION=juniper
+             kill-phase-on: NEVER
 
 - job-template:
     name: '{bvt-name}'
-    description: 'The BVT test for {fuel-release}.{plugin-name}.{plugin-version}'
-    disabled: false
-    concurrent: true
+    description: 'The Smoke test for {fuel-release}.{plugin-name}.{plugin-version}'
+    concurent: true
     project-type: multijob
     node: runner
     <<: *runner-parameters
     <<: *runner-properties
-    <<: *runner-wrappers
     scm:  []
     triggers:
       - gerrit:
           <<: *bvt-gerrit-events
           <<: *generic-gerrit-projects
+    publishers:
+      - archive:
+          artifacts: 'logs/*,*.rpm,pkg_properties'
+          allow-empty: true
+          fingerprint: true
+      - email:
+          recipients: '{email-to}'
     builders:
       - copyartifact:
           project: '{build-name}'
           which-build: last-successful
           stable: true
+      - inject:
+          properties-file: 'pkg_properties'
+
       - multijob:
-          name: 'BVT test for open/juniper contrail'
-          condition: COMPLETED
+          name: 'Smoke tests for open contrail'
+          condition: SUCCESSFUL
           projects:
-            - name: '{fuel-release}.{plugin-name}.{plugin-version}.bvt.test.open'
-              current-parameters: true
-              predefined-parameters: |
-                TEST_GROUP=contrail_bvt
-                CONTRAIL_DISTRIBUTION=open
-              kill-phase-on: NEVER
+           - name: '{fuel-release}.{plugin-name}.{plugin-version}.deploy_controller_compute_contrail'
+             current-parameters: true
+             predefined-parameters: CONTRAIL_DISTRIBUTION=open
+             kill-phase-on: NEVER
 
-            - name: '{fuel-release}.{plugin-name}.{plugin-version}.bvt.test.juniper'
-              current-parameters: true
-              predefined-parameters: |
-                TEST_GROUP=contrail_bvt
-                CONTRAIL_DISTRIBUTION=juniper
-              kill-phase-on: NEVER
-    publishers:
-      - postbuildscript:
-          script-only-if-succeeded: False
-          builders:
-             - shell: env > bvt.properties
-      - archive:
-          artifacts: '*.rpm'
-          allow-empty: false
-      - archive:
-          artifacts: 'build.properties'
-          allow-empty: false
-      - archive:
-          artifacts: 'bvt.properties'
-          allow-empty: false
-      - email:
-          recipients: '{email-to}'
-
-- job-template:
-    name: '{regression-name}'
-    description: 'The regression test for {fuel-release}.{plugin-name}.{plugin-version}'
-    disabled: false
-    concurrent: true
-    project-type: multijob
-    node: runner
-    <<: *runner-parameters
-    <<: *runner-wrappers
-    properties:
-      - heavy-job:
-          weight: 1
-    scm:  []
-    triggers:
-      - timed: '{regression-timer}'
-    publishers:
-      - postbuildscript:
-          script-only-if-succeeded: False
-          builders:
-             - shell: env > regression.properties
-      - archive:
-          artifacts: 'regression.properties'
-          allow-empty: false
-      - email:
-          recipients: '{email-to}'
-    builders:
       - multijob:
-          name: 'regression test for open/juniper contrail'
-          condition: FAILURE
+          name: 'Smoke tests for juniper contrail'
+          condition: SUCCESSFUL
           projects:
-            - name: '{fuel-release}.{plugin-name}.{plugin-version}.regression.test.open'
-              predefined-parameters: |
-                TEST_GROUP=contrail_bvt
-                CONTRAIL_DISTRIBUTION=open
-                CONTRAIL_PLUGIN_PATH={released-plugin-path}
-              current-parameters: true
-              kill-phase-on: NEVER
-
-            - name: '{fuel-release}.{plugin-name}.{plugin-version}.regression.test.juniper'
-              predefined-parameters:  |
-                TEST_GROUP=contrail_bvt
-                CONTRAIL_DISTRIBUTION=juniper
-                CONTRAIL_PLUGIN_PATH={released-plugin-path}
-              current-parameters: true
-              kill-phase-on: NEVER
+           - name: '{fuel-release}.{plugin-name}.{plugin-version}.deploy_controller_compute_contrail'
+             current-parameters: true
+             predefined-parameters: CONTRAIL_DISTRIBUTION=juniper
+             kill-phase-on: NEVER
 
 - job-template:
     name: '{nightly-name}'
     project-type: multijob
-    disabled: '{nightly-disabled}'
     node: runner
     <<: *runner-parameters
-    <<: *runner-wrappers
-    properties:
-      - heavy-job:
-          weight: 1
-    publishers:
-      - postbuildscript:
-          script-only-if-succeeded: False
-          builders:
-            - shell: env > nightly.properties
-      - archive:
-          artifacts: 'nightly.properties'
-          allow-empty: false
-      - archive:
-          artifacts: 'build.properties'
-          allow-empty: false
-      - email:
-          recipients: '{email-to}'
-    scm: []
+    <<: *runner-properties
     triggers:
-      - timed: '{nightly-timer}'
-
+      - timed: 'H 19  * * *'
+    scm: []
     builders:
-      # copy latest stable plugin package that has passed dvs bvt on the stable iso
       - copyartifact:
           project: '{bvt-name}'
           which-build: last-successful
           stable: true
-      - multijob:
-          name: 'Smoke tests for open/juniper contrail. Juniper or contrail version is provided in variable by multijob'
-          condition: COMPLETED
-          projects:
-            - name: '{fuel-release}.{plugin-name}.{plugin-version}.contrail_plugin_add_delete_compute_node.open'
-              predefined-parameters: CONTRAIL_DISTRIBUTION=open
-              current-parameters: true
-              kill-phase-on: NEVER
-
-            - name: '{fuel-release}.{plugin-name}.{plugin-version}.deploy_ha_contrail_plugin.open'
-              predefined-parameters: CONTRAIL_DISTRIBUTION=open
-              current-parameters: true
-              kill-phase-on: NEVER
-
-            - name: '{fuel-release}.{plugin-name}.{plugin-version}.contrail_plugin_add_delete_controller_node.open'
-              predefined-parameters: CONTRAIL_DISTRIBUTION=open
-              current-parameters: true
-              kill-phase-on: NEVER
- 
-            - name: '{fuel-release}.{plugin-name}.{plugin-version}.deploy_ha_with_pub_net_all_nodes.open'
-              predefined-parameters: CONTRAIL_DISTRIBUTION=open
-              current-parameters: true
-              kill-phase-on: NEVER
-            - name: '{fuel-release}.{plugin-name}.{plugin-version}.check_bonding_with_contrail.open'
-              predefined-parameters: |
-                CONTRAIL_DISTRIBUTION=open
-                BONDING=true
-              current-parameters: true
-              kill-phase-on: NEVER
-            - name: '{fuel-release}.{plugin-name}.{plugin-version}.deploy_contrail_plugin_with_the_same_names.open'
-              predefined-parameters: CONTRAIL_DISTRIBUTION=open
-              current-parameters: true
-              kill-phase-on: NEVER
+      - inject:
+          properties-file: 'pkg_properties'
 
       - multijob:
-          name: 'All tests for juniper contrail'
-          condition: COMPLETED
+          name: 'Smoke tests for open contrail'
+          condition: SUCCESSFUL
           projects:
-            - name: '{fuel-release}.{plugin-name}.{plugin-version}.contrail_plugin_add_delete_compute_node.juniper'
-              predefined-parameters: CONTRAIL_DISTRIBUTION=juniper
-              current-parameters: true
-              kill-phase-on: NEVER
+           - name: '{fuel-release}.{plugin-name}.{plugin-version}.contrail_plugin_add_delete_compute_node'
+             current-parameters: true
+             predefined-parameters: CONTRAIL_DISTRIBUTION=open
+             kill-phase-on: NEVER
 
-            - name: '{fuel-release}.{plugin-name}.{plugin-version}.deploy_ha_contrail_plugin.juniper'
-              predefined-parameters: CONTRAIL_DISTRIBUTION=juniper
-              current-parameters: true
-              kill-phase-on: NEVER
+           - name: '{fuel-release}.{plugin-name}.{plugin-version}.deploy_ha_contrail_plugin'
+             current-parameters: true
+             predefined-parameters: CONTRAIL_DISTRIBUTION=open
+             kill-phase-on: NEVER
 
-            - name: '{fuel-release}.{plugin-name}.{plugin-version}.contrail_plugin_add_delete_controller_node.juniper'
-              predefined-parameters: CONTRAIL_DISTRIBUTION=juniper
-              current-parameters: true
-              kill-phase-on: NEVER
- 
-            - name: '{fuel-release}.{plugin-name}.{plugin-version}.deploy_ha_with_pub_net_all_nodes.juniper'
-              predefined-parameters: CONTRAIL_DISTRIBUTION=juniper
-              current-parameters: true
-              kill-phase-on: NEVER
-            - name: '{fuel-release}.{plugin-name}.{plugin-version}.check_bonding_with_contrail.juniper'
-              predefined-parameters: |
-                CONTRAIL_DISTRIBUTION=juniper
-                BONDING=true
-              current-parameters: true
-              kill-phase-on: NEVER
-            - name: '{fuel-release}.{plugin-name}.{plugin-version}.deploy_contrail_plugin_with_the_same_names.juniper'
-              predefined-parameters: CONTRAIL_DISTRIBUTION=juniper
-              current-parameters: true
-              kill-phase-on: NEVER
+      - multijob:
+          name: 'Smoke tests for juniper contrail'
+          condition: SUCCESSFUL
+          projects:
+           - name: '{fuel-release}.{plugin-name}.{plugin-version}.contrail_plugin_add_delete_compute_node'
+             current-parameters: true
+             predefined-parameters: CONTRAIL_DISTRIBUTION=juniper
+             kill-phase-on: NEVER
+
+           - name: '{fuel-release}.{plugin-name}.{plugin-version}.deploy_ha_contrail_plugin'
+             current-parameters: true
+             predefined-parameters: CONTRAIL_DISTRIBUTION=juniper
+             kill-phase-on: NEVER
