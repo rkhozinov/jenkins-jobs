@@ -45,6 +45,7 @@
       unstable: true
       notbuilt: true
 
+
 - runner-properties: &runner-properties
     name: 'runner-properties'
     properties:
@@ -145,23 +146,23 @@
       - string:
           name: NODES_COUNT
           default: '9'
-          #TODO: description
+          description: 'Amount of nodes in the test lab'
       - string:
           name: ADMIN_NODE_MEMORY
           default: '4096'
-          #TODO: description
+          description: 'Amount of vitrual RAM for admin node'
       - string:
           name: SLAVE_NODE_MEMORY
           default: '4096'
-          #TODO: description
+          description: 'Amount of vitrual RAM per slave node'
       - string:
           name: ADMIN_NODE_CPU
           default: '4'
-          #TODO: description
+          description: 'Amount of vitrual CPUs for admin node'
       - string:
           name: SLAVE_NODE_CPU
           default: '4'
-          #TODO: description
+          description: 'Amount of vitrual CPUs per slave node'
       - string:
           name: ENV_PREFIX
           default: '{fuel-release}.{plugin-name}'
@@ -238,7 +239,6 @@
     builders:
       - inject:
           properties-content: |
-            FUEL_RELEASE={fuel-release}
             ISO_STORAGE={iso-storage}
       - copyartifact:
           project: '{build-name}'
@@ -256,7 +256,7 @@
           refspec: $GERRIT_REFSPEC
           branches:
             - $GERRIT_BRANCH
-          #choosing-strategy: gerrit
+          choosing-strategy: gerrit
           submodule:
             disable: false
             tracking: true
@@ -422,7 +422,7 @@
           properties-file: 'pkg_properties'
 
       - multijob:
-          name: 'Smoke tests for open contrail'
+          name: 'Smoke tests for open/juniper contrail'
           condition: SUCCESSFUL
           projects:
            - name: '{fuel-release}.{plugin-name}.{plugin-version}.deploy_controller_compute_contrail'
@@ -430,10 +430,6 @@
              predefined-parameters: CONTRAIL_DISTRIBUTION=open
              kill-phase-on: NEVER
 
-      - multijob:
-          name: 'Smoke tests for juniper contrail'
-          condition: SUCCESSFUL
-          projects:
            - name: '{fuel-release}.{plugin-name}.{plugin-version}.deploy_controller_compute_contrail'
              current-parameters: true
              predefined-parameters: CONTRAIL_DISTRIBUTION=juniper
@@ -457,7 +453,7 @@
           properties-file: 'pkg_properties'
 
       - multijob:
-          name: 'Smoke tests for open contrail'
+          name: 'Smoke tests for open/juniper contrail. Juniper or contrail version is provided in variable by multijob'
           condition: SUCCESSFUL
           projects:
            - name: '{fuel-release}.{plugin-name}.{plugin-version}.contrail_plugin_add_delete_compute_node'
@@ -470,10 +466,6 @@
              predefined-parameters: CONTRAIL_DISTRIBUTION=open
              kill-phase-on: NEVER
 
-      - multijob:
-          name: 'Smoke tests for juniper contrail'
-          condition: SUCCESSFUL
-          projects:
            - name: '{fuel-release}.{plugin-name}.{plugin-version}.contrail_plugin_add_delete_compute_node'
              current-parameters: true
              predefined-parameters: CONTRAIL_DISTRIBUTION=juniper
