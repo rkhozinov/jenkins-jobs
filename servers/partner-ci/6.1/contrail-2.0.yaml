@@ -149,23 +149,23 @@
       - string:
           name: NODES_COUNT
           default: '9'
-          #TODO: description  
+          description: 'Amount of nodes in the test lab'
       - string:
           name: ADMIN_NODE_MEMORY
           default: '4096'
-          #TODO: description  
+          description: 'Amount of vitrual RAM for admin node'
       - string:
           name: SLAVE_NODE_MEMORY
           default: '4096'
-          #TODO: description  
+          description: 'Amount of vitrual RAM per slave node'
       - string:
           name: ADMIN_NODE_CPU
           default: '4'
-          #TODO: description  
+          description: 'Amount of vitrual CPUs for admin node'
       - string:
           name: SLAVE_NODE_CPU
           default: '4'
-          #TODO: description  
+          description: 'Amount of vitrual CPUs per slave node'
       - string:
           name: ENV_PREFIX
           default: '{fuel-release}.{plugin-name}'
