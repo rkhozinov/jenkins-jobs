@@ -45,6 +45,7 @@
       unstable: true
       notbuilt: true
 
+
 - runner-properties: &runner-properties
     name: 'runner-properties'
     properties:
@@ -238,7 +239,6 @@
     builders:
       - inject:
           properties-content: |
-            FUEL_RELEASE={fuel-release}
             ISO_STORAGE={iso-storage}
       - copyartifact:
           project: '{build-name}'
@@ -256,7 +256,7 @@
           refspec: $GERRIT_REFSPEC
           branches:
             - $GERRIT_BRANCH
-          #choosing-strategy: gerrit
+          choosing-strategy: gerrit
           submodule:
             disable: false
             tracking: true
