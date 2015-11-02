@@ -7,11 +7,14 @@ rm -f nosetests.xml
 rm -rf logs/*      
 
 export ISO_VERSION=$(cut -d'-' -f3-3<<< $ISO_FILE)
-echo $ISO_VERSION
 export REQUIRED_FREE_SPACE=200
 export ISO_PATH="${ISO_STORAGE}/${ISO_FILE}"
-export VENV_PATH="${HOME}/${FUEL_RELEASE}-venv"
 export FUEL_RELEASE=$(cut -d'-' -f2-2 <<< $ISO_FILE | tr -d '.') 
+export VENV_PATH="${HOME}/${FUEL_RELEASE}-venv"
+
+echo iso-version: $ISO_VERSION
+echo fuel-release: $FUEL_RELEASE
+echo virtual-env: $VENV_PATH 
 
 ## For plugins we should get a valid version of requrements of python-venv
 ## This requirements could be got from the github repo

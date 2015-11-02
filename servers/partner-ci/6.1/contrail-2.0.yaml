@@ -1,3 +1,5 @@
+# TODO test smoke test running by gerrit trigger RESULT: smoke multijob doesn't run open/juniper tests concurrently 
+#
 - build-gerrit-events: &build-gerrit-events
     name: 'build-gerrit-events'
     trigger-on:
@@ -45,7 +47,6 @@
       unstable: true
       notbuilt: true
 
-
 - runner-properties: &runner-properties
     name: 'runner-properties'
     properties:
@@ -58,6 +59,7 @@
           block-level: 'GLOBAL'
           queue-scanning: 'BUILDABLE'
 
+## parameters for multijobs
 - runner-parameters: &runner-parameters
     name: 'runner-parameters'
     parameters:
@@ -118,6 +120,7 @@
           default: false
           description: 'The env will be erased after test'
 
+## parameters for jobs created per test-group and custom test job
 - test-parameters: &test-parameters
     name: 'test-parameters'
     parameters:
@@ -383,11 +386,6 @@
              predefined-parameters: VCENTER_SNAPSHOT=open
              kill-phase-on: NEVER
 
-      - multijob:
-          name: 'Smoke tests for juniper contrail'
-          condition: SUCCESSFUL
-          projects:
-            
            - name: '{fuel-release}.{plugin-name}.{plugin-version}.deploy_contrail'
              current-parameters: true
              predefined-parameters: CONTRAIL_DISTRIBUTION=juniper
