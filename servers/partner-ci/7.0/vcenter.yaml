@@ -1,19 +1,52 @@
-# jobs for test-group
-- defaults:
-    name: global
-    logrotate:
-        daysToKeep: 7
-        numToKeep: 10
-
+- runner-properties: &runner-properties
+    name: 'runner-properties'
     properties:
       - heavy-job:
           weight: 1
 
+- runner-parameters: &runner-parameters
+    name: 'runner-parameters'
     parameters:
       - string:
           name: ISO_FILE
-          default: ''
-          description: "The fuel iso name, downloded by the 'download_iso' job to tpi-s1 storage"
+          default: '{iso-file}'
+          description: 'ISO file name that is on the tpi-s1 in /storage/downloads'
+      - string:
+          name: OPENSTACK_RELEASE
+          default: 'Ubuntu'
+          description: 'Openstack release (CentOS, Ubuntu)'
+      - string:
+          name: GERRIT_REFSPEC
+          default: 'refs/heads/{gerrit-branch}'
+          description: 'Refspecs for commits in fuel-qa gerrit separated with spaces'
+      - string:
+          name: GERRIT_BRANCH
+          default: 'origin/{gerrit-branch}'
+          description: 'The branch for fuel-qa gerrit'
+      - string:
+          name: NODES_COUNT
+          default: '9'
+          description: 'Amount of nodes in the test lab'
+      - string:
+          name: ADMIN_NODE_MEMORY
+          default: '4096'
+          description: 'Amount of vitrual RAM for admin node'
+      - string:
+          name: SLAVE_NODE_MEMORY
+          default: '4096'
+          description: 'Amount of vitrual RAM per slave node'
+      - string:
+          name: ADMIN_NODE_CPU
+          default: '4'
+          description: 'Amount of vitrual CPUs for admin node'
+      - string:
+          name: SLAVE_NODE_CPU
+          default: '4'
+          description: 'Amount of vitrual CPUs per slave node'
+      - string:
+          name: ENV_PREFIX
+          default: '{fuel-release}.{plugin-name}'
+          description: 'The name of devops env. Needed to properly work of existing mode of devops'
       - bool:
           name: USE_SNAPSHOTS
           default: true
@@ -26,6 +59,92 @@
           name: ERASE_AFTER
           default: false
           description: 'The env will be erased after test'
+
+- test-parameters: &test-parameters
+    name: 'test-parameters'
+    parameters:
+      - string:
+          name: TEST_GROUP
+          default: '{testgroup}'
+      - string:
+          name: VCENTER_SNAPSHOT
+          default: 'vcenterha'
+          description: 'Snapshot name for vsphere lab'
+      - string:
+          name: ISO_FILE
+          default: '{iso-file}'
+          description: 'ISO file name that is on the tpi-s1 in /storage/downloads'
+      - string:
+          name: OPENSTACK_RELEASE
+          default: 'Ubuntu'
+          description: 'Openstack release (CentOS, Ubuntu)'
+      - string:
+          name: GERRIT_REFSPEC
+          default: 'refs/heads/{gerrit-branch}'
+          description: 'Refspecs for commits in fuel-qa gerrit separated with spaces'
+      - string:
+          name: GERRIT_BRANCH
+          default: 'origin/{gerrit-branch}'
+          description: 'The branch for fuel-qa gerrit'
+      - string:
+          name: NODES_COUNT
+          default: '9'
+          description: 'Amount of nodes in the test lab'
+      - string:
+          name: ADMIN_NODE_MEMORY
+          default: '4096'
+          description: 'Amount of vitrual RAM for admin node'
+      - string:
+          name: SLAVE_NODE_MEMORY
+          default: '4096'
+          description: 'Amount of vitrual RAM per slave node'
+      - string:
+          name: ADMIN_NODE_CPU
+          default: '4'
+          description: 'Amount of vitrual CPUs for admin node'
+      - string:
+          name: SLAVE_NODE_CPU
+          default: '4'
+          description: 'Amount of vitrual CPUs per slave node'
+      - string:
+          name: ENV_PREFIX
+          default: '{fuel-release}.{plugin-name}'
+          description: 'The name of devops env. Needed to properly work of existing mode of devops'
+      - bool:
+          name: USE_SNAPSHOTS
+          default: true
+          descrition: 'Will be used existing environment'
+      - bool:
+          name: SHUTDOWN_AFTER
+          default: true
+          decsription: 'The env will be powered off after test'
+      - bool:
+          name: ERASE_AFTER
+          default: false
+          description: 'The env will be erased after test'
+
+# jobs for test-group
+- defaults:
+    name: global
+    logrotate:
+      daysToKeep: 7
+      numToKeep: 10
+      artifactDaysToKeep: 7
+      artifactNumToKeep: 10
+
+    properties:
+      - heavy-job:
+          weight: 1
+      - throttle:
+          max-per-node: 0
+          max-total: 0
+          categories:
+            - contrail
+            - vsphere
+            - dvs
+            - nsx
+          option: category
+    <<: *test-parameters
     wrappers:
       - ansicolor:
           colormap: xterm
@@ -33,13 +152,12 @@
           fail: true
           timeout: 6000
 - project:
-   name: '7.0.vcenter.systest'
-   description: '7.0 vcenter system tests'
    fuel-release: '7.0'
    id: 'systest'
    repobranch: 'origin/stable/7.0'
    reponame: 'fuel-qa'
-   repourl: 'https://github.com/stackforge/{reponame}.git'
+   repourl: 'https://review.openstack.org/openstack/{reponame}.git'
+   #TODO: refactor usage of virualenv creation
    venvpath: '/home/jenkins/venv-nailgun-tests-2.9'
    runner-name: '{fuel-release}.{id}.vcenter.runner'
    runner-properties: 'properties'
@@ -47,6 +165,7 @@
    default_pool: '10.109.0.0/16:24'
    nodes-count: '9'
    openstack-release: 'Ubuntu'
+   #TODO:
    vcenter-snapshot: 'vcenterha'
    iso-storage: '/storage/downloads'
    env-prefix: '{fuel-release}.vcenter'
@@ -83,18 +202,6 @@
     name: '{fuel-release}.{id}.{testgroup}'
     concurrent: false
     node: 'vsphere'
-    properties:
-      - throttle:
-          max-per-node: 0
-          max-total: 0
-          categories:
-            - vsphere
-          option: category
-    scm:
-      - git:
-          url: '{repourl}'
-          branches:
-            - '{repobranch}'
     builders:
       - inject:
           properties-content: |
@@ -147,11 +254,6 @@
           name: 'System tests for vcenter'
           condition: COMPLETED
           projects:
-            - name: '7.0.systest.vcenter_bvt'
-              current-parameters: true
-              property-file: '{runner-properties}'
-              kill-phase-on: NEVER
-
             - name: '7.0.systest.vcenter_cindervmdk'
               current-parameters: true
               property-file: '{runner-properties}'
@@ -269,3 +371,45 @@
                   skip-if-no-test-files: true
         - email:
             recipients: '{mail-to}'
+
+
+- job-template:
+    name: '{nightly-name}'
+    project-type: multijob
+    node: runner
+    <<: *runner-parameters
+    <<: *runner-properties
+    triggers:
+      - timed: 'H 19  * * *'
+    scm: []
+    builders:
+      - copyartifact:
+          project: '{bvt-name}'
+          which-build: last-successful
+          stable: true
+      - inject:
+          properties-file: 'pkg_properties'
+
+      - multijob:
+          name: 'Smoke tests for open/juniper contrail. Juniper or contrail version is provided in variable by multijob'
+          condition: SUCCESSFUL
+          projects:
+           - name: '{fuel-release}.{plugin-name}.{plugin-version}.contrail_plugin_add_delete_compute_node'
+             current-parameters: true
+             predefined-parameters: CONTRAIL_DISTRIBUTION=open
+             kill-phase-on: NEVER
+
+           - name: '{fuel-release}.{plugin-name}.{plugin-version}.deploy_ha_contrail_plugin'
+             current-parameters: true
+             predefined-parameters: CONTRAIL_DISTRIBUTION=open
+             kill-phase-on: NEVER
+
+           - name: '{fuel-release}.{plugin-name}.{plugin-version}.contrail_plugin_add_delete_compute_node'
+             current-parameters: true
+             predefined-parameters: CONTRAIL_DISTRIBUTION=juniper
+             kill-phase-on: NEVER
+
+           - name: '{fuel-release}.{plugin-name}.{plugin-version}.deploy_ha_contrail_plugin'
+             current-parameters: true
+             predefined-parameters: CONTRAIL_DISTRIBUTION=juniper
+             kill-phase-on: NEVER
