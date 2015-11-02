@@ -420,7 +420,7 @@
           properties-file: 'pkg_properties'
 
       - multijob:
-          name: 'Smoke tests for open contrail'
+          name: 'Smoke tests for open/juniper contrail'
           condition: SUCCESSFUL
           projects:
            - name: '{fuel-release}.{plugin-name}.{plugin-version}.deploy_controller_compute_contrail'
@@ -428,10 +428,6 @@
              predefined-parameters: CONTRAIL_DISTRIBUTION=open
              kill-phase-on: NEVER
 
-      - multijob:
-          name: 'Smoke tests for juniper contrail'
-          condition: SUCCESSFUL
-          projects:
            - name: '{fuel-release}.{plugin-name}.{plugin-version}.deploy_controller_compute_contrail'
              current-parameters: true
              predefined-parameters: CONTRAIL_DISTRIBUTION=juniper
@@ -455,7 +451,7 @@
           properties-file: 'pkg_properties'
 
       - multijob:
-          name: 'Smoke tests for open contrail'
+          name: 'Smoke tests for open/juniper contrail. Juniper or contrail version is provided in variable by multijob'
           condition: SUCCESSFUL
           projects:
            - name: '{fuel-release}.{plugin-name}.{plugin-version}.contrail_plugin_add_delete_compute_node'
@@ -468,10 +464,6 @@
              predefined-parameters: CONTRAIL_DISTRIBUTION=open
              kill-phase-on: NEVER
 
-      - multijob:
-          name: 'Smoke tests for juniper contrail'
-          condition: SUCCESSFUL
-          projects:
            - name: '{fuel-release}.{plugin-name}.{plugin-version}.contrail_plugin_add_delete_compute_node'
              current-parameters: true
              predefined-parameters: CONTRAIL_DISTRIBUTION=juniper
