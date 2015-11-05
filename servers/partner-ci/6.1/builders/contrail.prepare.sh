@@ -7,6 +7,7 @@ rm -f nosetests.xml
 rm -rf logs/*      
 
 export ISO_VERSION=$(cut -d'-' -f3-3<<< $ISO_FILE)
+echo iso build number is $ISO_VERSION
 export REQUIRED_FREE_SPACE=200
 export ISO_PATH="${ISO_STORAGE}/${ISO_FILE}"
 export FUEL_RELEASE=$(cut -d'-' -f2-2 <<< $ISO_FILE | tr -d '.') 
@@ -66,16 +67,24 @@ function prepare_venv {
     source "${VENV_PATH}/bin/activate"
     pip --version 
     [ $? -ne 0 ] && easy_install -U pip
-    pip install -r "${REQS_PATH}" --upgrade > /dev/null
+    pip install -r "${REQS_PATH}" --upgrade > /dev/null 2>/dev/null
     django-admin.py syncdb --settings=devops.settings --noinput
     django-admin.py migrate devops --settings=devops.settings --noinput
     deactivate
+}
+
+function fix_logger {
+   config_path="${HOME}/.devops/log.yaml"
+   echo devops config path $config_path
+   sed -i '/disable_existing_loggers.*/d' $config_path
+   echo disable_existing_loggers: False >> $config_path
 }
 
 
 ####################################################################################
 
 prepare_venv
+fix_logger
 
 # determine free space before run the cleaner
 free_space_exist=false

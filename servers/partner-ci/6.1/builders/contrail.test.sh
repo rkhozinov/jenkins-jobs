@@ -1,4 +1,4 @@
-#!/bin/bash -xe 
+#!/bin/bash -e 
 
 export ISO_PATH="${ISO_STORAGE}/${ISO_FILE}"
 export ISO_VERSION=$(cut -d'-' -f3-3 <<< $ISO_FILE) 
@@ -24,6 +24,5 @@ echo use-snapshots: $USE_SNAPSHOTS
 echo venv-path: $VENV_PATH
 echo env-name: $ENV_NAME
 echo iso-path: $ISO_PATH   
-echo plugin path: $DVS_PLUGIN_PATH plugin checksum: $(md5sum -b $DVS_PLUGIN_PATH) 
 
 ./plugin_test/utils/jenkins/system_tests.sh -t test ${systest_parameters} -i ${ISO_PATH} -j ${JOB_NAME} -o --group=${TEST_GROUP}

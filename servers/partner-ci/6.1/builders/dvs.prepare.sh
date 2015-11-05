@@ -7,12 +7,28 @@ rm -f nosetests.xml
 rm -rf logs/*      
 
 export ISO_VERSION=$(cut -d'-' -f3-3<<< $ISO_FILE)
-echo $ISO_VERSION
+echo iso build number is $ISO_VERSION
 export REQUIRED_FREE_SPACE=200
-export ISO_PATH="$ISO_STORAGE/$ISO_FILE"
-export REQS_PATH="plugin_test/fuel-qa/fuelweb_test/requirements.txt"
-export FUEL_RELEASE=$(cut -d'-' -f2-2<<< $ISO_FILE | tr -d .) 
+export ISO_PATH="${ISO_STORAGE}/${ISO_FILE}"
+export FUEL_RELEASE=$(cut -d'-' -f2-2 <<< $ISO_FILE | tr -d '.') 
 export VENV_PATH="${HOME}/${FUEL_RELEASE}-venv"
+
+echo iso-version: $ISO_VERSION
+echo fuel-release: $FUEL_RELEASE
+echo virtual-env: $VENV_PATH 
+
+## For plugins we should get a valid version of requrements of python-venv
+## This requirements could be got from the github repo
+## but for each branch of a plugin we should map specific branch of the fuel-qa repo
+## the fuel-qa branch is determined by a fuel-iso name.
+
+case "${FUEL_RELEASE}" in
+  *61* ) export REQS_BRANCH="stable/7.0" ;;
+  *70* ) export REQS_BRANCH="stable/6.1" ;; 
+   *   ) export REQS_BRANCH="master"
+esac
+
+REQS_PATH="https://raw.githubusercontent.com/openstack/fuel-qa/${REQS_BRANCH}/fuelweb_test/requirements.txt"
 
 ###############################################################################
 
@@ -51,16 +67,24 @@ function prepare_venv {
     source "${VENV_PATH}/bin/activate"
     pip --version 
     [ $? -ne 0 ] && easy_install -U pip
-    pip install -r "${REQS_PATH}" --upgrade
+    pip install -r "${REQS_PATH}" --upgrade > /dev/null 2>/dev/null
     django-admin.py syncdb --settings=devops.settings --noinput
     django-admin.py migrate devops --settings=devops.settings --noinput
     deactivate
+}
+
+function fix_logger {
+   config_path="${HOME}/.devops/log.yaml"
+   echo devops config path $config_path
+   sed -i '/disable_existing_loggers.*/d' $config_path
+   echo disable_existing_loggers: False >> $config_path
 }
 
 
 ####################################################################################
 
 prepare_venv
+fix_logger
 
 # determine free space before run the cleaner
 free_space_exist=false
