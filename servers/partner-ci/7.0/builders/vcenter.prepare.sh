@@ -1,15 +1,33 @@
 #!/bin/bash -ex 
 # for manually run of this job
-[ -z  $ISO_FILE          ] && export ISO_FILE=${ISO_FILE}  
+[ -z  $ISO_FILE ] && export ISO_FILE=${ISO_FILE}  
 
 #remove old logs and test data      
 rm -f nosetests.xml   
 rm -rf logs/*      
 
-export ISO_VERSION=$(cut -d'-' -f3-3 <<< $ISO_FILE)
+export ISO_VERSION=$(cut -d'-' -f3-3<<< $ISO_FILE)
 export REQUIRED_FREE_SPACE=200
-export ISO_PATH="$ISO_STORAGE/$ISO_FILE"
+export ISO_PATH="${ISO_STORAGE}/${ISO_FILE}"
+export FUEL_RELEASE=$(cut -d'-' -f2-2 <<< $ISO_FILE | tr -d '.') 
+export VENV_PATH="${HOME}/${FUEL_RELEASE}-venv"
 
+echo iso-version: $ISO_VERSION
+echo fuel-release: $FUEL_RELEASE
+echo virtual-env: $VENV_PATH 
+
+## For plugins we should get a valid version of requrements of python-venv
+## This requirements could be got from the github repo
+## but for each branch of a plugin we should map specific branch of the fuel-qa repo
+## the fuel-qa branch is determined by a fuel-iso name.
+
+case "${FUEL_RELEASE}" in
+  *61* ) export REQS_BRANCH="stable/7.0" ;;
+  *70* ) export REQS_BRANCH="stable/6.1" ;; 
+   *   ) export REQS_BRANCH="master"
+esac
+
+REQS_PATH="https://raw.githubusercontent.com/openstack/fuel-qa/${REQS_BRANCH}/fuelweb_test/requirements.txt"
 
 ###############################################################################
 
@@ -42,7 +60,20 @@ function delete_systest_envs {
    done
 }
 
+function prepare_venv {
+    #rm -rf "${VENV_PATH}"
+    [ ! -d $VENV_PATH ] && virtualenv --system-site-packages "${VENV_PATH}" || echo "${VENV_PATH} already exist"
+    source "${VENV_PATH}/bin/activate"
+    pip --version 
+    [ $? -ne 0 ] && easy_install -U pip
+    pip install -r "${REQS_PATH}" --upgrade > /dev/null
+    django-admin.py syncdb --settings=devops.settings --noinput
+    django-admin.py migrate devops --settings=devops.settings --noinput
+    deactivate
+}
 ####################################################################################
+
+prepare_venv
 
 # determine free space before run the cleaner
 free_space_exist=false

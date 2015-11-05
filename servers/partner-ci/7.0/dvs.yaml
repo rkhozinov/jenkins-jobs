@@ -1,3 +1,24 @@
+## common git settings to get sources
+- common-scm: &common-scm
+    name: 'common-scm'
+    scm:
+      - git:
+          name: ''
+          url: 'https://review.openstack.org/openstack/{gerrit-repo}'
+          refspec: $GERRIT_REFSPEC
+          branches:
+            - $GERRIT_BRANCH
+          choosing-strategy: gerrit
+          submodule:
+            disable: false
+            tracking: true
+            recursive: true
+          clean:
+            before: false
+          # TODO: need to check that. it can affect artifacts
+          wipe-workspace: false
+
+## list of gerrit events to trigger build job
 - build-gerrit-events: &build-gerrit-events
     name: 'build-gerrit-events'
     trigger-on:
@@ -57,68 +78,26 @@
           block-level: 'GLOBAL'
           queue-scanning: 'BUILDABLE'
 
+## properties for test jobs
+- test-properties: &test-properties
+    name: 'test-properties'
+    properties:
+      - heavy-job:
+          weight: 1
+      - throttle:
+          max-per-node: 0
+          max-total: 0
+          categories:
+            - vsphere
+            - dvs
+            - nsx
+            - contrail
+          option: category
+
+## parameters for smoke, bvt and nigthly multijobs
 - runner-parameters: &runner-parameters
     name: 'runner-parameters'
     parameters:
-      - string:
-          name: ISO_FILE
-          default: '{iso-file}'
-          description: 'ISO file name that is on the tpi-s1 in /storage/downloads'
-      - string:
-          name: OPENSTACK_RELEASE
-          default: 'Ubuntu'
-          description: 'Openstack release (CentOS, Ubuntu)'
-      - string:
-          name: GERRIT_REFSPEC
-          default: 'refs/heads/{gerrit-branch}'
-          description: 'Refspecs for commits in fuel-qa gerrit separated with spaces'
-      - string:
-          name: GERRIT_BRANCH
-          default: 'origin/{gerrit-branch}'
-          description: 'The branch for fuel-qa gerrit'
-      - string:
-          name: NODES_COUNT
-          default: '9'
-          #TODO: description
-      - string:
-          name: ADMIN_NODE_MEMORY
-          default: '4096'
-          #TODO: description
-      - string:
-          name: SLAVE_NODE_MEMORY
-          default: '4096'
-          #TODO: description
-      - string:
-          name: ADMIN_NODE_CPU
-          default: '4'
-          #TODO: description
-      - string:
-          name: SLAVE_NODE_CPU
-          default: '4'
-          #TODO: description
-      - string:
-          name: ENV_PREFIX
-          default: '{fuel-release}.{plugin-name}'
-          description: 'The name of devops env. Needed to properly work of existing mode of devops'
-      - bool:
-          name: USE_SNAPSHOTS
-          default: true
-          descrition: 'Will be used existing environment'
-      - bool:
-          name: SHUTDOWN_AFTER
-          default: true
-          decsription: 'The env will be powered off after test'
-      - bool:
-          name: ERASE_AFTER
-          default: false
-          description: 'The env will be erased after test'
-
-- test-parameters: &test-parameters
-    name: 'test-parameters'
-    parameters:
-      - string:
-          name: TEST_GROUP
-          default: '{testgroup}'
       - string:
           name: VCENTER_SNAPSHOT
           default: 'vcenterha'
@@ -128,6 +107,29 @@
           default: '{iso-file}'
           description: 'ISO file name that is on the tpi-s1 in /storage/downloads'
       - string:
+          name: ISO_STORAGE
+          default: '/storage/downloads'
+          description: 'Storage for iso files'
+      - string:
+          name: ISO_VERSION
+          description: 'Contrainer for storing an iso build number to output it as job name'
+      - bool:
+          name: UPDATE_MASTER
+          default: true
+          description: 'turns update fuel master node to maintenance update'
+      - string:
+          name: UPDATE_FUEL_MIRROR
+          default: 'http://mirror.fuel-infra.org/mos-repos/centos/mos7.0-centos6-fuel/proposed/x86_64/ http://mirror.fuel-infra.org/mos-repos/centos/mos7.0-centos6-fuel/security/x86_64/ http://mirror.fuel-infra.org/mos-repos/centos/mos7.0-centos6-fuel/updates/x86_64/'
+          description: 'proposed repositories to update fuel master node'
+      - string:
+          name: MIRROR_UBUNTU
+          default: 'deb http://mirror.seed-cz1.fuel-infra.org/pkgs/ubuntu-latest/ trusty main universe multiverse|deb http://mirror.seed-cz1.fuel-infra.org/pkgs/ubuntu-latest/ trusty-updates main universe multiverse|deb http://mirror.seed-cz1.fuel-infra.org/pkgs/ubuntu-latest/ trusty-security main universe multiverse'
+          description: 'proposed repositories to update ubuntu cluster'
+      - string:
+          name: VCENTER_SNAPSHOT
+          default: 'vcenterha'
+          description: 'Snapshot name for vsphere lab'
+      - string:
           name: OPENSTACK_RELEASE
           default: 'Ubuntu'
           description: 'Openstack release (CentOS, Ubuntu)'
@@ -142,39 +144,96 @@
       - string:
           name: NODES_COUNT
           default: '9'
-          #TODO: description
+          description: 'Amount of nodes in the test lab'
       - string:
           name: ADMIN_NODE_MEMORY
           default: '4096'
-          #TODO: description
+          description: 'Amount of vitrual RAM for admin node'
       - string:
           name: SLAVE_NODE_MEMORY
           default: '4096'
-          #TODO: description
+          description: 'Amount of vitrual RAM per slave node'
       - string:
           name: ADMIN_NODE_CPU
           default: '4'
-          #TODO: description
       - string:
           name: SLAVE_NODE_CPU
           default: '4'
-          #TODO: description
       - string:
           name: ENV_PREFIX
           default: '{fuel-release}.{plugin-name}'
           description: 'The name of devops env. Needed to properly work of existing mode of devops'
       - bool:
           name: USE_SNAPSHOTS
-          default: true
+          default: false
           descrition: 'Will be used existing environment'
       - bool:
           name: SHUTDOWN_AFTER
           default: true
           decsription: 'The env will be powered off after test'
+
+## parameters for jobs created per test-group and custom test job
+          name: ISO_STORAGE
+          default: '/storage/downloads'
+          description: 'Storage for iso files'
+      - string:
+          name: ISO_VERSION
+          description: 'Contrainer for storing an iso build number to output it as job name'
       - bool:
-          name: ERASE_AFTER
+          name: UPDATE_MASTER
+          default: true
+          description: 'turns update fuel master node to maintenance update'
+      - string:
+          name: UPDATE_FUEL_MIRROR
+          default: 'http://mirror.fuel-infra.org/mos-repos/centos/mos7.0-centos6-fuel/proposed/x86_64/ http://mirror.fuel-infra.org/mos-repos/centos/mos7.0-centos6-fuel/security/x86_64/ http://mirror.fuel-infra.org/mos-repos/centos/mos7.0-centos6-fuel/updates/x86_64/'
+          description: 'proposed repositories to update fuel master node'
+      - string:
+          name: MIRROR_UBUNTU
+          default: 'deb http://mirror.seed-cz1.fuel-infra.org/pkgs/ubuntu-latest/ trusty main universe multiverse|deb http://mirror.seed-cz1.fuel-infra.org/pkgs/ubuntu-latest/ trusty-updates main universe multiverse|deb http://mirror.seed-cz1.fuel-infra.org/pkgs/ubuntu-latest/ trusty-security main universe multiverse'
+          description: 'proposed repositories to update ubuntu cluster'
+      - string:
+          name: EXTRA_DEB_REPOS
+          default: 'mos-updates-2,deb http://mirror.seed-cz1.fuel-infra.org/mos-repos/ubuntu/snapshots/7.0-latest mos7.0-updates main restricted|mos-security-2,deb http://mirror.seed-cz1.fuel-infra.org/mos-repos/ubuntu/snapshots/7.0-latest mos7.0-security main restricted'
+          description: 'proposed repositories to update ubuntu cluster'
+      - string:
+          name: OPENSTACK_RELEASE
+          default: 'Ubuntu'
+          description: 'Openstack release (CentOS, Ubuntu)'
+      - string:
+          name: GERRIT_REFSPEC
+          default: 'refs/heads/{gerrit-branch}'
+          description: 'Refspecs for commits in fuel-qa gerrit separated with spaces'
+      - string:
+          name: GERRIT_BRANCH
+          default: 'origin/{gerrit-branch}'
+          description: 'The branch for fuel-qa gerrit'
+      - string:
+          name: NODES_COUNT
+          default: '9'
+      - string:
+          name: ADMIN_NODE_MEMORY
+          default: '4096'
+      - string:
+          name: SLAVE_NODE_MEMORY
+          default: '4096'
+      - string:
+          name: ADMIN_NODE_CPU
+          default: '4'
+      - string:
+          name: SLAVE_NODE_CPU
+          default: '4'
+      - string:
+          name: ENV_PREFIX
+          default: '{fuel-release}.{plugin-name}'
+          description: 'The name of devops env. Needed to properly work of existing mode of devops'
+      - bool:
+          name: USE_SNAPSHOTS
           default: false
-          description: 'The env will be erased after test'
+          descrition: 'Will be used existing environment'
+      - bool:
+          name: SHUTDOWN_AFTER
+          default: true
+          decsription: 'The env will be powered off after test'
 
 - project:
     name: 'predefined_parameters'
@@ -185,12 +244,13 @@
     custom-name: '{fuel-release}.{plugin-name}.custom'
     smoke-name: '{fuel-release}.{plugin-name}.smoke'
     bvt-name: '{fuel-release}.{plugin-name}.bvt'
+    mu-name: '{fuel-release}.{plugin-name}.mu'
     nightly-name: '{fuel-release}.{plugin-name}.nightly'
     iso-file: 'fuel-7.0-301-2015-09-22_20-01-53.iso'
     gerrit-repo: 'fuel-plugin-vmware-dvs'
     gerrit-branch: 'master'
     email-to: 'rkhozinov@mirantis.com'
-    iso-storage: '/storage/downloads'
+    released-plugin-path: '/storage/dvs/released/dvs-2.0.0.noarch.rpm'
 
     testgroup:
       - dvs_vcenter_smoke
@@ -213,6 +273,7 @@
       - '{custom-name}'
       - '{smoke-name}'
       - '{bvt-name}'
+      - '{mu-name}'
       - '{fuel-release}.{plugin-name}.{testgroup}'
 
 - defaults:
@@ -234,38 +295,25 @@
             - vsphere
             - dvs
             - nsx
+            - contrail
           option: category
     <<: *test-parameters
     builders:
       - inject:
           properties-content: |
-            FUEL_RELEASE={fuel-release}
             ISO_STORAGE={iso-storage}
       - copyartifact:
           project: '{build-name}'
           which-build: last-successful
-      - inject:
-          properties-file: 'pkg_properties'
       - shell:
           !include-raw-escape builders/dvs.prepare.sh
       - shell:
           !include-raw-escape builders/dvs.test.sh
-    scm:
-      - git:
-          name: ''
-          url: 'https://review.openstack.org/openstack/{gerrit-repo}'
-          refspec: $GERRIT_REFSPEC
-          branches:
-            - $GERRIT_BRANCH
-          #choosing-strategy: gerrit
-          submodule:
-            disable: false
-            tracking: true
-            recursive: true
-          clean:
-            before: false
-          wipe-workspace: true
+      - shell: |
+          env > properties
     wrappers:
+      - inject-passwords:
+          global: true
       - ansicolor:
           colormap: xterm
       - timeout:
@@ -273,7 +321,17 @@
           timeout: 6000
     publishers:
       - archive:
-          artifacts: '**/nosetests.xml,logs/*'
+          artifacts: 'build.properties'
+          allow-empty: false
+      - archive:
+          artifacts: 'properties'
+          allow-empty: false
+      - archive:
+          artifacts: '**/nosetests.xml'
+          allow-empty: true
+          fingerprint: true
+      - archive:
+          artifacts: 'logs/*'
           allow-empty: true
           fingerprint: true
       - xunit:
@@ -288,22 +346,10 @@
     name: '{build-name}'
     node: 'runner'
     concurrent: true
-    scm:
-      - git:
-          name: ''
-          url: 'https://review.openstack.org/openstack/{gerrit-repo}'
-          refspec: $GERRIT_REFSPEC
-          branches:
-            - $GERRIT_BRANCH
-          #choosing-strategy: gerrit
-          submodule:
-            disable: true
-            tracking: true
-            recursive: true
-          clean:
-            before: false
-          wipe-workspace: false
-
+    description: |
+      '<a href=https://github.com/openstack/{gerrit-repo}>
+       Build {name} plugin from fuel-plugins project</a>'
+    <<: *common-scm
     triggers:
       - gerrit:
           <<: *build-gerrit-events
@@ -315,27 +361,15 @@
       - shell:
           !include-raw-escape './builders/rpm-check.sh'
       - shell: |
-          echo PKG_BUILD_ID=${{BUILD_ID}}  > pkg_properties
-          echo PKG_BUILD_URL=${{BUILD_URL}} >> pkg_properties
-          pkg=$(ls | grep '.*\.rpm')
-          pkg_checksum=$(md5sum -b $pkg | awk '{{print $1}}')
-          echo PGK_CHECKSUM=$pkg_checksum >> pkg_properties
-
-    description: |
-      '<a href=https://github.com/openstack/{gerrit-repo}>
-       Build {name} plugin from fuel-plugins project</a>'
-    parameters:
-      - string:
-          name: 'GERRIT_REFSPEC'
-          default: 'refs/heads/{gerrit-branch}'
-    properties:
-      - heavy-job:
-          weight: 1
+          env > build.properties
     publishers:
       - archive:
-          artifacts: '*.rpm,pkg_properties'
+          artifacts: '*.rpm'
+          allow-empty: false
+      - archive:
+          artifacts: 'build.properties'
+          allow-empty: false
       - email:
-          notify-every-unstable-build: true
           recipients: '{email-to}'
 
 - job-template:
@@ -356,25 +390,26 @@
     node: runner
     <<: *runner-parameters
     <<: *runner-properties
+    scm:  []
+    publishers:
+      - archive:
+          artifacts: 'build.properties'
+          allow-empty: false
+      - archive:
+          artifacts: 'smoke.properties'
+          allow-empty: false
+      - email:
+          recipients: '{email-to}'
     triggers:
       - gerrit:
           <<: *smoke-gerrit-events
           <<: *generic-gerrit-projects
-    scm:  []
-    publishers:
-      - archive:
-          artifacts: 'logs/*,pkg_properties'
-          allow-empty: true
-          fingerprint: true
-      - email:
-          recipients: '{email-to}'
     builders:
+      - shell: env > smoke.properties
       - copyartifact:
           project: '{build-name}'
           which-build: last-successful
           stable: true
-      - inject:
-          properties-file: 'pkg_properties'
       - multijob:
           name: 'Smoke tests for dvs.vcenter5'
           condition: SUCCESSFUL
@@ -392,6 +427,8 @@
              predefined-parameters: VCENTER_SNAPSHOT=vcenter6
              kill-phase-on: NEVER
 
+## The multijob for run bvt tests for vsphere5 and vsphere6
+## runs by merge event trigger
 - job-template:
     name: '{bvt-name}'
     description: 'The Smoke test for {fuel-release}.{plugin-name}.{plugin-version}'
@@ -407,19 +444,19 @@
           <<: *generic-gerrit-projects
     publishers:
       - archive:
-          artifacts: 'logs/*,*.rpm,pkg_properties'
-          allow-empty: true
-          fingerprint: true
+          artifacts: 'build.properties'
+          allow-empty: false
+      - archive:
+          artifacts: 'bvt.properties'
+          allow-empty: false
       - email:
           recipients: '{email-to}'
     builders:
+      - shell: env > bvt.properties
       - copyartifact:
           project: '{build-name}'
           which-build: last-successful
           stable: true
-      - inject:
-          properties-file: 'pkg_properties'
-
       - multijob:
           name: 'Smoke tests for dvs.vcenter5'
           condition: SUCCESSFUL
@@ -434,18 +471,80 @@
              current-parameters: true
              kill-phase-on: NEVER
 
+- job-template:
+    name: '{mu-name}'
+    description: 'The Smoke test for {fuel-release}.{plugin-name}'
+    disabled: true
+    concurrent: true
+    project-type: multijob
+    node: runner
+    <<: *runner-parameters
+    properties:
+      - heavy-job:
+          weight: 1
+    scm:  []
+    triggers:
+      - timed: 'H 19  * * *'
+    publishers:
+      - archive:
+          artifacts: 'mu.properties'
+          allow-empty: false
+      - email:
+          recipients: '{email-to}'
+    builders:
+      - shell: env > mu.properties
       - multijob:
-          name: 'Smoke tests for dvs.vcenter6'
+          name: '1st phase - all tests'
+          condition: FAILURE
+          projects:
+            - name: '{fuel-release}.{plugin-name}.dvs_mu'
+              current-parameters: true
+              kill-phase-on: NEVER
+      - multijob:
+          name: '2st phase - mu test'
           condition: SUCCESSFUL
           projects:
-
-           - name: '{fuel-release}.{plugin-name}.dvs_vcenter_bvt'
-             predefined-parameters: VCENTER_SNAPSHOT=vcenter6
+           - name: '{fuel-release}.{plugin-name}.dvs_vcenter_ha_mode'
              current-parameters: true
              kill-phase-on: NEVER
 
-           - name: '{fuel-release}.{plugin-name}.dvs_vcenter_bvt2'
-             predefined-parameters: VCENTER_SNAPSHOT=vcenter6
+           - name: '{fuel-release}.{plugin-name}.dvs_vcenter_ceph'
+             current-parameters: true
+             kill-phase-on: NEVER
+
+           - name: '{fuel-release}.{plugin-name}.dvs_vcenter_ceph_2'
+             current-parameters: true
+             kill-phase-on: NEVER
+
+           - name: '{fuel-release}.{plugin-name}.dvs_vcenter_ceilometer'
+             current-parameters: true
+             kill-phase-on: NEVER
+
+           - name: '{fuel-release}.{plugin-name}.dvs_vcenter_ceilometer_2'
+             current-parameters: true
+             kill-phase-on: NEVER
+
+           - name: '{fuel-release}.{plugin-name}.dvs_vcenter_add_delete_nodes'
+             current-parameters: true
+             kill-phase-on: NEVER
+
+           - name: '{fuel-release}.{plugin-name}.dvs_vcenter_add_delete_controller'
+             current-parameters: true
+             kill-phase-on: NEVER
+
+           - name: '{fuel-release}.{plugin-name}.dvs_vcenter_networks'
+             current-parameters: true
+             kill-phase-on: NEVER
+
+           - name: '{fuel-release}.{plugin-name}.dvs_vcenter_ping_public'
+             current-parameters: true
+             kill-phase-on: NEVER
+
+           - name: '{fuel-release}.{plugin-name}.dvs_vcenter_5_instances'
+             current-parameters: true
+             kill-phase-on: NEVER
+
+           - name: '{fuel-release}.{plugin-name}.dvs_vcenter_uninstall'
              current-parameters: true
              kill-phase-on: NEVER
 
@@ -464,17 +563,32 @@
     project-type: multijob
     node: runner
     <<: *runner-parameters
-    <<: *runner-properties
+    properties:
+      - heavy-job:
+          weight: 1
+    publishers:
+      - archive:
+          artifacts: 'nigthly.properties'
+          allow-empty: false
+      - archive:
+          artifacts: 'build.properties'
+          allow-empty: false
+      - email:
+          recipients: '{email-to}'
+    scm: []
     triggers:
       - timed: 'H 19  * * *'
-    scm: []
+#      - reverse:
+#          jobs: '{mu-name}'
+#          result: 'failure'
+
     builders:
+      - shell: env > nigthly.properties
+        # TODO: when we use mu lifecycle we should use
       - copyartifact:
           project: '{bvt-name}'
           which-build: last-successful
           stable: true
-      - inject:
-          properties-file: 'pkg_properties'
       - multijob:
           name: 'System tests for dvs{fuel-release}.{plugin-version} vcenter5'
           condition: COMPLETED
