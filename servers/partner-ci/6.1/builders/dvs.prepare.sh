@@ -7,7 +7,6 @@ rm -f nosetests.xml
 rm -rf logs/*      
 
 export ISO_VERSION=$(cut -d'-' -f3-3<<< $ISO_FILE)
-echo iso build number is $ISO_VERSION
 export REQUIRED_FREE_SPACE=200
 export ISO_PATH="${ISO_STORAGE}/${ISO_FILE}"
 export FUEL_RELEASE=$(cut -d'-' -f2-2 <<< $ISO_FILE | tr -d '.') 
@@ -38,7 +37,10 @@ REQS_PATH="https://raw.githubusercontent.com/openstack/fuel-qa/${REQS_BRANCH}/fu
 function delete_envs {
    [ -z $VIRTUAL_ENV ] && exit 1
    dos.py sync
-   for env in $(dos.py list | tail -n +3) ; do dos.py erase $env; done
+   env_list=$(dos.py list | tail -n +3)
+   if [ ! -z $env_list ]; then
+     for env in $env_list; do dos.py erase $env; done
+   fi
 }
 
 ## We have limited cpu resources, because we use two hypervisors with heavy VMs, so
@@ -47,7 +49,10 @@ function delete_envs {
 function destroy_envs {
    [ -z $VIRTUAL_ENV ] && exit 1
    dos.py sync
-   for env in $(dos.py list | tail -n +3); do dos.py destroy $env; done
+   env_list=$(dos.py list | tail -n +3)
+   if [ ! -z $env_list ]; then
+     for env in $env_list; do dos.py destroy $env; done
+   fi
 }
 
 ## Delete all systest envs except the env with the same version of a fuel-build 

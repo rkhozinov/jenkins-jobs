@@ -1,3 +1,25 @@
+## configuration for git scm
+## with plugin repository
+- plugin-repo-git: &plugin-repo-git
+    name: 'plugin-repo-git'
+    scm:
+      - git:
+          name: ''
+          url: 'https://review.openstack.org/openstack/{gerrit-repo}'
+          refspec: $GERRIT_REFSPEC
+          branches:
+            - $GERRIT_BRANCH
+          choosing-strategy: gerrit
+          submodule:
+            disable: false
+            tracking: true
+            recursive: true
+          clean:
+            before: false
+          wipe-workspace: true
+
+## configuration of gerrit section for the build job
+## build job should run on patchset, draft, merge events
 - build-gerrit-events: &build-gerrit-events
     name: 'build-gerrit-events'
     trigger-on:
@@ -7,6 +29,8 @@
           exclude-trivial-rebase: true
           exclude-no-code-change: true
 
+## configuration of gerrit event for the smoke multijob
+## smoke multijob should run on patchset, draft events
 - smoke-gerrit-events: &smoke-gerrit-events
     name: 'smoke-gerrit-events'
     trigger-on:
@@ -15,11 +39,14 @@
           exclude-trivial-rebase: true
           exclude-no-code-change: true
 
+## configuration of gerrit event for the bvt multijob
+## bvt multijob should run only on merge event
 - bvt-gerrit-events: &bvt-gerrit-events
     name: 'bvt-gerrit-events'
     trigger-on:
       - change-merged-event
 
+## the main part of gerrit section as yaml anchor
 - generic-gerrit-projects: &generic-gerrit-projects
     name: 'generic-gerrit-projects'
     projects:
@@ -45,6 +72,7 @@
       unstable: true
       notbuilt: true
 
+## properties for smoke, bvt and nigthly multijobs
 - runner-properties: &runner-properties
     name: 'runner-properties'
     properties:
@@ -53,10 +81,11 @@
       - build-blocker:
           use-build-blocker: true
           blocking-jobs:
-            - '{bvt-name}'
+            - '{build-name}'
           block-level: 'GLOBAL'
           queue-scanning: 'BUILDABLE'
 
+## parameters for smoke, bvt and nigthly multijobs
 - runner-parameters: &runner-parameters
     name: 'runner-parameters'
     parameters:
@@ -83,9 +112,11 @@
       - string:
           name: NODES_COUNT
           default: '9'
+          description: 'Amount of nodes in a virtual cluster'
       - string:
           name: ADMIN_NODE_MEMORY
           default: '4096'
+          description: 'Amount of virtual memory for the master node'
       - string:
           name: SLAVE_NODE_MEMORY
           default: '4096'
@@ -112,6 +143,37 @@
           default: false
           description: 'The env will be erased after test'
 
+## publishers for smoke, bvt, build and nithly jobs
+## arcives rpm, pkg_properties and email conf
+- runner-publishers: &runner-publishers
+    name: 'runner-publishers'
+    publishers:
+      - archive:
+          artifacts: 'pkg_properties'
+          allow-empty: false
+      - archive:
+          artifacts: '*.rpm'
+          allow-empty: false
+      - email:
+          recipients: '{email-to}'
+
+## properties for test jobs
+- test-properties: &test-properties
+    name: 'test-properties'
+    properties:
+      - heavy-job:
+          weight: 1
+      - throttle:
+          max-per-node: 0
+          max-total: 0
+          categories:
+            - vsphere
+            - dvs
+            - nsx
+            - contrail
+          option: category
+
+## parameters for test jobs
 - test-parameters: &test-parameters
     name: 'test-parameters'
     parameters:
@@ -182,7 +244,7 @@
     nightly-name: '{fuel-release}.{plugin-name}.nightly'
     iso-file: 'fuel-7.0-301-2015-09-22_20-01-53.iso'
     gerrit-repo: 'fuel-plugin-vmware-dvs'
-    gerrit-branch: 'master'
+    gerrit-branch: 'stable/7.0'
     email-to: 'rkhozinov@mirantis.com'
     iso-storage: '/storage/downloads'
 
@@ -218,25 +280,15 @@
       numToKeep: 10
       artifactDaysToKeep: 7
       artifactNumToKeep: 10
-    properties:
-      - heavy-job:
-          weight: 1
-      - throttle:
-          max-per-node: 0
-          max-total: 0
-          categories:
-            - vsphere
-            - dvs
-            - nsx
-            - contrail
-          option: category
+    <<: *test-properties
     <<: *test-parameters
+    <<: *plugin-repo-git
     builders:
       - inject:
           properties-content: |
             ISO_STORAGE={iso-storage}
       - copyartifact:
-          project: '{build-name}'
+          project: '{bvt-name}'
           which-build: last-successful
       - inject:
           properties-file: 'pkg_properties'
@@ -244,21 +296,6 @@
           !include-raw-escape builders/dvs.prepare.sh
       - shell:
           !include-raw-escape builders/dvs.test.sh
-    scm:
-      - git:
-          name: ''
-          url: 'https://review.openstack.org/openstack/{gerrit-repo}'
-          refspec: $GERRIT_REFSPEC
-          branches:
-            - $GERRIT_BRANCH
-          #choosing-strategy: gerrit
-          submodule:
-            disable: false
-            tracking: true
-            recursive: true
-          clean:
-            before: false
-          wipe-workspace: true
     wrappers:
       - ansicolor:
           colormap: xterm
@@ -267,7 +304,14 @@
           timeout: 6000
     publishers:
       - archive:
-          artifacts: '**/nosetests.xml,logs/*'
+          artifacts: 'pkg_properties'
+          allow-empty: false
+      - archive:
+          artifacts: '**/nosetests.xml'
+          allow-empty: true
+          fingerprint: true
+      - archive:
+          artifacts: 'logs/*'
           allow-empty: true
           fingerprint: true
       - xunit:
@@ -282,27 +326,19 @@
     name: '{build-name}'
     node: 'runner'
     concurrent: true
-    scm:
-      - git:
-          name: ''
-          url: 'https://review.openstack.org/openstack/{gerrit-repo}'
-          refspec: $GERRIT_REFSPEC
-          branches:
-            - $GERRIT_BRANCH
-          #choosing-strategy: gerrit
-          submodule:
-            disable: true
-            tracking: true
-            recursive: true
-          clean:
-            before: false
-          wipe-workspace: false
-
+    <<: *plugin-repo-git
+    <<: *runner-publishers
     triggers:
       - gerrit:
           <<: *build-gerrit-events
           <<: *generic-gerrit-projects
-
+    parameters:
+      - string:
+          name: 'GERRIT_REFSPEC'
+          default: 'refs/heads/{gerrit-branch}'
+    properties:
+      - heavy-job:
+          weight: 1
     builders:
       - shell:
           !include-raw-escape './builders/build-plugin.sh'
@@ -315,23 +351,6 @@
           pkg=$(ls | grep '.*\.rpm')
           pkg_checksum=$(md5sum -b $pkg | awk '{{print $1}}')
           echo PGK_CHECKSUM=$pkg_checksum >> pkg_properties
-
-    description: |
-      '<a href=https://github.com/openstack/{gerrit-repo}>
-       Build {name} plugin from fuel-plugins project</a>'
-    parameters:
-      - string:
-          name: 'GERRIT_REFSPEC'
-          default: 'refs/heads/{gerrit-branch}'
-    properties:
-      - heavy-job:
-          weight: 1
-    publishers:
-      - archive:
-          artifacts: '*.rpm,pkg_properties'
-      - email:
-          notify-every-unstable-build: true
-          recipients: '{email-to}'
 
 - job-template:
     name: '{fuel-release}.{plugin-name}.{testgroup}'
@@ -351,18 +370,12 @@
     node: runner
     <<: *runner-parameters
     <<: *runner-properties
+    <<: *runner-publishers
+    scm:  []
     triggers:
       - gerrit:
           <<: *smoke-gerrit-events
           <<: *generic-gerrit-projects
-    scm:  []
-    publishers:
-      - archive:
-          artifacts: 'pkg_properties'
-          allow-empty: true
-          fingerprint: true
-      - email:
-          recipients: '{email-to}'
     builders:
       - copyartifact:
           project: '{build-name}'
@@ -395,25 +408,18 @@
     node: runner
     <<: *runner-parameters
     <<: *runner-properties
+    <<: *runner-publishers
     scm:  []
     triggers:
       - gerrit:
           <<: *bvt-gerrit-events
           <<: *generic-gerrit-projects
-    publishers:
-      - archive:
-          artifacts: '*.rpm'
-          allow-empty: false
-      - archive:
-          artifacts: 'pkg_properties'
-          allow-empty: false
-      - email:
-          recipients: '{email-to}'
     builders:
       - copyartifact:
           project: '{build-name}'
           which-build: last-successful
           stable: true
+
       - inject:
           properties-file: 'pkg_properties'
 
@@ -462,9 +468,10 @@
     node: runner
     <<: *runner-parameters
     <<: *runner-properties
+    <<: *runner-publishers
+    scm: []
     triggers:
       - timed: 'H 19  * * *'
-    scm: []
     builders:
       - copyartifact:
           project: '{bvt-name}'
