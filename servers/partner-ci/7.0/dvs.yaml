@@ -65,6 +65,10 @@
           default: '{iso-file}'
           description: 'ISO file name that is on the tpi-s1 in /storage/downloads'
       - string:
+          name: VCENTER_SNAPSHOT
+          default: 'vcenterha'
+          description: 'Snapshot name for vsphere lab'
+      - string:
           name: OPENSTACK_RELEASE
           default: 'Ubuntu'
           description: 'Openstack release (CentOS, Ubuntu)'
@@ -79,23 +83,18 @@
       - string:
           name: NODES_COUNT
           default: '9'
-          #TODO: description
       - string:
           name: ADMIN_NODE_MEMORY
           default: '4096'
-          #TODO: description
       - string:
           name: SLAVE_NODE_MEMORY
           default: '4096'
-          #TODO: description
       - string:
           name: ADMIN_NODE_CPU
           default: '4'
-          #TODO: description
       - string:
           name: SLAVE_NODE_CPU
           default: '4'
-          #TODO: description
       - string:
           name: ENV_PREFIX
           default: '{fuel-release}.{plugin-name}'
@@ -142,23 +141,18 @@
       - string:
           name: NODES_COUNT
           default: '9'
-          #TODO: description
       - string:
           name: ADMIN_NODE_MEMORY
           default: '4096'
-          #TODO: description
       - string:
           name: SLAVE_NODE_MEMORY
           default: '4096'
-          #TODO: description
       - string:
           name: ADMIN_NODE_CPU
           default: '4'
-          #TODO: description
       - string:
           name: SLAVE_NODE_CPU
           default: '4'
-          #TODO: description
       - string:
           name: ENV_PREFIX
           default: '{fuel-release}.{plugin-name}'
@@ -234,12 +228,12 @@
             - vsphere
             - dvs
             - nsx
+            - contrail
           option: category
     <<: *test-parameters
     builders:
       - inject:
           properties-content: |
-            FUEL_RELEASE={fuel-release}
             ISO_STORAGE={iso-storage}
       - copyartifact:
           project: '{build-name}'
@@ -317,6 +311,7 @@
       - shell: |
           echo PKG_BUILD_ID=${{BUILD_ID}}  > pkg_properties
           echo PKG_BUILD_URL=${{BUILD_URL}} >> pkg_properties
+          echo PKG_JOB_NAME=${{JOB_NAME}} >> pkg_properties
           pkg=$(ls | grep '.*\.rpm')
           pkg_checksum=$(md5sum -b $pkg | awk '{{print $1}}')
           echo PGK_CHECKSUM=$pkg_checksum >> pkg_properties
@@ -363,7 +358,7 @@
     scm:  []
     publishers:
       - archive:
-          artifacts: 'logs/*,pkg_properties'
+          artifacts: 'pkg_properties'
           allow-empty: true
           fingerprint: true
       - email:
@@ -407,9 +402,11 @@
           <<: *generic-gerrit-projects
     publishers:
       - archive:
-          artifacts: 'logs/*,*.rpm,pkg_properties'
-          allow-empty: true
-          fingerprint: true
+          artifacts: '*.rpm'
+          allow-empty: false
+      - archive:
+          artifacts: 'pkg_properties'
+          allow-empty: false
       - email:
           recipients: '{email-to}'
     builders:
