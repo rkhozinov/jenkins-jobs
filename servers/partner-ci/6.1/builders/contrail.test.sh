@@ -25,4 +25,8 @@ echo venv-path: $VENV_PATH
 echo env-name: $ENV_NAME
 echo iso-path: $ISO_PATH   
 
+sudo /sbin/iptables -F
+sudo /sbin/iptables -t nat -F
+sudo /sbin/iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE
+
 ./plugin_test/utils/jenkins/system_tests.sh -t test ${systest_parameters} -i ${ISO_PATH} -j ${JOB_NAME} -o --group=${TEST_GROUP}
