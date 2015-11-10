@@ -108,6 +108,9 @@
           default: '{fuel-release}.{plugin-name}'
           description: 'The name of devops env. Needed to properly work of existing mode of devops'
       - bool:
+          name: BONDING
+          default: false
+      - bool:
           name: USE_SNAPSHOTS
           default: true
           descrition: 'Will be used existing environment'
@@ -167,9 +170,12 @@
           default: '4'
           description: 'Amount of vitrual CPUs per slave node'
       - string:
-          name: ENV_PREFIX
-          default: '{fuel-release}.{plugin-name}'
-          description: 'The name of devops env. Needed to properly work of existing mode of devops'
+        name: ENV_PREFIX
+        default: '{fuel-release}.{plugin-name}'
+        description: 'The name of devops env. Needed to properly work of existing mode of devops'
+      - bool:
+          name: BONDING
+          default: false
       - bool:
           name: USE_SNAPSHOTS
           default: true
