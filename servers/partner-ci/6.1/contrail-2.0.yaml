@@ -1,5 +1,3 @@
-# TODO test smoke test running by gerrit trigger RESULT: smoke multijob doesn't run open/juniper tests concurrently 
-#
 - build-gerrit-events: &build-gerrit-events
     name: 'build-gerrit-events'
     trigger-on:
@@ -82,27 +80,21 @@
       - string:
           name: NODES_COUNT
           default: '9'
-          #TODO: description  
       - string:
           name: NODES_VOLUME_SIZE
           default: '325'
-          #TODO: description  
       - string:
           name: ADMIN_NODE_MEMORY
           default: '4096'
-          #TODO: description  
       - string:
           name: SLAVE_NODE_MEMORY
           default: '4096'
-          #TODO: description  
       - string:
           name: ADMIN_NODE_CPU
           default: '4'
-          #TODO: description  
       - string:
           name: SLAVE_NODE_CPU
           default: '4'
-          #TODO: description  
       - string:
           name: ENV_PREFIX
           default: '{fuel-release}.{plugin-name}'
@@ -112,7 +104,7 @@
           default: false
       - bool:
           name: USE_SNAPSHOTS
-          default: true
+          default: false
           descrition: 'Will be used existing environment'
       - bool:
           name: SHUTDOWN_AFTER
@@ -123,6 +115,24 @@
           default: false
           description: 'The env will be erased after test'
 
+- common-scm: &common-scm
+    name: 'common-scm'
+    scm:
+      - git:
+          name: ''
+          url: 'https://review.openstack.org/openstack/{gerrit-repo}'
+          refspec: $GERRIT_REFSPEC
+          branches:
+            - $GERRIT_BRANCH
+          choosing-strategy: gerrit
+          submodule:
+            disable: false
+            tracking: true
+            recursive: true
+          clean:
+            before: false
+          wipe-workspace: true
+
 ## parameters for jobs created per test-group and custom test job
 - test-parameters: &test-parameters
     name: 'test-parameters'
@@ -130,6 +140,9 @@
       - string:
           name: CONTRAIL_DISTRIBUTION
           default: 'open'
+      - string:
+          name: CONTRAIL_PLUGIN_PATH 
+          default: ''
       - string:
           name: TEST_GROUP
           default: '{testgroup}'
@@ -170,15 +183,15 @@
           default: '4'
           description: 'Amount of vitrual CPUs per slave node'
       - string:
-        name: ENV_PREFIX
-        default: '{fuel-release}.{plugin-name}'
-        description: 'The name of devops env. Needed to properly work of existing mode of devops'
+          name: ENV_PREFIX
+          default: '{fuel-release}.{plugin-name}'
+          description: 'The name of devops env. Needed to properly work of existing mode of devops'
       - bool:
           name: BONDING
           default: false
       - bool:
           name: USE_SNAPSHOTS
-          default: true
+          default: false
           descrition: 'Will be used existing environment'
       - bool:
           name: SHUTDOWN_AFTER
@@ -198,17 +211,20 @@
     custom-name: '{fuel-release}.{plugin-name}.{plugin-version}.custom'
     smoke-name: '{fuel-release}.{plugin-name}.{plugin-version}.smoke'
     bvt-name: '{fuel-release}.{plugin-name}.{plugin-version}.bvt'
+    mu-name: '{fuel-release}.{plugin-name}.{plugin-version}.mu'
     nightly-name: '{fuel-release}.{plugin-name}.{plugin-version}.nightly'
     iso-file: 'fuel-6.1-525-2015-06-19_13-02-31.iso'
     gerrit-repo: 'fuel-plugin-contrail'
     gerrit-branch: 'stable/2.0'
     email-to: 'rkhozinov@mirantis.com'
     iso-storage: '/storage/downloads'
+    released-plugin-path: '/storage/contrail/released/contrail-2.0.0.noarch.rpm'
 
     testgroup:
       - install_contrail
+      - contrail_mu
       - deploy_contrail
-      - deploy_controller_compute_contrail
+      - contrail_bvt
       - contrail_plugin_add_delete_compute_node
       - deploy_ha_contrail_plugin
       - contrail_plugin_add_delete_controller_node
@@ -221,6 +237,7 @@
       - '{custom-name}'
       - '{smoke-name}'
       - '{bvt-name}'
+      - '{mu-name}'
       - '{fuel-release}.{plugin-name}.{plugin-version}.{testgroup}'
 
 - defaults:
@@ -245,6 +262,7 @@
             - nsx
           option: category
     <<: *test-parameters
+    <<: *common-scm
     builders:
       - inject:
           properties-content: |
@@ -258,21 +276,6 @@
           !include-raw-escape builders/contrail.prepare.sh
       - shell:
           !include-raw-escape builders/contrail.test.sh
-    scm:
-      - git:
-          name: ''
-          url: 'https://review.openstack.org/openstack/{gerrit-repo}'
-          refspec: $GERRIT_REFSPEC
-          branches:
-            - $GERRIT_BRANCH
-          choosing-strategy: gerrit
-          submodule:
-            disable: false
-            tracking: true
-            recursive: true
-          clean:
-            before: false
-          wipe-workspace: true
     wrappers:
       - ansicolor: 
           colormap: xterm
@@ -296,21 +299,8 @@
     name: '{build-name}'
     node: 'runner'
     concurrent: true
-    scm:
-      - git:
-          name: ''
-          url: 'https://review.openstack.org/openstack/{gerrit-repo}'
-          refspec: $GERRIT_REFSPEC
-          branches:
-            - $GERRIT_BRANCH
-          #choosing-strategy: gerrit
-          submodule:
-            disable: true
-            tracking: true
-            recursive: true
-          clean:
-            before: false
-          wipe-workspace: false
+
+    <<: *common-scm
 
     triggers:
       - gerrit:
@@ -358,6 +348,7 @@
 
 - job-template:
     name: '{smoke-name}'
+    disable: true
     description: 'The Smoke test for {fuel-release}.{plugin-name}.{plugin-version}'
     concurent: true
     project-type: multijob
@@ -387,15 +378,15 @@
           name: 'Smoke tests for open contrail'
           condition: SUCCESSFUL
           projects:
-           - name: '{fuel-release}.{plugin-name}.{plugin-version}.deploy_contrail'
-             current-parameters: true            
-             predefined-parameters: VCENTER_SNAPSHOT=open
-             kill-phase-on: NEVER
+            - name: '{fuel-release}.{plugin-name}.{plugin-version}.deploy_contrail'
+              current-parameters: true            
+              predefined-parameters: VCENTER_SNAPSHOT=open
+              kill-phase-on: NEVER
 
-           - name: '{fuel-release}.{plugin-name}.{plugin-version}.deploy_contrail'
-             current-parameters: true
-             predefined-parameters: CONTRAIL_DISTRIBUTION=juniper
-             kill-phase-on: NEVER
+            - name: '{fuel-release}.{plugin-name}.{plugin-version}.deploy_contrail'
+              current-parameters: true
+              predefined-parameters: CONTRAIL_DISTRIBUTION=juniper
+              kill-phase-on: NEVER
 
 - job-template:
     name: '{bvt-name}'
@@ -429,15 +420,54 @@
           name: 'Smoke tests for open/juniper contrail'
           condition: SUCCESSFUL
           projects:
-           - name: '{fuel-release}.{plugin-name}.{plugin-version}.deploy_controller_compute_contrail'
-             current-parameters: true
-             predefined-parameters: CONTRAIL_DISTRIBUTION=open
-             kill-phase-on: NEVER
+            - name: '{fuel-release}.{plugin-name}.{plugin-version}.contrail_bvt'
+              current-parameters: true
+              predefined-parameters: CONTRAIL_DISTRIBUTION=open
+              kill-phase-on: NEVER
 
-           - name: '{fuel-release}.{plugin-name}.{plugin-version}.deploy_controller_compute_contrail'
-             current-parameters: true
-             predefined-parameters: CONTRAIL_DISTRIBUTION=juniper
-             kill-phase-on: NEVER
+            - name: '{fuel-release}.{plugin-name}.{plugin-version}.contrail_bvt'
+              current-parameters: true
+              predefined-parameters: CONTRAIL_DISTRIBUTION=juniper
+              kill-phase-on: NEVER
+
+- job-template:
+    name: '{mu-name}'
+    description: 'The Smoke test for {fuel-release}.{plugin-name}.{plugin-version}'
+    concurent: true
+    project-type: multijob
+    node: runner
+    <<: *runner-parameters
+    properties:
+      - heavy-job:
+          weight: 1
+    scm:  []
+    triggers:
+      - timed: 'H 19  * * *'
+    publishers:
+      - archive:
+          artifacts: 'pkg_properties'
+          allow-empty: true
+          fingerprint: true
+      - email: 
+          recipients: '{email-to}'
+    builders:
+      - multijob:
+          name: 'Smoke tests for open/juniper contrail'
+          condition: SUCCESSFUL
+          projects:
+            - name: '{fuel-release}.{plugin-name}.{plugin-version}.contrail_mu'
+              current-parameters: true
+              predefined-parameters: 
+                CONTRAIL_DISTRIBUTION=open
+                CONTRAIL_PLUGIN_PATH={released-plugin-path}
+
+            - name: '{fuel-release}.{plugin-name}.{plugin-version}.contrail_mu'
+              current-parameters: true
+              predefined-parameters:
+                CONTRAIL_DISTRIBUTION=juniper 
+                CONTRAIL_PLUGIN_PATH={released-plugin-path}
+              kill-phase-on: NEVER
+
 
 - job-template:
     name: '{nightly-name}'
@@ -445,8 +475,11 @@
     node: runner
     <<: *runner-parameters
     <<: *runner-properties
+    
     triggers:
-      - timed: 'H 19  * * *'
+      - reverse: 
+          jobs: '{mu-name}'
+          result: 'failure'
     scm: []
     builders:
       - copyartifact:
@@ -460,22 +493,22 @@
           name: 'Smoke tests for open/juniper contrail. Juniper or contrail version is provided in variable by multijob'
           condition: SUCCESSFUL
           projects:
-           - name: '{fuel-release}.{plugin-name}.{plugin-version}.contrail_plugin_add_delete_compute_node'
-             current-parameters: true
-             predefined-parameters: CONTRAIL_DISTRIBUTION=open
-             kill-phase-on: NEVER
+            - name: '{fuel-release}.{plugin-name}.{plugin-version}.contrail_plugin_add_delete_compute_node'
+              current-parameters: true
+              predefined-parameters: CONTRAIL_DISTRIBUTION=open
+              kill-phase-on: NEVER
 
-           - name: '{fuel-release}.{plugin-name}.{plugin-version}.deploy_ha_contrail_plugin'
-             current-parameters: true
-             predefined-parameters: CONTRAIL_DISTRIBUTION=open
-             kill-phase-on: NEVER
+            - name: '{fuel-release}.{plugin-name}.{plugin-version}.deploy_ha_contrail_plugin'
+              current-parameters: true
+              predefined-parameters: CONTRAIL_DISTRIBUTION=open
+              kill-phase-on: NEVER
 
-           - name: '{fuel-release}.{plugin-name}.{plugin-version}.contrail_plugin_add_delete_compute_node'
-             current-parameters: true
-             predefined-parameters: CONTRAIL_DISTRIBUTION=juniper
-             kill-phase-on: NEVER
-
-           - name: '{fuel-release}.{plugin-name}.{plugin-version}.deploy_ha_contrail_plugin'
-             current-parameters: true
-             predefined-parameters: CONTRAIL_DISTRIBUTION=juniper
-             kill-phase-on: NEVER
+            - name: '{fuel-release}.{plugin-name}.{plugin-version}.contrail_plugin_add_delete_compute_node'
+              current-parameters: true
+              predefined-parameters: CONTRAIL_DISTRIBUTION=juniper
+              kill-phase-on: NEVER
+ 
+            - name: '{fuel-release}.{plugin-name}.{plugin-version}.deploy_ha_contrail_plugin'
+              current-parameters: true
+              predefined-parameters: CONTRAIL_DISTRIBUTION=juniper
+              kill-phase-on: NEVER

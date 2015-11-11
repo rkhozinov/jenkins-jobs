@@ -297,6 +297,8 @@
       - shell:
           !include-raw-escape builders/dvs.test.sh
     wrappers:
+      - inject-passwords:
+          global: true
       - ansicolor:
           colormap: xterm
       - timeout:
@@ -444,6 +446,7 @@
 
            - name: '{fuel-release}.{plugin-name}.dvs_vcenter_bvt'
              predefined-parameters: VCENTER_SNAPSHOT=vcenter6
+
              current-parameters: true
              kill-phase-on: NEVER
 
