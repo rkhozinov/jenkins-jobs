@@ -362,7 +362,7 @@
     scm:  []
     publishers:
       - archive:
-          artifacts: 'logs/*,pkg_properties'
+          artifacts: 'pkg_properties'
           allow-empty: true
           fingerprint: true
       - email: 
@@ -391,6 +391,7 @@
 - job-template:
     name: '{bvt-name}'
     description: 'The Smoke test for {fuel-release}.{plugin-name}.{plugin-version}'
+    disable: true
     concurent: true
     project-type: multijob
     node: runner
@@ -403,8 +404,10 @@
           <<: *generic-gerrit-projects
     publishers:
       - archive:
-          artifacts: 'logs/*,*.rpm,pkg_properties'
-          allow-empty: true
+          artifacts: 'pkg_properties'
+          fingerprint: true
+      - archive:
+          artifacts: '*.rpm'
           fingerprint: true
       - email: 
           recipients: '{email-to}'
@@ -476,11 +479,12 @@
     <<: *runner-parameters
     <<: *runner-properties
     
+    scm: []
     triggers:
       - reverse: 
           jobs: '{mu-name}'
           result: 'failure'
-    scm: []
+
     builders:
       - copyartifact:
           project: '{bvt-name}'
