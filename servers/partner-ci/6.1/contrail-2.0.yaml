@@ -348,7 +348,7 @@
 
 - job-template:
     name: '{smoke-name}'
-    disable: true
+    disabled: true
     description: 'The Smoke test for {fuel-release}.{plugin-name}.{plugin-version}'
     concurent: true
     project-type: multijob
@@ -391,7 +391,7 @@
 - job-template:
     name: '{bvt-name}'
     description: 'The Smoke test for {fuel-release}.{plugin-name}.{plugin-version}'
-    disable: true
+    disabled: true
     concurent: true
     project-type: multijob
     node: runner
