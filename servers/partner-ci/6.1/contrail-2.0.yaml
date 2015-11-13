@@ -380,7 +380,7 @@
           projects:
             - name: '{fuel-release}.{plugin-name}.{plugin-version}.deploy_contrail'
               current-parameters: true            
-              predefined-parameters: VCENTER_SNAPSHOT=open
+              predefined-parameters: CONTRAIL_DISTRIBUTION=open
               kill-phase-on: NEVER
 
             - name: '{fuel-release}.{plugin-name}.{plugin-version}.deploy_contrail'
