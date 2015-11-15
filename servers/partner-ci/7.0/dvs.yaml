@@ -1,7 +1,6 @@
-## configuration for git scm
-## with plugin repository
-- plugin-repo-git: &plugin-repo-git
-    name: 'plugin-repo-git'
+## common git settings to get sources
+- common-scm: &common-scm
+    name: 'common-scm'
     scm:
       - git:
           name: ''
@@ -18,8 +17,7 @@
             before: false
           wipe-workspace: true
 
-## configuration of gerrit section for the build job
-## build job should run on patchset, draft, merge events
+## list of gerrit events to trigger build job
 - build-gerrit-events: &build-gerrit-events
     name: 'build-gerrit-events'
     trigger-on:
@@ -81,7 +79,7 @@
       - build-blocker:
           use-build-blocker: true
           blocking-jobs:
-            - '{build-name}'
+            - '{bvt-name}'
           block-level: 'GLOBAL'
           queue-scanning: 'BUILDABLE'
 
@@ -93,14 +91,29 @@
           name: ISO_FILE
           default: '{iso-file}'
           description: 'ISO file name that is on the tpi-s1 in /storage/downloads'
+      - bool:
+          name: UPDATE_MASTER
+          default: true
+          description: 'turns update fuel master node to maintenance update'
       - string:
-          name: VCENTER_SNAPSHOT
-          default: 'vcenterha'
-          description: 'Snapshot name for vsphere lab'
+          name: UPDATE_FUEL_MIRROR
+          default: 'http://mirror.fuel-infra.org/mos-repos/centos/mos7.0-centos6-fuel/proposed/x86_64/ http://mirror.fuel-infra.org/mos-repos/centos/mos7.0-centos6-fuel/security/x86_64/ http://mirror.fuel-infra.org/mos-repos/centos/mos7.0-centos6-fuel/updates/x86_64/'
+          description: 'proposed repositories to update fuel master node'
+      - string:
+          name: MIRROR_UBUNTU
+          default: 'deb http://mirror.seed-cz1.fuel-infra.org/pkgs/ubuntu-latest/ trusty main universe multiverse|deb http://mirror.seed-cz1.fuel-infra.org/pkgs/ubuntu-latest/ trusty-updates main universe multiverse|deb http://mirror.seed-cz1.fuel-infra.org/pkgs/ubuntu-latest/ trusty-security main universe multiverse'
+          description: 'proposed repositories to update ubuntu cluster'
+      - string:
+          name: EXTRA_DEB_REPOS
+          default: 'mos-updates-2,deb http://mirror.seed-cz1.fuel-infra.org/mos-repos/ubuntu/snapshots/7.0-latest mos7.0-updates main restricted|mos-security-2,deb http://mirror.seed-cz1.fuel-infra.org/mos-repos/ubuntu/snapshots/7.0-latest mos7.0-security main restricted'
+          description: 'proposed repositories to update ubuntu cluster'
       - string:
           name: OPENSTACK_RELEASE
           default: 'Ubuntu'
           description: 'Openstack release (CentOS, Ubuntu)'
+      - string:
+          name: ISO_VERSION
+          description: 'Contrainer for storing an iso build number to output it as job name'
       - string:
           name: GERRIT_REFSPEC
           default: 'refs/heads/{gerrit-branch}'
@@ -111,7 +124,7 @@
           description: 'The branch for fuel-qa gerrit'
       - string:
           name: NODES_COUNT
-          default: '9'
+          default: '10'
           description: 'Amount of nodes in a virtual cluster'
       - string:
           name: ADMIN_NODE_MEMORY
@@ -120,12 +133,15 @@
       - string:
           name: SLAVE_NODE_MEMORY
           default: '4096'
+          description: 'Amount of vitrual memory per slave node'
       - string:
           name: ADMIN_NODE_CPU
           default: '4'
+          description: 'Amount of vitrual CPUs for admin node'
       - string:
           name: SLAVE_NODE_CPU
           default: '4'
+          description: 'Amount of vitrual CPUs per slave node'
       - string:
           name: ENV_PREFIX
           default: '{fuel-release}.{plugin-name}'
@@ -173,7 +189,7 @@
             - contrail
           option: category
 
-## parameters for test jobs
+## parameters for jobs created per test-group and custom test job
 - test-parameters: &test-parameters
     name: 'test-parameters'
     parameters:
@@ -189,6 +205,10 @@
           default: '{iso-file}'
           description: 'ISO file name that is on the tpi-s1 in /storage/downloads'
       - string:
+          name: ISO_STORAGE
+          default: '/storage/downloads'
+          description: 'Storage for iso files'
+      - string:
           name: OPENSTACK_RELEASE
           default: 'Ubuntu'
           description: 'Openstack release (CentOS, Ubuntu)'
@@ -203,18 +223,23 @@
       - string:
           name: NODES_COUNT
           default: '9'
+          description: 'Amount of nodes in the test lab'
       - string:
           name: ADMIN_NODE_MEMORY
           default: '4096'
+          description: 'Amount of vitrual RAM for admin node'
       - string:
           name: SLAVE_NODE_MEMORY
           default: '4096'
+          description: 'Amount of vitrual RAM per slave node'
       - string:
           name: ADMIN_NODE_CPU
           default: '4'
+          description: 'Amount of vitrual CPUs for admin node'
       - string:
           name: SLAVE_NODE_CPU
           default: '4'
+          description: 'Amount of vitrual CPUs per slave node'
       - string:
           name: ENV_PREFIX
           default: '{fuel-release}.{plugin-name}'
@@ -234,8 +259,8 @@
 
 - project:
     name: 'predefined_parameters'
-    fuel-release: 7.0
-    plugin-version: 1.1
+    fuel-release: '7.0'
+    plugin-version: '1.1'
     plugin-name: 'dvs'
     build-name: '{fuel-release}.{plugin-name}.build'
     custom-name: '{fuel-release}.{plugin-name}.custom'
@@ -246,7 +271,6 @@
     gerrit-repo: 'fuel-plugin-vmware-dvs'
     gerrit-branch: 'stable/7.0'
     email-to: 'rkhozinov@mirantis.com'
-    iso-storage: '/storage/downloads'
 
     testgroup:
       - dvs_vcenter_smoke
@@ -282,11 +306,8 @@
       artifactNumToKeep: 10
     <<: *test-properties
     <<: *test-parameters
-    <<: *plugin-repo-git
+    <<: *common-scm
     builders:
-      - inject:
-          properties-content: |
-            ISO_STORAGE={iso-storage}
       - copyartifact:
           project: '{bvt-name}'
           which-build: last-successful
@@ -299,6 +320,7 @@
     wrappers:
       - inject-passwords:
           global: true
+          mask-password-params: true
       - ansicolor:
           colormap: xterm
       - timeout:
@@ -324,12 +346,18 @@
       - email:
           recipients: '{email-to}'
 
+## Jobs for system tests by testgroup
 - job-template:
     name: '{build-name}'
     node: 'runner'
     concurrent: true
-    <<: *plugin-repo-git
+    description: |
+      '<a href=https://github.com/openstack/{gerrit-repo}>
+       Build {name} plugin from fuel-plugins project</a>'
+
+    <<: *common-scm
     <<: *runner-publishers
+
     triggers:
       - gerrit:
           <<: *build-gerrit-events
@@ -344,8 +372,8 @@
     builders:
       - shell:
           !include-raw-escape './builders/build-plugin.sh'
-      - shell:
-          !include-raw-escape './builders/rpm-check.sh'
+#     - shell:
+#         !include-raw-escape './builders/rpm-check.sh'
       - shell: |
           echo PKG_BUILD_ID=${{BUILD_ID}}  > pkg_properties
           echo PKG_BUILD_URL=${{BUILD_URL}} >> pkg_properties
@@ -366,6 +394,7 @@
 
 - job-template:
     name: '{smoke-name}'
+    disabled: false
     description: 'The Smoke test for {fuel-release}.{plugin-name}.{plugin-version}'
     concurrent: true
     project-type: multijob
@@ -378,6 +407,7 @@
       - gerrit:
           <<: *smoke-gerrit-events
           <<: *generic-gerrit-projects
+    scm:  []
     builders:
       - copyartifact:
           project: '{build-name}'
@@ -391,20 +421,14 @@
           projects:
            - name: '{fuel-release}.{plugin-name}.dvs_vcenter_smoke'
              current-parameters: true
-             predefined-parameters: VCENTER_SNAPSHOT=vcenterha
-             kill-phase-on: NEVER
-      - multijob:
-          name: 'Smoke tests for dvs.vcenter6'
-          condition: SUCCESSFUL
-          projects:
-           - name: '{fuel-release}.{plugin-name}.dvs_vcenter_smoke'
-             current-parameters: true
-             predefined-parameters: VCENTER_SNAPSHOT=vcenter6
+             predefined-parameters: |
+               VCENTER_SNAPSHOT=vcenterha
              kill-phase-on: NEVER
 
 - job-template:
     name: '{bvt-name}'
     description: 'The Smoke test for {fuel-release}.{plugin-name}.{plugin-version}'
+    disabled: false
     concurrent: true
     project-type: multijob
     node: runner
@@ -416,6 +440,7 @@
       - gerrit:
           <<: *bvt-gerrit-events
           <<: *generic-gerrit-projects
+
     builders:
       - copyartifact:
           project: '{build-name}'
@@ -430,30 +455,40 @@
           condition: SUCCESSFUL
           projects:
            - name: '{fuel-release}.{plugin-name}.dvs_vcenter_bvt'
-             predefined-parameters: VCENTER_SNAPSHOT=vcenterha
              current-parameters: true
              kill-phase-on: NEVER
 
            - name: '{fuel-release}.{plugin-name}.dvs_vcenter_bvt2'
-             predefined-parameters: VCENTER_SNAPSHOT=vcenterha
              current-parameters: true
              kill-phase-on: NEVER
 
+- job-template:
+    name: '{mu-name}'
+    description: 'The Smoke test for {fuel-release}.{plugin-name}'
+    disabled: true
+    concurrent: true
+    project-type: multijob
+    node: runner
+    <<: *runner-parameters
+    properties:
+      - heavy-job:
+          weight: 1
+    scm:  []
+    triggers:
+      - timed: 'H 19  * * *'
+    publishers:
+      - archive:
+          artifacts: 'pkg_properties'
+      - email:
+          recipients: '{email-to}'
+    builders:
       - multijob:
-          name: 'Smoke tests for dvs.vcenter6'
+          name: 'Smoke tests for open/juniper contrail'
           condition: SUCCESSFUL
           projects:
-
-           - name: '{fuel-release}.{plugin-name}.dvs_vcenter_bvt'
-             predefined-parameters: VCENTER_SNAPSHOT=vcenter6
-
-             current-parameters: true
-             kill-phase-on: NEVER
-
-           - name: '{fuel-release}.{plugin-name}.dvs_vcenter_bvt2'
-             predefined-parameters: VCENTER_SNAPSHOT=vcenter6
-             current-parameters: true
-             kill-phase-on: NEVER
+            - name: '{fuel-release}.{plugin-name}.dvs_mu'
+              current-parameters: true
+              kill-phase-on: NEVER
 
 - job-template:
     name: '{nightly-name}'
@@ -471,7 +506,9 @@
     node: runner
     <<: *runner-parameters
     <<: *runner-properties
-    <<: *runner-publishers
+    properties:
+      - heavy-job:
+          weight: 1
     scm: []
     triggers:
       - timed: 'H 19  * * *'
@@ -527,65 +564,5 @@
              kill-phase-on: NEVER
 
            - name: '{fuel-release}.{plugin-name}.dvs_vcenter_uninstall'
-             current-parameters: true
-             kill-phase-on: NEVER
-
-      - multijob:
-          name: 'System tests for dvs.vcenter6'
-          condition: COMPLETED
-          projects:
-
-           - name: '{fuel-release}.{plugin-name}.dvs_vcenter_ha_mode'
-             predefined-parameters: VCENTER_SNAPSHOT=vcenter6
-             current-parameters: true
-             kill-phase-on: NEVER
-
-           - name: '{fuel-release}.{plugin-name}.dvs_vcenter_ceph'
-             predefined-parameters: VCENTER_SNAPSHOT=vcenter6
-             current-parameters: true
-             kill-phase-on: NEVER
-
-           - name: '{fuel-release}.{plugin-name}.dvs_vcenter_ceph_2'
-             predefined-parameters: VCENTER_SNAPSHOT=vcenter6
-             current-parameters: true
-             kill-phase-on: NEVER
-
-           - name: '{fuel-release}.{plugin-name}.dvs_vcenter_ceilometer'
-             predefined-parameters: VCENTER_SNAPSHOT=vcenter6
-             current-parameters: true
-             kill-phase-on: NEVER
-
-           - name: '{fuel-release}.{plugin-name}.dvs_vcenter_ceilometer_2'
-             predefined-parameters: VCENTER_SNAPSHOT=vcenter6
-             current-parameters: true
-             kill-phase-on: NEVER
-
-           - name: '{fuel-release}.{plugin-name}.dvs_vcenter_add_delete_nodes'
-             predefined-parameters: VCENTER_SNAPSHOT=vcenter6
-             current-parameters: true
-             kill-phase-on: NEVER
-
-           - name: '{fuel-release}.{plugin-name}.dvs_vcenter_add_delete_controller'
-             predefined-parameters: VCENTER_SNAPSHOT=vcenter6
-             current-parameters: true
-             kill-phase-on: NEVER
-
-           - name: '{fuel-release}.{plugin-name}.dvs_vcenter_networks'
-             predefined-parameters: VCENTER_SNAPSHOT=vcenter6
-             current-parameters: true
-             kill-phase-on: NEVER
-
-           - name: '{fuel-release}.{plugin-name}.dvs_vcenter_ping_public'
-             predefined-parameters: VCENTER_SNAPSHOT=vcenter6
-             current-parameters: true
-             kill-phase-on: NEVER
-
-           - name: '{fuel-release}.{plugin-name}.dvs_vcenter_5_instances'
-             predefined-parameters: VCENTER_SNAPSHOT=vcenter6
-             current-parameters: true
-             kill-phase-on: NEVER
-
-           - name: '{fuel-release}.{plugin-name}.dvs_vcenter_uninstall'
-             predefined-parameters: VCENTER_SNAPSHOT=vcenter6
              current-parameters: true
              kill-phase-on: NEVER

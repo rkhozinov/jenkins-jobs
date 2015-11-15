@@ -7,6 +7,7 @@ rm -f nosetests.xml
 rm -rf logs/*      
 
 export ISO_VERSION=$(cut -d'-' -f3-3<<< $ISO_FILE)
+echo iso build number is $ISO_VERSION
 export REQUIRED_FREE_SPACE=200
 export ISO_PATH="${ISO_STORAGE}/${ISO_FILE}"
 export FUEL_RELEASE=$(cut -d'-' -f2-2 <<< $ISO_FILE | tr -d '.') 
