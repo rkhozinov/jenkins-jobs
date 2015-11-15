@@ -7,6 +7,8 @@
           exclude-trivial-rebase: true
           exclude-no-code-change: true
 
+## configuration of gerrit event for the smoke multijob
+## smoke multijob should run on patchset, draft events
 - smoke-gerrit-events: &smoke-gerrit-events
     name: 'smoke-gerrit-events'
     trigger-on:
@@ -15,11 +17,14 @@
           exclude-trivial-rebase: true
           exclude-no-code-change: true
 
+## configuration of gerrit event for the bvt multijob
+## bvt multijob should run only on merge event
 - bvt-gerrit-events: &bvt-gerrit-events
     name: 'bvt-gerrit-events'
     trigger-on:
       - change-merged-event
 
+## the main part of gerrit section as yaml anchor
 - generic-gerrit-projects: &generic-gerrit-projects
     name: 'generic-gerrit-projects'
     projects:
@@ -40,11 +45,12 @@
     escape-quotes: true
     readable-message: true
     skip-vote:
-      successfull: false  
+      successfull: false
       failed: false
       unstable: true
       notbuilt: true
 
+## properties for smoke, bvt and nigthly multijobs
 - runner-properties: &runner-properties
     name: 'runner-properties'
     properties:
@@ -57,7 +63,7 @@
           block-level: 'GLOBAL'
           queue-scanning: 'BUILDABLE'
 
-## parameters for multijobs
+## parameters for smoke, bvt and nigthly multijobs
 - runner-parameters: &runner-parameters
     name: 'runner-parameters'
     parameters:
@@ -79,13 +85,15 @@
           description: 'The branch for fuel-qa gerrit'
       - string:
           name: NODES_COUNT
-          default: '9'
+          default: '10'
+          description: 'Amount of nodes in a virtual cluster'
       - string:
           name: NODES_VOLUME_SIZE
           default: '325'
       - string:
           name: ADMIN_NODE_MEMORY
           default: '4096'
+          description: 'Amount of virtual memory for the master node'
       - string:
           name: SLAVE_NODE_MEMORY
           default: '4096'
@@ -132,6 +140,35 @@
           clean:
             before: false
           wipe-workspace: true
+## publishers for smoke, bvt, build and nithly jobs
+## arcives rpm, pkg_properties and email conf
+- runner-publishers: &runner-publishers
+    name: 'runner-publishers'
+    publishers:
+      - archive:
+          artifacts: 'pkg_properties'
+          allow-empty: false
+      - archive:
+          artifacts: '*.rpm'
+          allow-empty: false
+      - email:
+          recipients: '{email-to}'
+
+## properties for test jobs
+- test-properties: &test-properties
+    name: 'test-properties'
+    properties:
+      - heavy-job:
+          weight: 1
+      - throttle:
+          max-per-node: 0
+          max-total: 0
+          categories:
+            - vsphere
+            - dvs
+            - nsx
+            - contrail
+          option: category
 
 ## parameters for jobs created per test-group and custom test job
 - test-parameters: &test-parameters
@@ -249,18 +286,7 @@
       numToKeep: 10
       artifactDaysToKeep: 7
       artifactNumToKeep: 10
-    properties:
-      - heavy-job:
-          weight: 1
-      - throttle:
-          max-per-node: 0
-          max-total: 0
-          categories:
-            - contrail
-            - vsphere
-            - dvs
-            - nsx
-          option: category
+    <<: *test-properties
     <<: *test-parameters
     <<: *common-scm
     builders:
@@ -284,7 +310,14 @@
           timeout: 6000
     publishers:
       - archive:
-          artifacts: '**/nosetests.xml,logs/*'
+          artifacts: 'pkg_properties'
+          allow-empty: false
+      - archive:
+          artifacts: '**/nosetests.xml'
+          allow-empty: true
+          fingerprint: true
+      - archive:
+          artifacts: 'logs/*'
           allow-empty: true
           fingerprint: true
       - xunit:
@@ -299,14 +332,24 @@
     name: '{build-name}'
     node: 'runner'
     concurrent: true
+    description: |
+      '<a href=https://github.com/openstack/{gerrit-repo}>
+       Build {name} plugin from fuel-plugins project</a>'
 
     <<: *common-scm
+    <<: *runner-publishers
 
     triggers:
       - gerrit:
           <<: *build-gerrit-events
           <<: *generic-gerrit-projects
-
+    parameters:
+      - string:
+          name: 'GERRIT_REFSPEC'
+          default: 'refs/heads/{gerrit-branch}'
+    properties:
+      - heavy-job:
+          weight: 1
     builders:
       - shell:
           !include-raw-escape './builders/build-plugin.sh'
@@ -315,26 +358,10 @@
       - shell: |
           echo PKG_BUILD_ID=${{BUILD_ID}}  > pkg_properties
           echo PKG_BUILD_URL=${{BUILD_URL}} >> pkg_properties 
+          echo PKG_JOB_NAME=${{JOB_NAME}} >> pkg_properties
           pkg=$(ls | grep '.*\.rpm')
           pkg_checksum=$(md5sum -b $pkg | awk '{{print $1}}')
           echo PGK_CHECKSUM=$pkg_checksum >> pkg_properties 
-
-    description: |
-      '<a href=https://github.com/openstack/{gerrit-repo}>
-       Build {name} plugin from fuel-plugins project</a>'
-    parameters:
-      - string:
-          name: 'GERRIT_REFSPEC'
-          default: 'refs/heads/{gerrit-branch}'
-    properties:
-      - heavy-job:
-          weight: 1
-    publishers:
-      - archive:
-          artifacts: '*.rpm,pkg_properties'
-      - email:
-          notify-every-unstable-build: true
-          recipients: '{email-to}'
 
 - job-template:
     name: '{fuel-release}.{plugin-name}.{plugin-version}.{testgroup}'
@@ -350,23 +377,18 @@
     name: '{smoke-name}'
     disabled: false
     description: 'The Smoke test for {fuel-release}.{plugin-name}.{plugin-version}'
-    concurent: true
+    concurrent: true
     project-type: multijob
     node: runner    
     <<: *runner-parameters
     <<: *runner-properties
+    <<: *runner-publishers
+    scm:  []
     triggers:
       - gerrit:
           <<: *smoke-gerrit-events
           <<: *generic-gerrit-projects
     scm:  []
-    publishers:
-      - archive:
-          artifacts: 'pkg_properties'
-          allow-empty: true
-          fingerprint: true
-      - email: 
-          recipients: '{email-to}'
     builders:
       - copyartifact:
           project: '{build-name}'
@@ -392,30 +414,24 @@
     name: '{bvt-name}'
     description: 'The Smoke test for {fuel-release}.{plugin-name}.{plugin-version}'
     disabled: false
-    concurent: true
+    concurrent: true
     project-type: multijob
     node: runner
     <<: *runner-parameters
     <<: *runner-properties
+    <<: *runner-publishers
     scm:  []
     triggers:
       - gerrit:
           <<: *bvt-gerrit-events
           <<: *generic-gerrit-projects
-    publishers:
-      - archive:
-          artifacts: 'pkg_properties'
-          fingerprint: true
-      - archive:
-          artifacts: '*.rpm'
-          fingerprint: true
-      - email: 
-          recipients: '{email-to}'
+
     builders:
       - copyartifact:
           project: '{build-name}'
           which-build: last-successful
           stable: true
+
       - inject:
           properties-file: 'pkg_properties'
 
@@ -437,7 +453,7 @@
     name: '{mu-name}'
     description: 'The Smoke test for {fuel-release}.{plugin-name}.{plugin-version}'
     disabled: true
-    concurent: true
+    concurrent: true
     project-type: multijob
     node: runner
     <<: *runner-parameters
