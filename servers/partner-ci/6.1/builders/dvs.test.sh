@@ -14,9 +14,8 @@ echo "Description string: ${TEST_GROUP} on ${NODE_NAME}: ${ENV_NAME}"
 source $VENV_PATH/bin/activate
 
 systest_parameters=''
-[[ $USE_SNAPSHOTS == "true"  ]] && systest_parameters+=' --existing' || echo new env will not be created
-[[ $SHUTDOWN_AFTER == "true" ]] && systest_parameters+=' --destroy' || echo  the env will not be powered off after test
-[[ $ERASE_AFTER  == "true"  ]] && systest_parameters+=' --erase' || echo the env will not be erased after test 
+[[ $USE_SNAPSHOTS == "true"  ]] && systest_parameters+=' -k' || echo new env will not be created
+[[ $ERASE_AFTER  == "true"  ]] && echo the env will be erased after test || systest_parameters+=' -K' 
 
 echo use-snapshots: $USE_SNAPSHOTS
 
@@ -27,5 +26,5 @@ echo plugin-path: $DVS_PLUGIN_PATH
 echo plugin path: $DVS_PLUGIN_PATH plugin checksum: $(md5sum -b $DVS_PLUGIN_PATH) 
 
 cd plugin_test/
-/btsync/tpi_systest.sh -i $ISO_PATH -d $OPENSTACK_RELEASE -t $TEST_GROUP -n $NODES_COUNT $systest_parameters
-
+#/btsync/tpi_systest.sh -i $ISO_PATH -d $OPENSTACK_RELEASE -t $TEST_GROUP -n $NODES_COUNT $systest_parameters
+./plugin_test/utils/jenkins/system_tests.sh -t test ${systest_parameters} -i ${ISO_PATH} -j ${JOB_NAME} -o --group=${TEST_GROUP}
