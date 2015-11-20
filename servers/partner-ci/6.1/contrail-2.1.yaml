@@ -393,7 +393,6 @@
       - gerrit:
           <<: *smoke-gerrit-events
           <<: *generic-gerrit-projects
-    scm:  []
     builders:
       - copyartifact:
           project: '{build-name}'
