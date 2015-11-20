@@ -148,7 +148,7 @@
           description: 'The name of devops env. Needed to properly work of existing mode of devops'
       - bool:
           name: USE_SNAPSHOTS
-          default: true
+          default: false
           descrition: 'Will be used existing environment'
       - bool:
           name: SHUTDOWN_AFTER
@@ -246,7 +246,7 @@
           description: 'The name of devops env. Needed to properly work of existing mode of devops'
       - bool:
           name: USE_SNAPSHOTS
-          default: true
+          default: false
           descrition: 'Will be used existing environment'
       - bool:
           name: SHUTDOWN_AFTER
