@@ -1,5 +1,7 @@
 #!/bin/bash -e 
 
+[ -z $CONTRAIL_VERSION ] && exit 1 || echo contrail version is $CONTRAIL_VERSION
+
 export ISO_PATH="${ISO_STORAGE}/${ISO_FILE}"
 export ISO_VERSION=$(cut -d'-' -f3-3 <<< $ISO_FILE) 
 export FUEL_RELEASE=$(cut -d'-' -f2-2 <<< $ISO_FILE | tr -d '.') 
@@ -12,7 +14,8 @@ if [ -z $CONTRAIL_PLUGIN_PATH ]; then
   export CONTRAIL_PLUGIN_PATH=$(ls ${WORKSPACE}/contrail*.rpm)
 fi
 
-export JUNIPER_PKG_PATH="/storage/contrail/2.20/"
+#export JUNIPER_PKG_PATH="/storage/contrail/2.20/"
+export JUNIPER_PKG_PATH="/storage/contrail/${CONTRAIL_VERSION}/"
 export CONTRAIL_PLUGIN_PACK_CEN_PATH=$(find ${JUNIPER_PKG_PATH} -type f -name '*rpm' )
 export CONTRAIL_PLUGIN_PACK_UB_PATH=$(find ${JUNIPER_PKG_PATH} -type f -name '*deb' )
 
