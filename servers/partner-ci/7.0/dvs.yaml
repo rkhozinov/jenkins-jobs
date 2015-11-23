@@ -323,7 +323,7 @@
       - shell:
           !include-raw-escape builders/dvs.prepare.sh
       - shell:
-          !include-raw-escape builders/contrail.test.sh
+          !include-raw-escape builders/dvs.test.sh
       - shell: |
           env > properties
     wrappers:
