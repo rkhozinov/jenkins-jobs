@@ -110,17 +110,20 @@
           name: UPDATE_MASTER
           default: true
           description: 'turns update fuel master node to maintenance update'
+
+      - string:
+          name: MIRROR
+          default: 'http://mirror.seed-cz1.fuel-infra.org'
+
       - string:
           name: UPDATE_FUEL_MIRROR
-          default: 'http://mirror.fuel-infra.org/mos-repos/centos/mos7.0-centos6-fuel/proposed/x86_64/ http://mirror.fuel-infra.org/mos-repos/centos/mos7.0-centos6-fuel/security/x86_64/ http://mirror.fuel-infra.org/mos-repos/centos/mos7.0-centos6-fuel/updates/x86_64/'
+          default: "${MIRROR}/mos/centos-6/mos6.1/updates/ ${MIRROR}/mos/centos-6/mos6.1/security/"
           description: 'proposed repositories to update fuel master node'
+
+
       - string:
           name: MIRROR_UBUNTU
-          default: 'deb http://mirror.seed-cz1.fuel-infra.org/pkgs/ubuntu-latest/ trusty main universe multiverse|deb http://mirror.seed-cz1.fuel-infra.org/pkgs/ubuntu-latest/ trusty-updates main universe multiverse|deb http://mirror.seed-cz1.fuel-infra.org/pkgs/ubuntu-latest/ trusty-security main universe multiverse'
-          description: 'proposed repositories to update ubuntu cluster'
-      - string:
-          name: EXTRA_DEB_REPOS
-          default: 'mos-updates-2,deb http://mirror.seed-cz1.fuel-infra.org/mos-repos/ubuntu/snapshots/7.0-latest mos7.0-updates main restricted|mos-security-2,deb http://mirror.seed-cz1.fuel-infra.org/mos-repos/ubuntu/snapshots/7.0-latest mos7.0-security main restricted'
+          default: "deb ${MIRROR}/mos/ubuntu/dists/mos6.1-updates/ main restricted"
           description: 'proposed repositories to update ubuntu cluster'
       - string:
           name: CONTRAIL_VERSION
