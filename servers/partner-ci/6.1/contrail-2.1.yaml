@@ -132,7 +132,7 @@
           description: 'ubuntu-security repositories for master ui'
       - string:
           name: CONTRAIL_VERSION
-          default: '2.20'
+          default: '2.21'
           description: 'There is a version of juniper packages stored in common sotrage'
       - string:
           name: OPENSTACK_RELEASE
@@ -201,7 +201,7 @@
           default: 'open'
       - string:
           name: CONTRAIL_VERSION
-          default: '2.20'
+          default: '2.21'
           description: 'There is a version of juniper packages stored in common sotrage'
       - string:
           name: CONTRAIL_PLUGIN_PATH
@@ -300,7 +300,7 @@
     gerrit-repo: 'fuel-plugin-contrail'
     gerrit-branch: 'stable/2.1'
     email-to: 'rkhozinov@mirantis.com'
-    released-plugin-path: '/storage/contrail/released/contrail-2.0.0.noarch.rpm'
+    released-plugin-path: '/storage/contrail/released/contrail-2.1-2.1.0-1.noarch.rpm'
 
     testgroup:
       - check_bonding_with_contrail
@@ -519,7 +519,7 @@
 - job-template:
     name: '{mu-name}'
     description: 'The Smoke test for {fuel-release}.{plugin-name}.{plugin-version}'
-    disabled: true
+    disabled: false
     concurrent: true
     project-type: multijob
     node: runner
@@ -540,7 +540,7 @@
       - shell: env > mu.properties
       - multijob:
           name: '1st phase - mu test'
-          condition: FAILURE
+          condition: COMPLETED
           projects:
             - name: '{fuel-release}.{plugin-name}.{plugin-version}.contrail_mu'
               current-parameters: true
@@ -556,44 +556,125 @@
               kill-phase-on: NEVER
 
       - multijob:
-          name: '2st phase - all tests'
-          condition: SUCCESSFUL
+          name: '2st phase - all tests - juniper'
+          condition: COMPLETED
           projects:
             - name: '{fuel-release}.{plugin-name}.{plugin-version}.deploy_ha_contrail_plugin'
               current-parameters: true
-              predefined-parameters: CONTRAIL_DISTRIBUTION=juniper
+              predefined-parameters: |
+                CONTRAIL_DISTRIBUTION=juniper
+                CONTRAIL_PLUGIN_PATH={released-plugin-path}
               kill-phase-on: NEVER
             - name: '{fuel-release}.{plugin-name}.{plugin-version}.check_bonding_with_contrail'
               current-parameters: true
-              predefined-parameters: CONTRAIL_DISTRIBUTION=juniper
+              predefined-parameters: |
+                CONTRAIL_DISTRIBUTION=juniper
+                CONTRAIL_PLUGIN_PATH={released-plugin-path}
               kill-phase-on: NEVER
             - name: '{fuel-release}.{plugin-name}.{plugin-version}.contrail_jumbo_frame'
               current-parameters: true
-              predefined-parameters: CONTRAIL_DISTRIBUTION=juniper
+              predefined-parameters: |
+                CONTRAIL_DISTRIBUTION=juniper
+                CONTRAIL_PLUGIN_PATH={released-plugin-path}
               kill-phase-on: NEVER
             - name: '{fuel-release}.{plugin-name}.{plugin-version}.contrail_plugin_add_delete_compute_node'
               current-parameters: true
-              predefined-parameters: CONTRAIL_DISTRIBUTION=juniper
+              predefined-parameters: |
+                CONTRAIL_DISTRIBUTION=juniper
+                CONTRAIL_PLUGIN_PATH={released-plugin-path}
               kill-phase-on: NEVER
             - name: '{fuel-release}.{plugin-name}.{plugin-version}.contrail_plugin_add_contrail_controller_node'
               current-parameters: true
-              predefined-parameters: CONTRAIL_DISTRIBUTION=juniper
+              predefined-parameters: |
+                CONTRAIL_DISTRIBUTION=juniper
+                CONTRAIL_PLUGIN_PATH={released-plugin-path}
               kill-phase-on: NEVER
             - name: '{fuel-release}.{plugin-name}.{plugin-version}.contrail_plugin_add_delete_controller_node'
               current-parameters: true
-              predefined-parameters: CONTRAIL_DISTRIBUTION=juniper
+              predefined-parameters: |
+                CONTRAIL_DISTRIBUTION=juniper
+                CONTRAIL_PLUGIN_PATH={released-plugin-path}
               kill-phase-on: NEVER
             - name: '{fuel-release}.{plugin-name}.{plugin-version}.deploy_contrail_with_base_os_ceph'
               current-parameters: true
-              predefined-parameters: CONTRAIL_DISTRIBUTION=juniper
+              predefined-parameters: |
+                CONTRAIL_DISTRIBUTION=juniper
+                CONTRAIL_PLUGIN_PATH={released-plugin-path}
               kill-phase-on: NEVER
             - name: '{fuel-release}.{plugin-name}.{plugin-version}.deploy_contrail_with_ceilometer'
               current-parameters: true
-              predefined-parameters: CONTRAIL_DISTRIBUTION=juniper
+              predefined-parameters: |
+                CONTRAIL_DISTRIBUTION=juniper
+                CONTRAIL_PLUGIN_PATH={released-plugin-path}
               kill-phase-on: NEVER
             - name: '{fuel-release}.{plugin-name}.{plugin-version}.deploy_ha_with_pub_net_all_nodes'
               current-parameters: true
+              predefined-parameters: |
+                CONTRAIL_DISTRIBUTION=juniper
+                CONTRAIL_PLUGIN_PATH={released-plugin-path}
+              kill-phase-on: NEVER
+            - name: '{fuel-release}.{plugin-name}.{plugin-version}.deploy_ha_with_vlan_tagging'
+              current-parameters: true
               predefined-parameters: CONTRAIL_DISTRIBUTION=juniper
+              kill-phase-on: NEVER
+
+      - multijob:
+          name: '3st phase - all tests - open'
+          condition: COMPLETED
+          projects:
+            - name: '{fuel-release}.{plugin-name}.{plugin-version}.deploy_ha_contrail_plugin'
+              current-parameters: true
+              predefined-parameters: |
+                CONTRAIL_DISTRIBUTION=open
+                CONTRAIL_PLUGIN_PATH={released-plugin-path}
+              kill-phase-on: NEVER
+            - name: '{fuel-release}.{plugin-name}.{plugin-version}.check_bonding_with_contrail'
+              current-parameters: true
+              predefined-parameters: |
+                CONTRAIL_DISTRIBUTION=open
+                CONTRAIL_PLUGIN_PATH={released-plugin-path}
+              kill-phase-on: NEVER
+            - name: '{fuel-release}.{plugin-name}.{plugin-version}.contrail_jumbo_frame'
+              current-parameters: true
+              predefined-parameters: |
+                CONTRAIL_DISTRIBUTION=open
+                CONTRAIL_PLUGIN_PATH={released-plugin-path}
+              kill-phase-on: NEVER
+            - name: '{fuel-release}.{plugin-name}.{plugin-version}.contrail_plugin_add_delete_compute_node'
+              current-parameters: true
+              predefined-parameters: |
+                CONTRAIL_DISTRIBUTION=open
+                CONTRAIL_PLUGIN_PATH={released-plugin-path}
+              kill-phase-on: NEVER
+            - name: '{fuel-release}.{plugin-name}.{plugin-version}.contrail_plugin_add_contrail_controller_node'
+              current-parameters: true
+              predefined-parameters: |
+                CONTRAIL_DISTRIBUTION=open
+                CONTRAIL_PLUGIN_PATH={released-plugin-path}
+              kill-phase-on: NEVER
+            - name: '{fuel-release}.{plugin-name}.{plugin-version}.contrail_plugin_add_delete_controller_node'
+              current-parameters: true
+              predefined-parameters: |
+                CONTRAIL_DISTRIBUTION=open
+                CONTRAIL_PLUGIN_PATH={released-plugin-path}
+              kill-phase-on: NEVER
+            - name: '{fuel-release}.{plugin-name}.{plugin-version}.deploy_contrail_with_base_os_ceph'
+              current-parameters: true
+              predefined-parameters: |
+                CONTRAIL_DISTRIBUTION=open
+                CONTRAIL_PLUGIN_PATH={released-plugin-path}
+              kill-phase-on: NEVER
+            - name: '{fuel-release}.{plugin-name}.{plugin-version}.deploy_contrail_with_ceilometer'
+              current-parameters: true
+              predefined-parameters: |
+                CONTRAIL_DISTRIBUTION=open
+                CONTRAIL_PLUGIN_PATH={released-plugin-path}
+              kill-phase-on: NEVER
+            - name: '{fuel-release}.{plugin-name}.{plugin-version}.deploy_ha_with_pub_net_all_nodes'
+              current-parameters: true
+              predefined-parameters: |
+                CONTRAIL_DISTRIBUTION=open
+                CONTRAIL_PLUGIN_PATH={released-plugin-path}
               kill-phase-on: NEVER
             - name: '{fuel-release}.{plugin-name}.{plugin-version}.deploy_ha_with_vlan_tagging'
               current-parameters: true
@@ -604,6 +685,7 @@
     name: '{nightly-name}'
     project-type: multijob
     node: runner
+    disabled: true
     <<: *runner-parameters
     properties:
       - heavy-job:
