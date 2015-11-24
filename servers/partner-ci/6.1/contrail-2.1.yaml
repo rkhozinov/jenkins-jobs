@@ -109,22 +109,27 @@
       - bool:
           name: UPDATE_MASTER
           default: true
-          description: 'turns update fuel master node to maintenance update'
-
+          description: 'turns on update fuel master node to maintenance update'
       - string:
           name: MIRROR
           default: 'http://mirror.seed-cz1.fuel-infra.org'
-
+          description: 'mirror for package repositories. this mirror is optimized for CZ'
       - string:
           name: UPDATE_FUEL_MIRROR
-          default: "${MIRROR}/mos/centos-6/mos6.1/updates/ ${MIRROR}/mos/centos-6/mos6.1/security/"
-          description: 'proposed repositories to update fuel master node'
-
-
+          default: "${{MIRROR}}/mos/centos-6/mos6.1/updates/ ${{MIRROR}}/mos/centos-6/mos6.1/security/"
+          description: 'repositories to update fuel master node'
       - string:
           name: MIRROR_UBUNTU
-          default: "deb ${MIRROR}/mos/ubuntu/dists/mos6.1-updates/ main restricted"
-          description: 'proposed repositories to update ubuntu cluster'
+          default: "deb ${{MIRROR}}/mos/ubuntu/dists/mos6.1-updates/ main restricted"
+          description: 'updates repository to update ubuntu cluster'
+      - string:
+          name: DEB_UPDATES
+          default: "mos-updates,deb ${{MIRROR}}/mos/ubuntu/dists/mos6.1-updates main restricted"
+          description: 'ubuntu-updates repositories for master ui'
+      - string:
+          name: DEB_SECURITY
+          default: "mos-security,deb ${{MIRROR}}/mos/ubuntu/dists/mos6.1-security main restricted"
+          description: 'ubuntu-security repositories for master ui'
       - string:
           name: CONTRAIL_VERSION
           default: '2.20'
@@ -201,6 +206,22 @@
       - string:
           name: CONTRAIL_PLUGIN_PATH
           default: ''
+      - string:
+          name: UPDATE_FUEL_MIRROR
+          default: "${{MIRROR}}/mos/centos-6/mos6.1/updates/ ${{MIRROR}}/mos/centos-6/mos6.1/security/"
+          description: 'repositories to update fuel master node'
+      - string:
+          name: MIRROR_UBUNTU
+          default: "deb ${{MIRROR}}/mos/ubuntu/dists/mos6.1-updates/ main restricted"
+          description: 'updates repository to update ubuntu cluster'
+      - string:
+          name: DEB_UPDATES
+          default: "mos-updates,deb ${{MIRROR}}/mos/ubuntu/dists/mos6.1-updates main restricted"
+          description: 'ubuntu-updates repositories for master ui'
+      - string:
+          name: DEB_SECURITY
+          default: "mos-security,deb ${{MIRROR}}/mos/ubuntu/dists/mos6.1-security main restricted"
+          description: 'ubuntu-security repositories for master ui'
       - string:
           name: TEST_GROUP
           default: '{testgroup}'

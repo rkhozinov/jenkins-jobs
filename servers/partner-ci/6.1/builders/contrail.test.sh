@@ -24,7 +24,7 @@ echo "Description string: ${TEST_GROUP} on ${NODE_NAME}: ${ENV_NAME}"
 source $VENV_PATH/bin/activate
 
 systest_parameters=''
-[[ $USE_SNAPSHOTS == "true"  ]] && systest_parameters+=' -k' || echo new env will not be created
+[[ $USE_SNAPSHOTS == "true"  ]] && systest_parameters+=' -k' || echo new env will be created
 [[ $ERASE_AFTER  == "true"  ]] && echo the env will be erased after test || systest_parameters+=' -K' 
 
 echo use-snapshots: $USE_SNAPSHOTS
