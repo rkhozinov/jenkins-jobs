@@ -80,7 +80,7 @@
       - build-blocker:
           use-build-blocker: true
           blocking-jobs:
-            - '{bvt-name}'
+            - '{build-name}'
           block-level: 'GLOBAL'
           queue-scanning: 'BUILDABLE'
 
@@ -108,37 +108,30 @@
           name: VCENTER_SNAPSHOT
           default: 'vcenterha'
           description: 'Snapshot name for vsphere lab'
-      - string:
-          name: ISO_FILE
-          default: '{iso-file}'
-          description: 'ISO file name that is on the tpi-s1 in /storage/downloads'
-      - string:
-          name: ISO_STORAGE
-          default: '/storage/downloads'
-          description: 'Storage for iso files'
-      - string:
-          name: ISO_VERSION
-          description: 'Contrainer for storing an iso build number to output it as job name'
       - bool:
           name: UPDATE_MASTER
-          default: true
-          description: 'turns update fuel master node to maintenance update'
+          default: false
+          description: 'turns on update fuel master node to maintenance update'
+      - string:
+          name: MIRROR
+          default: 'http://mirror.seed-cz1.fuel-infra.org'
+          description: 'mirror for package repositories. this mirror is optimized for CZ'
       - string:
           name: UPDATE_FUEL_MIRROR
-          default: 'http://mirror.fuel-infra.org/mos-repos/centos/mos7.0-centos6-fuel/proposed/x86_64/ http://mirror.fuel-infra.org/mos-repos/centos/mos7.0-centos6-fuel/security/x86_64/ http://mirror.fuel-infra.org/mos-repos/centos/mos7.0-centos6-fuel/updates/x86_64/'
-          description: 'proposed repositories to update fuel master node'
+          default: "${{MIRROR}}/mos/snapshots/centos-6-stable/mos6.1/updates ${{MIRROR}}/mos/snapshots/centos-6-stable/mos6.1/security"
+          description: 'repositories to update fuel master node'
       - string:
           name: MIRROR_UBUNTU
-          default: 'deb http://mirror.seed-cz1.fuel-infra.org/pkgs/ubuntu-latest/ trusty main universe multiverse|deb http://mirror.seed-cz1.fuel-infra.org/pkgs/ubuntu-latest/ trusty-updates main universe multiverse|deb http://mirror.seed-cz1.fuel-infra.org/pkgs/ubuntu-latest/ trusty-security main universe multiverse'
-          description: 'proposed repositories to update ubuntu cluster'
+          default: "deb ${{MIRROR}}/pkgs/ubuntu trusty main restricted universe multiverse|deb ${{MIRROR}}/pkgs/ubuntu trusty-updates main restricted universe multiverse|deb ${{MIRROR}}/pkgs/ubuntu trusty-security main restricted universe multiverse"
+          description: 'updates repository to update ubuntu cluster'
       - string:
-          name: EXTRA_DEB_REPOS
-          default: 'mos-updates-2,deb http://mirror.seed-cz1.fuel-infra.org/mos-repos/ubuntu/snapshots/7.0-latest mos7.0-updates main restricted|mos-security-2,deb http://mirror.seed-cz1.fuel-infra.org/mos-repos/ubuntu/snapshots/7.0-latest mos7.0-security main restricted'
-          description: 'proposed repositories to update ubuntu cluster'
+          name: DEB_UPDATES
+          default: "mos-updates,deb ${{MIRROR}}/mos/snapshots/ubuntu-stable mos6.1-updates main restricted"
+          description: 'ubuntu-updates repositories for master ui'
       - string:
-          name: OPENSTACK_RELEASE
-          default: 'Ubuntu'
-          description: 'Openstack release (CentOS, Ubuntu)'
+          name: DEB_SECURITY
+          default: "mos-security,deb ${{MIRROR}}/mos/snapshots/ubuntu-stable mos6.1-security main restricted"
+          description: 'ubuntu-security repositories for master ui'
       - string:
           name: GERRIT_REFSPEC
           default: 'refs/heads/{gerrit-branch}'
@@ -147,26 +140,6 @@
           name: GERRIT_BRANCH
           default: 'origin/{gerrit-branch}'
           description: 'The branch for fuel-qa gerrit'
-      - string:
-          name: NODES_COUNT
-          default: '9'
-          description: 'Amount of nodes in the test lab'
-      - string:
-          name: ADMIN_NODE_MEMORY
-          default: '4096'
-          description: 'Amount of vitrual RAM for admin node'
-      - string:
-          name: SLAVE_NODE_MEMORY
-          default: '4096'
-          description: 'Amount of vitrual RAM per slave node'
-      - string:
-          name: ADMIN_NODE_CPU
-          default: '4'
-          description: 'Amount of vitrual CPUs for admin node'
-      - string:
-          name: SLAVE_NODE_CPU
-          default: '4'
-          description: 'Amount of vitrual CPUs per slave node'
       - string:
           name: ENV_PREFIX
           default: '{fuel-release}.{plugin-name}'
@@ -204,20 +177,28 @@
           description: 'Contrainer for storing an iso build number to output it as job name'
       - bool:
           name: UPDATE_MASTER
-          default: true
-          description: 'turns update fuel master node to maintenance update'
+          default: false
+          description: 'turns on update fuel master node to maintenance update'
+      - string:
+          name: MIRROR
+          default: 'http://mirror.seed-cz1.fuel-infra.org'
+          description: 'mirror for package repositories. this mirror is optimized for CZ'
       - string:
           name: UPDATE_FUEL_MIRROR
-          default: 'http://mirror.fuel-infra.org/mos-repos/centos/mos7.0-centos6-fuel/proposed/x86_64/ http://mirror.fuel-infra.org/mos-repos/centos/mos7.0-centos6-fuel/security/x86_64/ http://mirror.fuel-infra.org/mos-repos/centos/mos7.0-centos6-fuel/updates/x86_64/'
-          description: 'proposed repositories to update fuel master node'
+          default: "${{MIRROR}}/mos/snapshots/centos-6-stable/mos6.1/updates ${{MIRROR}}/mos/snapshots/centos-6-stable/mos6.1/security"
+          description: 'repositories to update fuel master node'
       - string:
           name: MIRROR_UBUNTU
-          default: 'deb http://mirror.seed-cz1.fuel-infra.org/pkgs/ubuntu-latest/ trusty main universe multiverse|deb http://mirror.seed-cz1.fuel-infra.org/pkgs/ubuntu-latest/ trusty-updates main universe multiverse|deb http://mirror.seed-cz1.fuel-infra.org/pkgs/ubuntu-latest/ trusty-security main universe multiverse'
-          description: 'proposed repositories to update ubuntu cluster'
+          default: "deb ${{MIRROR}}/pkgs/ubuntu trusty main restricted universe multiverse|deb ${{MIRROR}}/pkgs/ubuntu trusty-updates main restricted universe multiverse|deb ${{MIRROR}}/pkgs/ubuntu trusty-security main restricted universe multiverse"
+          description: 'updates repository to update ubuntu cluster'
       - string:
-          name: EXTRA_DEB_REPOS
-          default: 'mos-updates-2,deb http://mirror.seed-cz1.fuel-infra.org/mos-repos/ubuntu/snapshots/7.0-latest mos7.0-updates main restricted|mos-security-2,deb http://mirror.seed-cz1.fuel-infra.org/mos-repos/ubuntu/snapshots/7.0-latest mos7.0-security main restricted'
-          description: 'proposed repositories to update ubuntu cluster'
+          name: DEB_UPDATES
+          default: "mos-updates,deb ${{MIRROR}}/mos/snapshots/ubuntu-stable mos6.1-updates main restricted"
+          description: 'ubuntu-updates repositories for master ui'
+      - string:
+          name: DEB_SECURITY
+          default: "mos-security,deb ${{MIRROR}}/mos/snapshots/ubuntu-stable mos6.1-security main restricted"
+          description: 'ubuntu-security repositories for master ui'
       - string:
           name: OPENSTACK_RELEASE
           default: 'Ubuntu'
@@ -232,7 +213,7 @@
           description: 'The branch for fuel-qa gerrit'
       - string:
           name: NODES_COUNT
-          default: '9'
+          default: '10'
           description: 'Amount of nodes in the test lab'
       - string:
           name: ADMIN_NODE_MEMORY
@@ -281,20 +262,24 @@
     released-plugin-path: '/storage/dvs/released/dvs-2.0.0.noarch.rpm'
 
     testgroup:
+      - dvs_vcenter_smoke
       - dvs_vcenter_ha_mode
       - dvs_vcenter_ceph
       - dvs_vcenter_ceilometer
       - dvs_vcenter_add_delete_nodes
-      - dvs_vcenter_multiroles
       - dvs_vcenter_add_delete_controller
-      - dvs_vcenter_5_instances
-      - dvs_vcenter_networks
-      - dvs_vcenter_reset_controller
+      - dvs_vcenter_multiroles
       - dvs_vcenter_diff_networks
-      - dvs_vcenter_uninstall
+      - dvs_vcenter_networks
+      - dvs_vcenter_security
       - dvs_vcenter_tenants_isolation
       - dvs_vcenter_same_ip
-      - dvs_vcenter_security
+      - dvs_vcenter_ping_public
+      - dvs_vcenter_bind_port
+      - dvs_vcenter_5_instances
+      - dvs_vcenter_uninstall
+      - dvs_vcenter_reset_controller
+      - dvs_vcenter_shutdown_controller
     jobs:
       - '{build-name}'
       - '{nightly-name}'
@@ -322,10 +307,10 @@
           which-build: last-successful
       - shell:
           !include-raw-escape builders/dvs.prepare.sh
-      - shell:
-          !include-raw-escape builders/contrail.test.sh
       - shell: |
           env > properties
+      - shell:
+          !include-raw-escape builders/dvs.test.sh
     wrappers:
       - inject-passwords:
           global: true
@@ -444,14 +429,6 @@
                VCENTER_SNAPSHOT=vcenterha
              kill-phase-on: NEVER
 
-- job-template:
-    name: '{bvt-name}'
-    description: 'The Smoke test for {fuel-release}.{plugin-name}.{plugin-version}'
-    disabled: false
-    concurrent: true
-    project-type: multijob
-    node: runner
-
 ## The multijob for run bvt tests for vsphere5 and vsphere6
 ## runs by merge event trigger
 - job-template:
@@ -487,11 +464,7 @@
           name: 'Smoke tests for dvs.vcenter5'
           condition: SUCCESSFUL
           projects:
-           - name: '{fuel-release}.{plugin-name}.dvs_vcenter_bvt'
-             current-parameters: true
-             kill-phase-on: NEVER
-
-           - name: '{fuel-release}.{plugin-name}.dvs_vcenter_bvt2'
+           - name: '{fuel-release}.{plugin-name}.dvs_vcenter_smoke'
              current-parameters: true
              kill-phase-on: NEVER
 
@@ -521,7 +494,9 @@
           name: '1st phase - all tests'
           condition: FAILURE
           projects:
-            - name: '{fuel-release}.{plugin-name}.dvs_mu'
+            - name: '{fuel-release}.{plugin-name}.dvs_vcenter_smoke'
+              predefined-parameters: |
+                DVS_PLUGIN_PATH={released-plugin-path}
               current-parameters: true
               kill-phase-on: NEVER
       - multijob:
@@ -529,46 +504,88 @@
           condition: SUCCESSFUL
           projects:
            - name: '{fuel-release}.{plugin-name}.dvs_vcenter_ha_mode'
+             predefined-parameters: |
+                DVS_PLUGIN_PATH={released-plugin-path}
              current-parameters: true
              kill-phase-on: NEVER
-
            - name: '{fuel-release}.{plugin-name}.dvs_vcenter_ceph'
+             predefined-parameters: |
+                DVS_PLUGIN_PATH={released-plugin-path}
              current-parameters: true
              kill-phase-on: NEVER
-
-           - name: '{fuel-release}.{plugin-name}.dvs_vcenter_ceph_2'
-             current-parameters: true
-             kill-phase-on: NEVER
-
            - name: '{fuel-release}.{plugin-name}.dvs_vcenter_ceilometer'
+             predefined-parameters: |
+                DVS_PLUGIN_PATH={released-plugin-path}
              current-parameters: true
              kill-phase-on: NEVER
-
-           - name: '{fuel-release}.{plugin-name}.dvs_vcenter_ceilometer_2'
-             current-parameters: true
-             kill-phase-on: NEVER
-
            - name: '{fuel-release}.{plugin-name}.dvs_vcenter_add_delete_nodes'
+             predefined-parameters: |
+                DVS_PLUGIN_PATH={released-plugin-path}
              current-parameters: true
              kill-phase-on: NEVER
-
            - name: '{fuel-release}.{plugin-name}.dvs_vcenter_add_delete_controller'
+             predefined-parameters: |
+                DVS_PLUGIN_PATH={released-plugin-path}
              current-parameters: true
              kill-phase-on: NEVER
-
+           - name: '{fuel-release}.{plugin-name}.dvs_vcenter_multiroles'
+             predefined-parameters: |
+                DVS_PLUGIN_PATH={released-plugin-path}
+             current-parameters: true
+             kill-phase-on: NEVER
+           - name: '{fuel-release}.{plugin-name}.dvs_vcenter_diff_networks'
+             predefined-parameters: |
+                DVS_PLUGIN_PATH={released-plugin-path}
+             current-parameters: true
+             kill-phase-on: NEVER
            - name: '{fuel-release}.{plugin-name}.dvs_vcenter_networks'
+             predefined-parameters: |
+                DVS_PLUGIN_PATH={released-plugin-path}
              current-parameters: true
              kill-phase-on: NEVER
-
+           - name: '{fuel-release}.{plugin-name}.dvs_vcenter_security'
+             predefined-parameters: |
+                DVS_PLUGIN_PATH={released-plugin-path}
+             current-parameters: true
+             kill-phase-on: NEVER
+           - name: '{fuel-release}.{plugin-name}.dvs_vcenter_tenants_isolation'
+             predefined-parameters: |
+                DVS_PLUGIN_PATH={released-plugin-path}
+             current-parameters: true
+             kill-phase-on: NEVER
+           - name: '{fuel-release}.{plugin-name}.dvs_vcenter_same_ip'
+             predefined-parameters: |
+                DVS_PLUGIN_PATH={released-plugin-path}
+             current-parameters: true
+             kill-phase-on: NEVER
            - name: '{fuel-release}.{plugin-name}.dvs_vcenter_ping_public'
+             predefined-parameters: |
+                DVS_PLUGIN_PATH={released-plugin-path}
              current-parameters: true
              kill-phase-on: NEVER
-
+           - name: '{fuel-release}.{plugin-name}.dvs_vcenter_bind_port'
+             predefined-parameters: |
+                DVS_PLUGIN_PATH={released-plugin-path}
+             current-parameters: true
+             kill-phase-on: NEVER
            - name: '{fuel-release}.{plugin-name}.dvs_vcenter_5_instances'
+             predefined-parameters: |
+                DVS_PLUGIN_PATH={released-plugin-path}
              current-parameters: true
              kill-phase-on: NEVER
-
            - name: '{fuel-release}.{plugin-name}.dvs_vcenter_uninstall'
+             predefined-parameters: |
+                DVS_PLUGIN_PATH={released-plugin-path}
+             current-parameters: true
+             kill-phase-on: NEVER
+           - name: '{fuel-release}.{plugin-name}.dvs_vcenter_reset_controller'
+             predefined-parameters: |
+                DVS_PLUGIN_PATH={released-plugin-path}
+             current-parameters: true
+             kill-phase-on: NEVER
+           - name: '{fuel-release}.{plugin-name}.dvs_vcenter_shutdown_controller'
+             predefined-parameters: |
+                DVS_PLUGIN_PATH={released-plugin-path}
              current-parameters: true
              kill-phase-on: NEVER
 
@@ -585,6 +602,7 @@
        <p>There're a pkg details (that copied withing the package)
        in pkg_properties file in the root of job's workspace.</p>
     project-type: multijob
+    disabled: true  
     node: runner
     <<: *runner-parameters
     properties:
@@ -620,43 +638,51 @@
            - name: '{fuel-release}.{plugin-name}.dvs_vcenter_ha_mode'
              current-parameters: true
              kill-phase-on: NEVER
-
            - name: '{fuel-release}.{plugin-name}.dvs_vcenter_ceph'
              current-parameters: true
              kill-phase-on: NEVER
-
-           - name: '{fuel-release}.{plugin-name}.dvs_vcenter_ceph_2'
-             current-parameters: true
-             kill-phase-on: NEVER
-
            - name: '{fuel-release}.{plugin-name}.dvs_vcenter_ceilometer'
              current-parameters: true
              kill-phase-on: NEVER
-
-           - name: '{fuel-release}.{plugin-name}.dvs_vcenter_ceilometer_2'
-             current-parameters: true
-             kill-phase-on: NEVER
-
            - name: '{fuel-release}.{plugin-name}.dvs_vcenter_add_delete_nodes'
              current-parameters: true
              kill-phase-on: NEVER
-
            - name: '{fuel-release}.{plugin-name}.dvs_vcenter_add_delete_controller'
              current-parameters: true
              kill-phase-on: NEVER
-
+           - name: '{fuel-release}.{plugin-name}.dvs_vcenter_multiroles'
+             current-parameters: true
+             kill-phase-on: NEVER
+           - name: '{fuel-release}.{plugin-name}.dvs_vcenter_diff_networks'
+             current-parameters: true
+             kill-phase-on: NEVER
            - name: '{fuel-release}.{plugin-name}.dvs_vcenter_networks'
              current-parameters: true
              kill-phase-on: NEVER
-
+           - name: '{fuel-release}.{plugin-name}.dvs_vcenter_security'
+             current-parameters: true
+             kill-phase-on: NEVER
+           - name: '{fuel-release}.{plugin-name}.dvs_vcenter_tenants_isolation'
+             current-parameters: true
+             kill-phase-on: NEVER
+           - name: '{fuel-release}.{plugin-name}.dvs_vcenter_same_ip'
+             current-parameters: true
+             kill-phase-on: NEVER
            - name: '{fuel-release}.{plugin-name}.dvs_vcenter_ping_public'
              current-parameters: true
              kill-phase-on: NEVER
-
+           - name: '{fuel-release}.{plugin-name}.dvs_vcenter_bind_port'
+             current-parameters: true
+             kill-phase-on: NEVER
            - name: '{fuel-release}.{plugin-name}.dvs_vcenter_5_instances'
              current-parameters: true
              kill-phase-on: NEVER
-
            - name: '{fuel-release}.{plugin-name}.dvs_vcenter_uninstall'
+             current-parameters: true
+             kill-phase-on: NEVER
+           - name: '{fuel-release}.{plugin-name}.dvs_vcenter_reset_controller'
+             current-parameters: true
+             kill-phase-on: NEVER
+           - name: '{fuel-release}.{plugin-name}.dvs_vcenter_shutdown_controller'
              current-parameters: true
              kill-phase-on: NEVER
