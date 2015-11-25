@@ -16,7 +16,7 @@ fi
 
 #export JUNIPER_PKG_PATH="/storage/contrail/2.20/"
 export JUNIPER_PKG_PATH="/storage/contrail/${CONTRAIL_VERSION}/"
-export CONTRAIL_PLUGIN_PACK_CEN_PATH=$(find ${JUNIPER_PKG_PATH} -type f -name '*rpm' )
+#export CONTRAIL_PLUGIN_PACK_CEN_PATH=$(find ${JUNIPER_PKG_PATH} -type f -name '*rpm' )
 export CONTRAIL_PLUGIN_PACK_UB_PATH=$(find ${JUNIPER_PKG_PATH} -type f -name '*deb' )
 
 echo "Description string: ${TEST_GROUP} on ${NODE_NAME}: ${ENV_NAME}"
