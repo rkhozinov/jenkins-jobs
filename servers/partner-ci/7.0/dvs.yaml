@@ -80,7 +80,7 @@
       - build-blocker:
           use-build-blocker: true
           blocking-jobs:
-            - '{bvt-name}'
+            - '{build-name}'
           block-level: 'GLOBAL'
           queue-scanning: 'BUILDABLE'
 
@@ -121,24 +121,28 @@
           description: 'Contrainer for storing an iso build number to output it as job name'
       - bool:
           name: UPDATE_MASTER
-          default: true
-          description: 'turns update fuel master node to maintenance update'
+          default: false
+          description: 'turns on update fuel master node to maintenance update'
+      - string:
+          name: MIRROR
+          default: 'http://mirror.seed-cz1.fuel-infra.org'
+          description: 'mirror for package repositories. this mirror is optimized for CZ'
       - string:
           name: UPDATE_FUEL_MIRROR
-          default: 'http://mirror.fuel-infra.org/mos-repos/centos/mos7.0-centos6-fuel/proposed/x86_64/ http://mirror.fuel-infra.org/mos-repos/centos/mos7.0-centos6-fuel/security/x86_64/ http://mirror.fuel-infra.org/mos-repos/centos/mos7.0-centos6-fuel/updates/x86_64/'
-          description: 'proposed repositories to update fuel master node'
+          default: "${{MIRROR}}/mos-repos/centos/mos7.0-centos6-fuel/security/x86_64/ ${{MIRROR}}/mos-repos/centos/mos7.0-centos6-fuel/updates/x86_64/"
+          description: 'repositories to update fuel master node'
       - string:
           name: MIRROR_UBUNTU
-          default: 'deb http://mirror.seed-cz1.fuel-infra.org/pkgs/ubuntu-latest/ trusty main universe multiverse|deb http://mirror.seed-cz1.fuel-infra.org/pkgs/ubuntu-latest/ trusty-updates main universe multiverse|deb http://mirror.seed-cz1.fuel-infra.org/pkgs/ubuntu-latest/ trusty-security main universe multiverse'
+          default: 'deb ${{MIRROR}}/pkgs/ubuntu/ trusty main universe multiverse|deb ${{MIRROR}}/pkgs/ubuntu/ trusty-updates main universe multiverse'
           description: 'proposed repositories to update ubuntu cluster'
       - string:
-          name: EXTRA_DEB_REPOS
-          default: 'mos-updates-2,deb http://mirror.seed-cz1.fuel-infra.org/mos-repos/ubuntu/snapshots/7.0-latest mos7.0-updates main restricted|mos-security-2,deb http://mirror.seed-cz1.fuel-infra.org/mos-repos/ubuntu/snapshots/7.0-latest mos7.0-security main restricted'
-          description: 'proposed repositories to update ubuntu cluster'
+          name: DEB_UPDATES
+          default: "mos-updates,deb ${{MIRROR}}/mos/ubuntu/dists/mos7.0-updates main restricted"
+          description: 'ubuntu-updates repositories for master ui'
       - string:
-          name: OPENSTACK_RELEASE
-          default: 'Ubuntu'
-          description: 'Openstack release (CentOS, Ubuntu)'
+          name: DEB_SECURITY
+          default: "mos-security,deb ${{MIRROR}}/mos/ubuntu/dists/mos7.0-security main restricted"
+          description: 'ubuntu-security repositories for master ui'
       - string:
           name: GERRIT_REFSPEC
           default: 'refs/heads/{gerrit-branch}'
@@ -147,26 +151,6 @@
           name: GERRIT_BRANCH
           default: 'origin/{gerrit-branch}'
           description: 'The branch for fuel-qa gerrit'
-      - string:
-          name: NODES_COUNT
-          default: '9'
-          description: 'Amount of nodes in the test lab'
-      - string:
-          name: ADMIN_NODE_MEMORY
-          default: '4096'
-          description: 'Amount of vitrual RAM for admin node'
-      - string:
-          name: SLAVE_NODE_MEMORY
-          default: '4096'
-          description: 'Amount of vitrual RAM per slave node'
-      - string:
-          name: ADMIN_NODE_CPU
-          default: '4'
-          description: 'Amount of vitrual CPUs for admin node'
-      - string:
-          name: SLAVE_NODE_CPU
-          default: '4'
-          description: 'Amount of vitrual CPUs per slave node'
       - string:
           name: ENV_PREFIX
           default: '{fuel-release}.{plugin-name}'
@@ -204,20 +188,28 @@
           description: 'Contrainer for storing an iso build number to output it as job name'
       - bool:
           name: UPDATE_MASTER
-          default: true
-          description: 'turns update fuel master node to maintenance update'
+          default: false
+          description: 'turns on update fuel master node to maintenance update'
+      - string:
+          name: MIRROR
+          default: 'http://mirror.seed-cz1.fuel-infra.org'
+          description: 'mirror for package repositories. this mirror is optimized for CZ'
       - string:
           name: UPDATE_FUEL_MIRROR
-          default: 'http://mirror.fuel-infra.org/mos-repos/centos/mos7.0-centos6-fuel/proposed/x86_64/ http://mirror.fuel-infra.org/mos-repos/centos/mos7.0-centos6-fuel/security/x86_64/ http://mirror.fuel-infra.org/mos-repos/centos/mos7.0-centos6-fuel/updates/x86_64/'
-          description: 'proposed repositories to update fuel master node'
+          default: "${{MIRROR}}/mos-repos/centos/mos7.0-centos6-fuel/security/x86_64/ ${{MIRROR}}/mos-repos/centos/mos7.0-centos6-fuel/updates/x86_64/"
+          description: 'repositories to update fuel master node'
       - string:
           name: MIRROR_UBUNTU
-          default: 'deb http://mirror.seed-cz1.fuel-infra.org/pkgs/ubuntu-latest/ trusty main universe multiverse|deb http://mirror.seed-cz1.fuel-infra.org/pkgs/ubuntu-latest/ trusty-updates main universe multiverse|deb http://mirror.seed-cz1.fuel-infra.org/pkgs/ubuntu-latest/ trusty-security main universe multiverse'
+          default: 'deb ${{MIRROR}}/pkgs/ubuntu/ trusty main universe multiverse|deb ${{MIRROR}}/pkgs/ubuntu/ trusty-updates main universe multiverse'
           description: 'proposed repositories to update ubuntu cluster'
       - string:
-          name: EXTRA_DEB_REPOS
-          default: 'mos-updates-2,deb http://mirror.seed-cz1.fuel-infra.org/mos-repos/ubuntu/snapshots/7.0-latest mos7.0-updates main restricted|mos-security-2,deb http://mirror.seed-cz1.fuel-infra.org/mos-repos/ubuntu/snapshots/7.0-latest mos7.0-security main restricted'
-          description: 'proposed repositories to update ubuntu cluster'
+          name: DEB_UPDATES
+          default: "mos-updates,deb ${{MIRROR}}/mos/ubuntu/dists/mos7.0-updates main restricted"
+          description: 'ubuntu-updates repositories for master ui'
+      - string:
+          name: DEB_SECURITY
+          default: "mos-security,deb ${{MIRROR}}/mos/ubuntu/dists/mos7.0-security main restricted"
+          description: 'ubuntu-security repositories for master ui'
       - string:
           name: OPENSTACK_RELEASE
           default: 'Ubuntu'
@@ -232,7 +224,7 @@
           description: 'The branch for fuel-qa gerrit'
       - string:
           name: NODES_COUNT
-          default: '9'
+          default: '10'
           description: 'Amount of nodes in the test lab'
       - string:
           name: ADMIN_NODE_MEMORY
@@ -514,6 +506,8 @@
           condition: FAILURE
           projects:
             - name: '{fuel-release}.{plugin-name}.dvs_mu'
+              predefined-parameters: |
+                DVS_PLUGIN_PATH={released-plugin-path}
               current-parameters: true
               kill-phase-on: NEVER
       - multijob:
@@ -521,46 +515,68 @@
           condition: SUCCESSFUL
           projects:
            - name: '{fuel-release}.{plugin-name}.dvs_vcenter_ha_mode'
+             predefined-parameters: |
+                DVS_PLUGIN_PATH={released-plugin-path}
              current-parameters: true
              kill-phase-on: NEVER
 
            - name: '{fuel-release}.{plugin-name}.dvs_vcenter_ceph'
+             predefined-parameters: |
+                DVS_PLUGIN_PATH={released-plugin-path}
              current-parameters: true
              kill-phase-on: NEVER
 
            - name: '{fuel-release}.{plugin-name}.dvs_vcenter_ceph_2'
+             predefined-parameters: |
+                DVS_PLUGIN_PATH={released-plugin-path}
              current-parameters: true
              kill-phase-on: NEVER
 
            - name: '{fuel-release}.{plugin-name}.dvs_vcenter_ceilometer'
+             predefined-parameters: |
+                DVS_PLUGIN_PATH={released-plugin-path}
              current-parameters: true
              kill-phase-on: NEVER
 
            - name: '{fuel-release}.{plugin-name}.dvs_vcenter_ceilometer_2'
+             predefined-parameters: |
+                DVS_PLUGIN_PATH={released-plugin-path}
              current-parameters: true
              kill-phase-on: NEVER
 
            - name: '{fuel-release}.{plugin-name}.dvs_vcenter_add_delete_nodes'
+             predefined-parameters: |
+                DVS_PLUGIN_PATH={released-plugin-path}
              current-parameters: true
              kill-phase-on: NEVER
 
            - name: '{fuel-release}.{plugin-name}.dvs_vcenter_add_delete_controller'
+             predefined-parameters: |
+                DVS_PLUGIN_PATH={released-plugin-path}
              current-parameters: true
              kill-phase-on: NEVER
 
            - name: '{fuel-release}.{plugin-name}.dvs_vcenter_networks'
+             predefined-parameters: |
+                DVS_PLUGIN_PATH={released-plugin-path}
              current-parameters: true
              kill-phase-on: NEVER
 
            - name: '{fuel-release}.{plugin-name}.dvs_vcenter_ping_public'
+             predefined-parameters: |
+                DVS_PLUGIN_PATH={released-plugin-path}
              current-parameters: true
              kill-phase-on: NEVER
 
            - name: '{fuel-release}.{plugin-name}.dvs_vcenter_5_instances'
+             predefined-parameters: |
+                DVS_PLUGIN_PATH={released-plugin-path}
              current-parameters: true
              kill-phase-on: NEVER
 
            - name: '{fuel-release}.{plugin-name}.dvs_vcenter_uninstall'
+             predefined-parameters: |
+                DVS_PLUGIN_PATH={released-plugin-path}
              current-parameters: true
              kill-phase-on: NEVER
 
@@ -577,6 +593,7 @@
        <p>There're a pkg details (that copied withing the package)
        in pkg_properties file in the root of job's workspace.</p>
     project-type: multijob
+    disabled: false  
     node: runner
     <<: *runner-parameters
     properties:
