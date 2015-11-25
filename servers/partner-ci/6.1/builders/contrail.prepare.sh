@@ -5,6 +5,8 @@
 #remove old logs and test data      
 rm -f nosetests.xml   
 rm -rf logs/*      
+rm -rf *.rpm.*      
+rm -rf *.rpm      
 
 export ISO_VERSION=$(cut -d'-' -f3-3<<< $ISO_FILE)
 echo iso build number is $ISO_VERSION
@@ -51,7 +53,7 @@ function destroy_envs {
    [ -z $VIRTUAL_ENV ] && exit 1
    dos.py sync
    env_list=$(dos.py list | tail -n +3)
-   if [ ! -z $env_list ]; then
+   if [[ ! -z $env_list ]]; then
      for env in $env_list; do dos.py destroy $env; done
    fi
 }

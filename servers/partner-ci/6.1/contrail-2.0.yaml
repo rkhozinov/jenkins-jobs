@@ -78,7 +78,7 @@
       - build-blocker:
           use-build-blocker: true
           blocking-jobs:
-            - '{bvt-name}'
+            - '{build-name}'
           block-level: 'GLOBAL'
           queue-scanning: 'BUILDABLE'
 
@@ -102,18 +102,38 @@
 - runner-parameters: &runner-parameters
     name: 'runner-parameters'
     parameters:
+      - bool:
+          name: UPDATE_MASTER
+          default: false
+          description: 'turns on update fuel master node to maintenance update'
       - string:
-          name: ISO_FILE
-          default: '{iso-file}'
-          description: 'ISO file name that is on the tpi-s1 in /storage/downloads'
+          name: MIRROR
+          default: 'http://mirror.seed-cz1.fuel-infra.org'
+          description: 'mirror for package repositories. this mirror is optimized for CZ'
+      - string:
+          name: UPDATE_FUEL_MIRROR
+          default: "${{MIRROR}}/mos/snapshots/centos-6-stable/mos6.1/updates ${{MIRROR}}/mos/snapshots/centos-6-stable/mos6.1/security"
+          description: 'repositories to update fuel master node'
+      - string:
+          name: MIRROR_UBUNTU
+          default: "deb ${{MIRROR}}/pkgs/ubuntu trusty main restricted universe multiverse|deb ${{MIRROR}}/pkgs/ubuntu trusty-updates main restricted universe multiverse|deb ${{MIRROR}}/pkgs/ubuntu trusty-security main restricted universe multiverse"
+          description: 'updates repository to update ubuntu cluster'
+      - string:
+          name: DEB_UPDATES
+          default: "mos-updates,deb ${{MIRROR}}/mos/snapshots/ubuntu-stable mos6.1-updates main restricted"
+          description: 'ubuntu-updates repositories for master ui'
+      - string:
+          name: DEB_SECURITY
+          default: "mos-security,deb ${{MIRROR}}/mos/snapshots/ubuntu-stable mos6.1-security main restricted"
+          description: 'ubuntu-security repositories for master ui'
       - string:
           name: CONTRAIL_VERSION
           default: '2.20'
           description: 'There is a version of juniper packages stored in common sotrage'
       - string:
-          name: OPENSTACK_RELEASE
-          default: 'Ubuntu'
-          description: 'Openstack release (CentOS, Ubuntu)'
+          name: CONTRAIL_PLUGIN_PATH
+          default: ''
+          description: 'The path to the contrail package on storage'  
       - string:
           name: GERRIT_REFSPEC
           default: 'refs/heads/{gerrit-branch}'
@@ -123,32 +143,9 @@
           default: 'origin/{gerrit-branch}'
           description: 'The branch for fuel-qa gerrit'
       - string:
-          name: NODES_COUNT
-          default: '10'
-          description: 'Amount of nodes in a virtual cluster'
-      - string:
-          name: NODES_VOLUME_SIZE
-          default: '325'
-      - string:
-          name: ADMIN_NODE_MEMORY
-          default: '4096'
-          description: 'Amount of virtual memory for the master node'
-      - string:
-          name: SLAVE_NODE_MEMORY
-          default: '4096'
-      - string:
-          name: ADMIN_NODE_CPU
-          default: '4'
-      - string:
-          name: SLAVE_NODE_CPU
-          default: '4'
-      - string:
           name: ENV_PREFIX
           default: '{fuel-release}.{plugin-name}'
           description: 'The name of devops env. Needed to properly work of existing mode of devops'
-      - string:
-          name: ISO_VERSION
-          description: 'There is a contrainer to store an iso number (will be filled during job execution)' 
       - bool:
           name: BONDING
           default: false
@@ -160,10 +157,6 @@
           name: SHUTDOWN_AFTER
           default: true
           decsription: 'The env will be powered off after test'
-      - bool:
-          name: ERASE_AFTER
-          default: false
-          description: 'The env will be erased after test'
 
 ## parameters for jobs created per test-group and custom test job
 - test-parameters: &test-parameters
@@ -175,10 +168,34 @@
       - string:
           name: CONTRAIL_VERSION
           default: '2.20'
-          description: 'There is a version of juniper packages stored in common sotrage'
+          description: 'There is a version of juniper packages stored in common storage'
       - string:
           name: CONTRAIL_PLUGIN_PATH
           default: ''
+      - bool:
+          name: UPDATE_MASTER
+          default: false
+          description: 'turns on update fuel master node to maintenance update'
+      - string:
+          name: MIRROR
+          default: 'http://mirror.seed-cz1.fuel-infra.org'
+          description: 'mirror for package repositories. this mirror is optimized for CZ'
+      - string:
+          name: UPDATE_FUEL_MIRROR
+          default: "${{MIRROR}}/mos/snapshots/centos-6-stable/mos6.1/updates ${{MIRROR}}/mos/snapshots/centos-6-stable/mos6.1/security"
+          description: 'repositories to update fuel master node'
+      - string:
+          name: MIRROR_UBUNTU
+          default: "deb ${{MIRROR}}/pkgs/ubuntu trusty main restricted universe multiverse|deb ${{MIRROR}}/pkgs/ubuntu trusty-updates main restricted universe multiverse|deb ${{MIRROR}}/pkgs/ubuntu trusty-security main restricted universe multiverse"
+          description: 'updates repository to update ubuntu cluster'
+      - string:
+          name: DEB_UPDATES
+          default: "mos-updates,deb ${{MIRROR}}/mos/snapshots/ubuntu-stable mos6.1-updates main restricted"
+          description: 'ubuntu-updates repositories for master ui'
+      - string:
+          name: DEB_SECURITY
+          default: "mos-security,deb ${{MIRROR}}/mos/snapshots/ubuntu-stable mos6.1-security main restricted"
+          description: 'ubuntu-security repositories for master ui'
       - string:
           name: TEST_GROUP
           default: '{testgroup}'
@@ -186,6 +203,14 @@
           name: ISO_FILE
           default: '{iso-file}'
           description: 'ISO file name that is on the tpi-s1 in /storage/downloads'
+      - string:
+          name: ISO_VERSION
+          description: 'Contrainer for storing an iso build number to output it as job name'
+          default: ''
+      - string:
+          name: ISO_STORAGE
+          default: '/storage/downloads'
+          description: 'Storage for iso files'
       - string:
           name: OPENSTACK_RELEASE
           default: 'Ubuntu'
@@ -199,8 +224,11 @@
           default: 'origin/{gerrit-branch}'
           description: 'The branch for fuel-qa gerrit'
       - string:
+          name: NODE_VOLUME_SIZE
+          default: '512'
+      - string:
           name: NODES_COUNT
-          default: '9'
+          default: '10'
           description: 'Amount of nodes in the test lab'
       - string:
           name: ADMIN_NODE_MEMORY
@@ -233,10 +261,6 @@
           name: SHUTDOWN_AFTER
           default: true
           decsription: 'The env will be powered off after test'
-      - bool:
-          name: ERASE_AFTER
-          default: false
-          description: 'The env will be erased after test'
 
 - project:
     name: 'predefined_parameters'
@@ -253,7 +277,6 @@
     gerrit-repo: 'fuel-plugin-contrail'
     gerrit-branch: 'stable/2.0'
     email-to: 'rkhozinov@mirantis.com'
-    iso-storage: '/storage/downloads'
     released-plugin-path: '/storage/contrail/released/contrail-2.0.0.noarch.rpm'
 
     testgroup:
@@ -289,14 +312,9 @@
     <<: *test-parameters
     <<: *common-scm
     builders:
-      - inject:
-          properties-content: |
-            ISO_STORAGE={iso-storage}
       - copyartifact:
           project: '{build-name}'
           which-build: last-successful
-      #- inject:
-      #    properties-file: 'pkg_properties'
       - shell:
           !include-raw-escape builders/contrail.prepare.sh
       - shell:
@@ -304,7 +322,7 @@
       - shell: |
           env > properties
     wrappers:
-      - ansicolor:
+      - ansicolor: 
           colormap: xterm
       - timeout:
           fail: true
@@ -332,6 +350,7 @@
       - email: 
           recipients: '{email-to}'
 
+## Jobs for system tests by testgroup
 - job-template:
     name: '{build-name}'
     node: 'runner'
@@ -493,16 +512,17 @@
           condition: FAILURE
           projects:
             - name: '{fuel-release}.{plugin-name}.{plugin-version}.contrail_mu'
-              current-parameters: true
               predefined-parameters: |
                 CONTRAIL_DISTRIBUTION=open
                 CONTRAIL_PLUGIN_PATH={released-plugin-path}
+              current-parameters: true
+              kill-phase-on: NEVER
 
             - name: '{fuel-release}.{plugin-name}.{plugin-version}.contrail_mu'
-              current-parameters: true
               predefined-parameters:  |
                 CONTRAIL_DISTRIBUTION=juniper
                 CONTRAIL_PLUGIN_PATH={released-plugin-path}
+              current-parameters: true
               kill-phase-on: NEVER
 
       - multijob:
@@ -510,23 +530,31 @@
           condition: SUCCESSFUL
           projects:
             - name: '{fuel-release}.{plugin-name}.{plugin-version}.contrail_plugin_add_delete_compute_node'
+              predefined-parameters: |
+                CONTRAIL_DISTRIBUTION=open
+                CONTRAIL_PLUGIN_PATH={released-plugin-path}
               current-parameters: true
-              predefined-parameters: CONTRAIL_DISTRIBUTION=open
               kill-phase-on: NEVER
 
             - name: '{fuel-release}.{plugin-name}.{plugin-version}.deploy_ha_contrail_plugin'
+              predefined-parameters: |
+                CONTRAIL_DISTRIBUTION=open
+                CONTRAIL_PLUGIN_PATH={released-plugin-path}
               current-parameters: true
-              predefined-parameters: CONTRAIL_DISTRIBUTION=open
               kill-phase-on: NEVER
 
             - name: '{fuel-release}.{plugin-name}.{plugin-version}.contrail_plugin_add_delete_compute_node'
+              predefined-parameters: |
+                CONTRAIL_DISTRIBUTION=open
+                CONTRAIL_PLUGIN_PATH={released-plugin-path}
               current-parameters: true
-              predefined-parameters: CONTRAIL_DISTRIBUTION=juniper
               kill-phase-on: NEVER
  
             - name: '{fuel-release}.{plugin-name}.{plugin-version}.deploy_ha_contrail_plugin'
+              predefined-parameters: |
+                CONTRAIL_DISTRIBUTION=open
+                CONTRAIL_PLUGIN_PATH={released-plugin-path}
               current-parameters: true
-              predefined-parameters: CONTRAIL_DISTRIBUTION=juniper
               kill-phase-on: NEVER
 
 - job-template:
