@@ -164,7 +164,7 @@
     parameters:
       - string:
           name: CONTRAIL_DISTRIBUTION
-          default: 'open'
+          default: ''
       - string:
           name: CONTRAIL_VERSION
           default: '2.20'
@@ -297,7 +297,8 @@
       - '{smoke-name}'
       - '{bvt-name}'
       - '{mu-name}'
-      - '{fuel-release}.{plugin-name}.{plugin-version}.{testgroup}'
+      - '{fuel-release}.{plugin-name}.{plugin-version}.{testgroup}.open'
+      - '{fuel-release}.{plugin-name}.{plugin-version}.{testgroup}.juniper'
 
 - defaults:
     name: global
@@ -317,10 +318,10 @@
           which-build: last-successful
       - shell:
           !include-raw-escape builders/contrail.prepare.sh
-      - shell:
-          !include-raw-escape builders/contrail.test.sh
       - shell: |
           env > properties
+      - shell:
+          !include-raw-escape builders/contrail.test.sh
     wrappers:
       - ansicolor: 
           colormap: xterm
@@ -388,8 +389,13 @@
           recipients: '{email-to}'
 
 - job-template:
-    name: '{fuel-release}.{plugin-name}.{plugin-version}.{testgroup}'
-    description: 'The test "{testgroup}" for {fuel-release}.{plugin-name}.{plugin-version}'
+    name: '{fuel-release}.{plugin-name}.{plugin-version}.{testgroup}.open'
+    description: 'The test "{testgroup}" for {fuel-release}.{plugin-name}.{plugin-version} open contrail'
+    concurrent: true
+
+- job-template:
+    name: '{fuel-release}.{plugin-name}.{plugin-version}.{testgroup}.juniper'
+    description: 'The test "{testgroup}" for {fuel-release}.{plugin-name}.{plugin-version} juniper contrail'
     concurrent: true
 
 - job-template:
@@ -430,12 +436,12 @@
           name: 'Smoke tests for open contrail'
           condition: SUCCESSFUL
           projects:
-            - name: '{fuel-release}.{plugin-name}.{plugin-version}.deploy_contrail'
+            - name: '{fuel-release}.{plugin-name}.{plugin-version}.deploy_contrail.open'
               current-parameters: true            
               predefined-parameters: CONTRAIL_DISTRIBUTION=open
               kill-phase-on: NEVER
 
-            - name: '{fuel-release}.{plugin-name}.{plugin-version}.deploy_contrail'
+            - name: '{fuel-release}.{plugin-name}.{plugin-version}.deploy_contrail.juniper'
               current-parameters: true
               predefined-parameters: CONTRAIL_DISTRIBUTION=juniper
               kill-phase-on: NEVER
@@ -473,13 +479,13 @@
           name: 'Smoke tests for open/juniper contrail'
           condition: SUCCESSFUL
           projects:
-            - name: '{fuel-release}.{plugin-name}.{plugin-version}.contrail_bvt'
+            - name: '{fuel-release}.{plugin-name}.{plugin-version}.contrail_bvt.open'
               current-parameters: true
               predefined-parameters: |
                 CONTRAIL_DISTRIBUTION=open
               kill-phase-on: NEVER
 
-            - name: '{fuel-release}.{plugin-name}.{plugin-version}.contrail_bvt'
+            - name: '{fuel-release}.{plugin-name}.{plugin-version}.contrail_bvt.juniper'
               current-parameters: true
               predefined-parameters: |
                 CONTRAIL_DISTRIBUTION=juniper
@@ -509,16 +515,16 @@
       - shell: env > mu.properties
       - multijob:
           name: '1st phase - mu test'
-          condition: FAILURE
+          condition: COMPLETED
           projects:
-            - name: '{fuel-release}.{plugin-name}.{plugin-version}.contrail_mu'
+            - name: '{fuel-release}.{plugin-name}.{plugin-version}.contrail_mu.open'
               predefined-parameters: |
                 CONTRAIL_DISTRIBUTION=open
                 CONTRAIL_PLUGIN_PATH={released-plugin-path}
               current-parameters: true
               kill-phase-on: NEVER
 
-            - name: '{fuel-release}.{plugin-name}.{plugin-version}.contrail_mu'
+            - name: '{fuel-release}.{plugin-name}.{plugin-version}.contrail_mu.juniper'
               predefined-parameters:  |
                 CONTRAIL_DISTRIBUTION=juniper
                 CONTRAIL_PLUGIN_PATH={released-plugin-path}
@@ -526,33 +532,65 @@
               kill-phase-on: NEVER
 
       - multijob:
-          name: '2st phase. all tests'
-          condition: SUCCESSFUL
+          name: '2st phase - all tests - open'
+          condition: COMPLETED
           projects:
-            - name: '{fuel-release}.{plugin-name}.{plugin-version}.contrail_plugin_add_delete_compute_node'
+            - name: '{fuel-release}.{plugin-name}.{plugin-version}.contrail_plugin_add_delete_compute_node.open'
               predefined-parameters: |
                 CONTRAIL_DISTRIBUTION=open
                 CONTRAIL_PLUGIN_PATH={released-plugin-path}
               current-parameters: true
               kill-phase-on: NEVER
 
-            - name: '{fuel-release}.{plugin-name}.{plugin-version}.deploy_ha_contrail_plugin'
+            - name: '{fuel-release}.{plugin-name}.{plugin-version}.deploy_ha_contrail_plugin.open'
               predefined-parameters: |
                 CONTRAIL_DISTRIBUTION=open
                 CONTRAIL_PLUGIN_PATH={released-plugin-path}
               current-parameters: true
               kill-phase-on: NEVER
 
-            - name: '{fuel-release}.{plugin-name}.{plugin-version}.contrail_plugin_add_delete_compute_node'
+            - name: '{fuel-release}.{plugin-name}.{plugin-version}.contrail_plugin_add_delete_compute_node.open'
               predefined-parameters: |
                 CONTRAIL_DISTRIBUTION=open
                 CONTRAIL_PLUGIN_PATH={released-plugin-path}
               current-parameters: true
               kill-phase-on: NEVER
  
-            - name: '{fuel-release}.{plugin-name}.{plugin-version}.deploy_ha_contrail_plugin'
+            - name: '{fuel-release}.{plugin-name}.{plugin-version}.deploy_ha_contrail_plugin.open'
               predefined-parameters: |
                 CONTRAIL_DISTRIBUTION=open
+                CONTRAIL_PLUGIN_PATH={released-plugin-path}
+              current-parameters: true
+              kill-phase-on: NEVER
+
+      - multijob:
+          name: '3st phase - all tests - juniper'
+          condition: COMPLETED
+          projects:
+            - name: '{fuel-release}.{plugin-name}.{plugin-version}.contrail_plugin_add_delete_compute_node.juniper'
+              predefined-parameters: |
+                CONTRAIL_DISTRIBUTION=juniper
+                CONTRAIL_PLUGIN_PATH={released-plugin-path}
+              current-parameters: true
+              kill-phase-on: NEVER
+
+            - name: '{fuel-release}.{plugin-name}.{plugin-version}.deploy_ha_contrail_plugin.juniper'
+              predefined-parameters: |
+                CONTRAIL_DISTRIBUTION=juniper
+                CONTRAIL_PLUGIN_PATH={released-plugin-path}
+              current-parameters: true
+              kill-phase-on: NEVER
+
+            - name: '{fuel-release}.{plugin-name}.{plugin-version}.contrail_plugin_add_delete_compute_node.juniper'
+              predefined-parameters: |
+                CONTRAIL_DISTRIBUTION=juniper
+                CONTRAIL_PLUGIN_PATH={released-plugin-path}
+              current-parameters: true
+              kill-phase-on: NEVER
+ 
+            - name: '{fuel-release}.{plugin-name}.{plugin-version}.deploy_ha_contrail_plugin.juniper'
+              predefined-parameters: |
+                CONTRAIL_DISTRIBUTION=juniper
                 CONTRAIL_PLUGIN_PATH={released-plugin-path}
               current-parameters: true
               kill-phase-on: NEVER
@@ -586,25 +624,49 @@
           which-build: last-successful
           stable: true
       - multijob:
-          name: 'Smoke tests for open/juniper contrail. Juniper or contrail version is provided in variable by multijob'
+          name: 'All tests for open contrail'
+          condition: COMPLETED
+          projects:
+            - name: '{fuel-release}.{plugin-name}.{plugin-version}.contrail_plugin_add_delete_compute_node.open'
+              current-parameters: true
+              predefined-parameters: CONTRAIL_DISTRIBUTION=open
+              kill-phase-on: NEVER
+
+            - name: '{fuel-release}.{plugin-name}.{plugin-version}.deploy_ha_contrail_plugin.open'
+              current-parameters: true
+              predefined-parameters: CONTRAIL_DISTRIBUTION=open
+              kill-phase-on: NEVER
+
+            - name: '{fuel-release}.{plugin-name}.{plugin-version}.contrail_plugin_add_delete_compute_node.open'
+              current-parameters: true
+              predefined-parameters: CONTRAIL_DISTRIBUTION=open
+              kill-phase-on: NEVER
+ 
+            - name: '{fuel-release}.{plugin-name}.{plugin-version}.deploy_ha_contrail_plugin.open'
+              current-parameters: true
+              predefined-parameters: CONTRAIL_DISTRIBUTION=open
+              kill-phase-on: NEVER
+
+      - multijob:
+          name: 'All tests for juniper contrail'
           condition: SUCCESSFUL
           projects:
-            - name: '{fuel-release}.{plugin-name}.{plugin-version}.contrail_plugin_add_delete_compute_node'
+            - name: '{fuel-release}.{plugin-name}.{plugin-version}.contrail_plugin_add_delete_compute_node.juniper'
               current-parameters: true
-              predefined-parameters: CONTRAIL_DISTRIBUTION=open
+              predefined-parameters: CONTRAIL_DISTRIBUTION=juniper
               kill-phase-on: NEVER
 
-            - name: '{fuel-release}.{plugin-name}.{plugin-version}.deploy_ha_contrail_plugin'
+            - name: '{fuel-release}.{plugin-name}.{plugin-version}.deploy_ha_contrail_plugin.juniper'
               current-parameters: true
-              predefined-parameters: CONTRAIL_DISTRIBUTION=open
+              predefined-parameters: CONTRAIL_DISTRIBUTION=juniper
               kill-phase-on: NEVER
 
-            - name: '{fuel-release}.{plugin-name}.{plugin-version}.contrail_plugin_add_delete_compute_node'
+            - name: '{fuel-release}.{plugin-name}.{plugin-version}.contrail_plugin_add_delete_compute_node.juniper'
               current-parameters: true
               predefined-parameters: CONTRAIL_DISTRIBUTION=juniper
               kill-phase-on: NEVER
  
-            - name: '{fuel-release}.{plugin-name}.{plugin-version}.deploy_ha_contrail_plugin'
+            - name: '{fuel-release}.{plugin-name}.{plugin-version}.deploy_ha_contrail_plugin.juniper'
               current-parameters: true
               predefined-parameters: CONTRAIL_DISTRIBUTION=juniper
               kill-phase-on: NEVER
