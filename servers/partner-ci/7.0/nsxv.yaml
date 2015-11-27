@@ -357,8 +357,8 @@
     builders:
       - shell:
           !include-raw-escape './builders/build-plugin.sh'
-#     - shell:
-#         !include-raw-escape './builders/rpm-check.sh'
+      - shell:
+          !include-raw-escape './builders/rpm-check.sh'
       - shell: |
           env > build.properties
     publishers:
