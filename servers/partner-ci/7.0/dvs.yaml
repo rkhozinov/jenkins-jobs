@@ -318,7 +318,7 @@
           colormap: xterm
       - timeout:
           fail: true
-          timeout: 6000
+          timeout: 300
     publishers:
       - archive:
           artifacts: 'build.properties'
