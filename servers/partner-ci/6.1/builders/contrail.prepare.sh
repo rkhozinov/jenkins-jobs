@@ -5,8 +5,6 @@
 #remove old logs and test data      
 rm -f nosetests.xml   
 rm -rf logs/*      
-rm -rf *.rpm.*      
-rm -rf *.rpm      
 
 export ISO_VERSION=$(cut -d'-' -f3-3<<< $ISO_FILE)
 echo iso build number is $ISO_VERSION
