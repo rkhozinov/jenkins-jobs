@@ -1,4 +1,7 @@
-#!/bin/bash -xe 
+#!/bin/bash -e 
+
+# activate bash xtrace for script
+[[ "${DEBUG}" == "true" ]] && set -x || set +x
 
 export ISO_PATH="${ISO_STORAGE}/${ISO_FILE}"
 export ISO_VERSION=$(cut -d'-' -f3-3 <<< $ISO_FILE) 
@@ -7,8 +10,7 @@ export FUEL_RELEASE=$(cut -d'-' -f2-2 <<< $ISO_FILE | tr -d '.')
 export ENV_NAME="${ENV_PREFIX}.${ISO_VERSION}"
 export VENV_PATH="${HOME}/${FUEL_RELEASE}-venv"
 
-[[ -z "${DVS_PLUGIN_PATH}" ]] && export DVS_PLUGIN_PATH=$(ls ${WORKSPACE}/fuel-plugin-vmware-dvs*.rpm) \
-                            || true
+[[ -z "${DVS_PLUGIN_PATH}" ]] && export DVS_PLUGIN_PATH=$(ls ${WORKSPACE}/fuel-plugin-vmware-dvs*.rpm) || true
 
 source $VENV_PATH/bin/activate
 
