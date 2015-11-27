@@ -110,7 +110,7 @@
           description: 'Snapshot name for vsphere lab'
       - bool:
           name: UPDATE_MASTER
-          default: false
+          default: true
           description: 'turns on update fuel master node to maintenance update'
       - string:
           name: MIRROR
@@ -146,12 +146,8 @@
           description: 'The name of devops env. Needed to properly work of existing mode of devops'
       - bool:
           name: USE_SNAPSHOTS
-          default: false
-          descrition: 'Will be used existing environment'
-      - bool:
-          name: SHUTDOWN_AFTER
           default: true
-          decsription: 'The env will be powered off after test'
+          descrition: 'Will be used existing environment'
 
 ## parameters for jobs created per test-group and custom test job
 - test-parameters: &test-parameters
@@ -239,10 +235,6 @@
           name: USE_SNAPSHOTS
           default: false
           descrition: 'Will be used existing environment'
-      - bool:
-          name: SHUTDOWN_AFTER
-          default: true
-          decsription: 'The env will be powered off after test'
 
 - project:
     name: 'predefined_parameters'
@@ -259,7 +251,7 @@
     gerrit-repo: 'fuel-plugin-vmware-dvs'
     gerrit-branch: 'stable/6.1'
     email-to: 'rkhozinov@mirantis.com'
-    released-plugin-path: '/storage/dvs/released/dvs-2.0.0.noarch.rpm'
+    released-plugin-path: '/storage/dvs/released/fuel-plugin-vmware-dvs-1.0-1.0.2-1.noarch.rpm'
 
     testgroup:
       - dvs_vcenter_smoke
@@ -319,7 +311,7 @@
           colormap: xterm
       - timeout:
           fail: true
-          timeout: 6000
+          timeout: 240
     publishers:
       - archive:
           artifacts: 'build.properties'
@@ -620,13 +612,9 @@
     scm: []
     triggers:
       - timed: 'H 19  * * *'
-#      - reverse:
-#          jobs: '{mu-name}'
-#          result: 'failure'
 
     builders:
       - shell: env > nigthly.properties
-        # TODO: when we use mu lifecycle we should use 
       - copyartifact:
           project: '{bvt-name}'
           which-build: last-successful
