@@ -1,4 +1,4 @@
-#!/bin/bash -e 
+#!/bin/bash -xe 
 
 [ -z $CONTRAIL_VERSION ] && exit 1 || echo contrail version is $CONTRAIL_VERSION
 
@@ -9,15 +9,15 @@ export FUEL_RELEASE=$(cut -d'-' -f2-2 <<< $ISO_FILE | tr -d '.')
 export ENV_NAME="${ENV_PREFIX}.${ISO_VERSION}"
 export VENV_PATH="${HOME}/${FUEL_RELEASE}-venv"
 
+[[ -z ${CONTRAIL_PLUGIN_PATH} ]] && export CONTRAIL_PLUGIN_PATH=$(ls ${WORKSPACE}/contrail*.rpm) \
+                                 || echo CONTRAIL_PLUGIN_PATH=$CONTRAIL_PLUGIN_PATH
 
-if [ -z $CONTRAIL_PLUGIN_PATH ]; then 
-  export CONTRAIL_PLUGIN_PATH=$(ls ${WORKSPACE}/contrail*.rpm)
-fi
 
 #export JUNIPER_PKG_PATH="/storage/contrail/2.20/"
 export JUNIPER_PKG_PATH="/storage/contrail/${CONTRAIL_VERSION}/"
 #export CONTRAIL_PLUGIN_PACK_CEN_PATH=$(find ${JUNIPER_PKG_PATH} -type f -name '*rpm' )
 export CONTRAIL_PLUGIN_PACK_UB_PATH=$(find ${JUNIPER_PKG_PATH} -type f -name '*deb' )
+
 
 echo "Description string: ${TEST_GROUP} on ${NODE_NAME}: ${ENV_NAME}"
 
@@ -32,3 +32,6 @@ echo venv-path: $VENV_PATH
 echo env-name: $ENV_NAME
 echo iso-path: $ISO_PATH   
 ./plugin_test/utils/jenkins/system_tests.sh -t test ${systest_parameters} -i ${ISO_PATH} -j ${JOB_NAME} -o --group=${TEST_GROUP}
+
+rm -rf *.rpm.*      
+rm -rf *.rpm      
