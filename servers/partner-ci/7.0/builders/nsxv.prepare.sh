@@ -1,12 +1,14 @@
 #!/bin/bash -e 
+
+# activate bash xtrace for script
+[[ "${DEBUG}" == "true" ]] && set -x || set +x
+
 # for manually run of this job
 [ -z  $ISO_FILE ] && export ISO_FILE=${ISO_FILE}  
 
 #remove old logs and test data      
 rm -f nosetests.xml   
 rm -rf logs/*      
-rm -rf .*.rpm.*
-rm -rf .*.rpm
 
 export ISO_VERSION=$(cut -d'-' -f3-3<<< $ISO_FILE)
 echo iso build number is $ISO_VERSION
