@@ -56,7 +56,7 @@
             branch-pattern: '{gerrit-branch}'
         forbidden-file-paths:
           - compare-type: 'ANT'
-            pattern: 'docs/*'
+            pattern: 'docs/**'
           - compare-type: 'ANT'
             pattern: 'specs/*'
     silent: false
@@ -104,6 +104,10 @@
 - runner-parameters: &runner-parameters
     name: 'runner-parameters'
     parameters:
+      - bool:
+          name: DEBUG
+          default: true
+          description: "Set -x (xtrace) for jobs' bash scripts"
       - string:
           name: VCENTER_SNAPSHOT
           default: 'vcenterha'
@@ -153,6 +157,10 @@
 - test-parameters: &test-parameters
     name: 'test-parameters'
     parameters:
+      - bool:
+          name: DEBUG
+          default: true
+          description: "Set -x (xtrace) for jobs' bash scripts"
       - string:
           name: TEST_GROUP
           default: '{testgroup}'
@@ -299,8 +307,6 @@
           which-build: last-successful
       - shell:
           !include-raw-escape builders/dvs.prepare.sh
-      - shell: |
-          env > properties
       - shell:
           !include-raw-escape builders/dvs.test.sh
     wrappers:
@@ -313,6 +319,12 @@
           fail: true
           timeout: 240
     publishers:
+      - postbuildscript:
+          builders:
+            - shell: env > properties
+              # need to delete packages, because we don't wipe workspace,
+              # but packages could be duplicated
+            - shell: rm -f .*rpm.*
       - archive:
           artifacts: 'build.properties'
           allow-empty: false
@@ -335,7 +347,6 @@
       - email: 
           recipients: '{email-to}'
 
-## Jobs for system tests by testgroup
 - job-template:
     name: '{build-name}'
     node: 'runner'
@@ -358,11 +369,12 @@
     builders:
       - shell:
           !include-raw-escape './builders/build-plugin.sh'
-#     - shell:
-#         !include-raw-escape './builders/rpm-check.sh'
-      - shell: |
-          env > build.properties
+      - shell:
+          !include-raw-escape './builders/rpm-check.sh'
     publishers:
+      - postbuildscript:
+          builders:
+             - shell: env > build.properties
       - archive:
           artifacts: '*.rpm'
           allow-empty: false
@@ -392,21 +404,11 @@
     <<: *runner-parameters
     <<: *runner-properties
     scm:  []
-    publishers:
-      - archive:
-          artifacts: 'build.properties'
-          allow-empty: false
-      - archive:
-          artifacts: 'smoke.properties'
-          allow-empty: false
-      - email:
-          recipients: '{email-to}'
     triggers:
       - gerrit:
           <<: *smoke-gerrit-events
           <<: *generic-gerrit-projects
     builders:
-      - shell: env > smoke.properties
       - copyartifact:
           project: '{build-name}'
           which-build: last-successful
@@ -417,12 +419,21 @@
           projects:
            - name: '{fuel-release}.{plugin-name}.dvs_vcenter_smoke'
              current-parameters: true            
-             predefined-parameters: |
-               VCENTER_SNAPSHOT=vcenterha
              kill-phase-on: NEVER
 
-## The multijob for run bvt tests for vsphere5 and vsphere6
-## runs by merge event trigger
+    publishers:
+      - postbuildscript:
+          builders:
+            - shell: env > smoke.properties
+      - archive:
+          artifacts: 'build.properties'
+          allow-empty: false
+      - archive:
+          artifacts: 'smoke.properties'
+          allow-empty: false
+      - email:
+          recipients: '{email-to}'
+
 - job-template:
     name: '{bvt-name}'
     description: 'The Smoke test for {fuel-release}.{plugin-name}.{plugin-version}'
@@ -437,17 +448,7 @@
       - gerrit:
           <<: *bvt-gerrit-events
           <<: *generic-gerrit-projects
-    publishers:
-      - archive:
-          artifacts: 'build.properties'
-          allow-empty: false
-      - archive:
-          artifacts: 'bvt.properties'
-          allow-empty: false
-      - email:
-          recipients: '{email-to}'
     builders:
-      - shell: env > bvt.properties
       - copyartifact:
           project: '{build-name}'
           which-build: last-successful
@@ -460,10 +461,31 @@
              current-parameters: true
              kill-phase-on: NEVER
 
+    publishers:
+      - postbuildscript:
+          builders:
+             - shell: env > bvt.properties
+      - archive:
+          artifacts: 'build.properties'
+          allow-empty: false
+      - archive:
+          artifacts: 'smoke.properties'
+          allow-empty: false
+      - email:
+          recipients: '{email-to}'
+      - archive:
+          artifacts: 'build.properties'
+          allow-empty: false
+      - archive:
+          artifacts: 'bvt.properties'
+          allow-empty: false
+      - email:
+          recipients: '{email-to}'
+
 - job-template:
     name: '{mu-name}'
     description: 'The Smoke test for {fuel-release}.{plugin-name}'
-    disabled: true
+    disabled: false
     concurrent: true
     project-type: multijob
     node: runner
@@ -475,15 +497,17 @@
     triggers:
       - timed: 'H 19  * * *'
     publishers:
+      - postbuildscript:
+          builders:
+             - shell: env > mu.properties
       - archive:
           artifacts: 'mu.properties'
           allow-empty: false
       - email:
           recipients: '{email-to}'
     builders:
-      - shell: env > mu.properties
       - multijob:
-          name: '1st phase - all tests'
+          name: '1st phase - mu test'
           condition: FAILURE
           projects:
             - name: '{fuel-release}.{plugin-name}.dvs_vcenter_smoke'
@@ -491,83 +515,74 @@
                 DVS_PLUGIN_PATH={released-plugin-path}
               current-parameters: true
               kill-phase-on: NEVER
+
       - multijob:
-          name: '2st phase - mu test'
-          condition: SUCCESSFUL
+          name: '2st phase - all test for {fuel-release}.{plugin-name}.{plugin-version}'
+          condition: COMPLETED
           projects:
            - name: '{fuel-release}.{plugin-name}.dvs_vcenter_ha_mode'
              predefined-parameters: |
-                DVS_PLUGIN_PATH={released-plugin-path}
+               DVS_PLUGIN_PATH={released-plugin-path}
              current-parameters: true
              kill-phase-on: NEVER
+
            - name: '{fuel-release}.{plugin-name}.dvs_vcenter_ceph'
              predefined-parameters: |
-                DVS_PLUGIN_PATH={released-plugin-path}
+               DVS_PLUGIN_PATH={released-plugin-path}
              current-parameters: true
              kill-phase-on: NEVER
+
+           - name: '{fuel-release}.{plugin-name}.dvs_vcenter_ceph_2'
+             predefined-parameters: |
+               DVS_PLUGIN_PATH={released-plugin-path}
+             current-parameters: true
+             kill-phase-on: NEVER
+
            - name: '{fuel-release}.{plugin-name}.dvs_vcenter_ceilometer'
              predefined-parameters: |
-                DVS_PLUGIN_PATH={released-plugin-path}
+               DVS_PLUGIN_PATH={released-plugin-path}
              current-parameters: true
              kill-phase-on: NEVER
+
+           - name: '{fuel-release}.{plugin-name}.dvs_vcenter_ceilometer_2'
+             predefined-parameters: |
+               DVS_PLUGIN_PATH={released-plugin-path}
+             current-parameters: true
+             kill-phase-on: NEVER
+
            - name: '{fuel-release}.{plugin-name}.dvs_vcenter_add_delete_nodes'
              predefined-parameters: |
-                DVS_PLUGIN_PATH={released-plugin-path}
+               DVS_PLUGIN_PATH={released-plugin-path}
              current-parameters: true
              kill-phase-on: NEVER
+
            - name: '{fuel-release}.{plugin-name}.dvs_vcenter_add_delete_controller'
              predefined-parameters: |
-                DVS_PLUGIN_PATH={released-plugin-path}
+               DVS_PLUGIN_PATH={released-plugin-path}
              current-parameters: true
              kill-phase-on: NEVER
-           - name: '{fuel-release}.{plugin-name}.dvs_vcenter_multiroles'
-             predefined-parameters: |
-                DVS_PLUGIN_PATH={released-plugin-path}
-             current-parameters: true
-             kill-phase-on: NEVER
-           - name: '{fuel-release}.{plugin-name}.dvs_vcenter_diff_networks'
-             predefined-parameters: |
-                DVS_PLUGIN_PATH={released-plugin-path}
-             current-parameters: true
-             kill-phase-on: NEVER
+
            - name: '{fuel-release}.{plugin-name}.dvs_vcenter_networks'
              predefined-parameters: |
-                DVS_PLUGIN_PATH={released-plugin-path}
+               DVS_PLUGIN_PATH={released-plugin-path}
              current-parameters: true
              kill-phase-on: NEVER
-           - name: '{fuel-release}.{plugin-name}.dvs_vcenter_security'
-             predefined-parameters: |
-                DVS_PLUGIN_PATH={released-plugin-path}
-             current-parameters: true
-             kill-phase-on: NEVER
-           - name: '{fuel-release}.{plugin-name}.dvs_vcenter_tenants_isolation'
-             predefined-parameters: |
-                DVS_PLUGIN_PATH={released-plugin-path}
-             current-parameters: true
-             kill-phase-on: NEVER
-           - name: '{fuel-release}.{plugin-name}.dvs_vcenter_same_ip'
-             predefined-parameters: |
-                DVS_PLUGIN_PATH={released-plugin-path}
-             current-parameters: true
-             kill-phase-on: NEVER
+
            - name: '{fuel-release}.{plugin-name}.dvs_vcenter_ping_public'
              predefined-parameters: |
-                DVS_PLUGIN_PATH={released-plugin-path}
+               DVS_PLUGIN_PATH={released-plugin-path}
              current-parameters: true
              kill-phase-on: NEVER
-           - name: '{fuel-release}.{plugin-name}.dvs_vcenter_bind_port'
-             predefined-parameters: |
-                DVS_PLUGIN_PATH={released-plugin-path}
-             current-parameters: true
-             kill-phase-on: NEVER
+
            - name: '{fuel-release}.{plugin-name}.dvs_vcenter_5_instances'
              predefined-parameters: |
-                DVS_PLUGIN_PATH={released-plugin-path}
+               DVS_PLUGIN_PATH={released-plugin-path}
              current-parameters: true
              kill-phase-on: NEVER
+
            - name: '{fuel-release}.{plugin-name}.dvs_vcenter_uninstall'
              predefined-parameters: |
-                DVS_PLUGIN_PATH={released-plugin-path}
+               DVS_PLUGIN_PATH={released-plugin-path}
              current-parameters: true
              kill-phase-on: NEVER
            - name: '{fuel-release}.{plugin-name}.dvs_vcenter_reset_controller'
@@ -601,6 +616,9 @@
       - heavy-job:
           weight: 1
     publishers:
+      - postbuildscript:
+          builders:
+            - shell: env > nigthly.properties
       - archive:
           artifacts: 'nigthly.properties'
           allow-empty: false
@@ -614,7 +632,6 @@
       - timed: 'H 19  * * *'
 
     builders:
-      - shell: env > nigthly.properties
       - copyartifact:
           project: '{bvt-name}'
           which-build: last-successful
@@ -626,6 +643,7 @@
            - name: '{fuel-release}.{plugin-name}.dvs_vcenter_ha_mode'
              current-parameters: true
              kill-phase-on: NEVER
+
            - name: '{fuel-release}.{plugin-name}.dvs_vcenter_ceph'
              current-parameters: true
              kill-phase-on: NEVER
