@@ -1,5 +1,8 @@
 #!/bin/bash -xe 
 
+# activate bash xtrace for script
+[[ "${DEBUG}" == "true" ]] && set -x || set +x
+
 export ISO_PATH="${ISO_STORAGE}/${ISO_FILE}"
 export ISO_VERSION=$(cut -d'-' -f3-3 <<< $ISO_FILE) 
 export FUEL_RELEASE=$(cut -d'-' -f2-2 <<< $ISO_FILE | tr -d '.') 
@@ -24,4 +27,7 @@ echo iso-path: $ISO_PATH
 echo plugin-path: $NSXV_PLUGIN_PATH
 echo plugin path: $NSXV_PLUGIN_PATH plugin checksum: $(md5sum -b $NSXV_PLUGIN_PATH) 
 
-#./plugin_test/utils/jenkins/system_tests.sh -t test ${systest_parameters} -i ${ISO_PATH} -j ${JOB_NAME} -o --group=${TEST_GROUP}
+bash -xe plugin_test/utils/jenkins/system_tests.sh -t test ${systest_parameters} -i ${ISO_PATH} -j ${JOB_NAME} -o --group=${TEST_GROUP}
+
+rm -rf .*.rpm.*
+rm -rf .*.rpm

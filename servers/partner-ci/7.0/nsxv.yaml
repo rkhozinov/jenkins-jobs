@@ -56,9 +56,9 @@
             branch-pattern: '{gerrit-branch}'
         forbidden-file-paths:
           - compare-type: 'ANT'
-            pattern: 'docs/*'
+            pattern: 'docs/**'
           - compare-type: 'ANT'
-            pattern: 'specs/*'
+            pattern: 'specs/**'
     silent: false
     override-votes: true
     server-name: 'review.openstack.org'
@@ -104,6 +104,10 @@
 - runner-parameters: &runner-parameters
     name: 'runner-parameters'
     parameters:
+      - bool:
+          name: DEBUG
+          default: true
+          description: "Set -x (xtrace) for jobs' bash scripts"
       - string:
           name: VCENTER_SNAPSHOT
           default: 'nsxv'
@@ -157,6 +161,10 @@
 - test-parameters: &test-parameters
     name: 'test-parameters'
     parameters:
+      - bool:
+          name: DEBUG
+          default: true
+          description: "Set -x (xtrace) for jobs' bash scripts"
       - string:
           name: TEST_GROUP
           default: '{testgroup}'
@@ -259,7 +267,7 @@
     gerrit-repo: 'fuel-plugin-nsxv'
     gerrit-branch: '7.0'
     email-to: 'rkhozinov@mirantis.com'
-    released-plugin-path: '/storage/nsx/released/nsxv-2.0.0.noarch.rpm'
+    released-plugin-path: '/storage/nsxv/released/nsxv-1.1-1.1.0-1.noarch.rpmn'
 
     testgroup:
       - nsxv_smoke
@@ -460,7 +468,7 @@
 - job-template:
     name: '{mu-name}'
     description: 'The Smoke test for {fuel-release}.{plugin-name}'
-    disabled: true
+    disabled: false
     concurrent: true
     project-type: multijob
     node: runner
