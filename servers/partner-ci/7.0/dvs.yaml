@@ -56,7 +56,7 @@
             branch-pattern: '{gerrit-branch}'
         forbidden-file-paths:
           - compare-type: 'ANT'
-            pattern: 'docs/*'
+            pattern: 'docs/**'
           - compare-type: 'ANT'
             pattern: 'specs/*'
     silent: false
@@ -104,24 +104,17 @@
 - runner-parameters: &runner-parameters
     name: 'runner-parameters'
     parameters:
+      - bool:
+          name: DEBUG
+          default: true
+          description: "Set -x (xtrace) for jobs' bash scripts"
       - string:
           name: VCENTER_SNAPSHOT
           default: 'vcenterha'
           description: 'Snapshot name for vsphere lab'
-      - string:
-          name: ISO_FILE
-          default: '{iso-file}'
-          description: 'ISO file name that is on the tpi-s1 in /storage/downloads'
-      - string:
-          name: ISO_STORAGE
-          default: '/storage/downloads'
-          description: 'Storage for iso files'
-      - string:
-          name: ISO_VERSION
-          description: 'Contrainer for storing an iso build number to output it as job name'
       - bool:
           name: UPDATE_MASTER
-          default: false
+          default: true
           description: 'turns on update fuel master node to maintenance update'
       - string:
           name: MIRROR
@@ -157,17 +150,17 @@
           description: 'The name of devops env. Needed to properly work of existing mode of devops'
       - bool:
           name: USE_SNAPSHOTS
-          default: false
-          descrition: 'Will be used existing environment'
-      - bool:
-          name: SHUTDOWN_AFTER
           default: true
-          decsription: 'The env will be powered off after test'
+          descrition: 'Will be used existing environment'
 
 ## parameters for jobs created per test-group and custom test job
 - test-parameters: &test-parameters
     name: 'test-parameters'
     parameters:
+      - bool:
+          name: DEBUG
+          default: true
+          description: "Set -x (xtrace) for jobs' bash scripts"
       - string:
           name: TEST_GROUP
           default: '{testgroup}'
@@ -250,10 +243,6 @@
           name: USE_SNAPSHOTS
           default: false
           descrition: 'Will be used existing environment'
-      - bool:
-          name: SHUTDOWN_AFTER
-          default: true
-          decsription: 'The env will be powered off after test'
 
 - project:
     name: 'predefined_parameters'
@@ -270,7 +259,7 @@
     gerrit-repo: 'fuel-plugin-vmware-dvs'
     gerrit-branch: 'stable/7.0'
     email-to: 'rkhozinov@mirantis.com'
-    released-plugin-path: '/storage/dvs/released/dvs-2.0.0.noarch.rpm'
+    released-plugin-path: '/storage/dvs/released/fuel-plugin-vmware-dvs-1.1-1.1.0-1.noarch.rpm'
 
     testgroup:
       - dvs_vcenter_smoke
@@ -316,8 +305,6 @@
           !include-raw-escape builders/dvs.prepare.sh
       - shell:
           !include-raw-escape builders/dvs.test.sh
-      - shell: |
-          env > properties
     wrappers:
       - inject-passwords:
           global: true
@@ -326,8 +313,14 @@
           colormap: xterm
       - timeout:
           fail: true
-          timeout: 300
+          timeout: 240
     publishers:
+      - postbuildscript:
+          builders:
+            - shell: env > properties
+              # need to delete packages, because we don't wipe workspace,
+              # but packages could be duplicated
+            - shell: rm -f .*rpm.*
       - archive:
           artifacts: 'build.properties'
           allow-empty: false
@@ -350,7 +343,6 @@
       - email:
           recipients: '{email-to}'
 
-## Jobs for system tests by testgroup
 - job-template:
     name: '{build-name}'
     node: 'runner'
@@ -373,11 +365,12 @@
     builders:
       - shell:
           !include-raw-escape './builders/build-plugin.sh'
-#     - shell:
-#         !include-raw-escape './builders/rpm-check.sh'
-      - shell: |
-          env > build.properties
+      - shell:
+          !include-raw-escape './builders/rpm-check.sh'
     publishers:
+      - postbuildscript:
+          builders:
+             - shell: env > build.properties
       - archive:
           artifacts: '*.rpm'
           allow-empty: false
@@ -407,21 +400,11 @@
     <<: *runner-parameters
     <<: *runner-properties
     scm:  []
-    publishers:
-      - archive:
-          artifacts: 'build.properties'
-          allow-empty: false
-      - archive:
-          artifacts: 'smoke.properties'
-          allow-empty: false
-      - email:
-          recipients: '{email-to}'
     triggers:
       - gerrit:
           <<: *smoke-gerrit-events
           <<: *generic-gerrit-projects
     builders:
-      - shell: env > smoke.properties
       - copyartifact:
           project: '{build-name}'
           which-build: last-successful
@@ -432,16 +415,25 @@
           projects:
            - name: '{fuel-release}.{plugin-name}.dvs_vcenter_smoke'
              current-parameters: true
-             predefined-parameters: |
-               VCENTER_SNAPSHOT=vcenterha
              kill-phase-on: NEVER
 
-## The multijob for run bvt tests for vsphere5 and vsphere6
-## runs by merge event trigger
+    publishers:
+      - postbuildscript:
+          builders:
+            - shell: env > smoke.properties
+      - archive:
+          artifacts: 'build.properties'
+          allow-empty: false
+      - archive:
+          artifacts: 'smoke.properties'
+          allow-empty: false
+      - email:
+          recipients: '{email-to}'
+
 - job-template:
     name: '{bvt-name}'
     description: 'The Smoke test for {fuel-release}.{plugin-name}.{plugin-version}'
-    disabled: false
+    disabled: true
     concurrent: true
     project-type: multijob
     node: runner
@@ -452,17 +444,7 @@
       - gerrit:
           <<: *bvt-gerrit-events
           <<: *generic-gerrit-projects
-    publishers:
-      - archive:
-          artifacts: 'build.properties'
-          allow-empty: false
-      - archive:
-          artifacts: 'bvt.properties'
-          allow-empty: false
-      - email:
-          recipients: '{email-to}'
     builders:
-      - shell: env > bvt.properties
       - copyartifact:
           project: '{build-name}'
           which-build: last-successful
@@ -479,10 +461,31 @@
              current-parameters: true
              kill-phase-on: NEVER
 
+    publishers:
+      - postbuildscript:
+          builders:
+             - shell: env > bvt.properties
+      - archive:
+          artifacts: 'build.properties'
+          allow-empty: false
+      - archive:
+          artifacts: 'smoke.properties'
+          allow-empty: false
+      - email:
+          recipients: '{email-to}'
+      - archive:
+          artifacts: 'build.properties'
+          allow-empty: false
+      - archive:
+          artifacts: 'bvt.properties'
+          allow-empty: false
+      - email:
+          recipients: '{email-to}'
+
 - job-template:
     name: '{mu-name}'
     description: 'The Smoke test for {fuel-release}.{plugin-name}'
-    disabled: true
+    disabled: false
     concurrent: true
     project-type: multijob
     node: runner
@@ -494,15 +497,17 @@
     triggers:
       - timed: 'H 19  * * *'
     publishers:
+      - postbuildscript:
+          builders:
+             - shell: env > mu.properties
       - archive:
           artifacts: 'mu.properties'
           allow-empty: false
       - email:
           recipients: '{email-to}'
     builders:
-      - shell: env > mu.properties
       - multijob:
-          name: '1st phase - all tests'
+          name: '1st phase - mu test'
           condition: FAILURE
           projects:
             - name: '{fuel-release}.{plugin-name}.dvs_mu'
@@ -510,73 +515,74 @@
                 DVS_PLUGIN_PATH={released-plugin-path}
               current-parameters: true
               kill-phase-on: NEVER
+
       - multijob:
-          name: '2st phase - mu test'
-          condition: SUCCESSFUL
+          name: '2st phase - all test for {fuel-release}.{plugin-name}.{plugin-version}'
+          condition: COMPLETED
           projects:
            - name: '{fuel-release}.{plugin-name}.dvs_vcenter_ha_mode'
              predefined-parameters: |
-                DVS_PLUGIN_PATH={released-plugin-path}
+               DVS_PLUGIN_PATH={released-plugin-path}
              current-parameters: true
              kill-phase-on: NEVER
 
            - name: '{fuel-release}.{plugin-name}.dvs_vcenter_ceph'
              predefined-parameters: |
-                DVS_PLUGIN_PATH={released-plugin-path}
+               DVS_PLUGIN_PATH={released-plugin-path}
              current-parameters: true
              kill-phase-on: NEVER
 
            - name: '{fuel-release}.{plugin-name}.dvs_vcenter_ceph_2'
              predefined-parameters: |
-                DVS_PLUGIN_PATH={released-plugin-path}
+               DVS_PLUGIN_PATH={released-plugin-path}
              current-parameters: true
              kill-phase-on: NEVER
 
            - name: '{fuel-release}.{plugin-name}.dvs_vcenter_ceilometer'
              predefined-parameters: |
-                DVS_PLUGIN_PATH={released-plugin-path}
+               DVS_PLUGIN_PATH={released-plugin-path}
              current-parameters: true
              kill-phase-on: NEVER
 
            - name: '{fuel-release}.{plugin-name}.dvs_vcenter_ceilometer_2'
              predefined-parameters: |
-                DVS_PLUGIN_PATH={released-plugin-path}
+               DVS_PLUGIN_PATH={released-plugin-path}
              current-parameters: true
              kill-phase-on: NEVER
 
            - name: '{fuel-release}.{plugin-name}.dvs_vcenter_add_delete_nodes'
              predefined-parameters: |
-                DVS_PLUGIN_PATH={released-plugin-path}
+               DVS_PLUGIN_PATH={released-plugin-path}
              current-parameters: true
              kill-phase-on: NEVER
 
            - name: '{fuel-release}.{plugin-name}.dvs_vcenter_add_delete_controller'
              predefined-parameters: |
-                DVS_PLUGIN_PATH={released-plugin-path}
+               DVS_PLUGIN_PATH={released-plugin-path}
              current-parameters: true
              kill-phase-on: NEVER
 
            - name: '{fuel-release}.{plugin-name}.dvs_vcenter_networks'
              predefined-parameters: |
-                DVS_PLUGIN_PATH={released-plugin-path}
+               DVS_PLUGIN_PATH={released-plugin-path}
              current-parameters: true
              kill-phase-on: NEVER
 
            - name: '{fuel-release}.{plugin-name}.dvs_vcenter_ping_public'
              predefined-parameters: |
-                DVS_PLUGIN_PATH={released-plugin-path}
+               DVS_PLUGIN_PATH={released-plugin-path}
              current-parameters: true
              kill-phase-on: NEVER
 
            - name: '{fuel-release}.{plugin-name}.dvs_vcenter_5_instances'
              predefined-parameters: |
-                DVS_PLUGIN_PATH={released-plugin-path}
+               DVS_PLUGIN_PATH={released-plugin-path}
              current-parameters: true
              kill-phase-on: NEVER
 
            - name: '{fuel-release}.{plugin-name}.dvs_vcenter_uninstall'
              predefined-parameters: |
-                DVS_PLUGIN_PATH={released-plugin-path}
+               DVS_PLUGIN_PATH={released-plugin-path}
              current-parameters: true
              kill-phase-on: NEVER
 
@@ -593,13 +599,16 @@
        <p>There're a pkg details (that copied withing the package)
        in pkg_properties file in the root of job's workspace.</p>
     project-type: multijob
-    disabled: false  
+    disabled: true
     node: runner
     <<: *runner-parameters
     properties:
       - heavy-job:
           weight: 1
     publishers:
+      - postbuildscript:
+          builders:
+            - shell: env > nigthly.properties
       - archive:
           artifacts: 'nigthly.properties'
           allow-empty: false
@@ -611,13 +620,8 @@
     scm: []
     triggers:
       - timed: 'H 19  * * *'
-#      - reverse:
-#          jobs: '{mu-name}'
-#          result: 'failure'
 
     builders:
-      - shell: env > nigthly.properties
-        # TODO: when we use mu lifecycle we should use
       - copyartifact:
           project: '{bvt-name}'
           which-build: last-successful
