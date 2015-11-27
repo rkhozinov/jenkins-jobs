@@ -268,7 +268,7 @@
     canary-name: '{fuel-release}.{plugin-name}.canary'
     download-iso-name: 'download_iso'
     nightly-name: '{fuel-release}.{plugin-name}.nightly'
-    iso-file: 'fuel-7.0-301-2015-09-22_20-01-53.iso'
+    iso-file: ''
     gerrit-repo: 'fuel-plugin-vmware-dvs'
     gerrit-branch: 'master'
     email-to: 'rkhozinov@mirantis.com'
@@ -552,7 +552,7 @@
       - trigger-builds:
         - project: '{build-name}'
           current-parameters: true
-          git-revision: true
+          git-revision: false
           block: true
       - copyartifact:
           project: '{build-name}'
