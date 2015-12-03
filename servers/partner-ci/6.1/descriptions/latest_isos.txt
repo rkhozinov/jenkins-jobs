@@ -1,3 +1,0 @@
-ISO_FILE_80=fuel-kilo-8.0-125-2015-10-06_10-23-00.iso
-ISO_FILE_80-kilo=fuel-kilo-8.0-125-2015-10-06_10-23-00.iso
-ISO_FILE_70=fuel-kilo-8.0-125-2015-10-06_10-23-00.iso
