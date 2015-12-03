@@ -1,7 +1,0 @@
-mos-updates,deb http://mirror.fuel-infra.org/mos-repos/ubuntu/8.0/ mos8.0-updates main restricted
-mos-security,deb http://mirror.fuel-infra.org/mos-repos/ubuntu/8.0/ mos8.0-security main restricted
-mos-holdback,deb http://mirror.fuel-infra.org/mos-repos/ubuntu/8.0/ mos8.0-holdback main restricted
-ubuntu deb http://archive.ubuntu.com/ubuntu/ trusty main universe multiverse
-ubuntu-updates deb http://archive.ubuntu.com/ubuntu/ trusty-updates main universe multiverse 
-ubuntu-security deb http://archive.ubuntu.com/ubuntu/ trusty-security main universe multiverse
-
