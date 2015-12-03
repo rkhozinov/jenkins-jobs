@@ -73,7 +73,7 @@ function delete_systest_envs {
 
 function prepare_venv {
     #rm -rf "${VENV_PATH}"
-    [ ! -d $VENV_PATH ] && virtualenv --system-site-packages "${VENV_PATH}" || echo "${VENV_PATH} already exist"
+    [ ! -d $VENV_PATH ] && virtualenv "${VENV_PATH}" || echo "${VENV_PATH} already exist"
     source "${VENV_PATH}/bin/activate"
     pip --version 
     [ $? -ne 0 ] && easy_install -U pip
