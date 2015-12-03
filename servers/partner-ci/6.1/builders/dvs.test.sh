@@ -16,7 +16,7 @@ source $VENV_PATH/bin/activate
 
 systest_parameters=''
 [[ $USE_SNAPSHOTS == "true"  ]] && systest_parameters+=' -k' || echo new env will be created
-[[ $ERASE_AFTER   == "true"  ]] && echo the env will be erased after test || systest_parameters+=' -K' 
+[[ $ERASE_AFTER   == "true"  ]] && echo the env will be erased after test || systest_parameters+=' -K'
 
 echo test-group: $TEST_GROUP
 echo env-name: $ENV_NAME

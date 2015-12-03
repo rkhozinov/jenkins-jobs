@@ -1,4 +1,8 @@
 #!/bin/bash -e 
+
+# activate bash xtrace for script
+[[ "${DEBUG}" == "true" ]] && set -x || set +x
+
 # for manually run of this job
 [ -z  $ISO_FILE ] && export ISO_FILE=${ISO_FILE}  
 
@@ -10,12 +14,12 @@ export ISO_VERSION=$(cut -d'-' -f3-3<<< $ISO_FILE)
 echo iso build number is $ISO_VERSION
 export REQUIRED_FREE_SPACE=200
 export ISO_PATH="${ISO_STORAGE}/${ISO_FILE}"
-export FUEL_RELEASE=$(cut -d'-' -f2-2 <<< $ISO_FILE | tr -d '.') 
+export FUEL_RELEASE=$(cut -d'-' -f2-2 <<< $ISO_FILE | tr -d '.')
 export VENV_PATH="${HOME}/${FUEL_RELEASE}-venv"
 
 echo iso-version: $ISO_VERSION
 echo fuel-release: $FUEL_RELEASE
-echo virtual-env: $VENV_PATH 
+echo virtual-env: $VENV_PATH
 
 ## For plugins we should get a valid version of requrements of python-venv
 ## This requirements could be got from the github repo
@@ -24,7 +28,7 @@ echo virtual-env: $VENV_PATH
 
 case "${FUEL_RELEASE}" in
   *61* ) export REQS_BRANCH="stable/7.0" ;;
-  *70* ) export REQS_BRANCH="stable/6.1" ;; 
+  *70* ) export REQS_BRANCH="stable/6.1" ;;
    *   ) export REQS_BRANCH="master"
 esac
 
@@ -39,7 +43,7 @@ function delete_envs {
    [ -z $VIRTUAL_ENV ] && exit 1
    dos.py sync
    env_list=$(dos.py list | tail -n +3)
-   if [ ! -z $env_list ]; then
+   if [[ ! -z "${env_list}" ]]; then
      for env in $env_list; do dos.py erase $env; done
    fi
 }
@@ -51,7 +55,7 @@ function destroy_envs {
    [ -z $VIRTUAL_ENV ] && exit 1
    dos.py sync
    env_list=$(dos.py list | tail -n +3)
-   if [[ ! -z $env_list ]]; then
+   if [[ ! -z "${env_list}" ]]; then
      for env in $env_list; do dos.py destroy $env; done
    fi
 }
@@ -69,7 +73,7 @@ function delete_systest_envs {
 
 function prepare_venv {
     #rm -rf "${VENV_PATH}"
-    [ ! -d $VENV_PATH ] && virtualenv --system-site-packages "${VENV_PATH}" || echo "${VENV_PATH} already exist"
+    [ ! -d $VENV_PATH ] && virtualenv "${VENV_PATH}" || echo "${VENV_PATH} already exist"
     source "${VENV_PATH}/bin/activate"
     pip --version 
     [ $? -ne 0 ] && easy_install -U pip

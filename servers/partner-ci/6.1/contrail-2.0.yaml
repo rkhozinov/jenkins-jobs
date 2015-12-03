@@ -270,12 +270,22 @@
     fuel-release: 6.1
     plugin-version: 2.0
     plugin-name: 'contrail'
+
     build-name: '{fuel-release}.{plugin-name}.{plugin-version}.build'
-    custom-name: '{fuel-release}.{plugin-name}.{plugin-version}.custom'
     smoke-name: '{fuel-release}.{plugin-name}.{plugin-version}.smoke'
     bvt-name: '{fuel-release}.{plugin-name}.{plugin-version}.bvt'
     mu-name: '{fuel-release}.{plugin-name}.{plugin-version}.mu'
     nightly-name: '{fuel-release}.{plugin-name}.{plugin-version}.nightly'
+    custom-name: '{fuel-release}.{plugin-name}.{plugin-version}.custom'
+
+    build-disabled: true
+    smoke-disabled: true
+    bvt-disabled: true
+    mu-disabled: true
+    nightly-disabled: true
+    nightly-timer: 'H 21 * * *'
+    mu-timer: 'H 19 * * *'
+
     iso-file: 'fuel-6.1-525-2015-06-19_13-02-31.iso'
     gerrit-repo: 'fuel-plugin-contrail'
     gerrit-branch: 'stable/2.0'
@@ -363,6 +373,7 @@
     name: '{build-name}'
     node: 'runner'
     concurrent: true
+    disabled: {build-disabled}
     description: |
       '<a href=https://github.com/openstack/{gerrit-repo}>
        Build {name} plugin from fuel-plugins project</a>'
@@ -413,7 +424,7 @@
 
 - job-template:
     name: '{smoke-name}'
-    disabled: true
+    disabled: {smoke-disabled}
     description: 'The Smoke test for {fuel-release}.{plugin-name}.{plugin-version}'
     concurrent: true
     project-type: multijob
@@ -459,7 +470,7 @@
 - job-template:
     name: '{bvt-name}'
     description: 'The Smoke test for {fuel-release}.{plugin-name}.{plugin-version}'
-    disabled: true
+    disabled: {bvt-disabled}
     concurrent: true
     project-type: multijob
     node: runner
@@ -510,10 +521,11 @@
           allow-empty: false
       - email:
           recipients: '{email-to}'
+
 - job-template:
     name: '{mu-name}'
     description: 'The Smoke test for {fuel-release}.{plugin-name}.{plugin-version}'
-    disabled: true
+    disabled: {mu-disabled}
     concurrent: true
     project-type: multijob
     node: runner
@@ -523,7 +535,7 @@
           weight: 1
     scm:  []
     triggers:
-      - timed: 'H 19  * * *'
+      - timed: '{mu-timer}'
     publishers:
       - postbuildscript:
           builders:
@@ -619,7 +631,7 @@
 - job-template:
     name: '{nightly-name}'
     project-type: multijob
-    disabled: true  
+    disabled: {nightly-disabled}
     node: runner
     <<: *runner-parameters
     properties:
@@ -639,7 +651,8 @@
           recipients: '{email-to}'
     scm: []
     triggers:
-      - timed: 'H 22 * * *'
+      - timed: '{nightly-timer}'
+
     builders:
       - copyartifact:
           project: '{bvt-name}'

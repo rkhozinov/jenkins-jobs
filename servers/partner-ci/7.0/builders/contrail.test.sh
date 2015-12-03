@@ -1,4 +1,7 @@
-#!/bin/bash -e 
+#!/bin/bash -e
+
+# activate bash xtrace for script
+[[ "${DEBUG}" == "true" ]] && set -x || set +x
 
 [ -z $CONTRAIL_VERSION ] && exit 1 || echo contrail version is $CONTRAIL_VERSION
 
@@ -18,17 +21,21 @@ export JUNIPER_PKG_PATH="/storage/contrail/${CONTRAIL_VERSION}/"
 #export CONTRAIL_PLUGIN_PACK_CEN_PATH=$(find ${JUNIPER_PKG_PATH} -type f -name '*rpm' )
 export CONTRAIL_PLUGIN_PACK_UB_PATH=$(find ${JUNIPER_PKG_PATH} -type f -name '*deb' )
 
-
-echo "Description string: ${TEST_GROUP} on ${NODE_NAME}: ${ENV_NAME}"
-
 source $VENV_PATH/bin/activate
 
 systest_parameters=''
 [[ $USE_SNAPSHOTS == "true"  ]] && systest_parameters+=' -k' || echo new env will be created
-[[ $ERASE_AFTER  == "true"  ]] && echo the env will be erased after test || systest_parameters+=' -K' 
+[[ $ERASE_AFTER   == "true"  ]] && echo the env will be erased after test || systest_parameters+=' -K'
 
+echo test-group: $TEST_GROUP
+echo env-name: $ENV_NAME
 echo use-snapshots: $USE_SNAPSHOTS
+echo fuel-release: $FUEL_RELEASE
 echo venv-path: $VENV_PATH
 echo env-name: $ENV_NAME
 echo iso-path: $ISO_PATH   
-#./plugin_test/utils/jenkins/system_tests.sh -t test ${systest_parameters} -i ${ISO_PATH} -j ${JOB_NAME} -o --group=${TEST_GROUP}
+echo plugin-path: $CONTRAIL_PLUGIN_PATH
+echo ubuntu-plugin-path: $CONTRAIL_PLUGIN_PACK_UB_PATH
+echo plugin-checksum: $(md5sum -b $DVS_PLUGIN_PATH)
+
+./plugin_test/utils/jenkins/system_tests.sh -t test ${systest_parameters} -i ${ISO_PATH} -j ${JOB_NAME} -o --group=${TEST_GROUP}
