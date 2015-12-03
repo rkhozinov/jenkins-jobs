@@ -43,7 +43,7 @@ function delete_envs {
    [ -z $VIRTUAL_ENV ] && exit 1
    dos.py sync
    env_list=$(dos.py list | tail -n +3)
-   if [[ ! -z $env_list ]]; then
+   if [[ ! -z "${env_list}" ]]; then
      for env in $env_list; do dos.py erase $env; done
    fi
 }
@@ -55,7 +55,7 @@ function destroy_envs {
    [ -z $VIRTUAL_ENV ] && exit 1
    dos.py sync
    env_list=$(dos.py list | tail -n +3)
-   if [[ ! -z $env_list ]]; then
+   if [[ ! -z "${env_list}" ]]; then
      for env in $env_list; do dos.py destroy $env; done
    fi
 }
