@@ -72,7 +72,7 @@
       unstable: true
       notbuilt: true
 
-## properties for smoke, bvt and nigthly multijobs
+## properties for smoke, bvt and nightly multijobs
 - runner-properties: &runner-properties
     name: 'runner-properties'
     properties:
@@ -101,7 +101,7 @@
             - contrail
           option: category
 
-## parameters for smoke, bvt and nigthly multijobs
+## parameters for smoke, bvt and nightly multijobs
 - runner-parameters: &runner-parameters
     name: 'runner-parameters'
     parameters:
@@ -710,9 +710,9 @@
     publishers:
       - postbuildscript:
           builders:
-            - shell: env > nigthly.properties
+            - shell: env > nightly.properties
       - archive:
-          artifacts: 'nigthly.properties'
+          artifacts: 'nightly.properties'
           allow-empty: false
       - archive:
           artifacts: 'build.properties'
