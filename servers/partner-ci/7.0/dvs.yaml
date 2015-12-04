@@ -72,7 +72,7 @@
       unstable: true
       notbuilt: true
 
-## properties for smoke, bvt and nigthly multijobs
+## properties for smoke, bvt and nightly multijobs
 - runner-properties: &runner-properties
     name: 'runner-properties'
     properties:
@@ -101,7 +101,7 @@
             - contrail
           option: category
 
-## parameters for smoke, bvt and nigthly multijobs
+## parameters for smoke, bvt and nightly multijobs
 - runner-parameters: &runner-parameters
     name: 'runner-parameters'
     parameters:
@@ -153,7 +153,6 @@
           name: USE_SNAPSHOTS
           default: true
           descrition: 'Will be used existing environment'
-
 
 ## parameters for jobs created per test-group and custom test job
 - test-parameters: &test-parameters
@@ -253,22 +252,16 @@
     plugin-name: 'dvs'
 
     build-name: '{fuel-release}.{plugin-name}.build'
-    custom-name: '{fuel-release}.{plugin-name}.custom'
     smoke-name: '{fuel-release}.{plugin-name}.smoke'
     bvt-name: '{fuel-release}.{plugin-name}.bvt'
     mu-name: '{fuel-release}.{plugin-name}.mu'
     nightly-name: '{fuel-release}.{plugin-name}.nightly'
     custom-name: '{fuel-release}.{plugin-name}.custom'
 
-    build-disabled: true
-    smoke-disabled: true
-    bvt-disabled: true
-    mu-disabled: true
-    nightly-disabled: true
     nightly-timer: 'H 22 * * *'
     mu-timer: 'H 18 * * *'
 
-    iso-file: 'fuel-6.1-525-2015-06-19_13-02-31.iso'
+    iso-file: 'fuel-7.0-301-2015-09-22_20-01-53.iso'
     gerrit-repo: 'fuel-plugin-vmware-dvs'
     gerrit-branch: 'stable/7.0'
     email-to: 'rkhozinov@mirantis.com'
@@ -361,10 +354,10 @@
     name: '{build-name}'
     node: 'runner'
     concurrent: true
-    disabled: {build-disabled}
+    disabled: false
     description: |
       '<a href=https://github.com/openstack/{gerrit-repo}>
-       Build {name} plugin from fuel-plugins project</a>'
+      Build {plugin-name} plugin from fuel-plugins project</a>'
     <<: *common-scm
     triggers:
       - gerrit:
@@ -407,7 +400,7 @@
 
 - job-template:
     name: '{smoke-name}'
-    disabled: {smoke-disabled}
+    disabled: false
     description: 'The Smoke test for {fuel-release}.{plugin-name}.{plugin-version}'
     concurrent: true
     project-type: multijob
@@ -450,7 +443,7 @@
 - job-template:
     name: '{bvt-name}'
     description: 'The Smoke test for {fuel-release}.{plugin-name}.{plugin-version}'
-    disabled: {bvt-disabled}
+    disabled: false
     concurrent: true
     project-type: multijob
     node: runner
@@ -477,7 +470,6 @@
            - name: '{fuel-release}.{plugin-name}.dvs_vcenter_bvt2'
              current-parameters: true
              kill-phase-on: NEVER
-
     publishers:
       - postbuildscript:
           builders:
@@ -490,19 +482,11 @@
           allow-empty: false
       - email:
           recipients: '{email-to}'
-      - archive:
-          artifacts: 'build.properties'
-          allow-empty: false
-      - archive:
-          artifacts: 'bvt.properties'
-          allow-empty: false
-      - email:
-          recipients: '{email-to}'
 
 - job-template:
     name: '{mu-name}'
     description: 'The Smoke test for {fuel-release}.{plugin-name}.{plugin-version}'
-    disabled: {mu-disabled}
+    disabled: false
     concurrent: true
     project-type: multijob
     node: runner
@@ -533,76 +517,6 @@
               current-parameters: true
               kill-phase-on: NEVER
 
-      - multijob:
-          name: '2st phase - all test for {fuel-release}.{plugin-name}.{plugin-version}'
-          condition: COMPLETED
-          projects:
-           - name: '{fuel-release}.{plugin-name}.dvs_vcenter_ha_mode'
-             predefined-parameters: |
-               DVS_PLUGIN_PATH={released-plugin-path}
-             current-parameters: true
-             kill-phase-on: NEVER
-
-           - name: '{fuel-release}.{plugin-name}.dvs_vcenter_ceph'
-             predefined-parameters: |
-               DVS_PLUGIN_PATH={released-plugin-path}
-             current-parameters: true
-             kill-phase-on: NEVER
-
-           - name: '{fuel-release}.{plugin-name}.dvs_vcenter_ceph_2'
-             predefined-parameters: |
-               DVS_PLUGIN_PATH={released-plugin-path}
-             current-parameters: true
-             kill-phase-on: NEVER
-
-           - name: '{fuel-release}.{plugin-name}.dvs_vcenter_ceilometer'
-             predefined-parameters: |
-               DVS_PLUGIN_PATH={released-plugin-path}
-             current-parameters: true
-             kill-phase-on: NEVER
-
-           - name: '{fuel-release}.{plugin-name}.dvs_vcenter_ceilometer_2'
-             predefined-parameters: |
-               DVS_PLUGIN_PATH={released-plugin-path}
-             current-parameters: true
-             kill-phase-on: NEVER
-
-           - name: '{fuel-release}.{plugin-name}.dvs_vcenter_add_delete_nodes'
-             predefined-parameters: |
-               DVS_PLUGIN_PATH={released-plugin-path}
-             current-parameters: true
-             kill-phase-on: NEVER
-
-           - name: '{fuel-release}.{plugin-name}.dvs_vcenter_add_delete_controller'
-             predefined-parameters: |
-               DVS_PLUGIN_PATH={released-plugin-path}
-             current-parameters: true
-             kill-phase-on: NEVER
-
-           - name: '{fuel-release}.{plugin-name}.dvs_vcenter_networks'
-             predefined-parameters: |
-               DVS_PLUGIN_PATH={released-plugin-path}
-             current-parameters: true
-             kill-phase-on: NEVER
-
-           - name: '{fuel-release}.{plugin-name}.dvs_vcenter_ping_public'
-             predefined-parameters: |
-               DVS_PLUGIN_PATH={released-plugin-path}
-             current-parameters: true
-             kill-phase-on: NEVER
-
-           - name: '{fuel-release}.{plugin-name}.dvs_vcenter_5_instances'
-             predefined-parameters: |
-               DVS_PLUGIN_PATH={released-plugin-path}
-             current-parameters: true
-             kill-phase-on: NEVER
-
-           - name: '{fuel-release}.{plugin-name}.dvs_vcenter_uninstall'
-             predefined-parameters: |
-               DVS_PLUGIN_PATH={released-plugin-path}
-             current-parameters: true
-             kill-phase-on: NEVER
-
 - job-template:
     name: '{nightly-name}'
     description: |
@@ -616,7 +530,7 @@
        <p>There're a pkg details (that copied withing the package)
        in pkg_properties file in the root of job's workspace.</p>
     project-type: multijob
-    disabled: {nightly-disabled}
+    disabled: false
     node: runner
     <<: *runner-parameters
     properties:
@@ -625,9 +539,9 @@
     publishers:
       - postbuildscript:
           builders:
-            - shell: env > nigthly.properties
+            - shell: env > nightly.properties
       - archive:
-          artifacts: 'nigthly.properties'
+          artifacts: 'nightly.properties'
           allow-empty: false
       - archive:
           artifacts: 'build.properties'
