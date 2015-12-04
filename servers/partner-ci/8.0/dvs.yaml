@@ -19,7 +19,7 @@
           # we don't clean a workspace, so we need to remove rpms manually
           wipe-workspace: false
 
-## list of gerrit events to trigger build job           
+## list of gerrit events to trigger build job
 - build-gerrit-events: &build-gerrit-events
     name: 'build-gerrit-events'
     trigger-on:
@@ -72,7 +72,7 @@
       unstable: true
       notbuilt: true
 
-## properties for smoke, bvt and nigthly multijobs
+## properties for smoke, bvt and nightly multijobs
 - runner-properties: &runner-properties
     name: 'runner-properties'
     properties:
@@ -101,7 +101,7 @@
             - contrail
           option: category
 
-## parameters for smoke, bvt and nigthly multijobs
+## parameters for smoke, bvt and nightly multijobs
 - runner-parameters: &runner-parameters
     name: 'runner-parameters'
     parameters:
@@ -113,6 +113,10 @@
           name: VCENTER_SNAPSHOT
           default: 'vcenterha'
           description: 'Snapshot name for vsphere lab'
+      - string:
+          name: ISO_FILE
+          default: '{iso-file}'
+          description: 'ISO file name that is on the tpi-s1 in /storage/downloads'
 #      - bool:
 #          name: UPDATE_MASTER
 #          default: false
@@ -151,9 +155,8 @@
           description: 'The name of devops env. Needed to properly work of existing mode of devops'
       - bool:
           name: USE_SNAPSHOTS
-          default: false
+          default: true
           descrition: 'Will be used existing environment'
-
 
 ## parameters for jobs created per test-group and custom test job
 - test-parameters: &test-parameters
@@ -251,6 +254,7 @@
     fuel-release: '8.0'
     plugin-version: '2.0'
     plugin-name: 'dvs'
+
     build-name: '{fuel-release}.{plugin-name}.build'
     custom-name: '{fuel-release}.{plugin-name}.custom'
     smoke-name: '{fuel-release}.{plugin-name}.smoke'
@@ -259,6 +263,7 @@
     canary-name: '{fuel-release}.{plugin-name}.canary'
     download-iso-name: 'download_iso'
     nightly-name: '{fuel-release}.{plugin-name}.nightly'
+
     iso-file: ''
     gerrit-repo: 'fuel-plugin-vmware-dvs'
     gerrit-branch: 'master'
@@ -355,9 +360,10 @@
     name: '{build-name}'
     node: 'runner'
     concurrent: true
+    disabled: false
     description: |
       '<a href=https://github.com/openstack/{gerrit-repo}>
-       Build {name} plugin from fuel-plugins project</a>'
+      Build {plugin-name} plugin from fuel-plugins project</a>'
     <<: *common-scm
     triggers:
       - gerrit:
@@ -516,6 +522,20 @@
       - email:
           recipients: '{email-to}'
 
+- job-template:
+    name: '{canary-name}'
+    description: 'The Smoke test for {fuel-release}.{plugin-name}.{plugin-version}'
+    disabled: false
+    concurrent: true
+    project-type: multijob
+    node: runner
+    <<: *runner-parameters
+    <<: *runner-properties
+    scm:  []
+    triggers:
+      - reverse:
+          jobs: '{download-iso-name}'
+          result: 'success'
     builders:
       - trigger-builds:
         - project: '{build-name}'
@@ -532,7 +552,7 @@
           stable: true
       - inject:      
           properties-file: iso_file
-      - shell: env > canary.properties
+
       - multijob:
           name: 'Smoke tests for dvs.vcenter5'
           condition: SUCCESSFUL
@@ -541,17 +561,38 @@
              predefined-parameters: |
                 TEST_GROUP=dvs_vcenter_smoke
              current-parameters: true
+             property-file: iso_file
              kill-phase-on: NEVER
 
       - multijob:
-          name: 'Smoke tests for dvs.vcenter5'
+          name: 'BVT tests for dvs.vcenter5'
           condition: SUCCESSFUL
           projects:
            - name: '{fuel-release}.{plugin-name}.canary.fat'
              predefined-parameters: |
                 TEST_GROUP=dvs_vcenter_bvt
              current-parameters: true
+             property-file: iso_file
              kill-phase-on: NEVER
+
+    publishers:
+      - postbuildscript:
+          builders:
+            - shell: env > canary.properties
+      - archive:
+          artifacts: 'build.properties'
+          allow-empty: false
+      - archive:
+          artifacts: 'canary.properties'
+          allow-empty: false
+      - archive:
+          artifacts: 'iso_file'
+          allow-empty: false
+      - archive:
+          artifacts: '*.rpm'
+          allow-empty: false
+      - email:
+          recipients: '{email-to}'
 
 - job-template:
     name: '{mu-name}'
@@ -568,12 +609,21 @@
     triggers:
       - timed: 'H 19  * * *'
     publishers:
+      - postbuildscript:
+          builders:
+            - shell: env > mu.properties
       - archive:
           artifacts: 'mu.properties'
           allow-empty: false
       - email:
           recipients: '{email-to}'
     builders:
+      - copyartifact:
+          project: '{canary-name}'
+          which-build: last-successful
+          stable: true
+      - inject:      
+          properties-file: iso_file
       - multijob:
           name: '1st phase - all tests'
           condition: FAILURE
@@ -583,76 +633,6 @@
                 DVS_PLUGIN_PATH={released-plugin-path}
               current-parameters: true
               kill-phase-on: NEVER
-
-      - multijob:
-          name: '2st phase - mu test'
-          condition: SUCCESSFUL
-          projects:
-           - name: '{fuel-release}.{plugin-name}.dvs_vcenter_ha_mode'
-             predefined-parameters: |
-                DVS_PLUGIN_PATH={released-plugin-path}
-             current-parameters: true
-             kill-phase-on: NEVER
-
-           - name: '{fuel-release}.{plugin-name}.dvs_vcenter_ceph'
-             predefined-parameters: |
-                DVS_PLUGIN_PATH={released-plugin-path}
-             current-parameters: true
-             kill-phase-on: NEVER
-
-           - name: '{fuel-release}.{plugin-name}.dvs_vcenter_ceph_2'
-             predefined-parameters: |
-                DVS_PLUGIN_PATH={released-plugin-path}
-             current-parameters: true
-             kill-phase-on: NEVER
-
-           - name: '{fuel-release}.{plugin-name}.dvs_vcenter_ceilometer'
-             predefined-parameters: |
-                DVS_PLUGIN_PATH={released-plugin-path}
-             current-parameters: true
-             kill-phase-on: NEVER
-
-           - name: '{fuel-release}.{plugin-name}.dvs_vcenter_ceilometer_2'
-             predefined-parameters: |
-                DVS_PLUGIN_PATH={released-plugin-path}
-             current-parameters: true
-             kill-phase-on: NEVER
-
-           - name: '{fuel-release}.{plugin-name}.dvs_vcenter_add_delete_nodes'
-             predefined-parameters: |
-                DVS_PLUGIN_PATH={released-plugin-path}
-             current-parameters: true
-             kill-phase-on: NEVER
-
-           - name: '{fuel-release}.{plugin-name}.dvs_vcenter_add_delete_controller'
-             predefined-parameters: |
-                DVS_PLUGIN_PATH={released-plugin-path}
-             current-parameters: true
-             kill-phase-on: NEVER
-
-           - name: '{fuel-release}.{plugin-name}.dvs_vcenter_networks'
-             predefined-parameters: |
-                DVS_PLUGIN_PATH={released-plugin-path}
-             current-parameters: true
-             kill-phase-on: NEVER
-
-           - name: '{fuel-release}.{plugin-name}.dvs_vcenter_ping_public'
-             predefined-parameters: |
-                DVS_PLUGIN_PATH={released-plugin-path}
-             current-parameters: true
-             kill-phase-on: NEVER
-
-           - name: '{fuel-release}.{plugin-name}.dvs_vcenter_5_instances'
-             predefined-parameters: |
-                DVS_PLUGIN_PATH={released-plugin-path}
-             current-parameters: true
-             kill-phase-on: NEVER
-
-           - name: '{fuel-release}.{plugin-name}.dvs_vcenter_uninstall'
-             predefined-parameters: |
-                DVS_PLUGIN_PATH={released-plugin-path}
-             current-parameters: true
-             kill-phase-on: NEVER
 
 - job-template:
     name: '{nightly-name}'
@@ -676,9 +656,9 @@
     publishers:
       - postbuildscript:
           builders:
-            - shell: env > nigthly.properties
+            - shell: env > nightly.properties
       - archive:
-          artifacts: 'nigthly.properties'
+          artifacts: 'nightly.properties'
           allow-empty: false
       - archive:
           artifacts: 'build.properties'
@@ -693,10 +673,12 @@
       - timed: 'H 19  * * *'
 
     builders:
+      # copy latest stable plugin package that has passed dvs bvt on the stable iso
       - copyartifact:
           project: '{bvt-name}'
           which-build: last-successful
           stable: true
+      # copy latest stable iso that has passed fuel and dvs smoke and bvt tests
       - copyartifact:
           project: '{canary-name}'
           which-build: last-successful

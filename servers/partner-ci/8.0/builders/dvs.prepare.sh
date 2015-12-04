@@ -4,7 +4,7 @@
 [[ "${DEBUG}" == "true" ]] && set -x || set +x
 
 # for manually run of this job
-[ -z  $ISO_FILE ] && export ISO_FILE=${ISO_FILE}  
+#[ -z  $ISO_FILE ] && export ISO_FILE=${ISO_FILE}  
 
 #remove old logs and test data      
 rm -f nosetests.xml   
