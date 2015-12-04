@@ -50,14 +50,14 @@
       unstable: true
       notbuilt: true
 
-## properties for smoke, bvt and nigthly multijobs
+## properties for smoke, bvt and nightly multijobs
 - runner-properties: &runner-properties
     name: 'runner-properties'
     properties:
       - heavy-job:
           weight: 1
 
-## parameters for smoke, bvt and nigthly multijobs
+## parameters for smoke, bvt and nightly multijobs
 - runner-parameters: &runner-parameters
     name: 'runner-parameters'
     parameters:
