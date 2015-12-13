@@ -99,7 +99,6 @@
             - nsx
             - contrail
           option: category
-
 ## parameters for smoke, bvt and nightly multijobs
 - runner-parameters: &runner-parameters
     name: 'runner-parameters'
@@ -150,7 +149,7 @@
           description: 'The name of devops env. Needed to properly work of existing mode of devops'
       - bool:
           name: USE_SNAPSHOTS
-          default: true
+          default: {use-snapshots}
           descrition: 'Will be used existing environment'
 
 ## parameters for jobs created per test-group and custom test job
@@ -181,7 +180,7 @@
           description: 'Contrainer for storing an iso build number to output it as job name'
       - bool:
           name: UPDATE_MASTER
-          default: false
+          default: true
           description: 'turns on update fuel master node to maintenance update'
       - string:
           name: MIRROR
@@ -241,7 +240,7 @@
           description: 'The name of devops env. Needed to properly work of existing mode of devops'
       - bool:
           name: USE_SNAPSHOTS
-          default: false
+          default: {use-snapshots}
           descrition: 'Will be used existing environment'
 
 - project:
@@ -253,12 +252,14 @@
     build-name: '{fuel-release}.{plugin-name}.build'
     smoke-name: '{fuel-release}.{plugin-name}.smoke'
     bvt-name: '{fuel-release}.{plugin-name}.bvt'
-    mu-name: '{fuel-release}.{plugin-name}.mu'
+    regression-name: '{fuel-release}.{plugin-name}.regression'
     nightly-name: '{fuel-release}.{plugin-name}.nightly'
     custom-name: '{fuel-release}.{plugin-name}.custom'
 
     nightly-timer: 'H 22 * * *'
-    mu-timer: 'H 18 * * *'
+    regression-timer: 'H 18 * * *'
+
+    use-snapshots: false
 
     iso-file: 'fuel-7.0-301-2015-09-22_20-01-53.iso'
     gerrit-repo: 'fuel-plugin-vmware-dvs'
@@ -281,13 +282,15 @@
       - dvs_vcenter_ping_public
       - dvs_vcenter_5_instances
       - dvs_vcenter_uninstall
+
     jobs:
       - '{build-name}'
       - '{nightly-name}'
       - '{custom-name}'
       - '{smoke-name}'
       - '{bvt-name}'
-      - '{mu-name}'
+      - '{regression-name}'
+      - '{fuel-release}.{plugin-name}.regression.test'
       - '{fuel-release}.{plugin-name}.{testgroup}'
 
 - defaults:
@@ -307,7 +310,7 @@
           project: '{build-name}'
           which-build: last-successful
       - shell:
-          !include-raw-escape builders/dvs.prepare.sh
+          !include-raw-escape builders/common.prepare.sh
       - shell:
           !include-raw-escape builders/dvs.test.sh
     wrappers:
@@ -321,11 +324,13 @@
           timeout: 240
     publishers:
       - postbuildscript:
+          script-only-if-succeeded: False
           builders:
             - shell: env > properties
               # need to delete packages, because we don't wipe workspace,
               # but packages could be duplicated
             - shell: rm -f .*rpm.*
+
       - archive:
           artifacts: 'build.properties'
           allow-empty: false
@@ -348,7 +353,7 @@
       - email:
           recipients: '{email-to}'
 
-## Jobs for system tests by testgroup
+# job for building plugin package
 - job-template:
     name: '{build-name}'
     node: 'runner'
@@ -376,6 +381,7 @@
           !include-raw-escape './builders/rpm-check.sh'
     publishers:
       - postbuildscript:
+          script-only-if-succeeded: False
           builders:
              - shell: env > build.properties
       - archive:
@@ -387,8 +393,15 @@
       - email:
           recipients: '{email-to}'
 
+# jobs for system tests
 - job-template:
     name: '{fuel-release}.{plugin-name}.{testgroup}'
+    description: 'The test "{testgroup}" for {fuel-release}.{plugin-name}.{plugin-version}'
+    concurrent: true
+
+# jobs for regression test
+- job-template:
+    name: '{fuel-release}.{plugin-name}.regression.test'
     description: 'The test "{testgroup}" for {fuel-release}.{plugin-name}.{plugin-version}'
     concurrent: true
 
@@ -420,14 +433,15 @@
           name: 'Smoke tests for dvs.vcenter5'
           condition: SUCCESSFUL
           projects:
-           - name: '{fuel-release}.{plugin-name}.dvs_vcenter_smoke'
-             current-parameters: true
-             predefined-parameters: |
-               VCENTER_SNAPSHOT=vcenterha
-             kill-phase-on: NEVER
+            - name: '{fuel-release}.{plugin-name}.dvs_vcenter_smoke'
+              current-parameters: true
+              predefined-parameters: |
+                VCENTER_SNAPSHOT=vcenterha
+              kill-phase-on: NEVER
 
     publishers:
       - postbuildscript:
+          script-only-if-succeeded: False
           builders:
             - shell: env > smoke.properties
       - archive:
@@ -469,10 +483,15 @@
            - name: '{fuel-release}.{plugin-name}.dvs_vcenter_bvt2'
              current-parameters: true
              kill-phase-on: NEVER
+
     publishers:
       - postbuildscript:
+          script-only-if-succeeded: False
           builders:
              - shell: env > bvt.properties
+      - archive:
+          artifacts: '*.rpm'
+          allow-empty: false
       - archive:
           artifacts: 'build.properties'
           allow-empty: false
@@ -483,7 +502,7 @@
           recipients: '{email-to}'
 
 - job-template:
-    name: '{mu-name}'
+    name: '{regression-name}'
     description: 'The Smoke test for {fuel-release}.{plugin-name}.{plugin-version}'
     disabled: false
     concurrent: true
@@ -495,23 +514,25 @@
           weight: 1
     scm:  []
     triggers:
-      - timed: '{mu-timer}'
+      - timed: '{regression-timer}'
     publishers:
       - postbuildscript:
+          script-only-if-succeeded: False
           builders:
-             - shell: env > mu.properties
+             - shell: env > regression.properties
       - archive:
-          artifacts: 'mu.properties'
+          artifacts: 'regression.properties'
           allow-empty: false
       - email:
           recipients: '{email-to}'
     builders:
       - multijob:
-          name: '1st phase - mu test'
+          name: '1st phase - regression test'
           condition: FAILURE
           projects:
-            - name: '{fuel-release}.{plugin-name}.dvs_mu'
+            - name: '{fuel-release}.{plugin-name}.regression.test'
               predefined-parameters: |
+                TEST_GROUP=dvs_vcenter_bvt
                 DVS_PLUGIN_PATH={released-plugin-path}
               current-parameters: true
               kill-phase-on: NEVER
@@ -529,7 +550,7 @@
        <p>There're a pkg details (that copied withing the package)
        in pkg_properties file in the root of job's workspace.</p>
     project-type: multijob
-    disabled: false
+    disabled: true
     node: runner
     <<: *runner-parameters
     properties:
@@ -537,6 +558,7 @@
           weight: 1
     publishers:
       - postbuildscript:
+          script-only-if-succeeded: False
           builders:
             - shell: env > nightly.properties
       - archive:
@@ -552,6 +574,7 @@
       - timed: '{nightly-timer}'
 
     builders:
+      # copy latest stable plugin package that has passed dvs bvt on the stable iso
       - copyartifact:
           project: '{bvt-name}'
           which-build: last-successful
