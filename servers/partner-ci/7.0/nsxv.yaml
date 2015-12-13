@@ -100,7 +100,6 @@
             - nsx
             - contrail
           option: category
-
 ## parameters for smoke, bvt and nightly multijobs
 - runner-parameters: &runner-parameters
     name: 'runner-parameters'
@@ -151,7 +150,7 @@
           description: 'The name of devops env. Needed to properly work of existing mode of devops'
       - bool:
           name: USE_SNAPSHOTS
-          default: true
+          default: {use-snapshots}
           descrition: 'Will be used existing environment'
 
 ## parameters for jobs created per test-group and custom test job
@@ -182,7 +181,7 @@
           description: 'Contrainer for storing an iso build number to output it as job name'
       - bool:
           name: UPDATE_MASTER
-          default: false
+          default: true
           description: 'turns on update fuel master node to maintenance update'
       - string:
           name: MIRROR
@@ -242,7 +241,7 @@
           description: 'The name of devops env. Needed to properly work of existing mode of devops'
       - bool:
           name: USE_SNAPSHOTS
-          default: false
+          default: {use-snapshots}
           descrition: 'Will be used existing environment'
 
 - project:
@@ -254,18 +253,20 @@
     build-name: '{fuel-release}.{plugin-name}.build'
     smoke-name: '{fuel-release}.{plugin-name}.smoke'
     bvt-name: '{fuel-release}.{plugin-name}.bvt'
-    mu-name: '{fuel-release}.{plugin-name}.mu'
+    regression-name: '{fuel-release}.{plugin-name}.regression'
     nightly-name: '{fuel-release}.{plugin-name}.nightly'
     custom-name: '{fuel-release}.{plugin-name}.custom'
 
     nightly-timer: 'H 22 * * *'
-    mu-timer: 'H 18 * * *'
+    regression-timer: 'H 18 * * *'
+
+    use-snapshots: false
 
     iso-file: 'fuel-7.0-301-2015-09-22_20-01-53.iso'
     gerrit-repo: 'fuel-plugin-nsxv'
     gerrit-branch: '7.0'
     email-to: 'rkhozinov@mirantis.com'
-    released-plugin-path: '/storage/nsxv/released/nsxv-1.1-1.1.0-1.noarch.rpmn'
+    released-plugin-path: '/storage/nsxv/released/nsxv-1.1-1.1.0-1.noarch.rpm'
 
     testgroup:
       - nsxv_smoke
@@ -283,7 +284,8 @@
       - '{custom-name}'
       - '{smoke-name}'
       - '{bvt-name}'
-      - '{mu-name}'
+      - '{regression-name}'
+      - '{fuel-release}.{plugin-name}.regression.test'
       - '{fuel-release}.{plugin-name}.{testgroup}'
 
 - defaults:
@@ -303,7 +305,7 @@
           project: '{build-name}'
           which-build: last-successful
       - shell:
-          !include-raw-escape builders/nsxv.prepare.sh
+          !include-raw-escape builders/common.prepare.sh
       - shell:
           !include-raw-escape builders/nsxv.test.sh
     wrappers:
@@ -317,11 +319,13 @@
           timeout: 240
     publishers:
       - postbuildscript:
+          script-only-if-succeeded: False
           builders:
             - shell: env > properties
               # need to delete packages, because we don't wipe workspace,
               # but packages could be duplicated
             - shell: rm -f .*rpm.*
+
       - archive:
           artifacts: 'build.properties'
           allow-empty: false
@@ -344,7 +348,7 @@
       - email: 
           recipients: '{email-to}'
 
-## Jobs for system tests by testgroup
+# job for building plugin package
 - job-template:
     name: '{build-name}'
     node: 'runner'
@@ -372,6 +376,7 @@
           !include-raw-escape './builders/rpm-check.sh'
     publishers:
       - postbuildscript:
+          script-only-if-succeeded: False
           builders:
              - shell: env > build.properties
       - archive:
@@ -383,8 +388,15 @@
       - email:
           recipients: '{email-to}'
 
+# jobs for system tests
 - job-template:
     name: '{fuel-release}.{plugin-name}.{testgroup}'
+    description: 'The test "{testgroup}" for {fuel-release}.{plugin-name}.{plugin-version}'
+    concurrent: true
+
+# jobs for regression test
+- job-template:
+    name: '{fuel-release}.{plugin-name}.regression.test'
     description: 'The test "{testgroup}" for {fuel-release}.{plugin-name}.{plugin-version}'
     concurrent: true
 
@@ -422,6 +434,7 @@
 
     publishers:
       - postbuildscript:
+          script-only-if-succeeded: False
           builders:
             - shell: env > smoke.properties
       - archive:
@@ -462,8 +475,12 @@
 
     publishers:
       - postbuildscript:
+          script-only-if-succeeded: False
           builders:
              - shell: env > bvt.properties
+      - archive:
+          artifacts: '*.rpm'
+          allow-empty: false
       - archive:
           artifacts: 'build.properties'
           allow-empty: false
@@ -474,7 +491,7 @@
           recipients: '{email-to}'
 
 - job-template:
-    name: '{mu-name}'
+    name: '{regression-name}'
     description: 'The Smoke test for {fuel-release}.{plugin-name}.{plugin-version}'
     disabled: false
     concurrent: true
@@ -486,23 +503,25 @@
           weight: 1
     scm:  []
     triggers:
-      - timed: '{mu-timer}'
+      - timed: '{regression-timer}'
     publishers:
       - postbuildscript:
+          script-only-if-succeeded: False
           builders:
-             - shell: env > mu.properties
+             - shell: env > regression.properties
       - archive:
-          artifacts: 'mu.properties'
+          artifacts: 'regression.properties'
           allow-empty: false
       - email:
           recipients: '{email-to}'
     builders:
       - multijob:
-          name: '1st phase - mu test'
+          name: '1st phase - regression test'
           condition: FAILURE
           projects:
-            - name: '{fuel-release}.{plugin-name}.nsxv_mu'
+            - name: '{fuel-release}.{plugin-name}.regression.test'
               predefined-parameters: |
+                TEST_GROUP=nsxv_add_delete_nodes
                 NSXV_PLUGIN_PATH={released-plugin-path}
               current-parameters: true
               kill-phase-on: NEVER
@@ -520,7 +539,7 @@
        <p>There're a pkg details (that copied withing the package)
        in pkg_properties file in the root of job's workspace.</p>
     project-type: multijob
-    disabled: false
+    disabled: true
     node: runner
     <<: *runner-parameters
     properties:
@@ -528,6 +547,7 @@
           weight: 1
     publishers:
       - postbuildscript:
+          script-only-if-succeeded: False
           builders:
             - shell: env > nightly.properties
       - archive:
