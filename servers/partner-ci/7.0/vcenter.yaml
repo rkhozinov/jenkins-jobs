@@ -1,61 +1,61 @@
-- build-gerrit-events: &build-gerrit-events
-    name: 'build-gerrit-events'
-    trigger-on:
-      - change-merged-event
-      - draft-published-event
-      - patchset-created-event:
-          exclude-trivial-rebase: true
-          exclude-no-code-change: true
-
-## configuration of gerrit event for the smoke multijob
-## smoke multijob should run on patchset, draft events
-- smoke-gerrit-events: &smoke-gerrit-events
-    name: 'smoke-gerrit-events'
-    trigger-on:
-      - draft-published-event
-      - patchset-created-event:
-          exclude-trivial-rebase: true
-          exclude-no-code-change: true
-
-## configuration of gerrit event for the bvt multijob
-## bvt multijob should run only on merge event
-- bvt-gerrit-events: &bvt-gerrit-events
-    name: 'bvt-gerrit-events'
-    trigger-on:
-      - change-merged-event
-
-## the main part of gerrit section as yaml anchor
-- generic-gerrit-projects: &generic-gerrit-projects
-    name: 'generic-gerrit-projects'
-    projects:
-      - project-compare-type: 'PLAIN'
-        project-pattern: 'openstack/{gerrit-repo}'
-        branches:
-          - branch-compare-type: 'ANT'
-            branch-pattern: '{gerrit-branch}'
-        forbidden-file-paths:
-          - compare-type: 'ANT'
-            pattern: 'docs/*'
-          - compare-type: 'ANT'
-            pattern: 'specs/*'
-    silent: false
-    override-votes: true
-    server-name: 'review.openstack.org'
-    custom-url: '* $JOB_NAME $BUILD_URL'
-    escape-quotes: true
-    readable-message: true
-    skip-vote:
-      successfull: false
-      failed: false
-      unstable: true
-      notbuilt: true
-
-## properties for smoke, bvt and nightly multijobs
-- runner-properties: &runner-properties
-    name: 'runner-properties'
-    properties:
-      - heavy-job:
-          weight: 1
+#- build-gerrit-events: &build-gerrit-events
+#    name: 'build-gerrit-events'
+#    trigger-on:
+#      - change-merged-event
+#      - draft-published-event
+#      - patchset-created-event:
+#          exclude-trivial-rebase: true
+#          exclude-no-code-change: true
+#
+### configuration of gerrit event for the smoke multijob
+### smoke multijob should run on patchset, draft events
+#- smoke-gerrit-events: &smoke-gerrit-events
+#    name: 'smoke-gerrit-events'
+#    trigger-on:
+#      - draft-published-event
+#      - patchset-created-event:
+#          exclude-trivial-rebase: true
+#          exclude-no-code-change: true
+#
+### configuration of gerrit event for the bvt multijob
+### bvt multijob should run only on merge event
+#- bvt-gerrit-events: &bvt-gerrit-events
+#    name: 'bvt-gerrit-events'
+#    trigger-on:
+#      - change-merged-event
+#
+### the main part of gerrit section as yaml anchor
+#- generic-gerrit-projects: &generic-gerrit-projects
+#    name: 'generic-gerrit-projects'
+#    projects:
+#      - project-compare-type: 'PLAIN'
+#        project-pattern: 'openstack/{gerrit-repo}'
+#        branches:
+#          - branch-compare-type: 'ANT'
+#            branch-pattern: '{gerrit-branch}'
+#        forbidden-file-paths:
+#          - compare-type: 'ANT'
+#            pattern: 'docs/*'
+#          - compare-type: 'ANT'
+#            pattern: 'specs/*'
+#    silent: false
+#    override-votes: true
+#    server-name: 'review.openstack.org'
+#    custom-url: '* $JOB_NAME $BUILD_URL'
+#    escape-quotes: true
+#    readable-message: true
+#    skip-vote:
+#      successfull: false
+#      failed: false
+#      unstable: true
+#      notbuilt: true
+#
+### properties for smoke, bvt and nightly multijobs
+#- runner-properties: &runner-properties
+#    name: 'runner-properties'
+#    properties:
+#      - heavy-job:
+#          weight: 1
 
 ## parameters for smoke, bvt and nightly multijobs
 - runner-parameters: &runner-parameters
@@ -133,52 +133,52 @@
           default: false
           description: 'The env will be erased after test'
 
-- common-scm: &common-scm
-    name: 'common-scm'
-    scm:
-      - git:
-          name: ''
-          url: 'https://review.openstack.org/openstack/{gerrit-repo}'
-          refspec: $GERRIT_REFSPEC
-          branches:
-            - $GERRIT_BRANCH
-          choosing-strategy: gerrit
-          submodule:
-            disable: false
-            tracking: true
-            recursive: true
-          clean:
-            before: false
-          wipe-workspace: true
-## publishers for smoke, bvt, build and nithly jobs
-## arcives rpm, pkg_properties and email conf
-- runner-publishers: &runner-publishers
-    name: 'runner-publishers'
-    publishers:
-      - archive:
-          artifacts: 'pkg_properties'
-          allow-empty: false
-      - archive:
-          artifacts: '*.rpm'
-          allow-empty: false
-      - email:
-          recipients: '{email-to}'
-
-## properties for test jobs
-- test-properties: &test-properties
-    name: 'test-properties'
-    properties:
-      - heavy-job:
-          weight: 1
-      - throttle:
-          max-per-node: 0
-          max-total: 0
-          categories:
-            - vsphere
-            - dvs
-            - nsx
-            - contrail
-          option: category
+#- common-scm: &common-scm
+#    name: 'common-scm'
+#    scm:
+#      - git:
+#          name: ''
+#          url: 'https://review.openstack.org/openstack/{gerrit-repo}'
+#          refspec: $GERRIT_REFSPEC
+#          branches:
+#            - $GERRIT_BRANCH
+#          choosing-strategy: gerrit
+#          submodule:
+#            disable: false
+#            tracking: true
+#            recursive: true
+#          clean:
+#            before: false
+#          wipe-workspace: true
+### publishers for smoke, bvt, build and nithly jobs
+### arcives rpm, pkg_properties and email conf
+#- runner-publishers: &runner-publishers
+#    name: 'runner-publishers'
+#    publishers:
+#      - archive:
+#          artifacts: 'pkg_properties'
+#          allow-empty: false
+#      - archive:
+#          artifacts: '*.rpm'
+#          allow-empty: false
+#      - email:
+#          recipients: '{email-to}'
+#
+### properties for test jobs
+#- test-properties: &test-properties
+#    name: 'test-properties'
+#    properties:
+#      - heavy-job:
+#          weight: 1
+#      - throttle:
+#          max-per-node: 0
+#          max-total: 0
+#          categories:
+#            - vsphere
+#            - dvs
+#            - nsx
+#            - contrail
+#          option: category
 
 ## parameters for jobs created per test-group and custom test job
 - test-parameters: &test-parameters
