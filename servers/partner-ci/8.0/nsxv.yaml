@@ -100,7 +100,6 @@
             - nsx
             - contrail
           option: category
-
 ## parameters for smoke, bvt and nightly multijobs
 - runner-parameters: &runner-parameters
     name: 'runner-parameters'
@@ -113,30 +112,34 @@
           name: VCENTER_SNAPSHOT
           default: 'nsxv'
           description: 'Snapshot name for vsphere lab'
-      - bool:
-          name: UPDATE_MASTER
-          default: true
-          description: 'turns on update fuel master node to maintenance update'
       - string:
-          name: MIRROR
-          default: 'http://mirror.seed-cz1.fuel-infra.org'
-          description: 'mirror for package repositories. this mirror is optimized for CZ'
-      - string:
-          name: UPDATE_FUEL_MIRROR
-          default: "${{MIRROR}}/mos-repos/centos/mos7.0-centos6-fuel/security/x86_64/ ${{MIRROR}}/mos-repos/centos/mos7.0-centos6-fuel/updates/x86_64/"
-          description: 'repositories to update fuel master node'
-      - string:
-          name: MIRROR_UBUNTU
-          default: 'deb ${{MIRROR}}/pkgs/ubuntu/ trusty main universe multiverse|deb ${{MIRROR}}/pkgs/ubuntu/ trusty-updates main universe multiverse'
-          description: 'proposed repositories to update ubuntu cluster'
-      - string:
-          name: DEB_UPDATES
-          default: "mos-updates,deb ${{MIRROR}}/mos/ubuntu/dists/mos7.0-updates main restricted"
-          description: 'ubuntu-updates repositories for master ui'
-      - string:
-          name: DEB_SECURITY
-          default: "mos-security,deb ${{MIRROR}}/mos/ubuntu/dists/mos7.0-security main restricted"
-          description: 'ubuntu-security repositories for master ui'
+          name: ISO_FILE
+          default: '{iso-file}'
+          description: 'ISO file name that is on the tpi-s1 in /storage/downloads'
+#      - bool:
+#          name: UPDATE_MASTER
+#          default: false
+#          description: 'turns on update fuel master node to maintenance update'
+#      - string:
+#          name: MIRROR
+#          default: 'http://mirror.seed-cz1.fuel-infra.org'
+#          description: 'mirror for package repositories. this mirror is optimized for CZ'
+#      - string:
+#          name: UPDATE_FUEL_MIRROR
+#          default: "${{MIRROR}}/mos-repos/centos/mos7.0-centos6-fuel/security/x86_64/ ${{MIRROR}}/mos-repos/centos/mos7.0-centos6-fuel/updates/x86_64/"
+#          description: 'repositories to update fuel master node'
+#      - string:
+#          name: MIRROR_UBUNTU
+#          default: 'deb ${{MIRROR}}/pkgs/ubuntu/ trusty main universe multiverse|deb ${{MIRROR}}/pkgs/ubuntu/ trusty-updates main universe multiverse'
+#          description: 'proposed repositories to update ubuntu cluster'
+#      - string:
+#          name: DEB_UPDATES
+#          default: "mos-updates,deb ${{MIRROR}}/mos/ubuntu/dists/mos7.0-updates main restricted"
+#          description: 'ubuntu-updates repositories for master ui'
+#      - string:
+#          name: DEB_SECURITY
+#          default: "mos-security,deb ${{MIRROR}}/mos/ubuntu/dists/mos7.0-security main restricted"
+#          description: 'ubuntu-security repositories for master ui'
       - string:
           name: GERRIT_REFSPEC
           default: 'refs/heads/{gerrit-branch}'
@@ -151,7 +154,7 @@
           description: 'The name of devops env. Needed to properly work of existing mode of devops'
       - bool:
           name: USE_SNAPSHOTS
-          default: true
+          default: {use-snapshots}
           descrition: 'Will be used existing environment'
 
 ## parameters for jobs created per test-group and custom test job
@@ -180,31 +183,31 @@
       - string:
           name: ISO_VERSION
           description: 'Contrainer for storing an iso build number to output it as job name'
-      - bool:
-          name: UPDATE_MASTER
-          default: true
-          description: 'turns on update fuel master node to maintenance update'
-      - string:
-          name: MIRROR
-          default: 'http://mirror.seed-cz1.fuel-infra.org'
-          description: 'mirror for package repositories. this mirror is optimized for CZ'
-      - string:
-          name: UPDATE_FUEL_MIRROR
-          default: "${{MIRROR}}/mos-repos/centos/mos7.0-centos6-fuel/security/x86_64/ ${{MIRROR}}/mos-repos/centos/mos7.0-centos6-fuel/updates/x86_64/"
-          description: 'repositories to update fuel master node'
-      - string:
-          name: MIRROR_UBUNTU
-          default: 'deb ${{MIRROR}}/pkgs/ubuntu/ trusty main universe multiverse|deb ${{MIRROR}}/pkgs/ubuntu/ trusty-updates main universe multiverse'
-          description: 'proposed repositories to update ubuntu cluster'
-      - string:
-          name: DEB_UPDATES
-          default: "mos-updates,deb ${{MIRROR}}/mos/ubuntu/dists/mos7.0-updates main restricted"
-          description: 'ubuntu-updates repositories for master ui'
-      - string:
-          name: DEB_SECURITY
-          default: "mos-security,deb ${{MIRROR}}/mos/ubuntu/dists/mos7.0-security main restricted"
-          description: 'ubuntu-security repositories for master ui'
-      - string:
+#     - bool:
+#         name: UPDATE_MASTER
+#         default: false
+#         description: 'turns on update fuel master node to maintenance update'
+#     - string:
+#         name: MIRROR
+#         default: 'http://mirror.seed-cz1.fuel-infra.org'
+#         description: 'mirror for package repositories. this mirror is optimized for CZ'
+#     - string:
+#         name: UPDATE_FUEL_MIRROR
+#         default: "${{MIRROR}}/mos-repos/centos/mos7.0-centos6-fuel/security/x86_64/ ${{MIRROR}}/mos-repos/centos/mos7.0-centos6-fuel/updates/x86_64/"
+#         description: 'repositories to update fuel master node'
+#     - string:
+#         name: MIRROR_UBUNTU
+#         default: 'deb ${{MIRROR}}/pkgs/ubuntu/ trusty main universe multiverse|deb ${{MIRROR}}/pkgs/ubuntu/ trusty-updates main universe multiverse'
+#         description: 'proposed repositories to update ubuntu cluster'
+#     - string:
+#         name: DEB_UPDATES
+#         default: "mos-updates,deb ${{MIRROR}}/mos/ubuntu/dists/mos7.0-updates main restricted"
+#         description: 'ubuntu-updates repositories for master ui'
+#     - string:
+#         name: DEB_SECURITY
+#         default: "mos-security,deb ${{MIRROR}}/mos/ubuntu/dists/mos7.0-security main restricted"
+#         description: 'ubuntu-security repositories for master ui'
+#     - string:
           name: OPENSTACK_RELEASE
           default: 'Ubuntu'
           description: 'Openstack release (CentOS, Ubuntu)'
@@ -242,12 +245,12 @@
           description: 'The name of devops env. Needed to properly work of existing mode of devops'
       - bool:
           name: USE_SNAPSHOTS
-          default: false
+          default: {use-snapshots}
           descrition: 'Will be used existing environment'
 
 - project:
     name: 'predefined_parameters'
-    fuel-release: '7.0'
+    fuel-release: '8.0'
     plugin-version: '1.1.0'
     plugin-name: 'nsxv'
 
@@ -255,20 +258,25 @@
     smoke-name: '{fuel-release}.{plugin-name}.smoke'
     bvt-name: '{fuel-release}.{plugin-name}.bvt'
     regression-name: '{fuel-release}.{plugin-name}.regression'
+    canary-name: '{fuel-release}.{plugin-name}.canary'
+    download-iso-name: 'download_iso'
     nightly-name: '{fuel-release}.{plugin-name}.nightly'
     custom-name: '{fuel-release}.{plugin-name}.custom'
 
     nightly-timer: 'H 22 * * *'
     regression-timer: 'H 18 * * *'
 
-    iso-file: 'fuel-7.0-301-2015-09-22_20-01-53.iso'
+    use-snapshots: false
+
+    iso-file: ''
     gerrit-repo: 'fuel-plugin-nsxv'
-    gerrit-branch: '7.0'
+    gerrit-branch: 'master'
     email-to: 'rkhozinov@mirantis.com'
     released-plugin-path: '/storage/nsxv/released/nsxv-1.1-1.1.0-1.noarch.rpm'
 
     testgroup:
       - nsxv_smoke
+      - nsxv_bvt
       - nsxv_add_delete_nodes
       - nsxv_add_delete_controller
       - nsxv_reset_controller
@@ -277,15 +285,21 @@
       - nsxv_ha_mode
       - nsxv_ceph
       - nsxv_ceph_no_vcenter
+      - nsxv_floating_ip_to_public
+      - nsxv_create_and_delete_vms
     jobs:
       - '{build-name}'
       - '{nightly-name}'
       - '{custom-name}'
       - '{smoke-name}'
       - '{bvt-name}'
+      - '{canary-name}'
+      - '{fuel-release}.{plugin-name}.{testgroup}'
+
       - '{regression-name}'
       - '{fuel-release}.{plugin-name}.regression.test'
-      - '{fuel-release}.{plugin-name}.{testgroup}'
+      - '{fuel-release}.{plugin-name}.canary.skinny'
+      - '{fuel-release}.{plugin-name}.canary.fat'
 
 - defaults:
     name: global
@@ -311,19 +325,20 @@
       - inject-passwords:
           global: true
           mask-password-params: true
-      - ansicolor: 
+      - ansicolor:
           colormap: xterm
       - timeout:
           fail: true
           timeout: 240
     publishers:
       - postbuildscript:
+          script-only-if-succeeded: False
           builders:
             - shell: env > properties
               # need to delete packages, because we don't wipe workspace,
               # but packages could be duplicated
             - shell: rm -f .*rpm.*
-          script-only-if-succeeded: False
+
       - archive:
           artifacts: 'build.properties'
           allow-empty: false
@@ -343,7 +358,7 @@
             - junit:
                 pattern: '**/nosetest.xml'
                 skip-if-no-test-files: true
-      - email: 
+      - email:
           recipients: '{email-to}'
 
 # job for building plugin package
@@ -377,7 +392,6 @@
           script-only-if-succeeded: False
           builders:
              - shell: env > build.properties
-          script-only-if-succeeded: False
       - archive:
           artifacts: '*.rpm'
           allow-empty: false
@@ -387,7 +401,7 @@
       - email:
           recipients: '{email-to}'
 
-# jobs for regression test
+# jobs for system tests
 - job-template:
     name: '{fuel-release}.{plugin-name}.{testgroup}'
     description: 'The test "{testgroup}" for {fuel-release}.{plugin-name}.{plugin-version}'
@@ -397,6 +411,17 @@
 - job-template:
     name: '{fuel-release}.{plugin-name}.regression.test'
     description: 'The test "{testgroup}" for {fuel-release}.{plugin-name}.{plugin-version}'
+    concurrent: true
+
+# jobs for test a new iso
+- job-template:
+    name: '{fuel-release}.{plugin-name}.canary.skinny'
+    description: 'The dvs_vcenter_smoke test  for {fuel-release}.{plugin-name}.{plugin-version}'
+    concurrent: true
+
+- job-template:
+    name: '{fuel-release}.{plugin-name}.canary.fat'
+    description: 'The dvs_vcenter_bvt test for {fuel-release}.{plugin-name}.{plugin-version}'
     concurrent: true
 
 - job-template:
@@ -423,6 +448,12 @@
           project: '{build-name}'
           which-build: last-successful
           stable: true
+      - copyartifact:
+          project: '{canary-name}'
+          which-build: last-successful
+          stable: true
+      - inject:
+          properties-file: iso_file
       - multijob:
           name: 'Smoke tests for nsxv.vcenter5'
           condition: SUCCESSFUL
@@ -464,11 +495,17 @@
           project: '{build-name}'
           which-build: last-successful
           stable: true
+      - copyartifact:
+          project: '{canary-name}'
+          which-build: last-successful
+          stable: true
+      - inject:
+          properties-file: iso_file
       - multijob:
           name: 'Smoke tests for nsxv.vcenter5'
           condition: SUCCESSFUL
           projects:
-           - name: '{fuel-release}.{plugin-name}.nsxv_add_delete_nodes'
+           - name: '{fuel-release}.{plugin-name}.nsxv_bvt'
              current-parameters: true
              kill-phase-on: NEVER
 
@@ -486,13 +523,19 @@
       - archive:
           artifacts: 'bvt.properties'
           allow-empty: false
+      - archive:
+          artifacts: 'canary.properties'
+          allow-empty: false
+      - archive:
+          artifacts: 'iso_file'
+          allow-empty: false
       - email:
           recipients: '{email-to}'
 
 - job-template:
     name: '{regression-name}'
     description: 'The Smoke test for {fuel-release}.{plugin-name}.{plugin-version}'
-    disabled: false
+    disabled: true
     concurrent: true
     project-type: multijob
     node: runner
@@ -526,6 +569,79 @@
               kill-phase-on: NEVER
 
 - job-template:
+    name: '{canary-name}'
+    description: 'The Smoke test for {fuel-release}.{plugin-name}.{plugin-version}'
+    disabled: false
+    concurrent: true
+    project-type: multijob
+    node: runner
+    <<: *runner-parameters
+    <<: *runner-properties
+    scm:  []
+    triggers:
+      - reverse:
+          jobs: '{download-iso-name}'
+          result: 'success'
+    builders:
+      - trigger-builds:
+        - project: '{build-name}'
+          current-parameters: true
+          git-revision: false
+          block: true
+      - copyartifact:
+          project: '{build-name}'
+          which-build: last-successful
+          stable: true
+      - copyartifact:
+          project: '{download-iso-name}'
+          which-build: last-successful
+          stable: true
+      - inject:
+          properties-file: iso_file
+
+      - multijob:
+          name: 'Smoke tests for dvs.vcenter5'
+          condition: SUCCESSFUL
+          projects:
+           - name: '{fuel-release}.{plugin-name}.canary.skinny'
+             predefined-parameters: |
+                TEST_GROUP=nsxv_smoke
+             current-parameters: true
+             property-file: iso_file
+             kill-phase-on: NEVER
+
+      - multijob:
+          name: 'BVT tests for dvs.vcenter5'
+          condition: SUCCESSFUL
+          projects:
+           - name: '{fuel-release}.{plugin-name}.canary.fat'
+             predefined-parameters: |
+                TEST_GROUP=nsxv_bvt
+             current-parameters: true
+             property-file: iso_file
+             kill-phase-on: NEVER
+
+    publishers:
+      - postbuildscript:
+          builders:
+            - shell: env > canary.properties
+      - archive:
+          artifacts: 'build.properties'
+          allow-empty: false
+      - archive:
+          artifacts: 'canary.properties'
+          allow-empty: false
+      - archive:
+          artifacts: 'iso_file'
+          allow-empty: false
+      - archive:
+          artifacts: '*.rpm'
+          allow-empty: false
+      - email:
+          recipients: '{email-to}'
+
+
+- job-template:
     name: '{nightly-name}'
     description: |
       <p>System tests nsxv feature runs every day at 19.00 CZ.
@@ -555,6 +671,9 @@
       - archive:
           artifacts: 'build.properties'
           allow-empty: false
+      - archive:
+          artifacts: 'iso_file'
+          allow-empty: false
       - email:
           recipients: '{email-to}'
     scm: []
@@ -562,50 +681,63 @@
       - timed: '{nightly-timer}'
 
     builders:
+      # copy latest stable plugin package that has passed dvs bvt on the stable iso
       - copyartifact:
           project: '{bvt-name}'
           which-build: last-successful
           stable: true
+      # copy latest stable iso that has passed fuel and dvs smoke and bvt tests
+      - copyartifact:
+          project: '{canary-name}'
+          which-build: last-successful
+          stable: true
+      - inject:
+          properties-file: iso_file
       - multijob:
           name: 'System tests for nsxv {fuel-release}.{plugin-version} vcenter5'
           condition: COMPLETED
           projects:
-           - name: '{fuel-release}.{plugin-name}.nsxv_vcenter_ha_mode'
+           - name: '{fuel-release}.{plugin-name}.nsxv_add_delete_nodes'
              current-parameters: true
              kill-phase-on: NEVER
-
-           - name: '{fuel-release}.{plugin-name}.nsxv_vcenter_ceph'
-             current-parameters: true
-             kill-phase-on: NEVER
-
-           - name: '{fuel-release}.{plugin-name}.nsxv_vcenter_ceph_2'
-             current-parameters: true
-             kill-phase-on: NEVER
-
+             property-file: iso_file
            - name: '{fuel-release}.{plugin-name}.nsxv_add_delete_controller'
              current-parameters: true
              kill-phase-on: NEVER
-               
+             property-file: iso_file
            - name: '{fuel-release}.{plugin-name}.nsxv_reset_controller'
              current-parameters: true
              kill-phase-on: NEVER
-
+             property-file: iso_file
            - name: '{fuel-release}.{plugin-name}.nsxv_shutdown_controller'
              current-parameters: true
              kill-phase-on: NEVER
-
+             property-file: iso_file
            - name: '{fuel-release}.{plugin-name}.nsxv_ceilometer'
              current-parameters: true
              kill-phase-on: NEVER
-
+             property-file: iso_file
            - name: '{fuel-release}.{plugin-name}.nsxv_ha_mode'
              current-parameters: true
              kill-phase-on: NEVER
-
+             property-file: iso_file
            - name: '{fuel-release}.{plugin-name}.nsxv_ceph'
              current-parameters: true
              kill-phase-on: NEVER
-
+             property-file: iso_file
            - name: '{fuel-release}.{plugin-name}.nsxv_ceph_no_vcenter'
              current-parameters: true
              kill-phase-on: NEVER
+             property-file: iso_file
+           - name: '{fuel-release}.{plugin-name}.nsxv_floating_ip_to_public'
+             current-parameters: true
+             kill-phase-on: NEVER
+             property-file: iso_file
+           - name: '{fuel-release}.{plugin-name}.nsxv_create_and_delete_vms'
+             current-parameters: true
+             kill-phase-on: NEVER
+             property-file: iso_file
+           - name: '{fuel-release}.{plugin-name}.nsxv_vcenter_ha_mode'
+             current-parameters: true
+             kill-phase-on: NEVER
+             property-file: iso_file
