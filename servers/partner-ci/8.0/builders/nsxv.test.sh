@@ -10,7 +10,8 @@ export FUEL_RELEASE=$(cut -d'-' -f2-2 <<< $ISO_FILE | tr -d '.')
 export ENV_NAME="${ENV_PREFIX}.${ISO_VERSION}"
 export VENV_PATH="${HOME}/${FUEL_RELEASE}-venv"
 
-[[ -z "${DVS_PLUGIN_PATH}" ]] && export DVS_PLUGIN_PATH=$(ls ${WORKSPACE}/fuel-plugin-vmware-dvs*.rpm) ||  echo DVS_PLUGIN_PATH=$DVS_PLUGIN_PATH
+[[ -z ${NSXV_PLUGIN_PATH} ]] && export NSXV_PLUGIN_PATH=$(ls ${WORKSPACE}/nsxv*.rpm) || echo NSXV_PLUGIN_PATH=$NSXV_PLUGIN_PATH
+
 
 source $VENV_PATH/bin/activate
 
@@ -25,10 +26,7 @@ echo fuel-release: $FUEL_RELEASE
 echo venv-path: $VENV_PATH
 echo env-name: $ENV_NAME
 echo iso-path: $ISO_PATH   
-echo plugin-path: $DVS_PLUGIN_PATH
-echo plugin-checksum: $(md5sum -b $DVS_PLUGIN_PATH)
+echo plugin-path: $NSXV_PLUGIN_PATH
+echo plugin checksum: $(md5sum -b $NSXV_PLUGIN_PATH)
 
-export PATH_TO_CERT=${WORKSPACE}"/"${ENV_NAME}".crt"
-export PATH_TO_PEM=${WORKSPACE}"/"${ENV_NAME}".pem"
-
-./plugin_test/utils/jenkins/system_tests.sh -t test ${systest_parameters} -i ${ISO_PATH} -j ${JOB_NAME} -o --group=${TEST_GROUP}
+./plugin_test/utils/jenkins/system_tests.sh -t test ${systest_parameters} -i ${ISO_PATH} -j ${JOB_NAME} -o --group=${TEST_GROUP} 2>&1
