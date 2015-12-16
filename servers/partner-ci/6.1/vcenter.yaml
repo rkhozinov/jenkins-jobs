@@ -1,4 +1,3 @@
-# TODO: make ISO_VERSION global > add to job's properties : for valid job-build description
 # jobs for test-group
 - defaults:
     name: global
@@ -97,13 +96,13 @@
 - job-template:
     name: '{fuel-release}.{id}.{testgroup}'
     concurrent: false
-    node: 'vsphere'
+    node: 'vcenter'
     properties:
       - throttle:
           max-per-node: 0
           max-total: 0
           categories:
-            - vsphere
+            - vcenter
             - dvs
             - nsx
           option: category
@@ -145,7 +144,7 @@
 - job-template:
     name: '{custom-name}'
     concurrent: true
-    node: 'vsphere'
+    node: 'vcenter'
     parameters:
       - string:
           name: ISO_FILE
@@ -185,7 +184,7 @@
           max-per-node: 0
           max-total: 0
           categories:
-            - vsphere
+            - vcenter
             - dvs
             - nsx
           option: category

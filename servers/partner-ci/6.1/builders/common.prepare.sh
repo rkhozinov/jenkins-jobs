@@ -28,7 +28,6 @@ echo virtual-env: $VENV_PATH
 ## the fuel-qa branch is determined by a fuel-iso name.
 
 case "${FUEL_RELEASE}" in
-  *80* ) export REQS_BRANCH="stable/8.0" ;;
   *70* ) export REQS_BRANCH="stable/7.0" ;;
   *61* ) export REQS_BRANCH="stable/6.1" ;;
    *   ) export REQS_BRANCH="master"
@@ -74,25 +73,9 @@ function delete_systest_envs {
    done
 }
 
-## Recreate all an virtual env
-function recreate_venv {
-   [ -d $VENV_PATH ] && rm -rf ${VENV_PATH} || echo "The directory ${VENV_PATH} doesn't exist"
-   virtualenv --clear "${VENV_PATH}"
-}
-
-function get_venv_requirements {
-    rm -f requirements.txt*
-    wget $REQS_PATH
-    export REQS_PATH="$(pwd)/requirements.txt"
-
-    # change version for some package
-    if [[ "${REQS_BRANCH}" != "master" ]]; then
-      # bug: https://bugs.launchpad.net/fuel/+bug/1528193
-      sed -i 's/python-novaclient>=2.15.0/python-novaclient==2.35.0/' $REQS_PATH
-    fi
-}
-   
 function prepare_venv {
+    #rm -rf "${VENV_PATH}"
+    [ ! -d $VENV_PATH ] && virtualenv "${VENV_PATH}" || echo "${VENV_PATH} already exist"
     source "${VENV_PATH}/bin/activate"
     pip --version
     [ $? -ne 0 ] && easy_install -U pip
@@ -117,23 +100,19 @@ function fix_logger {
 
 ####################################################################################
 
-[[ "${RECREATE_VENV}" == "true" ]] && recreate_venv || true
-
-get_venv_requirements
-
-[ -d $VENV_PATH ] && prepare_venv || exit 1
-
+prepare_venv
 fix_logger
 
 source "$VENV_PATH/bin/activate"
 
 if [[ "${FORCE_ERASE}" -eq "true" ]]; then
-  delete_envs
+   delete_envs
 else
   # determine free space before run the cleaner
   free_space=$(df -h | grep '/$' | awk '{print $4}' | tr -d G)
 
   (( $free_space < $REQUIRED_FREE_SPACE )) &&  delete_systest_envs || echo free-space: $free_space
+
 
   # poweroff all envs
   destroy_envs
