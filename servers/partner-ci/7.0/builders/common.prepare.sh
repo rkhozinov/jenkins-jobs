@@ -67,6 +67,7 @@ function destroy_envs {
 function delete_systest_envs {
    [ -z $VIRTUAL_ENV ] && exit 1
    dos.py sync
+
    for env in $(dos.py list | grep $ENV_PREFIX); do
        [[ $env == *"$ENV_NAME"* ]] && continue || dos.py erase $env
    done
@@ -102,14 +103,18 @@ function fix_logger {
 prepare_venv
 fix_logger
 
-# determine free space before run the cleaner
-free_space=$(df -h | grep '/$' | awk '{print $4}' | tr -d G)
-
 source "$VENV_PATH/bin/activate"
 
-(( $free_space < $REQUIRED_FREE_SPACE )) &&  delete_systest_envs || echo free-space: $free_space
+if [[ "${FORCE_ERASE}" -eq "true" ]]; then
+   delete_envs
+else
+  # determine free space before run the cleaner
+  free_space=$(df -h | grep '/$' | awk '{print $4}' | tr -d G)
 
-# activate a python virtual env
+  (( $free_space < $REQUIRED_FREE_SPACE )) &&  delete_systest_envs || echo free-space: $free_space
 
-# poweroff all envs
-destroy_envs
+
+  # poweroff all envs
+  destroy_envs
+fi
+

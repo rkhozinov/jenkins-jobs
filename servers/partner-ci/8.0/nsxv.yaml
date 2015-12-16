@@ -1,3 +1,59 @@
+- project:
+    name: 'predefined_parameters'
+    fuel-release: '8.0'
+    plugin-version: '1.1.0'
+    plugin-name: 'nsxv'
+
+    build-name: '{fuel-release}.{plugin-name}.build'
+    smoke-name: '{fuel-release}.{plugin-name}.smoke'
+    bvt-name: '{fuel-release}.{plugin-name}.bvt'
+    regression-name: '{fuel-release}.{plugin-name}.regression'
+    canary-name: '{fuel-release}.{plugin-name}.canary'
+    download-iso-name: 'download_iso'
+    nightly-name: '{fuel-release}.{plugin-name}.nightly'
+    custom-name: '{fuel-release}.{plugin-name}.custom'
+
+    nightly-timer: 'H 22 * * *'
+    regression-timer: 'H 18 * * *'
+
+    use-snapshots: false
+    force-erase: true
+    disable-ssl: true
+    debug: true
+
+    iso-file: ''
+    gerrit-repo: 'fuel-plugin-nsxv'
+    gerrit-branch: 'master'
+    email-to: 'rkhozinov@mirantis.com'
+    released-plugin-path: '/storage/nsxv/released/nsxv-1.1-1.1.0-1.noarch.rpm'
+
+    testgroup:
+      - nsxv_smoke
+      - nsxv_bvt
+      - nsxv_add_delete_nodes
+      - nsxv_add_delete_controller
+      - nsxv_reset_controller
+      - nsxv_shutdown_controller
+      - nsxv_ceilometer
+      - nsxv_ha_mode
+      - nsxv_ceph
+      - nsxv_ceph_no_vcenter
+      - nsxv_floating_ip_to_public
+      - nsxv_create_and_delete_vms
+    jobs:
+      - '{build-name}'
+      - '{nightly-name}'
+      - '{custom-name}'
+      - '{smoke-name}'
+      - '{bvt-name}'
+      - '{canary-name}'
+      - '{fuel-release}.{plugin-name}.{testgroup}'
+
+      - '{regression-name}'
+      - '{fuel-release}.{plugin-name}.regression.test'
+      - '{fuel-release}.{plugin-name}.canary.skinny'
+      - '{fuel-release}.{plugin-name}.canary.fat'
+
 ## common git settings to get sources
 - common-scm: &common-scm
     name: 'common-scm'
@@ -95,7 +151,7 @@
           max-per-node: 0
           max-total: 0
           categories:
-            - vsphere
+            - vcenter
             - dvs
             - nsx
             - contrail
@@ -106,40 +162,24 @@
     parameters:
       - bool:
           name: DEBUG
-          default: true
+          default: '{debug}'
           description: "Set -x (xtrace) for jobs' bash scripts"
+      - bool:
+          name: DISABLE_SSL
+          default: '{disable-ssl}'
+          description: "Disable ssh for openstack horizon"
+      - bool:
+          name: FORCE_ERASE
+          default: '{force-erase}'
+          description: "Erase all envs before test"
       - string:
           name: VCENTER_SNAPSHOT
           default: 'nsxv'
-          description: 'Snapshot name for vsphere lab'
+          description: 'Snapshot name for vcenter lab'
       - string:
           name: ISO_FILE
           default: '{iso-file}'
           description: 'ISO file name that is on the tpi-s1 in /storage/downloads'
-#      - bool:
-#          name: UPDATE_MASTER
-#          default: false
-#          description: 'turns on update fuel master node to maintenance update'
-#      - string:
-#          name: MIRROR
-#          default: 'http://mirror.seed-cz1.fuel-infra.org'
-#          description: 'mirror for package repositories. this mirror is optimized for CZ'
-#      - string:
-#          name: UPDATE_FUEL_MIRROR
-#          default: "${{MIRROR}}/mos-repos/centos/mos7.0-centos6-fuel/security/x86_64/ ${{MIRROR}}/mos-repos/centos/mos7.0-centos6-fuel/updates/x86_64/"
-#          description: 'repositories to update fuel master node'
-#      - string:
-#          name: MIRROR_UBUNTU
-#          default: 'deb ${{MIRROR}}/pkgs/ubuntu/ trusty main universe multiverse|deb ${{MIRROR}}/pkgs/ubuntu/ trusty-updates main universe multiverse'
-#          description: 'proposed repositories to update ubuntu cluster'
-#      - string:
-#          name: DEB_UPDATES
-#          default: "mos-updates,deb ${{MIRROR}}/mos/ubuntu/dists/mos7.0-updates main restricted"
-#          description: 'ubuntu-updates repositories for master ui'
-#      - string:
-#          name: DEB_SECURITY
-#          default: "mos-security,deb ${{MIRROR}}/mos/ubuntu/dists/mos7.0-security main restricted"
-#          description: 'ubuntu-security repositories for master ui'
       - string:
           name: GERRIT_REFSPEC
           default: 'refs/heads/{gerrit-branch}'
@@ -154,8 +194,9 @@
           description: 'The name of devops env. Needed to properly work of existing mode of devops'
       - bool:
           name: USE_SNAPSHOTS
-          default: {use-snapshots}
+          default: '{use-snapshots}'
           descrition: 'Will be used existing environment'
+
 
 ## parameters for jobs created per test-group and custom test job
 - test-parameters: &test-parameters
@@ -163,15 +204,23 @@
     parameters:
       - bool:
           name: DEBUG
-          default: true
+          default: '{debug}'
           description: "Set -x (xtrace) for jobs' bash scripts"
+      - bool:
+          name: DISABLE_SSL
+          default: '{disable-ssl}'
+          description: "Disable ssh for openstack horizon"
+      - bool:
+          name: FORCE_ERASE
+          default: '{force-erase}'
+          description: "Erase all envs before test"
       - string:
           name: TEST_GROUP
           default: '{testgroup}'
       - string:
           name: VCENTER_SNAPSHOT
           default: 'nsxv'
-          description: 'Snapshot name for vsphere lab'
+          description: 'Snapshot name for vcenter lab'
       - string:
           name: ISO_FILE
           default: '{iso-file}'
@@ -183,31 +232,7 @@
       - string:
           name: ISO_VERSION
           description: 'Contrainer for storing an iso build number to output it as job name'
-#     - bool:
-#         name: UPDATE_MASTER
-#         default: false
-#         description: 'turns on update fuel master node to maintenance update'
-#     - string:
-#         name: MIRROR
-#         default: 'http://mirror.seed-cz1.fuel-infra.org'
-#         description: 'mirror for package repositories. this mirror is optimized for CZ'
-#     - string:
-#         name: UPDATE_FUEL_MIRROR
-#         default: "${{MIRROR}}/mos-repos/centos/mos7.0-centos6-fuel/security/x86_64/ ${{MIRROR}}/mos-repos/centos/mos7.0-centos6-fuel/updates/x86_64/"
-#         description: 'repositories to update fuel master node'
-#     - string:
-#         name: MIRROR_UBUNTU
-#         default: 'deb ${{MIRROR}}/pkgs/ubuntu/ trusty main universe multiverse|deb ${{MIRROR}}/pkgs/ubuntu/ trusty-updates main universe multiverse'
-#         description: 'proposed repositories to update ubuntu cluster'
-#     - string:
-#         name: DEB_UPDATES
-#         default: "mos-updates,deb ${{MIRROR}}/mos/ubuntu/dists/mos7.0-updates main restricted"
-#         description: 'ubuntu-updates repositories for master ui'
-#     - string:
-#         name: DEB_SECURITY
-#         default: "mos-security,deb ${{MIRROR}}/mos/ubuntu/dists/mos7.0-security main restricted"
-#         description: 'ubuntu-security repositories for master ui'
-#     - string:
+      - string:
           name: OPENSTACK_RELEASE
           default: 'Ubuntu'
           description: 'Openstack release (CentOS, Ubuntu)'
@@ -245,61 +270,8 @@
           description: 'The name of devops env. Needed to properly work of existing mode of devops'
       - bool:
           name: USE_SNAPSHOTS
-          default: {use-snapshots}
+          default: '{use-snapshots}'
           descrition: 'Will be used existing environment'
-
-- project:
-    name: 'predefined_parameters'
-    fuel-release: '8.0'
-    plugin-version: '1.1.0'
-    plugin-name: 'nsxv'
-
-    build-name: '{fuel-release}.{plugin-name}.build'
-    smoke-name: '{fuel-release}.{plugin-name}.smoke'
-    bvt-name: '{fuel-release}.{plugin-name}.bvt'
-    regression-name: '{fuel-release}.{plugin-name}.regression'
-    canary-name: '{fuel-release}.{plugin-name}.canary'
-    download-iso-name: 'download_iso'
-    nightly-name: '{fuel-release}.{plugin-name}.nightly'
-    custom-name: '{fuel-release}.{plugin-name}.custom'
-
-    nightly-timer: 'H 22 * * *'
-    regression-timer: 'H 18 * * *'
-
-    use-snapshots: false
-
-    iso-file: ''
-    gerrit-repo: 'fuel-plugin-nsxv'
-    gerrit-branch: 'master'
-    email-to: 'rkhozinov@mirantis.com'
-    released-plugin-path: '/storage/nsxv/released/nsxv-1.1-1.1.0-1.noarch.rpm'
-
-    testgroup:
-      - nsxv_smoke
-      - nsxv_bvt
-      - nsxv_add_delete_nodes
-      - nsxv_add_delete_controller
-      - nsxv_reset_controller
-      - nsxv_shutdown_controller
-      - nsxv_ceilometer
-      - nsxv_ha_mode
-      - nsxv_ceph
-      - nsxv_ceph_no_vcenter
-      - nsxv_floating_ip_to_public
-      - nsxv_create_and_delete_vms
-    jobs:
-      - '{build-name}'
-      - '{nightly-name}'
-      - '{custom-name}'
-      - '{smoke-name}'
-      - '{bvt-name}'
-      - '{canary-name}'
-      - '{fuel-release}.{plugin-name}.{testgroup}'
-
-      - '{regression-name}'
-      - '{fuel-release}.{plugin-name}.regression.test'
-      - '{fuel-release}.{plugin-name}.canary.skinny'
-      - '{fuel-release}.{plugin-name}.canary.fat'
 
 - defaults:
     name: global
@@ -324,12 +296,13 @@
     wrappers:
       - inject-passwords:
           global: true
-          mask-password-params: true
+          mask-password-params: false
       - ansicolor:
           colormap: xterm
       - timeout:
           fail: true
-          timeout: 240
+          write-description: "Timeout is exceeded"
+          timeout: 360
     publishers:
       - postbuildscript:
           script-only-if-succeeded: False
@@ -643,16 +616,6 @@
 
 - job-template:
     name: '{nightly-name}'
-    description: |
-      <p>System tests nsxv feature runs every day at 19.00 CZ.
-       Multijob copies all artifacts from the {build-name} job  
-       and runs to phases. The first phase is for vcenter5, the second
-       phase is for vcenter6. This behaviour is controlled by
-       VCENTER_SNAPSHOT predefined parameter. </p>
-       <p>The tests copy the latest package from the {bvt-name} job.
-       Because the {bvt-name} job's packages more stable.</p>
-       <p>There're a pkg details (that copied withing the package)
-       in pkg_properties file in the root of job's workspace.</p>
     project-type: multijob
     disabled: true
     node: runner

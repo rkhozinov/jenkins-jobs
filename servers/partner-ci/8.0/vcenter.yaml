@@ -1,3 +1,49 @@
+- project:
+    name: 'predefined_parameters'
+    fuel-release: '8.0'
+    plugin-version: '2.0'
+    plugin-name: 'vcenter'
+
+    download-iso-name: '8.0.dvs.canary'
+    nightly-name: '{fuel-release}.{plugin-name}.nightly'
+    custom-name: '{fuel-release}.{plugin-name}.custom'
+
+    nightly-timer: 'H 22 * * *'
+    regression-timer: 'H 18 * * *'
+
+    use-snapshots: false
+    force-erase: true
+    disable-ssl: true
+    debug: true
+
+    iso-file: ''
+    gerrit-repo: 'fuel-qa'
+    gerrit-branch: 'master'
+    email-to: 'rkhozinov@mirantis.com ibumarskov@mirantis.com'
+    released-plugin-path: ''
+
+    testgroup:
+      - vcenter_add_cindervmware
+      - vcenter_add_controller
+      - vcenter_ceilometer_and_computevmware
+      - vcenter_ceph_and_computevmware
+      - vcenter_cindervmdk_and_computevmware
+      - vcenter_computevmware
+      - vcenter_dvs_bvt
+      - vcenter_dvs_smoke
+      - vcenter_glance_backend_and_computevmware
+      - vcenter_ha_ceilometer
+      - vcenter_ha_ceph
+      - vcenter_ha_cinder_and_ceph
+      - vcenter_ha_multiple_clusters
+      - vcenter_multiroles_ceilometer
+      - vcenter_multiroles_cindervmdk_and_ceph
+      - vcenter_multiroles_cindervmdk_and_cinder
+    jobs:
+      - '{nightly-name}'
+      - '{custom-name}'
+      - '{fuel-release}.{plugin-name}.{testgroup}'
+
 ## common git settings to get sources
 - common-scm: &common-scm
     name: 'common-scm'
@@ -78,12 +124,12 @@
     properties:
       - heavy-job:
           weight: 1
-      - build-blocker:
-          use-build-blocker: true
-          blocking-jobs:
-            - '{build-name}'
-          block-level: 'GLOBAL'
-          queue-scanning: 'BUILDABLE'
+#      - build-blocker:
+#          use-build-blocker: true
+#          blocking-jobs:
+#            - '{build-name}'
+#          block-level: 'GLOBAL'
+#          queue-scanning: 'BUILDABLE'
 
 ## properties for test jobs
 - test-properties: &test-properties
@@ -95,23 +141,40 @@
           max-per-node: 0
           max-total: 0
           categories:
-            - vsphere
+            - vcenter
             - dvs
             - nsx
             - contrail
           option: category
+
 ## parameters for smoke, bvt and nightly multijobs
 - runner-parameters: &runner-parameters
     name: 'runner-parameters'
     parameters:
       - bool:
           name: DEBUG
-          default: true
+          default: '{debug}'
           description: "Set -x (xtrace) for jobs' bash scripts"
+      - bool:
+          name: DISABLE_SSL
+          default: '{disable-ssl}'
+          description: "Disable ssh for openstack horizon"
+      - bool:
+          name: FORCE_ERASE
+          default: '{force-erase}'
+          description: "Erase all envs before test"
+      - string:
+          name: TEST_GROUP_PREFIX
+          default: 'system_test.vcenter.deploy_vcenter_dvs_run_ostf'
+          description: 'Snapshot name for vsphere lab'
+      - string:
+          name: POOL_PUBLIC
+          default: '172.16.0.0/24:24'
+          description: 'Snapshot name for vsphere lab'
       - string:
           name: VCENTER_SNAPSHOT
           default: 'vcenterha'
-          description: 'Snapshot name for vsphere lab'
+          description: 'Snapshot name for vcenter lab'
       - string:
           name: ISO_FILE
           default: '{iso-file}'
@@ -130,8 +193,9 @@
           description: 'The name of devops env. Needed to properly work of existing mode of devops'
       - bool:
           name: USE_SNAPSHOTS
-          default: {use-snapshots}
+          default: '{use-snapshots}'
           descrition: 'Will be used existing environment'
+
 
 ## parameters for jobs created per test-group and custom test job
 - test-parameters: &test-parameters
@@ -139,15 +203,31 @@
     parameters:
       - bool:
           name: DEBUG
-          default: true
+          default: '{debug}'
           description: "Set -x (xtrace) for jobs' bash scripts"
+      - bool:
+          name: DISABLE_SSL
+          default: '{disable-ssl}'
+          description: "Disable ssh for openstack horizon"
+      - bool:
+          name: FORCE_ERASE
+          default: '{force-erase}'
+          description: "Erase all envs before test"
+      - string:
+          name: POOL_PUBLIC
+          default: '172.16.0.0/24:24'
+          description: 'Snapshot name for vsphere lab'
+      - string:
+          name: TEST_GROUP_PREFIX
+          default: 'system_test.vcenter.deploy_vcenter_dvs_run_ostf'
+          description: 'Snapshot name for vsphere lab'
       - string:
           name: TEST_GROUP
           default: '{testgroup}'
       - string:
           name: VCENTER_SNAPSHOT
           default: 'vcenterha'
-          description: 'Snapshot name for vsphere lab'
+          description: 'Snapshot name for vcenter lab'
       - string:
           name: ISO_FILE
           default: '{iso-file}'
@@ -197,69 +277,13 @@
           description: 'The name of devops env. Needed to properly work of existing mode of devops'
       - bool:
           name: USE_SNAPSHOTS
-          default: {use-snapshots}
+          default: '{use-snapshots}'
           descrition: 'Will be used existing environment'
-
-- project:
-    name: 'predefined_parameters'
-    fuel-release: '8.0'
-    plugin-version: '2.0'
-    plugin-name: 'dvs'
-
-    build-name: '{fuel-release}.{plugin-name}.build'
-    smoke-name: '{fuel-release}.{plugin-name}.smoke'
-    bvt-name: '{fuel-release}.{plugin-name}.bvt'
-    regression-name: '{fuel-release}.{plugin-name}.regression'
-    canary-name: '{fuel-release}.{plugin-name}.canary'
-    download-iso-name: '8.0.dvs.canary'
-    nightly-name: '{fuel-release}.{plugin-name}.nightly'
-    custom-name: '{fuel-release}.{plugin-name}.custom'
-
-    nightly-timer: 'H 22 * * *'
-    regression-timer: 'H 18 * * *'
-
-    use-snapshots: false
-
-    iso-file: ''
-    gerrit-repo: 'fuel-plugin-vmware-dvs'
-    gerrit-branch: 'master'
-    email-to: 'rkhozinov@mirantis.com'
-    released-plugin-path: ''
-
-    testgroup:
-      - vcenter_bvt
-      - vcenter_smoke
-      - vcenter_cindervmdk
-      - vcenter_cindervmdk_and_computevmware
-      - vcenter_computevmware
-      - vcenter_glance_backend
-      - vcenter_glance_backend_and_computevmware
-      - vcenter_multiple_cluster_with_computevmware
-      - vcenter_ceph
-      - vcenter_computevmware_and_ceph
-      - vcenter_multiroles_cindervmdk_and_ceph
-      - vcenter_multiroles_cindervmdk_and_cinder
-      - vcenter_ceilometer
-      - vcenter_ceilometer_and_computevmware
-      - vcenter_multiroles_ceilometer
-      - vcenter_add_delete_nodes
-      - vcenter_delete_controler
-      - vcenter_ha_nova_flat_multiple_clusters
-      - vcenter_ha_nova_vlan_multiple_clusters
-      - vcenter_ha_glance_backend_multiple_cluster
-      - vcenter_ha_ceph
-      - vcenter_ha_cinder_and_ceph
-      - vcenter_ha_multiroles_cindervmdk_and_cinder
-      - vcenter_ha_multiroles_cindervmdk_and_ceph
-
-    jobs:
-      - '{nightly-name}'
-      - '{fuel-release}.{plugin-name}.{testgroup}'
 
 - defaults:
     name: global
     disabled: false
-    node: 'dvs'
+    node: 'vcenter'
     logrotate:
       daysToKeep: 7
       numToKeep: 10
@@ -270,7 +294,7 @@
     <<: *common-scm
     builders:
       - copyartifact:
-          project: '{build-name}'
+          project: '{download-iso-name}'
           which-build: last-successful
       - shell:
           !include-raw-escape builders/common.prepare.sh
@@ -279,12 +303,13 @@
     wrappers:
       - inject-passwords:
           global: true
-          mask-password-params: true
+          mask-password-params: false
       - ansicolor:
           colormap: xterm
       - timeout:
           fail: true
-          timeout: 240
+          write-description: "Timeout is exceeded"
+          timeout: 360
     publishers:
       - postbuildscript:
           script-only-if-succeeded: False
@@ -319,26 +344,16 @@
 # jobs for system tests
 - job-template:
     name: '{fuel-release}.{plugin-name}.{testgroup}'
-    description: 'The test "{testgroup}" for {fuel-release}.{plugin-name}.{plugin-version}'
+    description: 'The test "{testgroup}" for {fuel-release}.{plugin-name}'
     concurrent: true
 
 - job-template:
     name: '{custom-name}'
-    description: 'The custom test for {fuel-release}.{plugin-name}.{plugin-version}'
+    description: 'The custom test for {fuel-release}.{plugin-name}'
     concurrent: true
 
 - job-template:
     name: '{nightly-name}'
-    description: |
-      <p>System tests dvs feature runs every day at 19.00 CZ.
-       Multijob copies all artifacts from the {build-name} job
-       and runs to phases. The first phase is for vcenter5, the second
-       phase is for vcenter6. This behaviour is controlled by
-       VCENTER_SNAPSHOT predefined parameter. </p>
-       <p>The tests copy the latest package from the {bvt-name} job.
-       Because the {bvt-name} job's packages more stable.</p>
-       <p>There're a pkg details (that copied withing the package)
-       in pkg_properties file in the root of job's workspace.</p>
     project-type: multijob
     disabled: false
     node: runner
@@ -367,8 +382,9 @@
       - timed: '{nightly-timer}'
 
     builders:
+      # copy latest stable plugin package that has passed dvs bvt on the stable iso
       - copyartifact:
-          project: '{download-iso}'
+          project: '{download-iso-name}'
           which-build: last-successful
       - inject:
           properties-file: iso_file
@@ -376,15 +392,23 @@
           name: 'System tests for dvs{fuel-release}.{plugin-version} vcenter5'
           condition: COMPLETED
           projects:
-           - name: '{fuel-release}.{plugin-name}.vcenter_bvt'
+           - name: '{fuel-release}.{plugin-name}.vcenter_add_cindervmware'
+             current-parameters: true
+             predefined-parameters: |
+               TEST_GROUP_PREFIX=system_test.vcenter.scale_vcenter_dvs
+             kill-phase-on: NEVER
+             property-file: iso_file
+           - name: '{fuel-release}.{plugin-name}.vcenter_add_controller'
+             current-parameters: true
+             predefined-parameters: |
+               TEST_GROUP_PREFIX=system_test.vcenter.scale_vcenter_dvs
+             kill-phase-on: NEVER
+             property-file: iso_file
+           - name: '{fuel-release}.{plugin-name}.vcenter_ceilometer_and_computevmware'
              current-parameters: true
              kill-phase-on: NEVER
              property-file: iso_file
-           - name: '{fuel-release}.{plugin-name}.vcenter_smoke'
-             current-parameters: true
-             kill-phase-on: NEVER
-             property-file: iso_file
-           - name: '{fuel-release}.{plugin-name}.vcenter_cindervmdk'
+           - name: '{fuel-release}.{plugin-name}.vcenter_ceph_and_computevmware'
              current-parameters: true
              kill-phase-on: NEVER
              property-file: iso_file
@@ -396,7 +420,11 @@
              current-parameters: true
              kill-phase-on: NEVER
              property-file: iso_file
-           - name: '{fuel-release}.{plugin-name}.vcenter_glance_backend'
+           - name: '{fuel-release}.{plugin-name}.vcenter_dvs_bvt'
+             current-parameters: true
+             kill-phase-on: NEVER
+             property-file: iso_file
+           - name: '{fuel-release}.{plugin-name}.vcenter_dvs_smoke'
              current-parameters: true
              kill-phase-on: NEVER
              property-file: iso_file
@@ -404,15 +432,23 @@
              current-parameters: true
              kill-phase-on: NEVER
              property-file: iso_file
-           - name: '{fuel-release}.{plugin-name}.vcenter_multiple_cluster_with_computevmware'
+           - name: '{fuel-release}.{plugin-name}.vcenter_ha_ceilometer'
              current-parameters: true
              kill-phase-on: NEVER
              property-file: iso_file
-           - name: '{fuel-release}.{plugin-name}.vcenter_ceph'
+           - name: '{fuel-release}.{plugin-name}.vcenter_ha_ceph'
              current-parameters: true
              kill-phase-on: NEVER
              property-file: iso_file
-           - name: '{fuel-release}.{plugin-name}.vcenter_computevmware_and_ceph'
+           - name: '{fuel-release}.{plugin-name}.vcenter_ha_cinder_and_ceph'
+             current-parameters: true
+             kill-phase-on: NEVER
+             property-file: iso_file
+           - name: '{fuel-release}.{plugin-name}.vcenter_ha_multiple_clusters'
+             current-parameters: true
+             kill-phase-on: NEVER
+             property-file: iso_file
+           - name: '{fuel-release}.{plugin-name}.vcenter_multiroles_ceilometer'
              current-parameters: true
              kill-phase-on: NEVER
              property-file: iso_file
@@ -424,46 +460,7 @@
              current-parameters: true
              kill-phase-on: NEVER
              property-file: iso_file
-           - name: '{fuel-release}.{plugin-name}.vcenter_ceilometer'
+           - name: '{fuel-release}.{plugin-name}.vcenter_cindervmdk'
              current-parameters: true
              kill-phase-on: NEVER
              property-file: iso_file
-           - name: '{fuel-release}.{plugin-name}.vcenter_ceilometer_and_computevmware'
-             current-parameters: true
-             kill-phase-on: NEVER
-             property-file: iso_file
-           - name: '{fuel-release}.{plugin-name}.vcenter_multiroles_ceilometer'
-             current-parameters: true
-             kill-phase-on: NEVER
-             property-file: iso_file
-           - name: '{fuel-release}.{plugin-name}.vcenter_add_delete_nodes'
-             current-parameters: true
-             kill-phase-on: NEVER
-             property-file: iso_file
-           - name: '{fuel-release}.{plugin-name}.vcenter_delete_controler'
-             current-parameters: true
-             kill-phase-on: NEVER
-             property-file: iso_file
-           - name: '{fuel-release}.{plugin-name}.vcenter_ha_nova_flat_multiple_clusters'
-             current-parameters: true
-             kill-phase-on: NEVER
-             property-file: iso_file
-           - name: '{fuel-release}.{plugin-name}.vcenter_ha_nova_vlan_multiple_clusters'
-             current-parameters: true
-             kill-phase-on: NEVER
-             property-file: iso_file
-           - name: '{fuel-release}.{plugin-name}.vcenter_ha_glance_backend_multiple_cluster'
-             current-parameters: true
-             kill-phase-on: NEVER
-           - name: '{fuel-release}.{plugin-name}.vcenter_ha_ceph'
-             current-parameters: true
-             kill-phase-on: NEVER
-           - name: '{fuel-release}.{plugin-name}.vcenter_ha_cinder_and_ceph'
-             current-parameters: true
-             kill-phase-on: NEVER
-           - name: '{fuel-release}.{plugin-name}.vcenter_ha_multiroles_cindervmdk_and_cinder'
-             current-parameters: true
-             kill-phase-on: NEVER
-           - name: '{fuel-release}.{plugin-name}.vcenter_ha_multiroles_cindervmdk_and_ceph'
-             current-parameters: true
-             kill-phase-on: NEVER

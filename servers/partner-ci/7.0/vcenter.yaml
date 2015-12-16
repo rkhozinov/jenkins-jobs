@@ -174,7 +174,7 @@
 #          max-per-node: 0
 #          max-total: 0
 #          categories:
-#            - vsphere
+#            - vcenter
 #            - dvs
 #            - nsx
 #            - contrail
@@ -190,7 +190,7 @@
       - string:
           name: VCENTER_SNAPSHOT
           default: 'vcenterha'
-          description: 'Snapshot name for vsphere lab'
+          description: 'Snapshot name for vcenter lab'
       - string:
           name: ISO_FILE
           default: '{iso-file}'
@@ -288,7 +288,7 @@
 - defaults:
     name: global
     disabled: false
-    node: 'vsphere'
+    node: 'vcenter'
     logrotate:
       daysToKeep: 7
       numToKeep: 10
@@ -335,7 +335,7 @@
     name: '{fuel-release}.{testgroup}'
     # with throttle configuration we can run some concurrent tests 
     concurrent: true
-    node: vsphere
+    node: vcenter
 
 # multijob configuration
 # for each of testgroups a job was created early in this script.
@@ -352,7 +352,7 @@
     <<: *runner-properties
     builders:
       - multijob:
-          name: 'System tests for vcenter with vsphere5'
+          name: 'System tests for vcenter with vcenter5'
           condition: COMPLETED
           projects:
             - name: '{fuel-release}.vcenter_cindervmdk'
@@ -462,7 +462,7 @@
               kill-phase-on: NEVER
 
 #      - multijob:
-#          name: 'System tests for vcenter with vsphere6'
+#          name: 'System tests for vcenter with vcenter6'
 #          condition: COMPLETED
 #          projects:
 #            - name: '{fuel-release}.vcenter_cindervmdk'

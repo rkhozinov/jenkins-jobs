@@ -1,3 +1,55 @@
+- project:
+    name: 'predefined_parameters'
+    fuel-release: '7.0'
+    plugin-version: '1.1'
+    plugin-name: 'dvs'
+
+    build-name: '{fuel-release}.{plugin-name}.build'
+    smoke-name: '{fuel-release}.{plugin-name}.smoke'
+    bvt-name: '{fuel-release}.{plugin-name}.bvt'
+    regression-name: '{fuel-release}.{plugin-name}.regression'
+    nightly-name: '{fuel-release}.{plugin-name}.nightly'
+    custom-name: '{fuel-release}.{plugin-name}.custom'
+
+    nightly-timer: 'H 22 * * *'
+    regression-timer: 'H 18 * * *'
+
+    use-snapshots: false
+    disable-ssl: false
+    force-erase: true
+    debug: true
+
+    iso-file: 'fuel-7.0-301-2015-09-22_20-01-53.iso'
+    gerrit-repo: 'fuel-plugin-vmware-dvs'
+    gerrit-branch: 'stable/7.0'
+    email-to: 'rkhozinov@mirantis.com'
+    released-plugin-path: '/storage/dvs/released/fuel-plugin-vmware-dvs-1.1-1.1.0-1.noarch.rpm'
+
+    testgroup:
+      - dvs_vcenter_smoke
+      - dvs_vcenter_bvt
+      - dvs_vcenter_bvt_2
+      - dvs_vcenter_ha_mode
+      - dvs_vcenter_ceph
+      - dvs_vcenter_ceph_2
+      - dvs_vcenter_ceilometer
+      - dvs_vcenter_ceilometer_2
+      - dvs_vcenter_add_delete_nodes
+      - dvs_vcenter_add_delete_controller
+      - dvs_vcenter_networks
+      - dvs_vcenter_ping_public
+      - dvs_vcenter_5_instances
+      - dvs_vcenter_uninstall
+
+    jobs:
+      - '{build-name}'
+      - '{nightly-name}'
+      - '{custom-name}'
+      - '{smoke-name}'
+      - '{bvt-name}'
+      - '{regression-name}'
+      - '{fuel-release}.{plugin-name}.regression.test'
+      - '{fuel-release}.{plugin-name}.{testgroup}'
 ## common git settings to get sources
 - common-scm: &common-scm
     name: 'common-scm'
@@ -94,7 +146,7 @@
           max-per-node: 0
           max-total: 0
           categories:
-            - vsphere
+            - vcenter
             - dvs
             - nsx
             - contrail
@@ -105,12 +157,20 @@
     parameters:
       - bool:
           name: DEBUG
-          default: true
+          default: '{debug}'
           description: "Set -x (xtrace) for jobs' bash scripts"
+      - bool:
+          name: DISABLE_SSL
+          default: '{disable-ssl}'
+          description: "Disable ssh for openstack horizon"
+      - bool:
+          name: FORCE_ERASE
+          default: '{force-erase}'
+          description: "Erase all envs before test"
       - string:
           name: VCENTER_SNAPSHOT
-          default: 'vcenterha'
-          description: 'Snapshot name for vsphere lab'
+          default: 'nsxv'
+          description: 'Snapshot name for vcenter lab'
       - bool:
           name: UPDATE_MASTER
           default: true
@@ -149,8 +209,9 @@
           description: 'The name of devops env. Needed to properly work of existing mode of devops'
       - bool:
           name: USE_SNAPSHOTS
-          default: {use-snapshots}
+          default: '{use-snapshots}'
           descrition: 'Will be used existing environment'
+
 
 ## parameters for jobs created per test-group and custom test job
 - test-parameters: &test-parameters
@@ -158,15 +219,23 @@
     parameters:
       - bool:
           name: DEBUG
-          default: true
+          default: '{debug}'
           description: "Set -x (xtrace) for jobs' bash scripts"
+      - bool:
+          name: DISABLE_SSL
+          default: '{disable-ssl}'
+          description: "Disable ssh for openstack horizon"
+      - bool:
+          name: FORCE_ERASE
+          default: '{force-erase}'
+          description: "Erase all envs before test"
       - string:
           name: TEST_GROUP
           default: '{testgroup}'
       - string:
           name: VCENTER_SNAPSHOT
           default: 'vcenterha'
-          description: 'Snapshot name for vsphere lab'
+          description: 'Snapshot name for vcenter lab'
       - string:
           name: ISO_FILE
           default: '{iso-file}'
@@ -240,58 +309,9 @@
           description: 'The name of devops env. Needed to properly work of existing mode of devops'
       - bool:
           name: USE_SNAPSHOTS
-          default: {use-snapshots}
+          default: '{use-snapshots}'
           descrition: 'Will be used existing environment'
 
-- project:
-    name: 'predefined_parameters'
-    fuel-release: '7.0'
-    plugin-version: '1.1'
-    plugin-name: 'dvs'
-
-    build-name: '{fuel-release}.{plugin-name}.build'
-    smoke-name: '{fuel-release}.{plugin-name}.smoke'
-    bvt-name: '{fuel-release}.{plugin-name}.bvt'
-    regression-name: '{fuel-release}.{plugin-name}.regression'
-    nightly-name: '{fuel-release}.{plugin-name}.nightly'
-    custom-name: '{fuel-release}.{plugin-name}.custom'
-
-    nightly-timer: 'H 22 * * *'
-    regression-timer: 'H 18 * * *'
-
-    use-snapshots: false
-
-    iso-file: 'fuel-7.0-301-2015-09-22_20-01-53.iso'
-    gerrit-repo: 'fuel-plugin-vmware-dvs'
-    gerrit-branch: 'stable/7.0'
-    email-to: 'rkhozinov@mirantis.com'
-    released-plugin-path: '/storage/dvs/released/fuel-plugin-vmware-dvs-1.1-1.1.0-1.noarch.rpm'
-
-    testgroup:
-      - dvs_vcenter_smoke
-      - dvs_vcenter_bvt
-      - dvs_vcenter_bvt_2
-      - dvs_vcenter_ha_mode
-      - dvs_vcenter_ceph
-      - dvs_vcenter_ceph_2
-      - dvs_vcenter_ceilometer
-      - dvs_vcenter_ceilometer_2
-      - dvs_vcenter_add_delete_nodes
-      - dvs_vcenter_add_delete_controller
-      - dvs_vcenter_networks
-      - dvs_vcenter_ping_public
-      - dvs_vcenter_5_instances
-      - dvs_vcenter_uninstall
-
-    jobs:
-      - '{build-name}'
-      - '{nightly-name}'
-      - '{custom-name}'
-      - '{smoke-name}'
-      - '{bvt-name}'
-      - '{regression-name}'
-      - '{fuel-release}.{plugin-name}.regression.test'
-      - '{fuel-release}.{plugin-name}.{testgroup}'
 
 - defaults:
     name: global
@@ -316,12 +336,13 @@
     wrappers:
       - inject-passwords:
           global: true
-          mask-password-params: true
+          mask-password-params: false
       - ansicolor:
           colormap: xterm
       - timeout:
           fail: true
-          timeout: 240
+          write-description: "Timeout is exceeded"
+          timeout: 360
     publishers:
       - postbuildscript:
           script-only-if-succeeded: False
@@ -473,7 +494,7 @@
           which-build: last-successful
           stable: true
       - multijob:
-          name: 'Smoke tests for dvs.vcenter5'
+          name: 'BVT tests for dvs.vcenter5'
           condition: SUCCESSFUL
           projects:
            - name: '{fuel-release}.{plugin-name}.dvs_vcenter_bvt'
@@ -539,16 +560,6 @@
 
 - job-template:
     name: '{nightly-name}'
-    description: |
-      <p>System tests dvs feature runs every day at 19.00 CZ.
-       Multijob copies all artifacts from the {build-name} job
-       and runs to phases. The first phase is for vcenter5, the second
-       phase is for vcenter6. This behaviour is controlled by
-       VCENTER_SNAPSHOT predefined parameter. </p>
-       <p>The tests copy the latest package from the {bvt-name} job.
-       Because the {bvt-name} job's packages more stable.</p>
-       <p>There're a pkg details (that copied withing the package)
-       in pkg_properties file in the root of job's workspace.</p>
     project-type: multijob
     disabled: true
     node: runner

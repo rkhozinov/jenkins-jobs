@@ -1,25 +1,26 @@
-#!/bin/bash -e 
+#!/bin/bash -e
 
 # activate bash xtrace for script
 [[ "${DEBUG}" == "true" ]] && set -x || set +x
 
 # for manually run of this job
-[ -z  $ISO_FILE ] && export ISO_FILE=${ISO_FILE}  
+[ -z  $ISO_FILE ] && export ISO_FILE=${ISO_FILE}
 
-#remove old logs and test data      
-rm -f nosetests.xml   
-rm -rf logs/*      
+#remove old logs and test data
+rm -f nosetests.xml
+rm -rf logs/*
 
 export ISO_VERSION=$(cut -d'-' -f3-3<<< $ISO_FILE)
 echo iso build number is $ISO_VERSION
 export REQUIRED_FREE_SPACE=200
 export ISO_PATH="${ISO_STORAGE}/${ISO_FILE}"
-export FUEL_RELEASE=$(cut -d'-' -f2-2 <<< $ISO_FILE | tr -d '.') 
+export FUEL_RELEASE=$(cut -d'-' -f2-2 <<< $ISO_FILE | tr -d '.')
 export VENV_PATH="${HOME}/${FUEL_RELEASE}-venv"
 
+export ENV_NAME="${ENV_PREFIX}.${ISO_VERSION}"
 echo iso-version: $ISO_VERSION
 echo fuel-release: $FUEL_RELEASE
-echo virtual-env: $VENV_PATH 
+echo virtual-env: $VENV_PATH
 
 ## For plugins we should get a valid version of requrements of python-venv
 ## This requirements could be got from the github repo
@@ -27,8 +28,8 @@ echo virtual-env: $VENV_PATH
 ## the fuel-qa branch is determined by a fuel-iso name.
 
 case "${FUEL_RELEASE}" in
-  *61* ) export REQS_BRANCH="stable/7.0" ;;
-  *70* ) export REQS_BRANCH="stable/6.1" ;; 
+  *70* ) export REQS_BRANCH="stable/7.0" ;;
+  *61* ) export REQS_BRANCH="stable/6.1" ;;
    *   ) export REQS_BRANCH="master"
 esac
 
@@ -49,7 +50,7 @@ function delete_envs {
 }
 
 ## We have limited cpu resources, because we use two hypervisors with heavy VMs, so
-## we should poweroff all unused envs, if there're exist. 
+## we should poweroff all unused envs, if there're exist.
 
 function destroy_envs {
    [ -z $VIRTUAL_ENV ] && exit 1
@@ -60,24 +61,30 @@ function destroy_envs {
    fi
 }
 
-## Delete all systest envs except the env with the same version of a fuel-build 
+## Delete all systest envs except the env with the same version of a fuel-build
 ## if it exists. This behaviour is needed to use restoring from snapshots.
 
 function delete_systest_envs {
    [ -z $VIRTUAL_ENV ] && exit 1
-   dos.py sync 
-   for env in $(dos.py list | tail -n +3 | grep $ENV_PREFIX); do
+   dos.py sync
+
+   for env in $(dos.py list | grep $ENV_PREFIX); do
        [[ $env == *"$ENV_NAME"* ]] && continue || dos.py erase $env
    done
 }
 
 function prepare_venv {
     #rm -rf "${VENV_PATH}"
-    [ ! -d $VENV_PATH ] && virtualenv --system-site-packages "${VENV_PATH}" || echo "${VENV_PATH} already exist"
+    [ ! -d $VENV_PATH ] && virtualenv "${VENV_PATH}" || echo "${VENV_PATH} already exist"
     source "${VENV_PATH}/bin/activate"
-    pip --version 
+    pip --version
     [ $? -ne 0 ] && easy_install -U pip
-    pip install -r "${REQS_PATH}" --upgrade > /dev/null 2>/dev/null
+    if [[ "${DEBUG}" == "true" ]]; then
+        pip install -r "${REQS_PATH}" --upgrade
+    else
+        pip install -r "${REQS_PATH}" --upgrade > /dev/null 2>/dev/null
+    fi
+
     django-admin.py syncdb --settings=devops.settings --noinput
     django-admin.py migrate devops --settings=devops.settings --noinput
     deactivate
@@ -96,17 +103,18 @@ function fix_logger {
 prepare_venv
 fix_logger
 
-# determine free space before run the cleaner
-free_space_exist=false
-free_space=$(df -h | grep '/$' | awk '{print $4}' | tr -d G)
+source "$VENV_PATH/bin/activate"
 
-(( $free_space > $REQUIRED_FREE_SPACE )) && export free_space_exist=true 
+if [[ "${FORCE_ERASE}" -eq "true" ]]; then
+   delete_envs
+else
+  # determine free space before run the cleaner
+  free_space=$(df -h | grep '/$' | awk '{print $4}' | tr -d G)
 
-# activate a python virtual env
-source "$VENV_PATH/bin/activate" 
+  (( $free_space < $REQUIRED_FREE_SPACE )) &&  delete_systest_envs || echo free-space: $free_space
 
-# free space
-[ $free_space_exist ] && delete_systest_envs || delete_envs 
 
-# poweroff all envs
-destroy_envs
+  # poweroff all envs
+  destroy_envs
+fi
+
