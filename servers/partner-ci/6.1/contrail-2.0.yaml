@@ -7,7 +7,7 @@
     build-name: '{fuel-release}.{plugin-name}.{plugin-version}.build'
     smoke-name: '{fuel-release}.{plugin-name}.{plugin-version}.smoke'
     bvt-name: '{fuel-release}.{plugin-name}.{plugin-version}.bvt'
-    regression-name: '{fuel-release}.{plugin-name}.regression'
+    regression-name: '{fuel-release}.{plugin-name}.{plugin-version}.regression'
     nightly-name: '{fuel-release}.{plugin-name}.{plugin-version}.nightly'
     custom-name: '{fuel-release}.{plugin-name}.{plugin-version}.custom'
 
@@ -17,6 +17,8 @@
     use-snapshots: false
     force-erase: true
     disable-ssl: true
+    bonding: true
+    update-master: true
     debug: true
 
     iso-file: 'fuel-6.1-525-2015-06-19_13-02-31.iso'
@@ -161,7 +163,7 @@
           description: "Set -x (xtrace) for jobs' bash scripts"
       - bool:
           name: UPDATE_MASTER
-          default: true
+          default: '{update-master}'
           description: 'turns on update fuel master node to maintenance update'
       - bool:
           name: FORCE_ERASE
@@ -209,7 +211,7 @@
           description: 'The name of devops env. Needed to properly work of existing mode of devops'
       - bool:
           name: BONDING
-          default: false
+          default: '{bonding}'
       - bool:
           name: USE_SNAPSHOTS
           default: '{use-snapshots}'
@@ -222,7 +224,7 @@
     parameters:
       - bool:
           name: DEBUG
-          default: true
+          default: '{debug}'
           description: "Set -x (xtrace) for jobs' bash scripts"
       - bool:
           name: FORCE_ERASE
@@ -254,7 +256,7 @@
           default: ''
       - bool:
           name: UPDATE_MASTER
-          default: false
+          default: '{update-master}'
           description: 'turns on update fuel master node to maintenance update'
       - string:
           name: MIRROR
@@ -317,7 +319,7 @@
           description: 'The name of devops env. Needed to properly work of existing mode of devops'
       - bool:
           name: BONDING
-          default: false
+          default: '{bonding}'
       - bool:
           name: USE_SNAPSHOTS
           default: '{use-snapshots}'
