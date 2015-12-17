@@ -81,8 +81,10 @@ function prepare_venv {
     [ $? -ne 0 ] && easy_install -U pip
     if [[ "${DEBUG}" == "true" ]]; then
         pip install -r "${REQS_PATH}" --upgrade
+        pip install --upgrade git+git://github.com/openstack/fuel-devops.git
     else
         pip install -r "${REQS_PATH}" --upgrade > /dev/null 2>/dev/null
+        pip install --upgrade git+git://github.com/openstack/fuel-devops.git
     fi
 
     django-admin.py syncdb --settings=devops.settings --noinput
