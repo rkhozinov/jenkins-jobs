@@ -20,6 +20,8 @@
     bonding: true
     update-master: true
     debug: true
+    runner-timeout: 600
+    test-timeout: 500
 
     iso-file: 'fuel-6.1-525-2015-06-19_13-02-31.iso'
     gerrit-repo: 'fuel-plugin-contrail'
@@ -142,6 +144,13 @@
           block-level: 'GLOBAL'
           queue-scanning: 'BUILDABLE'
 
+## properties for smoke, bvt and nightly multijobs
+- runner-wrappers: &runner-wrappers
+    name: 'runner-wrappers'
+    wrappers:
+      - ansicolor: 
+          colormap: xterm
+
 ## properties for test jobs
 - test-properties: &test-properties
     name: 'test-properties'
@@ -222,6 +231,17 @@
           default: '{use-snapshots}'
           descrition: 'Will be used existing environment'
 
+## properties for smoke, bvt and nightly multijobs
+- test-wrappers: &test-wrappers
+    name: 'test-wrappers'
+    wrappers:
+      - ansicolor: 
+          colormap: xterm
+      - timeout:
+          fail: true
+          type: no-activity
+          write-description: "Timeout is exceeded"
+          timeout: '{test-timeout}'
 
 ## parameters for jobs created per test-group and custom test job
 - test-parameters: &test-parameters
@@ -350,13 +370,8 @@
           !include-raw-escape builders/common.prepare.sh
       - shell:
           !include-raw-escape builders/contrail.test.sh
-    wrappers:
-      - ansicolor: 
-          colormap: xterm
-      - timeout:
-          fail: true
-          write-description: "Timeout is exceeded"
-          timeout: 360
+    <<: *test-wrappers
+
     publishers:
       - postbuildscript:
           script-only-if-succeeded: False
@@ -464,6 +479,7 @@
     node: runner    
     <<: *runner-parameters
     <<: *runner-properties
+    <<: *runner-wrappers
     scm:  []
     triggers:
       - gerrit:
@@ -476,7 +492,7 @@
           stable: true
       - multijob:
           name: 'Smoke tests for open contrail'
-          condition: SUCCESSFUL
+          condition: COMPLETED
           projects:
             - name: '{fuel-release}.{plugin-name}.{plugin-version}.deploy_contrail.open'
               current-parameters: true            
@@ -510,6 +526,7 @@
     node: runner
     <<: *runner-parameters
     <<: *runner-properties
+    <<: *runner-wrappers
     scm:  []
     triggers:
       - gerrit:
@@ -522,7 +539,7 @@
           stable: true
       - multijob:
           name: 'BVT tests for open/juniper contrail'
-          condition: SUCCESSFUL
+          condition: COMPLETED
           projects:
             - name: '{fuel-release}.{plugin-name}.{plugin-version}.contrail_bvt.open'
               current-parameters: true
@@ -560,6 +577,7 @@
     project-type: multijob
     node: runner
     <<: *runner-parameters
+    <<: *runner-wrappers
     properties:
       - heavy-job:
           weight: 1
@@ -604,6 +622,7 @@
     disabled: true
     node: runner
     <<: *runner-parameters
+    <<: *runner-wrappers
     properties:
       - heavy-job:
           weight: 1
