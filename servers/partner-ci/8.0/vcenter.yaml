@@ -14,7 +14,11 @@
     use-snapshots: false
     force-erase: true
     disable-ssl: true
+    update-master: true
+
     debug: true
+    runner-timeout: 600
+    test-timeout: 500
 
     iso-file: ''
     gerrit-repo: 'fuel-qa'
@@ -130,6 +134,28 @@
 #            - '{build-name}'
 #          block-level: 'GLOBAL'
 #          queue-scanning: 'BUILDABLE'
+
+## properties for smoke, bvt and nightly multijobs
+- runner-wrappers: &runner-wrappers
+    name: 'runner-wrappers'
+    wrappers:
+      - ansicolor:
+          colormap: xterm
+
+## properties for smoke, bvt and nightly multijobs
+- test-wrappers: &test-wrappers
+    name: 'test-wrappers'
+    wrappers:
+      - ansicolor:
+          colormap: xterm
+      - inject-passwords:
+          global: true
+          mask-password-params: true
+      - timeout:
+          fail: true
+          type: no-activity
+          write-description: "Timeout is exceeded"
+          timeout: '{test-timeout}'
 
 ## properties for test jobs
 - test-properties: &test-properties
@@ -292,6 +318,7 @@
     <<: *test-properties
     <<: *test-parameters
     <<: *common-scm
+    <<: *test-wrappers
     builders:
       - copyartifact:
           project: '{download-iso-name}'
@@ -300,16 +327,6 @@
           !include-raw-escape builders/common.prepare.sh
       - shell:
           !include-raw-escape builders/vcenter.test.sh
-    wrappers:
-      - inject-passwords:
-          global: true
-          mask-password-params: false
-      - ansicolor:
-          colormap: xterm
-      - timeout:
-          fail: true
-          write-description: "Timeout is exceeded"
-          timeout: 360
     publishers:
       - postbuildscript:
           script-only-if-succeeded: False
@@ -358,6 +375,7 @@
     disabled: false
     node: runner
     <<: *runner-parameters
+    <<: *runner-wrappers
     properties:
       - heavy-job:
           weight: 1
