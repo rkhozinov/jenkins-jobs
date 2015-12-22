@@ -19,7 +19,11 @@
     use-snapshots: false
     force-erase: true
     disable-ssl: true
+    update-master: true
+
     debug: true
+    runner-timeout: 600
+    test-timeout: 500
 
     iso-file: ''
     gerrit-repo: 'fuel-plugin-vmware-dvs'
@@ -144,6 +148,28 @@
           block-level: 'GLOBAL'
           queue-scanning: 'BUILDABLE'
 
+## properties for smoke, bvt and nightly multijobs
+- runner-wrappers: &runner-wrappers
+    name: 'runner-wrappers'
+    wrappers:
+      - ansicolor:
+          colormap: xterm
+
+## properties for smoke, bvt and nightly multijobs
+- test-wrappers: &test-wrappers
+    name: 'test-wrappers'
+    wrappers:
+      - ansicolor:
+          colormap: xterm
+      - inject-passwords:
+          global: true
+          mask-password-params: true
+      - timeout:
+          fail: true
+          type: no-activity
+          write-description: "Timeout is exceeded"
+          timeout: '{test-timeout}'
+
 ## properties for test jobs
 - test-properties: &test-properties
     name: 'test-properties'
@@ -159,6 +185,7 @@
             - nsx
             - contrail
           option: category
+
 ## parameters for smoke, bvt and nightly multijobs
 - runner-parameters: &runner-parameters
     name: 'runner-parameters'
@@ -175,6 +202,10 @@
           name: FORCE_ERASE
           default: '{force-erase}'
           description: "Erase all envs before test"
+      - string:
+          name: POOL_PUBLIC
+          default: '172.16.0.0/24:24'
+          description: 'Snapshot name for vsphere lab'
       - string:
           name: VCENTER_SNAPSHOT
           default: 'vcenterha'
@@ -217,6 +248,10 @@
           name: FORCE_ERASE
           default: '{force-erase}'
           description: "Erase all envs before test"
+      - string:
+          name: POOL_PUBLIC
+          default: '172.16.0.0/24:24'
+          description: 'Snapshot name for vsphere lab'
       - string:
           name: TEST_GROUP
           default: '{testgroup}'
@@ -288,6 +323,7 @@
     <<: *test-properties
     <<: *test-parameters
     <<: *common-scm
+    <<: *test-wrappers
     builders:
       - copyartifact:
           project: '{build-name}'
@@ -296,16 +332,6 @@
           !include-raw-escape builders/common.prepare.sh
       - shell:
           !include-raw-escape builders/dvs.test.sh
-    wrappers:
-      - inject-passwords:
-          global: true
-          mask-password-params: false
-      - ansicolor:
-          colormap: xterm
-      - timeout:
-          fail: true
-          write-description: "Timeout is exceeded"
-          timeout: 360
     publishers:
       - postbuildscript:
           script-only-if-succeeded: False
@@ -414,6 +440,7 @@
     node: runner    
     <<: *runner-parameters
     <<: *runner-properties
+    <<: *runner-wrappers
     scm:  []
     triggers:
       - gerrit:
@@ -432,13 +459,11 @@
           properties-file: iso_file
       - multijob:
           name: 'Smoke tests for dvs.vcenter5'
-          condition: SUCCESSFUL
+          condition: COMPLETED
           projects:
            - name: '{fuel-release}.{plugin-name}.dvs_vcenter_smoke'
-             current-parameters: true            
+             current-parameters: true
              property-file: iso_file
-             predefined-parameters: |
-               VCENTER_SNAPSHOT=vcenterha
              kill-phase-on: NEVER
 
     publishers:
@@ -464,6 +489,7 @@
     node: runner
     <<: *runner-parameters
     <<: *runner-properties
+    <<: *runner-wrappers
     scm:  []
     triggers:
       - gerrit:
@@ -482,7 +508,7 @@
           properties-file: iso_file
       - multijob:
           name: 'Smoke tests for dvs.vcenter5'
-          condition: SUCCESSFUL
+          condition: COMPLETED
           projects:
            - name: '{fuel-release}.{plugin-name}.dvs_vcenter_bvt'
              current-parameters: true
@@ -519,12 +545,13 @@
 
 - job-template:
     name: '{regression-name}'
-    description: 'The Smoke test for {fuel-release}.{plugin-name}.{plugin-version}'
+    description: 'The regression test for {fuel-release}.{plugin-name}.{plugin-version}'
     disabled: true
     concurrent: true
     project-type: multijob
     node: runner
     <<: *runner-parameters
+    <<: *runner-wrappers
     properties:
       - heavy-job:
           weight: 1
@@ -562,6 +589,7 @@
     node: runner
     <<: *runner-parameters
     <<: *runner-properties
+    <<: *runner-wrappers
     scm:  []
     triggers:
       - reverse:
@@ -632,6 +660,7 @@
     disabled: false
     node: runner
     <<: *runner-parameters
+    <<: *runner-wrappers
     properties:
       - heavy-job:
           weight: 1

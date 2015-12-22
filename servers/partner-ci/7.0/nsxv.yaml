@@ -17,7 +17,11 @@
     use-snapshots: false
     force-erase: true
     disable-ssl: true
+    update-master: true
+
     debug: true
+    runner-timeout: 600
+    test-timeout: 500
 
     iso-file: 'fuel-7.0-301-2015-09-22_20-01-53.iso'
     gerrit-repo: 'fuel-plugin-nsxv'
@@ -44,6 +48,7 @@
       - '{regression-name}'
       - '{fuel-release}.{plugin-name}.regression.test'
       - '{fuel-release}.{plugin-name}.{testgroup}'
+
 ## common git settings to get sources
 - common-scm: &common-scm
     name: 'common-scm'
@@ -131,6 +136,28 @@
           block-level: 'GLOBAL'
           queue-scanning: 'BUILDABLE'
 
+## properties for smoke, bvt and nightly multijobs
+- runner-wrappers: &runner-wrappers
+    name: 'runner-wrappers'
+    wrappers:
+      - ansicolor:
+          colormap: xterm
+
+## properties for smoke, bvt and nightly multijobs
+- test-wrappers: &test-wrappers
+    name: 'test-wrappers'
+    wrappers:
+      - ansicolor:
+          colormap: xterm
+      - inject-passwords:
+          global: true
+          mask-password-params: true
+      - timeout:
+          fail: true
+          type: no-activity
+          write-description: "Timeout is exceeded"
+          timeout: '{test-timeout}'
+
 ## properties for test jobs
 - test-properties: &test-properties
     name: 'test-properties'
@@ -146,6 +173,7 @@
             - nsx
             - contrail
           option: category
+
 ## parameters for smoke, bvt and nightly multijobs
 - runner-parameters: &runner-parameters
     name: 'runner-parameters'
@@ -168,7 +196,7 @@
           description: 'Snapshot name for vcenter lab'
       - bool:
           name: UPDATE_MASTER
-          default: true
+          default: '{update-master}'
           description: 'turns on update fuel master node to maintenance update'
       - string:
           name: MIRROR
@@ -244,7 +272,7 @@
           description: 'Contrainer for storing an iso build number to output it as job name'
       - bool:
           name: UPDATE_MASTER
-          default: true
+          default: '{update-master}'
           description: 'turns on update fuel master node to maintenance update'
       - string:
           name: MIRROR
@@ -320,6 +348,7 @@
     <<: *test-properties
     <<: *test-parameters
     <<: *common-scm
+    <<: *test-wrappers
     builders:
       - copyartifact:
           project: '{build-name}'
@@ -328,16 +357,6 @@
           !include-raw-escape builders/common.prepare.sh
       - shell:
           !include-raw-escape builders/nsxv.test.sh
-    wrappers:
-      - inject-passwords:
-          global: true
-          mask-password-params: false
-      - ansicolor:
-          colormap: xterm
-      - timeout:
-          fail: true
-          write-description: "Timeout is exceeded"
-          timeout: 360
     publishers:
       - postbuildscript:
           script-only-if-succeeded: False
@@ -432,9 +451,10 @@
     description: 'The Smoke test for {fuel-release}.{plugin-name}.{plugin-version}'
     concurrent: true
     project-type: multijob
-    node: runner    
+    node: runner
     <<: *runner-parameters
     <<: *runner-properties
+    <<: *runner-wrappers
     scm:  []
     triggers:
       - gerrit:
@@ -447,7 +467,7 @@
           stable: true
       - multijob:
           name: 'Smoke tests for nsxv.vcenter5'
-          condition: SUCCESSFUL
+          condition: COMPLETED
           projects:
            - name: '{fuel-release}.{plugin-name}.nsxv_smoke'
              current-parameters: true
@@ -476,6 +496,7 @@
     node: runner
     <<: *runner-parameters
     <<: *runner-properties
+    <<: *runner-wrappers
     scm:  []
     triggers:
       - gerrit:
@@ -487,8 +508,8 @@
           which-build: last-successful
           stable: true
       - multijob:
-          name: 'BVT tests for nsxv.vcenter5'
-          condition: SUCCESSFUL
+          name: 'BVT tests for dvs.vcenter5'
+          condition: COMPLETED
           projects:
            - name: '{fuel-release}.{plugin-name}.nsxv_add_delete_nodes'
              current-parameters: true
@@ -513,12 +534,13 @@
 
 - job-template:
     name: '{regression-name}'
-    description: 'The Smoke test for {fuel-release}.{plugin-name}.{plugin-version}'
+    description: 'The regression test for {fuel-release}.{plugin-name}.{plugin-version}'
     disabled: false
     concurrent: true
     project-type: multijob
     node: runner
     <<: *runner-parameters
+    <<: *runner-wrappers
     properties:
       - heavy-job:
           weight: 1
@@ -553,6 +575,7 @@
     disabled: true
     node: runner
     <<: *runner-parameters
+    <<: *runner-wrappers
     properties:
       - heavy-job:
           weight: 1
@@ -598,7 +621,7 @@
            - name: '{fuel-release}.{plugin-name}.nsxv_add_delete_controller'
              current-parameters: true
              kill-phase-on: NEVER
-               
+
            - name: '{fuel-release}.{plugin-name}.nsxv_reset_controller'
              current-parameters: true
              kill-phase-on: NEVER

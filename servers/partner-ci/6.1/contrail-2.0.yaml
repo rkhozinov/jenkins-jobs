@@ -16,8 +16,8 @@
 
     use-snapshots: false
     force-erase: true
-    disable-ssl: true
-    bonding: true
+    disable-ssl: false
+    bonding: false
     update-master: true
     debug: true
     runner-timeout: 600
@@ -31,7 +31,6 @@
 
     testgroup:
       - install_contrail
-      - contrail_mu
       - deploy_contrail
       - contrail_bvt
       - contrail_plugin_add_delete_compute_node
@@ -39,16 +38,23 @@
       - contrail_plugin_add_delete_controller_node
       - deploy_ha_with_pub_net_all_nodes
       - check_bonding_with_contrail
-
     jobs:
       - '{build-name}'
       - '{nightly-name}'
       - '{custom-name}'
+
       - '{smoke-name}'
+      - '{fuel-release}.{plugin-name}.{plugin-version}.smoke.test.open'
+      - '{fuel-release}.{plugin-name}.{plugin-version}.smoke.test.juniper'
+
       - '{bvt-name}'
+      - '{fuel-release}.{plugin-name}.{plugin-version}.bvt.test.open'
+      - '{fuel-release}.{plugin-name}.{plugin-version}.bvt.test.juniper'
+
       - '{regression-name}'
       - '{fuel-release}.{plugin-name}.{plugin-version}.regression.test.open'
       - '{fuel-release}.{plugin-name}.{plugin-version}.regression.test.juniper'
+
       - '{fuel-release}.{plugin-name}.{plugin-version}.{testgroup}.open'
       - '{fuel-release}.{plugin-name}.{plugin-version}.{testgroup}.juniper'
 
@@ -143,8 +149,20 @@
 - runner-wrappers: &runner-wrappers
     name: 'runner-wrappers'
     wrappers:
-      - ansicolor: 
+      - ansicolor:
           colormap: xterm
+
+## properties for smoke, bvt and nightly multijobs
+- test-wrappers: &test-wrappers
+    name: 'test-wrappers'
+    wrappers:
+      - ansicolor:
+          colormap: xterm
+      - timeout:
+          fail: true
+          type: no-activity
+          write-description: "Timeout is exceeded"
+          timeout: '{test-timeout}'
 
 ## properties for test jobs
 - test-properties: &test-properties
@@ -171,13 +189,17 @@
           default: '{debug}'
           description: "Set -x (xtrace) for jobs' bash scripts"
       - bool:
-          name: UPDATE_MASTER
-          default: '{update-master}'
-          description: 'turns on update fuel master node to maintenance update'
+          name: DISABLE_SSL
+          default: '{disable-ssl}'
+          description: "Disable ssh for openstack horizon"
       - bool:
           name: FORCE_ERASE
           default: '{force-erase}'
           description: "Erase all envs before test"
+      - bool:
+          name: UPDATE_MASTER
+          default: '{update-master}'
+          description: 'turns on update fuel master node to maintenance update'
       - string:
           name: MIRROR
           default: 'http://mirror.seed-cz1.fuel-infra.org'
@@ -226,17 +248,6 @@
           default: '{use-snapshots}'
           descrition: 'Will be used existing environment'
 
-## properties for smoke, bvt and nightly multijobs
-- test-wrappers: &test-wrappers
-    name: 'test-wrappers'
-    wrappers:
-      - ansicolor: 
-          colormap: xterm
-      - timeout:
-          fail: true
-          type: no-activity
-          write-description: "Timeout is exceeded"
-          timeout: '{test-timeout}'
 
 ## parameters for jobs created per test-group and custom test job
 - test-parameters: &test-parameters
@@ -246,6 +257,10 @@
           name: DEBUG
           default: '{debug}'
           description: "Set -x (xtrace) for jobs' bash scripts"
+      - bool:
+          name: DISABLE_SSL
+          default: '{disable-ssl}'
+          description: "Disable ssh for openstack horizon"
       - bool:
           name: FORCE_ERASE
           default: '{force-erase}'
@@ -345,6 +360,7 @@
           default: '{use-snapshots}'
           descrition: 'Will be used existing environment'
 
+
 - defaults:
     name: global
     disabled: false
@@ -357,6 +373,7 @@
     <<: *test-properties
     <<: *test-parameters
     <<: *common-scm
+    <<: *test-wrappers
     builders:
       - copyartifact:
           project: '{build-name}'
@@ -365,8 +382,6 @@
           !include-raw-escape builders/common.prepare.sh
       - shell:
           !include-raw-escape builders/contrail.test.sh
-    <<: *test-wrappers
-
     publishers:
       - postbuildscript:
           script-only-if-succeeded: False
@@ -438,26 +453,49 @@
       - email:
           recipients: '{email-to}'
 
-# jobs for system tests
+# jobs for system test
 - job-template:
     name: '{fuel-release}.{plugin-name}.{plugin-version}.{testgroup}.open'
     description: 'The test "{testgroup}" for {fuel-release}.{plugin-name}.{plugin-version} open contrail'
     concurrent: true
 
-# jobs for regression test
+# jobs for system test
 - job-template:
     name: '{fuel-release}.{plugin-name}.{plugin-version}.{testgroup}.juniper'
     description: 'The test "{testgroup}" for {fuel-release}.{plugin-name}.{plugin-version} juniper contrail'
     concurrent: true
 
+# jobs for bvt tests
+- job-template:
+    name: '{fuel-release}.{plugin-name}.{plugin-version}.bvt.test.open'
+    description: 'The test for {fuel-release}.{plugin-name}.{plugin-version} open contrail'
+    concurrent: true
+
+- job-template:
+    name: '{fuel-release}.{plugin-name}.{plugin-version}.bvt.test.juniper'
+    description: 'The test for {fuel-release}.{plugin-name}.{plugin-version} juniper contrail'
+    concurrent: true
+
+# jobs for smoke tests
+- job-template:
+    name: '{fuel-release}.{plugin-name}.{plugin-version}.smoke.test.open'
+    description: 'The test for {fuel-release}.{plugin-name}.{plugin-version} open contrail'
+    concurrent: true
+
+- job-template:
+    name: '{fuel-release}.{plugin-name}.{plugin-version}.smoke.test.juniper'
+    description: 'The test for {fuel-release}.{plugin-name}.{plugin-version} juniper contrail'
+    concurrent: true
+
+# jobs for regression tests
 - job-template:
     name: '{fuel-release}.{plugin-name}.{plugin-version}.regression.test.open'
-    description: 'The test "{testgroup}" for {fuel-release}.{plugin-name}.{plugin-version} open contrail'
+    description: 'The test for {fuel-release}.{plugin-name}.{plugin-version} open contrail'
     concurrent: true
 
 - job-template:
     name: '{fuel-release}.{plugin-name}.{plugin-version}.regression.test.juniper'
-    description: 'The test "{testgroup}" for {fuel-release}.{plugin-name}.{plugin-version} juniper contrail'
+    description: 'The test for {fuel-release}.{plugin-name}.{plugin-version} juniper contrail'
     concurrent: true
 
 - job-template:
@@ -486,17 +524,21 @@
           which-build: last-successful
           stable: true
       - multijob:
-          name: 'Smoke tests for open contrail'
+          name: 'Smoke tests for open/juniper contrail'
           condition: COMPLETED
           projects:
-            - name: '{fuel-release}.{plugin-name}.{plugin-version}.deploy_contrail.open'
-              current-parameters: true            
-              predefined-parameters: CONTRAIL_DISTRIBUTION=open
+            - name: '{fuel-release}.{plugin-name}.{plugin-version}.smoke.test.open'
+              current-parameters: true
+              predefined-parameters: |
+                TEST_GROUP=deploy_contrail
+                CONTRAIL_DISTRIBUTION=open
               kill-phase-on: NEVER
 
-            - name: '{fuel-release}.{plugin-name}.{plugin-version}.deploy_contrail.juniper'
+            - name: '{fuel-release}.{plugin-name}.{plugin-version}.smoke.test.juniper'
               current-parameters: true
-              predefined-parameters: CONTRAIL_DISTRIBUTION=juniper
+              predefined-parameters: |
+                TEST_GROUP=deploy_contrail
+                CONTRAIL_DISTRIBUTION=juniper
               kill-phase-on: NEVER
     publishers:
       - postbuildscript:
@@ -511,7 +553,7 @@
           allow-empty: false
       - email:
           recipients: '{email-to}'
-            
+
 - job-template:
     name: '{bvt-name}'
     description: 'The Smoke test for {fuel-release}.{plugin-name}.{plugin-version}'
@@ -533,18 +575,20 @@
           which-build: last-successful
           stable: true
       - multijob:
-          name: 'BVT tests for open/juniper contrail'
+          name: 'BVT test for open/juniper contrail'
           condition: COMPLETED
           projects:
-            - name: '{fuel-release}.{plugin-name}.{plugin-version}.contrail_bvt.open'
+            - name: '{fuel-release}.{plugin-name}.{plugin-version}.bvt.test.open'
               current-parameters: true
               predefined-parameters: |
+                TEST_GROUP=contrail_bvt
                 CONTRAIL_DISTRIBUTION=open
               kill-phase-on: NEVER
 
-            - name: '{fuel-release}.{plugin-name}.{plugin-version}.contrail_bvt.juniper'
+            - name: '{fuel-release}.{plugin-name}.{plugin-version}.bvt.test.juniper'
               current-parameters: true
               predefined-parameters: |
+                TEST_GROUP=contrail_bvt
                 CONTRAIL_DISTRIBUTION=juniper
               kill-phase-on: NEVER
     publishers:
@@ -591,7 +635,7 @@
           recipients: '{email-to}'
     builders:
       - multijob:
-          name: '1st phase - regression test'
+          name: '1st phase - regression test for open/juniper contrail'
           condition: FAILURE
           projects:
             - name: '{fuel-release}.{plugin-name}.{plugin-version}.regression.test.open'
@@ -645,27 +689,27 @@
           which-build: last-successful
           stable: true
       - multijob:
-          name: 'All tests for open contrail'
+          name: 'Smoke tests for open/juniper contrail. Juniper or contrail version is provided in variable by multijob'
           condition: COMPLETED
           projects:
             - name: '{fuel-release}.{plugin-name}.{plugin-version}.contrail_plugin_add_delete_compute_node.open'
-              current-parameters: true
               predefined-parameters: CONTRAIL_DISTRIBUTION=open
+              current-parameters: true
               kill-phase-on: NEVER
 
             - name: '{fuel-release}.{plugin-name}.{plugin-version}.deploy_ha_contrail_plugin.open'
-              current-parameters: true
               predefined-parameters: CONTRAIL_DISTRIBUTION=open
+              current-parameters: true
               kill-phase-on: NEVER
 
             - name: '{fuel-release}.{plugin-name}.{plugin-version}.contrail_plugin_add_delete_compute_node.open'
-              current-parameters: true
               predefined-parameters: CONTRAIL_DISTRIBUTION=open
+              current-parameters: true
               kill-phase-on: NEVER
  
             - name: '{fuel-release}.{plugin-name}.{plugin-version}.deploy_ha_contrail_plugin.open'
-              current-parameters: true
               predefined-parameters: CONTRAIL_DISTRIBUTION=open
+              current-parameters: true
               kill-phase-on: NEVER
 
       - multijob:
@@ -673,21 +717,21 @@
           condition: COMPLETED
           projects:
             - name: '{fuel-release}.{plugin-name}.{plugin-version}.contrail_plugin_add_delete_compute_node.juniper'
-              current-parameters: true
               predefined-parameters: CONTRAIL_DISTRIBUTION=juniper
+              current-parameters: true
               kill-phase-on: NEVER
 
             - name: '{fuel-release}.{plugin-name}.{plugin-version}.deploy_ha_contrail_plugin.juniper'
-              current-parameters: true
               predefined-parameters: CONTRAIL_DISTRIBUTION=juniper
+              current-parameters: true
               kill-phase-on: NEVER
 
             - name: '{fuel-release}.{plugin-name}.{plugin-version}.contrail_plugin_add_delete_compute_node.juniper'
-              current-parameters: true
               predefined-parameters: CONTRAIL_DISTRIBUTION=juniper
+              current-parameters: true
               kill-phase-on: NEVER
  
             - name: '{fuel-release}.{plugin-name}.{plugin-version}.deploy_ha_contrail_plugin.juniper'
-              current-parameters: true
               predefined-parameters: CONTRAIL_DISTRIBUTION=juniper
+              current-parameters: true
               kill-phase-on: NEVER

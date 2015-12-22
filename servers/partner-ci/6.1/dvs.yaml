@@ -1,3 +1,69 @@
+- project:
+    name: 'predefined_parameters'
+    fuel-release: '6.1'
+    plugin-version: '1.0'
+    plugin-name: 'dvs'
+
+    build-name: '{fuel-release}.{plugin-name}.build'
+    smoke-name: '{fuel-release}.{plugin-name}.smoke'
+    bvt-name: '{fuel-release}.{plugin-name}.bvt'
+    regression-name: '{fuel-release}.{plugin-name}.regression'
+    nightly-name: '{fuel-release}.{plugin-name}.nightly'
+    custom-name: '{fuel-release}.{plugin-name}.custom'
+
+    nightly-timer: 'H 22 * * *'
+    regression-timer: 'H 18 * * *'
+
+    use-snapshots: false
+    force-erase: true
+    disable-ssl: true
+    update-master: true
+
+    debug: true
+    runner-timeout: 600
+    test-timeout: 500
+
+    iso-file: 'fuel-6.1-525-2015-06-19_13-02-31.iso'
+    gerrit-repo: 'fuel-plugin-vmware-dvs'
+    gerrit-branch: 'stable/6.1'
+    email-to: 'rkhozinov@mirantis.com'
+    released-plugin-path: '/storage/dvs/released/fuel-plugin-vmware-dvs-1.0-1.0.2-1.noarch.rpm'
+
+    testgroup:
+      - dvs_vcenter_smoke
+      - dvs_vcenter_ha_mode
+      - dvs_vcenter_ceph
+      - dvs_vcenter_ceilometer
+      - dvs_vcenter_add_delete_nodes
+      - dvs_vcenter_add_delete_controller
+      - dvs_vcenter_multiroles
+      - dvs_vcenter_diff_networks
+      - dvs_vcenter_networks
+      - dvs_vcenter_security
+      - dvs_vcenter_tenants_isolation
+      - dvs_vcenter_same_ip
+      - dvs_vcenter_ping_public
+      - dvs_vcenter_bind_port
+      - dvs_vcenter_5_instances
+      - dvs_vcenter_uninstall
+      - dvs_vcenter_reset_controller
+      - dvs_vcenter_shutdown_controller
+    jobs:
+      - '{build-name}'
+      - '{nightly-name}'
+      - '{custom-name}'
+
+      - '{smoke-name}'
+      - '{fuel-release}.{plugin-name}.smoke.test'
+
+      - '{bvt-name}'
+      - '{fuel-release}.{plugin-name}.bvt.test'
+
+      - '{regression-name}'
+      - '{fuel-release}.{plugin-name}.regression.test'
+
+      - '{fuel-release}.{plugin-name}.{testgroup}'
+
 ## common git settings to get sources
 - common-scm: &common-scm
     name: 'common-scm'
@@ -85,6 +151,28 @@
           block-level: 'GLOBAL'
           queue-scanning: 'BUILDABLE'
 
+## properties for smoke, bvt and nightly multijobs
+- runner-wrappers: &runner-wrappers
+    name: 'runner-wrappers'
+    wrappers:
+      - ansicolor:
+          colormap: xterm
+
+## properties for smoke, bvt and nightly multijobs
+- test-wrappers: &test-wrappers
+    name: 'test-wrappers'
+    wrappers:
+      - ansicolor:
+          colormap: xterm
+      - inject-passwords:
+          global: true
+          mask-password-params: true
+      - timeout:
+          fail: true
+          type: no-activity
+          write-description: "Timeout is exceeded"
+          timeout: '{test-timeout}'
+
 ## properties for test jobs
 - test-properties: &test-properties
     name: 'test-properties'
@@ -107,15 +195,23 @@
     parameters:
       - bool:
           name: DEBUG
-          default: true
+          default: '{debug}'
           description: "Set -x (xtrace) for jobs' bash scripts"
+      - bool:
+          name: DISABLE_SSL
+          default: '{disable-ssl}'
+          description: "Disable ssh for openstack horizon"
+      - bool:
+          name: FORCE_ERASE
+          default: '{force-erase}'
+          description: "Erase all envs before test"
       - string:
           name: VCENTER_SNAPSHOT
           default: 'vcenterha'
           description: 'Snapshot name for vcenter lab'
       - bool:
           name: UPDATE_MASTER
-          default: true
+          default: '{update-master}'
           description: 'turns on update fuel master node to maintenance update'
       - string:
           name: MIRROR
@@ -151,7 +247,7 @@
           description: 'The name of devops env. Needed to properly work of existing mode of devops'
       - bool:
           name: USE_SNAPSHOTS
-          default: {use-snapshots}
+          default: '{use-snapshots}'
           descrition: 'Will be used existing environment'
 
 
@@ -161,8 +257,16 @@
     parameters:
       - bool:
           name: DEBUG
-          default: true
+          default: '{debug}'
           description: "Set -x (xtrace) for jobs' bash scripts"
+      - bool:
+          name: DISABLE_SSL
+          default: '{disable-ssl}'
+          description: "Disable ssh for openstack horizon"
+      - bool:
+          name: FORCE_ERASE
+          default: '{force-erase}'
+          description: "Erase all envs before test"
       - string:
           name: TEST_GROUP
           default: '{testgroup}'
@@ -183,7 +287,7 @@
           description: 'Contrainer for storing an iso build number to output it as job name'
       - bool:
           name: UPDATE_MASTER
-          default: true
+          default: '{update-master}'
           description: 'turns on update fuel master node to maintenance update'
       - string:
           name: MIRROR
@@ -243,61 +347,9 @@
           description: 'The name of devops env. Needed to properly work of existing mode of devops'
       - bool:
           name: USE_SNAPSHOTS
-          default: {use-snapshots}
+          default: '{use-snapshots}'
           descrition: 'Will be used existing environment'
 
-- project:
-    name: 'predefined_parameters'
-    fuel-release: '6.1'
-    plugin-version: '1.0'
-    plugin-name: 'dvs'
-
-    build-name: '{fuel-release}.{plugin-name}.build'
-    smoke-name: '{fuel-release}.{plugin-name}.smoke'
-    bvt-name: '{fuel-release}.{plugin-name}.bvt'
-    regression-name: '{fuel-release}.{plugin-name}.regression'
-    nightly-name: '{fuel-release}.{plugin-name}.nightly'
-    custom-name: '{fuel-release}.{plugin-name}.custom'
-
-    nightly-timer: 'H 22 * * *'
-    regression-timer: 'H 18 * * *'
-
-    use-snapshots: false
-
-    iso-file: 'fuel-6.1-525-2015-06-19_13-02-31.iso'
-    gerrit-repo: 'fuel-plugin-vmware-dvs'
-    gerrit-branch: 'stable/6.1'
-    email-to: 'rkhozinov@mirantis.com'
-    released-plugin-path: '/storage/dvs/released/fuel-plugin-vmware-dvs-1.0-1.0.2-1.noarch.rpm'
-
-    testgroup:
-      - dvs_vcenter_smoke
-      - dvs_vcenter_ha_mode
-      - dvs_vcenter_ceph
-      - dvs_vcenter_ceilometer
-      - dvs_vcenter_add_delete_nodes
-      - dvs_vcenter_add_delete_controller
-      - dvs_vcenter_multiroles
-      - dvs_vcenter_diff_networks
-      - dvs_vcenter_networks
-      - dvs_vcenter_security
-      - dvs_vcenter_tenants_isolation
-      - dvs_vcenter_same_ip
-      - dvs_vcenter_ping_public
-      - dvs_vcenter_bind_port
-      - dvs_vcenter_5_instances
-      - dvs_vcenter_uninstall
-      - dvs_vcenter_reset_controller
-      - dvs_vcenter_shutdown_controller
-    jobs:
-      - '{build-name}'
-      - '{nightly-name}'
-      - '{custom-name}'
-      - '{smoke-name}'
-      - '{bvt-name}'
-      - '{regression-name}'
-      - '{fuel-release}.{plugin-name}.regression.test'
-      - '{fuel-release}.{plugin-name}.{testgroup}'
 
 - defaults:
     name: global
@@ -311,6 +363,7 @@
     <<: *test-properties
     <<: *test-parameters
     <<: *common-scm
+    <<: *test-wrappers
     builders:
       - copyartifact:
           project: '{build-name}'
@@ -319,15 +372,6 @@
           !include-raw-escape builders/common.prepare.sh
       - shell:
           !include-raw-escape builders/dvs.test.sh
-    wrappers:
-      - inject-passwords:
-          global: true
-          mask-password-params: true
-      - ansicolor:
-          colormap: xterm
-      - timeout:
-          fail: true
-          timeout: 240
     publishers:
       - postbuildscript:
           script-only-if-succeeded: False
@@ -399,16 +443,26 @@
       - email:
           recipients: '{email-to}'
 
+- job-template:
+    name: '{fuel-release}.{plugin-name}.bvt.test'
+    description: 'The test for {fuel-release}.{plugin-name}.{plugin-version} open contrail'
+    concurrent: true
+
+- job-template:
+    name: '{fuel-release}.{plugin-name}.smoke.test'
+    description: 'The test for {fuel-release}.{plugin-name}.{plugin-version} open contrail'
+    concurrent: true
+
 # jobs for system tests
 - job-template:
     name: '{fuel-release}.{plugin-name}.{testgroup}'
     description: 'The test "{testgroup}" for {fuel-release}.{plugin-name}.{plugin-version}'
     concurrent: true
 
-# jobs for regression test
+# jobs for regression tests
 - job-template:
     name: '{fuel-release}.{plugin-name}.regression.test'
-    description: 'The test "{testgroup}" for {fuel-release}.{plugin-name}.{plugin-version}'
+    description: 'The test for {fuel-release}.{plugin-name}.{plugin-version}'
     concurrent: true
 
 - job-template:
@@ -422,9 +476,10 @@
     description: 'The Smoke test for {fuel-release}.{plugin-name}.{plugin-version}'
     concurrent: true
     project-type: multijob
-    node: runner    
+    node: runner
     <<: *runner-parameters
     <<: *runner-properties
+    <<: *runner-wrappers
     scm:  []
     triggers:
       - gerrit:
@@ -437,11 +492,12 @@
           stable: true
       - multijob:
           name: 'Smoke tests for dvs.vcenter5'
-          condition: SUCCESSFUL
+          condition: COMPLETED
           projects:
-            - name: '{fuel-release}.{plugin-name}.dvs_vcenter_smoke'
+            - name: '{fuel-release}.{plugin-name}.smoke.test'
               current-parameters: true
               predefined-parameters: |
+                TEST_GROUP=dvs_vcenter_smoke
                 VCENTER_SNAPSHOT=vcenterha
               kill-phase-on: NEVER
 
@@ -468,6 +524,7 @@
     node: runner
     <<: *runner-parameters
     <<: *runner-properties
+    <<: *runner-wrappers
     scm:  []
     triggers:
       - gerrit:
@@ -479,11 +536,14 @@
           which-build: last-successful
           stable: true
       - multijob:
-          name: 'BVT tests for dvs.vcenter5'
-          condition: SUCCESSFUL
+          name: 'BVT test for dvs.vcenter5'
+          condition: COMPLETED
           projects:
-           - name: '{fuel-release}.{plugin-name}.dvs_vcenter_smoke'
+           - name: '{fuel-release}.{plugin-name}.bvt.test'
              current-parameters: true
+             predefined-parameters: |
+               TEST_GROUP=dvs_vcenter_smoke
+               VCENTER_SNAPSHOT=vcenterha
              kill-phase-on: NEVER
 
     publishers:
@@ -505,12 +565,13 @@
 
 - job-template:
     name: '{regression-name}'
-    description: 'The Smoke test for {fuel-release}.{plugin-name}.{plugin-version}'
+    description: 'The regression test for {fuel-release}.{plugin-name}.{plugin-version}'
     disabled: false
     concurrent: true
     project-type: multijob
     node: runner
     <<: *runner-parameters
+    <<: *runner-wrappers
     properties:
       - heavy-job:
           weight: 1
@@ -545,6 +606,7 @@
     disabled: true
     node: runner
     <<: *runner-parameters
+    <<: *runner-wrappers
     properties:
       - heavy-job:
           weight: 1
@@ -566,6 +628,7 @@
       - timed: '{nightly-timer}'
 
     builders:
+      # copy latest stable plugin package that has passed dvs bvt on the stable iso
       - copyartifact:
           project: '{bvt-name}'
           which-build: last-successful
@@ -581,48 +644,63 @@
            - name: '{fuel-release}.{plugin-name}.dvs_vcenter_ceph'
              current-parameters: true
              kill-phase-on: NEVER
+
            - name: '{fuel-release}.{plugin-name}.dvs_vcenter_ceilometer'
              current-parameters: true
              kill-phase-on: NEVER
+
            - name: '{fuel-release}.{plugin-name}.dvs_vcenter_add_delete_nodes'
              current-parameters: true
              kill-phase-on: NEVER
+
            - name: '{fuel-release}.{plugin-name}.dvs_vcenter_add_delete_controller'
              current-parameters: true
              kill-phase-on: NEVER
+
            - name: '{fuel-release}.{plugin-name}.dvs_vcenter_multiroles'
              current-parameters: true
              kill-phase-on: NEVER
+
            - name: '{fuel-release}.{plugin-name}.dvs_vcenter_diff_networks'
              current-parameters: true
              kill-phase-on: NEVER
+
            - name: '{fuel-release}.{plugin-name}.dvs_vcenter_networks'
              current-parameters: true
              kill-phase-on: NEVER
+
            - name: '{fuel-release}.{plugin-name}.dvs_vcenter_security'
              current-parameters: true
              kill-phase-on: NEVER
+
            - name: '{fuel-release}.{plugin-name}.dvs_vcenter_tenants_isolation'
              current-parameters: true
              kill-phase-on: NEVER
+
            - name: '{fuel-release}.{plugin-name}.dvs_vcenter_same_ip'
              current-parameters: true
              kill-phase-on: NEVER
+
            - name: '{fuel-release}.{plugin-name}.dvs_vcenter_ping_public'
              current-parameters: true
              kill-phase-on: NEVER
+
            - name: '{fuel-release}.{plugin-name}.dvs_vcenter_bind_port'
              current-parameters: true
              kill-phase-on: NEVER
+
            - name: '{fuel-release}.{plugin-name}.dvs_vcenter_5_instances'
              current-parameters: true
              kill-phase-on: NEVER
+
            - name: '{fuel-release}.{plugin-name}.dvs_vcenter_uninstall'
              current-parameters: true
              kill-phase-on: NEVER
+
            - name: '{fuel-release}.{plugin-name}.dvs_vcenter_reset_controller'
              current-parameters: true
              kill-phase-on: NEVER
+
            - name: '{fuel-release}.{plugin-name}.dvs_vcenter_shutdown_controller'
              current-parameters: true
              kill-phase-on: NEVER
