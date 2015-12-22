@@ -75,6 +75,12 @@ function delete_systest_envs {
 
 function prepare_venv {
     #rm -rf "${VENV_PATH}"
+    rm -f requirements.txt*
+    wget $REQS_PATH
+    export REQS_PATH="$(pwd)/reguirements.txt"
+    # bug: https://bugs.launchpad.net/fuel/+bug/1528193
+    sed -i 's/python-novaclient>=2.15.0/python-novaclient==2.35.0/' requirements.txt
+
     [ ! -d $VENV_PATH ] && virtualenv "${VENV_PATH}" || echo "${VENV_PATH} already exist"
     source "${VENV_PATH}/bin/activate"
     pip --version
@@ -100,6 +106,7 @@ function fix_logger {
 
 ####################################################################################
 
+
 prepare_venv
 fix_logger
 
@@ -112,7 +119,6 @@ else
   free_space=$(df -h | grep '/$' | awk '{print $4}' | tr -d G)
 
   (( $free_space < $REQUIRED_FREE_SPACE )) &&  delete_systest_envs || echo free-space: $free_space
-
 
   # poweroff all envs
   destroy_envs
