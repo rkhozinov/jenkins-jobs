@@ -442,7 +442,7 @@
 # jobs for regression test
 - job-template:
     name: '{fuel-release}.{plugin-name}.regression.test'
-    description: 'The test "{testgroup}" for {fuel-release}.{plugin-name}.{plugin-version}'
+    description: 'The regression test for {fuel-release}.{plugin-name}.{plugin-version}'
     concurrent: true
 
 - job-template:
