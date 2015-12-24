@@ -31,9 +31,7 @@
 
     testgroup:
       - check_bonding_with_contrail
-      - contrail_bvt
       - contrail_jumbo_frame
-      - contrail_mu
       - contrail_plugin_add_contrail_controller_node
       - contrail_plugin_add_delete_compute_node
       - contrail_plugin_add_delete_controller_node
