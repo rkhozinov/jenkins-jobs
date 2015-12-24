@@ -32,7 +32,6 @@
     testgroup:
       - install_contrail
       - deploy_contrail
-      - contrail_bvt
       - contrail_plugin_add_delete_compute_node
       - deploy_ha_contrail_plugin
       - contrail_plugin_add_delete_controller_node
