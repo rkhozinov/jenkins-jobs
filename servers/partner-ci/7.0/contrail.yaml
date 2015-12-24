@@ -191,6 +191,13 @@
           name: UPDATE_MASTER
           default: '{update-master}'
           description: 'turns on update fuel master node to maintenance update'
+      - bool:
+          name: BONDING
+          default: '{bonding}'
+      - bool:
+          name: USE_SNAPSHOTS
+          default: '{use-snapshots}'
+          descrition: 'Will be used existing environment'
       - string:
           name: MIRROR
           default: 'http://mirror.seed-cz1.fuel-infra.org'
@@ -231,13 +238,6 @@
           name: ENV_PREFIX
           default: '{fuel-release}.{plugin-name}'
           description: 'The name of devops env. Needed to properly work of existing mode of devops'
-      - bool:
-          name: BONDING
-          default: '{bonding}'
-      - bool:
-          name: USE_SNAPSHOTS
-          default: '{use-snapshots}'
-          descrition: 'Will be used existing environment'
 
 
 ## parameters for jobs created per test-group and custom test job
@@ -256,6 +256,17 @@
           name: FORCE_ERASE
           default: '{force-erase}'
           description: "Erase all envs before test"
+      - bool:
+          name: UPDATE_MASTER
+          default: '{update-master}'
+          description: 'turns on update fuel master node to maintenance update'
+      - bool:
+          name: BONDING
+          default: '{bonding}'
+      - bool:
+          name: USE_SNAPSHOTS
+          default: '{use-snapshots}'
+          descrition: 'Will be used existing environment'
       - string:
           name: TEST_GROUP
           default: '{testgroup}'
@@ -280,10 +291,6 @@
       - string:
           name: CONTRAIL_PLUGIN_PATH
           default: ''
-      - bool:
-          name: UPDATE_MASTER
-          default: '{update-master}'
-          description: 'turns on update fuel master node to maintenance update'
       - string:
           name: MIRROR
           default: 'http://mirror.seed-cz1.fuel-infra.org'
@@ -343,13 +350,6 @@
           name: ENV_PREFIX
           default: '{fuel-release}.{plugin-name}'
           description: 'The name of devops env. Needed to properly work of existing mode of devops'
-      - bool:
-          name: BONDING
-          default: '{bonding}'
-      - bool:
-          name: USE_SNAPSHOTS
-          default: '{use-snapshots}'
-          descrition: 'Will be used existing environment'
 
 
 - defaults:
@@ -576,7 +576,7 @@
 - job-template:
     name: '{regression-name}'
     description: 'The regression test for {fuel-release}.{plugin-name}.{plugin-version}'
-    disabled: false
+    disabled: true
     concurrent: true
     project-type: multijob
     node: runner
