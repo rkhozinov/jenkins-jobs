@@ -30,7 +30,6 @@
     released-plugin-path: '/storage/dvs/released/fuel-plugin-vmware-dvs-1.0-1.0.2-1.noarch.rpm'
 
     testgroup:
-      - dvs_vcenter_smoke
       - dvs_vcenter_ha_mode
       - dvs_vcenter_ceph
       - dvs_vcenter_ceilometer
@@ -591,7 +590,7 @@
     builders:
       - multijob:
           name: '1st phase - regression test'
-          condition: FAILURE
+          condition: COMPLETED
           projects:
             - name: '{fuel-release}.{plugin-name}.regression.test'
               predefined-parameters: |
