@@ -33,6 +33,9 @@
       - contrail_bvt
       - contrail_smoke
       - install_contrail
+      - contrail_ha
+      - contrail_ha_baseos
+      - contrail_ceilometer
 
     jobs:
       - '{build-name}'
@@ -654,8 +657,37 @@
           name: 'Smoke tests for open/juniper contrail. Juniper or contrail version is provided in variable by multijob'
           condition: COMPLETED
           projects:
-            - name: '{fuel-release}.{plugin-name}.{plugin-version}.deploy_ha_contrail_plugin.juniper'
-              predefined-parameters: CONTRAIL_DISTRIBUTION=juniper
+            - name: '{fuel-release}.{plugin-name}.{plugin-version}.contrail_ha.juniper'
+              predefined-parameters: |
+                 CONTRAIL_DISTRIBUTION=juniper
+              current-parameters: true
+              kill-phase-on: NEVER
+            - name: '{fuel-release}.{plugin-name}.{plugin-version}.contrail_ha_baseos.juniper'
+              predefined-parameters: |
+                 CONTRAIL_DISTRIBUTION=juniper
               current-parameters: true
               kill-phase-on: NEVER
 
+            - name: '{fuel-release}.{plugin-name}.{plugin-version}.contrail_ceilometer.juniper'
+              predefined-parameters: |
+                 CONTRAIL_DISTRIBUTION=juniper
+              current-parameters: true
+              kill-phase-on: NEVER
+
+            - name: '{fuel-release}.{plugin-name}.{plugin-version}.contrail_ha.open'
+              predefined-parameters: |
+                 CONTRAIL_DISTRIBUTION=open
+              current-parameters: true
+              kill-phase-on: NEVER
+
+            - name: '{fuel-release}.{plugin-name}.{plugin-version}.contrail_ha_baseos.open'
+              predefined-parameters: |
+                 CONTRAIL_DISTRIBUTION=open
+              current-parameters: true
+              kill-phase-on: NEVER
+
+            - name: '{fuel-release}.{plugin-name}.{plugin-version}.contrail_ceilometer.open'
+              predefined-parameters: |
+                 CONTRAIL_DISTRIBUTION=open
+              current-parameters: true
+              kill-phase-on: NEVER
