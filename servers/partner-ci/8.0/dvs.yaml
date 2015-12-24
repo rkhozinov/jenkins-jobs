@@ -32,20 +32,17 @@
     released-plugin-path: '/storage/dvs/released/dvs-2.0.0.noarch.rpm'
 
     testgroup:
-      - dvs_vcenter_smoke
-      - dvs_vcenter_bvt
-      - dvs_vcenter_bvt_2
-      - dvs_vcenter_ha_mode
-      - dvs_vcenter_ceph
-      - dvs_vcenter_ceph_2
-      - dvs_vcenter_ceilometer
-      - dvs_vcenter_ceilometer_2
-      - dvs_vcenter_add_delete_nodes
-      - dvs_vcenter_add_delete_controller
+      - dvs_vcenter_systest_setup
       - dvs_vcenter_networks
       - dvs_vcenter_ping_public
       - dvs_vcenter_5_instances
+      - dvs_vcenter_security
+      - dvs_vcenter_tenants_isolation
+      - dvs_vcenter_same_ip
       - dvs_vcenter_uninstall
+      - dvs_vcenter_bind_port
+      - dvs_vcenter_add_delete_controller
+      - dvs_vcenter_add_delete_nodes
 
     jobs:
       - '{build-name}'
@@ -412,7 +409,19 @@
 # jobs for regression test
 - job-template:
     name: '{fuel-release}.{plugin-name}.regression.test'
-    description: 'The test "{testgroup}" for {fuel-release}.{plugin-name}.{plugin-version}'
+    description: 'The regression test for {fuel-release}.{plugin-name}.{plugin-version}'
+    concurrent: true
+
+# job for smoke test
+- job-template:
+    name: '{fuel-release}.{plugin-name}.smoke.test'
+    description: 'Smoke test for {fuel-release}.{plugin-name}.{plugin-version}'
+    concurrent: true
+
+# job for running of bvt test
+- job-template:
+    name: '{fuel-release}.{plugin-name}.bvt.test'
+    description: 'BVT test for {fuel-release}.{plugin-name}.{plugin-version}'
     concurrent: true
 
 # jobs for test a new iso
@@ -434,7 +443,7 @@
 - job-template:
     name: '{smoke-name}'
     disabled: false
-    description: 'The Smoke test for {fuel-release}.{plugin-name}.{plugin-version}'
+    description: 'Smoke test for {fuel-release}.{plugin-name}.{plugin-version}'
     concurrent: true
     project-type: multijob
     node: runner    
@@ -461,9 +470,11 @@
           name: 'Smoke tests for dvs.vcenter5'
           condition: COMPLETED
           projects:
-           - name: '{fuel-release}.{plugin-name}.dvs_vcenter_smoke'
+           - name: '{fuel-release}.{plugin-name}.smoke.test'
              current-parameters: true
              property-file: iso_file
+             predefined-parameters: |
+                TEST_GROUP=dvs_vcenter_smoke
              kill-phase-on: NEVER
 
     publishers:
@@ -482,7 +493,7 @@
 
 - job-template:
     name: '{bvt-name}'
-    description: 'The Smoke test for {fuel-release}.{plugin-name}.{plugin-version}'
+    description: 'BVT test for {fuel-release}.{plugin-name}.{plugin-version}'
     disabled: false
     concurrent: true
     project-type: multijob
@@ -510,14 +521,11 @@
           name: 'Smoke tests for dvs.vcenter5'
           condition: COMPLETED
           projects:
-           - name: '{fuel-release}.{plugin-name}.dvs_vcenter_bvt'
+           - name: '{fuel-release}.{plugin-name}.bvt.test'
              current-parameters: true
              property-file: iso_file
-             kill-phase-on: NEVER
-
-           - name: '{fuel-release}.{plugin-name}.dvs_vcenter_bvt2'
-             current-parameters: true
-             property-file: iso_file
+             predefined-parameters: |
+                TEST_GROUP=dvs_vcenter_bvt
              kill-phase-on: NEVER
 
     publishers:
@@ -701,55 +709,48 @@
           name: 'System tests for dvs{fuel-release}.{plugin-version} vcenter5'
           condition: COMPLETED
           projects:
-           - name: '{fuel-release}.{plugin-name}.dvs_vcenter_ha_mode'
+           - name: '{fuel-release}.{plugin-name}.dvs_vcenter_systest_setup'
              current-parameters: true
              kill-phase-on: NEVER
              property-file: iso_file
-           - name: '{fuel-release}.{plugin-name}.dvs_vcenter_ceph'
+           - name: '{fuel-release}.{plugin-name}.dvs_vcenter_networks'
              current-parameters: true
              kill-phase-on: NEVER
              property-file: iso_file
-           - name: '{fuel-release}.{plugin-name}.dvs_vcenter_ceph_2'
+           - name: '{fuel-release}.{plugin-name}.dvs_vcenter_ping_public'
              current-parameters: true
              kill-phase-on: NEVER
              property-file: iso_file
-
-           - name: '{fuel-release}.{plugin-name}.dvs_vcenter_ceilometer'
+           - name: '{fuel-release}.{plugin-name}.dvs_vcenter_5_instances'
              current-parameters: true
              kill-phase-on: NEVER
              property-file: iso_file
-
-           - name: '{fuel-release}.{plugin-name}.dvs_vcenter_ceilometer_2'
+           - name: '{fuel-release}.{plugin-name}.dvs_vcenter_security'
              current-parameters: true
              kill-phase-on: NEVER
              property-file: iso_file
-
+           - name: '{fuel-release}.{plugin-name}.dvs_vcenter_tenants_isolation'
+             current-parameters: true
+             kill-phase-on: NEVER
+             property-file: iso_file
+           - name: '{fuel-release}.{plugin-name}.dvs_vcenter_same_ip'
+             current-parameters: true
+             kill-phase-on: NEVER
+             property-file: iso_file
+           - name: '{fuel-release}.{plugin-name}.dvs_vcenter_uninstall'
+             current-parameters: true
+             kill-phase-on: NEVER
+             property-file: iso_file
+           - name: '{fuel-release}.{plugin-name}.dvs_vcenter_bind_port'
+             current-parameters: true
+             kill-phase-on: NEVER
+             property-file: iso_file
+           - name: '{fuel-release}.{plugin-name}.dvs_vcenter_add_delete_controller'
+             current-parameters: true
+             kill-phase-on: NEVER
+             property-file: iso_file
            - name: '{fuel-release}.{plugin-name}.dvs_vcenter_add_delete_nodes'
              current-parameters: true
              kill-phase-on: NEVER
              property-file: iso_file
 
-           - name: '{fuel-release}.{plugin-name}.dvs_vcenter_add_delete_controller'
-             current-parameters: true
-             kill-phase-on: NEVER
-             property-file: iso_file
-
-           - name: '{fuel-release}.{plugin-name}.dvs_vcenter_networks'
-             current-parameters: true
-             kill-phase-on: NEVER
-             property-file: iso_file
-
-           - name: '{fuel-release}.{plugin-name}.dvs_vcenter_ping_public'
-             current-parameters: true
-             kill-phase-on: NEVER
-             property-file: iso_file
-
-           - name: '{fuel-release}.{plugin-name}.dvs_vcenter_5_instances'
-             current-parameters: true
-             kill-phase-on: NEVER
-             property-file: iso_file
-
-           - name: '{fuel-release}.{plugin-name}.dvs_vcenter_uninstall'
-             current-parameters: true
-             kill-phase-on: NEVER
-             property-file: iso_file

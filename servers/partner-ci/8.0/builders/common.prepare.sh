@@ -75,6 +75,12 @@ function delete_systest_envs {
 
 function prepare_venv {
     #rm -rf "${VENV_PATH}"
+    rm -f requirements.txt*
+    wget $REQS_PATH
+    export REQS_PATH="$(pwd)/requirements.txt"
+    # bug: https://bugs.launchpad.net/fuel/+bug/1528193
+    sed 's/fuel-devops.git@2.9.14/fuel-devops.git@2.9.15/' requirements.txt
+
     [ ! -d $VENV_PATH ] && virtualenv "${VENV_PATH}" || echo "${VENV_PATH} already exist"
     source "${VENV_PATH}/bin/activate"
     pip --version
@@ -100,7 +106,6 @@ function fix_logger {
 
 ####################################################################################
 
-sed 's/fuel-devops.git@2.9.14/fuel-devops.git@2.9.15/' requirements.txt
 prepare_venv
 fix_logger
 

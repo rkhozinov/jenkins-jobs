@@ -77,7 +77,7 @@ function prepare_venv {
     #rm -rf "${VENV_PATH}"
     rm -f requirements.txt*
     wget $REQS_PATH
-    export REQS_PATH="$(pwd)/reguirements.txt"
+    export REQS_PATH="$(pwd)/requirements.txt"
     # bug: https://bugs.launchpad.net/fuel/+bug/1528193
     sed -i 's/python-novaclient>=2.15.0/python-novaclient==2.35.0/' requirements.txt
 
@@ -105,7 +105,6 @@ function fix_logger {
 
 
 ####################################################################################
-
 
 prepare_venv
 fix_logger
