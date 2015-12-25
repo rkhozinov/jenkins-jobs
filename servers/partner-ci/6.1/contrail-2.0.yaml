@@ -11,7 +11,7 @@
     nightly-name: '{fuel-release}.{plugin-name}.{plugin-version}.nightly'
     custom-name: '{fuel-release}.{plugin-name}.{plugin-version}.custom'
 
-    nightly-timer: 'H 21 * * *'
+    nightly-timer: 'H 22 * * *'
     regression-timer: 'H 18 * * *'
 
     use-snapshots: false
@@ -19,7 +19,7 @@
     disable-ssl: false
     bonding: false
     update-master: true
-    debug: true
+    debug: false
     runner-timeout: 600
     test-timeout: 500
 
@@ -199,6 +199,13 @@
           name: UPDATE_MASTER
           default: '{update-master}'
           description: 'turns on update fuel master node to maintenance update'
+      - bool:
+          name: BONDING
+          default: '{bonding}'
+      - bool:
+          name: USE_SNAPSHOTS
+          default: '{use-snapshots}'
+          descrition: 'Will be used existing environment'
       - string:
           name: MIRROR
           default: 'http://mirror.seed-cz1.fuel-infra.org'
@@ -239,13 +246,6 @@
           name: ENV_PREFIX
           default: '{fuel-release}.{plugin-name}'
           description: 'The name of devops env. Needed to properly work of existing mode of devops'
-      - bool:
-          name: BONDING
-          default: '{bonding}'
-      - bool:
-          name: USE_SNAPSHOTS
-          default: '{use-snapshots}'
-          descrition: 'Will be used existing environment'
 
 
 ## parameters for jobs created per test-group and custom test job
@@ -264,6 +264,17 @@
           name: FORCE_ERASE
           default: '{force-erase}'
           description: "Erase all envs before test"
+      - bool:
+          name: UPDATE_MASTER
+          default: '{update-master}'
+          description: 'turns on update fuel master node to maintenance update'
+      - bool:
+          name: BONDING
+          default: '{bonding}'
+      - bool:
+          name: USE_SNAPSHOTS
+          default: '{use-snapshots}'
+          descrition: 'Will be used existing environment'
       - string:
           name: TEST_GROUP
           default: '{testgroup}'
@@ -288,10 +299,6 @@
       - string:
           name: CONTRAIL_PLUGIN_PATH
           default: ''
-      - bool:
-          name: UPDATE_MASTER
-          default: '{update-master}'
-          description: 'turns on update fuel master node to maintenance update'
       - string:
           name: MIRROR
           default: 'http://mirror.seed-cz1.fuel-infra.org'
@@ -351,13 +358,6 @@
           name: ENV_PREFIX
           default: '{fuel-release}.{plugin-name}'
           description: 'The name of devops env. Needed to properly work of existing mode of devops'
-      - bool:
-          name: BONDING
-          default: '{bonding}'
-      - bool:
-          name: USE_SNAPSHOTS
-          default: '{use-snapshots}'
-          descrition: 'Will be used existing environment'
 
 
 - defaults:
@@ -452,19 +452,19 @@
       - email:
           recipients: '{email-to}'
 
-# jobs for system test
+## jobs for system test
 - job-template:
     name: '{fuel-release}.{plugin-name}.{plugin-version}.{testgroup}.open'
     description: 'The test "{testgroup}" for {fuel-release}.{plugin-name}.{plugin-version} open contrail'
     concurrent: true
 
-# jobs for system test
+# jobs for regression test
 - job-template:
     name: '{fuel-release}.{plugin-name}.{plugin-version}.{testgroup}.juniper'
     description: 'The test "{testgroup}" for {fuel-release}.{plugin-name}.{plugin-version} juniper contrail'
     concurrent: true
 
-# jobs for bvt tests
+## jobs for bvt tests
 - job-template:
     name: '{fuel-release}.{plugin-name}.{plugin-version}.bvt.test.open'
     description: 'The test for {fuel-release}.{plugin-name}.{plugin-version} open contrail'
@@ -475,7 +475,7 @@
     description: 'The test for {fuel-release}.{plugin-name}.{plugin-version} juniper contrail'
     concurrent: true
 
-# jobs for smoke tests
+## jobs for smoke tests
 - job-template:
     name: '{fuel-release}.{plugin-name}.{plugin-version}.smoke.test.open'
     description: 'The test for {fuel-release}.{plugin-name}.{plugin-version} open contrail'
@@ -486,7 +486,7 @@
     description: 'The test for {fuel-release}.{plugin-name}.{plugin-version} juniper contrail'
     concurrent: true
 
-# jobs for regression tests
+## jobs for regression tests
 - job-template:
     name: '{fuel-release}.{plugin-name}.{plugin-version}.regression.test.open'
     description: 'The test for {fuel-release}.{plugin-name}.{plugin-version} open contrail'
@@ -508,7 +508,7 @@
     description: 'The Smoke test for {fuel-release}.{plugin-name}.{plugin-version}'
     concurrent: true
     project-type: multijob
-    node: runner    
+    node: runner
     <<: *runner-parameters
     <<: *runner-properties
     <<: *runner-wrappers
@@ -555,7 +555,7 @@
 
 - job-template:
     name: '{bvt-name}'
-    description: 'The Smoke test for {fuel-release}.{plugin-name}.{plugin-version}'
+    description: 'The BVT test for {fuel-release}.{plugin-name}.{plugin-version}'
     disabled: false
     concurrent: true
     project-type: multijob
@@ -634,7 +634,7 @@
           recipients: '{email-to}'
     builders:
       - multijob:
-          name: '1st phase - regression test for open/juniper contrail'
+          name: 'regression test for open/juniper contrail'
           condition: FAILURE
           projects:
             - name: '{fuel-release}.{plugin-name}.{plugin-version}.regression.test.open'
