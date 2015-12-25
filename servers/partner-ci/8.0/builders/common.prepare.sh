@@ -28,6 +28,7 @@ echo virtual-env: $VENV_PATH
 ## the fuel-qa branch is determined by a fuel-iso name.
 
 case "${FUEL_RELEASE}" in
+  *80* ) export REQS_BRANCH="stable/8.0" ;;
   *70* ) export REQS_BRANCH="stable/7.0" ;;
   *61* ) export REQS_BRANCH="stable/6.1" ;;
    *   ) export REQS_BRANCH="master"
@@ -78,8 +79,6 @@ function prepare_venv {
     rm -f requirements.txt*
     wget $REQS_PATH
     export REQS_PATH="$(pwd)/requirements.txt"
-    # bug: https://bugs.launchpad.net/fuel/+bug/1528193
-    sed 's/fuel-devops.git@2.9.14/fuel-devops.git@2.9.15/' requirements.txt
 
     [ ! -d $VENV_PATH ] && virtualenv "${VENV_PATH}" || echo "${VENV_PATH} already exist"
     source "${VENV_PATH}/bin/activate"
@@ -118,7 +117,6 @@ else
   free_space=$(df -h | grep '/$' | awk '{print $4}' | tr -d G)
 
   (( $free_space < $REQUIRED_FREE_SPACE )) &&  delete_systest_envs || echo free-space: $free_space
-
 
   # poweroff all envs
   destroy_envs
