@@ -48,15 +48,21 @@
       - '{build-name}'
       - '{nightly-name}'
       - '{custom-name}'
+
       - '{smoke-name}'
+      - '{fuel-release}.{plugin-name}.smoke.test'
+
       - '{bvt-name}'
+      - '{fuel-release}.{plugin-name}.bvt.test'
+
       - '{canary-name}'
-      - '{fuel-release}.{plugin-name}.{testgroup}'
+      - '{fuel-release}.{plugin-name}.canary.skinny'
+      - '{fuel-release}.{plugin-name}.canary.fat'
 
       - '{regression-name}'
       - '{fuel-release}.{plugin-name}.regression.test'
-      - '{fuel-release}.{plugin-name}.canary.skinny'
-      - '{fuel-release}.{plugin-name}.canary.fat'
+
+      - '{fuel-release}.{plugin-name}.{testgroup}'
 
 ## common git settings to get sources
 - common-scm: &common-scm
