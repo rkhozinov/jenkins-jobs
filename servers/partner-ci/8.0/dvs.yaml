@@ -55,12 +55,12 @@
       - '{bvt-name}'
       - '{fuel-release}.{plugin-name}.bvt.test'
 
+      - '{regression-name}'
+      - '{fuel-release}.{plugin-name}.regression.test'
+
       - '{canary-name}'
       - '{fuel-release}.{plugin-name}.canary.skinny'
       - '{fuel-release}.{plugin-name}.canary.fat'
-
-      - '{regression-name}'
-      - '{fuel-release}.{plugin-name}.regression.test'
 
       - '{fuel-release}.{plugin-name}.{testgroup}'
 
@@ -205,6 +205,10 @@
           name: FORCE_ERASE
           default: '{force-erase}'
           description: "Erase all envs before test"
+      - bool:
+          name: USE_SNAPSHOTS
+          default: '{use-snapshots}'
+          descrition: 'Will be used existing environment'
       - string:
           name: POOL_PUBLIC
           default: '172.16.0.0/24:24'
@@ -229,10 +233,6 @@
           name: ENV_PREFIX
           default: '{fuel-release}.{plugin-name}'
           description: 'The name of devops env. Needed to properly work of existing mode of devops'
-      - bool:
-          name: USE_SNAPSHOTS
-          default: '{use-snapshots}'
-          descrition: 'Will be used existing environment'
 
 
 ## parameters for jobs created per test-group and custom test job
@@ -251,6 +251,10 @@
           name: FORCE_ERASE
           default: '{force-erase}'
           description: "Erase all envs before test"
+      - bool:
+          name: USE_SNAPSHOTS
+          default: '{use-snapshots}'
+          descrition: 'Will be used existing environment'
       - string:
           name: POOL_PUBLIC
           default: '172.16.0.0/24:24'
@@ -309,10 +313,7 @@
           name: ENV_PREFIX
           default: '{fuel-release}.{plugin-name}'
           description: 'The name of devops env. Needed to properly work of existing mode of devops'
-      - bool:
-          name: USE_SNAPSHOTS
-          default: '{use-snapshots}'
-          descrition: 'Will be used existing environment'
+
 
 - defaults:
     name: global
@@ -412,22 +413,22 @@
     description: 'The test "{testgroup}" for {fuel-release}.{plugin-name}.{plugin-version}'
     concurrent: true
 
-# jobs for regression test
+## jobs for bvt tests
+- job-template:
+    name: '{fuel-release}.{plugin-name}.bvt.test'
+    description: 'The test for {fuel-release}.{plugin-name}.{plugin-version}'
+    concurrent: true
+
+## jobs for smoke tests
+- job-template:
+    name: '{fuel-release}.{plugin-name}.smoke.test'
+    description: 'The test for {fuel-release}.{plugin-name}.{plugin-version}'
+    concurrent: true
+
+# jobs for regression tests
 - job-template:
     name: '{fuel-release}.{plugin-name}.regression.test'
     description: 'The regression test for {fuel-release}.{plugin-name}.{plugin-version}'
-    concurrent: true
-
-# job for smoke test
-- job-template:
-    name: '{fuel-release}.{plugin-name}.smoke.test'
-    description: 'Smoke test for {fuel-release}.{plugin-name}.{plugin-version}'
-    concurrent: true
-
-# job for running of bvt test
-- job-template:
-    name: '{fuel-release}.{plugin-name}.bvt.test'
-    description: 'BVT test for {fuel-release}.{plugin-name}.{plugin-version}'
     concurrent: true
 
 # jobs for test a new iso
@@ -449,10 +450,10 @@
 - job-template:
     name: '{smoke-name}'
     disabled: false
-    description: 'Smoke test for {fuel-release}.{plugin-name}.{plugin-version}'
+    description: 'The Smoke test for {fuel-release}.{plugin-name}.{plugin-version}'
     concurrent: true
     project-type: multijob
-    node: runner    
+    node: runner
     <<: *runner-parameters
     <<: *runner-properties
     <<: *runner-wrappers
@@ -473,14 +474,14 @@
       - inject:
           properties-file: iso_file
       - multijob:
-          name: 'Smoke tests for dvs.vcenter5'
+          name: 'The smoke test for {fuel-release}.{plugin-name}.{plugin-version}'
           condition: COMPLETED
           projects:
            - name: '{fuel-release}.{plugin-name}.smoke.test'
              current-parameters: true
-             property-file: iso_file
              predefined-parameters: |
                 TEST_GROUP=dvs_vcenter_smoke
+             property-file: iso_file
              kill-phase-on: NEVER
 
     publishers:
@@ -499,7 +500,7 @@
 
 - job-template:
     name: '{bvt-name}'
-    description: 'BVT test for {fuel-release}.{plugin-name}.{plugin-version}'
+    description: 'The BVT test for {fuel-release}.{plugin-name}.{plugin-version}'
     disabled: false
     concurrent: true
     project-type: multijob
@@ -524,7 +525,7 @@
       - inject:
           properties-file: iso_file
       - multijob:
-          name: 'Smoke tests for dvs.vcenter5'
+          name: 'The BVT test for {fuel-release}.{plugin-name}.{plugin-version}'
           condition: COMPLETED
           projects:
            - name: '{fuel-release}.{plugin-name}.bvt.test'
@@ -533,7 +534,6 @@
              predefined-parameters: |
                 TEST_GROUP=dvs_vcenter_bvt
              kill-phase-on: NEVER
-
     publishers:
       - postbuildscript:
           script-only-if-succeeded: False

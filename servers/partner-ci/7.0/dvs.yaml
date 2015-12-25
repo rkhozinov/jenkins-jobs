@@ -489,7 +489,7 @@
           which-build: last-successful
           stable: true
       - multijob:
-          description: 'The smoke test for {fuel-release}.{plugin-name}.{plugin-version}'
+          name: 'The smoke test for {fuel-release}.{plugin-name}.{plugin-version}'
           condition: COMPLETED
           projects:
            - name: '{fuel-release}.{plugin-name}.smoke.test'

@@ -32,8 +32,6 @@
     released-plugin-path: '/storage/nsxv/released/nsxv-1.1-1.1.0-1.noarch.rpm'
 
     testgroup:
-      - nsxv_smoke
-      - nsxv_bvt
       - nsxv_add_delete_nodes
       - nsxv_add_delete_controller
       - nsxv_reset_controller
@@ -48,15 +46,21 @@
       - '{build-name}'
       - '{nightly-name}'
       - '{custom-name}'
+
       - '{smoke-name}'
+      - '{fuel-release}.{plugin-name}.smoke.test'
+
       - '{bvt-name}'
-      - '{canary-name}'
-      - '{fuel-release}.{plugin-name}.{testgroup}'
+      - '{fuel-release}.{plugin-name}.bvt.test'
 
       - '{regression-name}'
       - '{fuel-release}.{plugin-name}.regression.test'
+
+      - '{canary-name}'
       - '{fuel-release}.{plugin-name}.canary.skinny'
       - '{fuel-release}.{plugin-name}.canary.fat'
+
+      - '{fuel-release}.{plugin-name}.{testgroup}'
 
 ## common git settings to get sources
 - common-scm: &common-scm
@@ -199,6 +203,10 @@
           name: FORCE_ERASE
           default: '{force-erase}'
           description: "Erase all envs before test"
+      - bool:
+          name: USE_SNAPSHOTS
+          default: '{use-snapshots}'
+          descrition: 'Will be used existing environment'
       - string:
           name: VCENTER_SNAPSHOT
           default: 'nsxv'
@@ -219,10 +227,6 @@
           name: ENV_PREFIX
           default: '{fuel-release}.{plugin-name}'
           description: 'The name of devops env. Needed to properly work of existing mode of devops'
-      - bool:
-          name: USE_SNAPSHOTS
-          default: '{use-snapshots}'
-          descrition: 'Will be used existing environment'
 
 
 ## parameters for jobs created per test-group and custom test job
@@ -241,6 +245,10 @@
           name: FORCE_ERASE
           default: '{force-erase}'
           description: "Erase all envs before test"
+      - bool:
+          name: USE_SNAPSHOTS
+          default: '{use-snapshots}'
+          descrition: 'Will be used existing environment'
       - string:
           name: TEST_GROUP
           default: '{testgroup}'
@@ -295,10 +303,6 @@
           name: ENV_PREFIX
           default: '{fuel-release}.{plugin-name}'
           description: 'The name of devops env. Needed to properly work of existing mode of devops'
-      - bool:
-          name: USE_SNAPSHOTS
-          default: '{use-snapshots}'
-          descrition: 'Will be used existing environment'
 
 
 - defaults:
@@ -399,10 +403,22 @@
     description: 'The test "{testgroup}" for {fuel-release}.{plugin-name}.{plugin-version}'
     concurrent: true
 
-# jobs for regression test
+## jobs for bvt tests
+- job-template:
+    name: '{fuel-release}.{plugin-name}.bvt.test'
+    description: 'The test for {fuel-release}.{plugin-name}.{plugin-version}'
+    concurrent: true
+
+## jobs for smoke tests
+- job-template:
+    name: '{fuel-release}.{plugin-name}.smoke.test'
+    description: 'The test for {fuel-release}.{plugin-name}.{plugin-version}'
+    concurrent: true
+
+# jobs for regression tests
 - job-template:
     name: '{fuel-release}.{plugin-name}.regression.test'
-    description: 'The test "{testgroup}" for {fuel-release}.{plugin-name}.{plugin-version}'
+    description: 'The regression test for {fuel-release}.{plugin-name}.{plugin-version}'
     concurrent: true
 
 # jobs for test a new iso
@@ -427,7 +443,7 @@
     description: 'The Smoke test for {fuel-release}.{plugin-name}.{plugin-version}'
     concurrent: true
     project-type: multijob
-    node: runner    
+    node: runner
     <<: *runner-parameters
     <<: *runner-properties
     <<: *runner-wrappers
@@ -448,11 +464,13 @@
       - inject:
           properties-file: iso_file
       - multijob:
-          name: 'Smoke tests for nsxv.vcenter5'
+          name: 'The smoke test for {fuel-release}.{plugin-name}.{plugin-version}'
           condition: COMPLETED
           projects:
-           - name: '{fuel-release}.{plugin-name}.nsxv_smoke'
+           - name: '{fuel-release}.{plugin-name}.smoke.test'
              current-parameters: true
+             predefined-parameters: |
+               TEST_GROUP=nsxv_smoke
              property-file: iso_file
              kill-phase-on: NEVER
 
@@ -472,7 +490,7 @@
 
 - job-template:
     name: '{bvt-name}'
-    description: 'The Smoke test for {fuel-release}.{plugin-name}.{plugin-version}'
+    description: 'The BVT test for {fuel-release}.{plugin-name}.{plugin-version}'
     disabled: false
     concurrent: true
     project-type: multijob
@@ -497,14 +515,15 @@
       - inject:
           properties-file: iso_file
       - multijob:
-          name: 'Smoke tests for nsxv.vcenter5'
+          name: 'The BVT test for {fuel-release}.{plugin-name}.{plugin-version}'
           condition: COMPLETED
           projects:
-           - name: '{fuel-release}.{plugin-name}.nsxv_bvt'
+           - name: '{fuel-release}.{plugin-name}.bvt.test'
              current-parameters: true
              property-file: iso_file
+             predefined-parameters: |
+               TEST_GROUP=nsxv_bvt
              kill-phase-on: NEVER
-
     publishers:
       - postbuildscript:
           script-only-if-succeeded: False

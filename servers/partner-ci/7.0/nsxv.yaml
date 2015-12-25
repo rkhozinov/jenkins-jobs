@@ -483,7 +483,7 @@
           which-build: last-successful
           stable: true
       - multijob:
-          description: 'The smoke test for {fuel-release}.{plugin-name}.{plugin-version}'
+          name: 'The smoke test for {fuel-release}.{plugin-name}.{plugin-version}'
           condition: COMPLETED
           projects:
            - name: '{fuel-release}.{plugin-name}.smoke.test'
@@ -527,7 +527,7 @@
           which-build: last-successful
           stable: true
       - multijob:
-          name: 'BVT tests for dvs.vcenter5'
+          name: 'The BVT test for {fuel-release}.{plugin-name}.{plugin-version}'
           condition: COMPLETED
           projects:
            - name: '{fuel-release}.{plugin-name}.bvt.test'
@@ -623,7 +623,7 @@
           which-build: last-successful
           stable: true
       - multijob:
-          name: 'System tests for {fuel-release}.{plugin-version} vcenter5'
+          name: 'System tests for nsxv {fuel-release}.{plugin-version} vcenter5'
           condition: COMPLETED
           projects:
            - name: '{fuel-release}.{plugin-name}.nsxv_vcenter_ha_mode'

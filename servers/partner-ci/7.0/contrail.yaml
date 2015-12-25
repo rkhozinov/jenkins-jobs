@@ -235,6 +235,10 @@
           default: ''
           description: 'The path to the contrail package on storage'
       - string:
+          name: CONTRAIL_PLUGIN_PACK_UB_PATH
+          default: ''
+          description: 'The path to the contrail package on storage'
+      - string:
           name: GERRIT_REFSPEC
           default: 'refs/heads/{gerrit-branch}'
           description: 'Refspecs for commits in fuel-qa gerrit separated with spaces'
@@ -299,6 +303,10 @@
       - string:
           name: CONTRAIL_PLUGIN_PATH
           default: ''
+      - string:
+          name: CONTRAIL_PLUGIN_PACK_UB_PATH
+          default: ''
+          description: 'The path to the contrail package on storage'
       - string:
           name: MIRROR
           default: 'http://mirror.seed-cz1.fuel-infra.org'
