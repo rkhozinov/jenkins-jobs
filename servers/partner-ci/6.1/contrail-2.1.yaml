@@ -11,7 +11,7 @@
     nightly-name: '{fuel-release}.{plugin-name}.{plugin-version}.nightly'
     custom-name: '{fuel-release}.{plugin-name}.{plugin-version}.custom'
 
-    nightly-timer: 'H 21 * * *'
+    nightly-timer: 'H 23 * * *'
     regression-timer: 'H 18 * * *'
 
     use-snapshots: false
@@ -19,7 +19,7 @@
     disable-ssl: false
     bonding: false
     update-master: true
-    debug: true
+    debug: false
     runner-timeout: 600
     test-timeout: 500
 
@@ -205,6 +205,13 @@
           name: UPDATE_MASTER
           default: '{update-master}'
           description: 'turns on update fuel master node to maintenance update'
+      - bool:
+          name: BONDING
+          default: '{bonding}'
+      - bool:
+          name: USE_SNAPSHOTS
+          default: '{use-snapshots}'
+          descrition: 'Will be used existing environment'
       - string:
           name: MIRROR
           default: 'http://mirror.seed-cz1.fuel-infra.org'
@@ -245,13 +252,6 @@
           name: ENV_PREFIX
           default: '{fuel-release}.{plugin-name}'
           description: 'The name of devops env. Needed to properly work of existing mode of devops'
-      - bool:
-          name: BONDING
-          default: '{bonding}'
-      - bool:
-          name: USE_SNAPSHOTS
-          default: '{use-snapshots}'
-          descrition: 'Will be used existing environment'
 
 
 ## parameters for jobs created per test-group and custom test job
@@ -270,6 +270,17 @@
           name: FORCE_ERASE
           default: '{force-erase}'
           description: "Erase all envs before test"
+      - bool:
+          name: UPDATE_MASTER
+          default: '{update-master}'
+          description: 'turns on update fuel master node to maintenance update'
+      - bool:
+          name: BONDING
+          default: '{bonding}'
+      - bool:
+          name: USE_SNAPSHOTS
+          default: '{use-snapshots}'
+          descrition: 'Will be used existing environment'
       - string:
           name: TEST_GROUP
           default: '{testgroup}'
@@ -294,10 +305,6 @@
       - string:
           name: CONTRAIL_PLUGIN_PATH
           default: ''
-      - bool:
-          name: UPDATE_MASTER
-          default: '{update-master}'
-          description: 'turns on update fuel master node to maintenance update'
       - string:
           name: MIRROR
           default: 'http://mirror.seed-cz1.fuel-infra.org'
@@ -357,13 +364,6 @@
           name: ENV_PREFIX
           default: '{fuel-release}.{plugin-name}'
           description: 'The name of devops env. Needed to properly work of existing mode of devops'
-      - bool:
-          name: BONDING
-          default: '{bonding}'
-      - bool:
-          name: USE_SNAPSHOTS
-          default: '{use-snapshots}'
-          descrition: 'Will be used existing environment'
 
 
 - defaults:
@@ -458,19 +458,18 @@
       - email:
           recipients: '{email-to}'
 
-# jobs for system test
+## jobs for system test
 - job-template:
     name: '{fuel-release}.{plugin-name}.{plugin-version}.{testgroup}.open'
     description: 'The test "{testgroup}" for {fuel-release}.{plugin-name}.{plugin-version} open contrail'
     concurrent: true
 
-# jobs for system test
 - job-template:
     name: '{fuel-release}.{plugin-name}.{plugin-version}.{testgroup}.juniper'
     description: 'The test "{testgroup}" for {fuel-release}.{plugin-name}.{plugin-version} juniper contrail'
     concurrent: true
 
-# jobs for bvt tests
+## jobs for bvt tests
 - job-template:
     name: '{fuel-release}.{plugin-name}.{plugin-version}.bvt.test.open'
     description: 'The test for {fuel-release}.{plugin-name}.{plugin-version} open contrail'
@@ -481,19 +480,18 @@
     description: 'The test for {fuel-release}.{plugin-name}.{plugin-version} juniper contrail'
     concurrent: true
 
-# jobs for smoke tests
+## jobs for smoke tests
 - job-template:
     name: '{fuel-release}.{plugin-name}.{plugin-version}.smoke.test.open'
     description: 'The test for {fuel-release}.{plugin-name}.{plugin-version} open contrail'
     concurrent: true
 
-# jobs for system tests
 - job-template:
     name: '{fuel-release}.{plugin-name}.{plugin-version}.smoke.test.juniper'
     description: 'The test for {fuel-release}.{plugin-name}.{plugin-version} juniper contrail'
     concurrent: true
 
-# jobs for regression tests
+## jobs for regression tests
 - job-template:
     name: '{fuel-release}.{plugin-name}.{plugin-version}.regression.test.open'
     description: 'The test for {fuel-release}.{plugin-name}.{plugin-version} open contrail'
@@ -641,7 +639,7 @@
           recipients: '{email-to}'
     builders:
       - multijob:
-          name: '1st phase - regression test'
+          name: 'regression test for open/juniper contrail'
           condition: FAILURE
           projects:
             - name: '{fuel-release}.{plugin-name}.{plugin-version}.regression.test.open'
@@ -749,51 +747,51 @@
               kill-phase-on: NEVER
 
             - name: '{fuel-release}.{plugin-name}.{plugin-version}.deploy_ha_contrail_plugin.open'
-              predefined-parameters: CONTRAIL_DISTRIBUTION=juniper
+              predefined-parameters: CONTRAIL_DISTRIBUTION=open
               current-parameters: true
               kill-phase-on: NEVER
 
             - name: '{fuel-release}.{plugin-name}.{plugin-version}.check_bonding_with_contrail.open'
               current-parameters: true
-              predefined-parameters: CONTRAIL_DISTRIBUTION=juniper
+              predefined-parameters: CONTRAIL_DISTRIBUTION=open
               kill-phase-on: NEVER
 
             - name: '{fuel-release}.{plugin-name}.{plugin-version}.contrail_jumbo_frame.open'
               current-parameters: true
-              predefined-parameters: CONTRAIL_DISTRIBUTION=juniper
+              predefined-parameters: CONTRAIL_DISTRIBUTION=open
               kill-phase-on: NEVER
 
             - name: '{fuel-release}.{plugin-name}.{plugin-version}.contrail_plugin_add_delete_compute_node.open'
               current-parameters: true
-              predefined-parameters: CONTRAIL_DISTRIBUTION=juniper
+              predefined-parameters: CONTRAIL_DISTRIBUTION=open
               kill-phase-on: NEVER
 
             - name: '{fuel-release}.{plugin-name}.{plugin-version}.contrail_plugin_add_contrail_controller_node.open'
               current-parameters: true
-              predefined-parameters: CONTRAIL_DISTRIBUTION=juniper
+              predefined-parameters: CONTRAIL_DISTRIBUTION=open
               kill-phase-on: NEVER
 
             - name: '{fuel-release}.{plugin-name}.{plugin-version}.contrail_plugin_add_delete_controller_node.open'
               current-parameters: true
-              predefined-parameters: CONTRAIL_DISTRIBUTION=juniper
+              predefined-parameters: CONTRAIL_DISTRIBUTION=open
               kill-phase-on: NEVER
 
             - name: '{fuel-release}.{plugin-name}.{plugin-version}.deploy_contrail_with_base_os_ceph.open'
               current-parameters: true
-              predefined-parameters: CONTRAIL_DISTRIBUTION=juniper
+              predefined-parameters: CONTRAIL_DISTRIBUTION=open
               kill-phase-on: NEVER
 
             - name: '{fuel-release}.{plugin-name}.{plugin-version}.deploy_contrail_with_ceilometer.open'
               current-parameters: true
-              predefined-parameters: CONTRAIL_DISTRIBUTION=juniper
+              predefined-parameters: CONTRAIL_DISTRIBUTION=open
               kill-phase-on: NEVER
 
             - name: '{fuel-release}.{plugin-name}.{plugin-version}.deploy_ha_with_pub_net_all_nodes.open'
               current-parameters: true
-              predefined-parameters: CONTRAIL_DISTRIBUTION=juniper
+              predefined-parameters: CONTRAIL_DISTRIBUTION=open
               kill-phase-on: NEVER
 
             - name: '{fuel-release}.{plugin-name}.{plugin-version}.deploy_ha_with_vlan_tagging.open'
               current-parameters: true
-              predefined-parameters: CONTRAIL_DISTRIBUTION=juniper
+              predefined-parameters: CONTRAIL_DISTRIBUTION=open
               kill-phase-on: NEVER
