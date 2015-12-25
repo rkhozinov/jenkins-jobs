@@ -49,10 +49,16 @@
       - '{build-name}'
       - '{nightly-name}'
       - '{custom-name}'
+
       - '{smoke-name}'
+      - '{fuel-release}.{plugin-name}.smoke.test'
+
       - '{bvt-name}'
+      - '{fuel-release}.{plugin-name}.bvt.test'
+
       - '{regression-name}'
       - '{fuel-release}.{plugin-name}.regression.test'
+
       - '{fuel-release}.{plugin-name}.{testgroup}'
 
 ## common git settings to get sources
@@ -200,6 +206,10 @@
           default: 'vcenterha'
           description: 'Snapshot name for vcenter lab'
       - bool:
+          name: USE_SNAPSHOTS
+          default: '{use-snapshots}'
+          descrition: 'Will be used existing environment'
+      - bool:
           name: UPDATE_MASTER
           default: '{update-master}'
           description: 'turns on update fuel master node to maintenance update'
@@ -235,10 +245,6 @@
           name: ENV_PREFIX
           default: '{fuel-release}.{plugin-name}'
           description: 'The name of devops env. Needed to properly work of existing mode of devops'
-      - bool:
-          name: USE_SNAPSHOTS
-          default: '{use-snapshots}'
-          descrition: 'Will be used existing environment'
 
 
 ## parameters for jobs created per test-group and custom test job
@@ -264,6 +270,14 @@
           name: VCENTER_SNAPSHOT
           default: 'vcenterha'
           description: 'Snapshot name for vcenter lab'
+      - bool:
+          name: USE_SNAPSHOTS
+          default: '{use-snapshots}'
+          descrition: 'Will be used existing environment'
+      - bool:
+          name: UPDATE_MASTER
+          default: '{update-master}'
+          description: 'turns on update fuel master node to maintenance update'
       - string:
           name: ISO_FILE
           default: '{iso-file}'
@@ -275,10 +289,6 @@
       - string:
           name: ISO_VERSION
           description: 'Contrainer for storing an iso build number to output it as job name'
-      - bool:
-          name: UPDATE_MASTER
-          default: '{update-master}'
-          description: 'turns on update fuel master node to maintenance update'
       - string:
           name: MIRROR
           default: 'http://mirror.seed-cz1.fuel-infra.org'
@@ -335,10 +345,6 @@
           name: ENV_PREFIX
           default: '{fuel-release}.{plugin-name}'
           description: 'The name of devops env. Needed to properly work of existing mode of devops'
-      - bool:
-          name: USE_SNAPSHOTS
-          default: '{use-snapshots}'
-          descrition: 'Will be used existing environment'
 
 
 - defaults:
@@ -439,7 +445,19 @@
     description: 'The test "{testgroup}" for {fuel-release}.{plugin-name}.{plugin-version}'
     concurrent: true
 
-# jobs for regression test
+## jobs for bvt tests
+- job-template:
+    name: '{fuel-release}.{plugin-name}.bvt.test'
+    description: 'The test for {fuel-release}.{plugin-name}.{plugin-version}'
+    concurrent: true
+
+## jobs for smoke tests
+- job-template:
+    name: '{fuel-release}.{plugin-name}.smoke.test'
+    description: 'The test for {fuel-release}.{plugin-name}.{plugin-version}'
+    concurrent: true
+
+# jobs for regression tests
 - job-template:
     name: '{fuel-release}.{plugin-name}.regression.test'
     description: 'The regression test for {fuel-release}.{plugin-name}.{plugin-version}'
@@ -471,14 +489,14 @@
           which-build: last-successful
           stable: true
       - multijob:
-          name: 'Smoke tests for dvs.vcenter5'
+          description: 'The smoke test for {fuel-release}.{plugin-name}.{plugin-version}'
           condition: COMPLETED
           projects:
-            - name: '{fuel-release}.{plugin-name}.dvs_vcenter_smoke'
-              current-parameters: true
-              predefined-parameters: |
-                VCENTER_SNAPSHOT=vcenterha
-              kill-phase-on: NEVER
+           - name: '{fuel-release}.{plugin-name}.smoke.test'
+             current-parameters: true
+             predefined-parameters: |
+               TEST_GROUP=dvs_vcenter_smoke
+             kill-phase-on: NEVER
 
     publishers:
       - postbuildscript:
@@ -496,7 +514,7 @@
 
 - job-template:
     name: '{bvt-name}'
-    description: 'The Smoke test for {fuel-release}.{plugin-name}.{plugin-version}'
+    description: 'The BVT test for {fuel-release}.{plugin-name}.{plugin-version}'
     disabled: false
     concurrent: true
     project-type: multijob
@@ -518,14 +536,11 @@
           name: 'BVT tests for dvs.vcenter5'
           condition: COMPLETED
           projects:
-           - name: '{fuel-release}.{plugin-name}.dvs_vcenter_bvt'
+           - name: '{fuel-release}.{plugin-name}.bvt.test'
              current-parameters: true
+             predefined-parameters: |
+               TEST_GROUP=dvs_vcenter_bvt
              kill-phase-on: NEVER
-
-           - name: '{fuel-release}.{plugin-name}.dvs_vcenter_bvt2'
-             current-parameters: true
-             kill-phase-on: NEVER
-
     publishers:
       - postbuildscript:
           script-only-if-succeeded: False
@@ -570,8 +585,8 @@
           recipients: '{email-to}'
     builders:
       - multijob:
-          name: '1st phase - regression test'
-          condition: FAILURE
+          name: 'regression test'
+          condition: COMPLETED
           projects:
             - name: '{fuel-release}.{plugin-name}.regression.test'
               predefined-parameters: |
@@ -614,7 +629,7 @@
           which-build: last-successful
           stable: true
       - multijob:
-          name: 'System tests for dvs{fuel-release}.{plugin-version} vcenter5'
+          name: 'System tests for {fuel-release}.{plugin-version} vcenter5'
           condition: COMPLETED
           projects:
            - name: '{fuel-release}.{plugin-name}.dvs_vcenter_ha_mode'
