@@ -492,14 +492,14 @@
           which-build: last-successful
           stable: true
       - multijob:
-          description: 'The smoke test for {fuel-release}.{plugin-name}.{plugin-version}'
+          name: 'The smoke test for {fuel-release}.{plugin-name}.{plugin-version}'
           condition: COMPLETED
           projects:
-           - name: '{fuel-release}.{plugin-name}.smoke.test'
-             current-parameters: true
-             predefined-parameters: |
-               TEST_GROUP=dvs_vcenter_smoke
-             kill-phase-on: NEVER
+            - name: '{fuel-release}.{plugin-name}.smoke.test'
+              current-parameters: true
+              predefined-parameters: |
+                TEST_GROUP=dvs_vcenter_smoke
+              kill-phase-on: NEVER
 
     publishers:
       - postbuildscript:
@@ -539,11 +539,11 @@
           name: 'BVT tests for dvs.vcenter5'
           condition: COMPLETED
           projects:
-           - name: '{fuel-release}.{plugin-name}.bvt.test'
-             current-parameters: true
-             predefined-parameters: |
-               TEST_GROUP=dvs_vcenter_bvt
-             kill-phase-on: NEVER
+            - name: '{fuel-release}.{plugin-name}.bvt.test'
+              current-parameters: true
+              predefined-parameters: |
+                TEST_GROUP=dvs_vcenter_bvt
+              kill-phase-on: NEVER
     publishers:
       - postbuildscript:
           script-only-if-succeeded: False
@@ -632,7 +632,7 @@
           which-build: last-successful
           stable: true
       - multijob:
-          name: 'System tests for {fuel-release}.{plugin-version} vcenter5'
+          name: 'System tests for {fuel-release}.{plugin-name}.{plugin-version} vcenter5'
           condition: COMPLETED
           projects:
            - name: '{fuel-release}.{plugin-name}.dvs_vcenter_ha_mode'
