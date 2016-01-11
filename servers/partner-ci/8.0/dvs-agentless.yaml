@@ -2,7 +2,7 @@
     name: 'predefined_parameters'
     fuel-release: '8.0'
     plugin-version: '2.0'
-    plugin-name: 'dvs'
+    plugin-name: 'dvs-agentless'
 
     build-name: '{fuel-release}.{plugin-name}.build'
     smoke-name: '{fuel-release}.{plugin-name}.smoke'
@@ -27,7 +27,7 @@
 
     iso-file: ''
     gerrit-repo: 'fuel-plugin-vmware-dvs'
-    gerrit-branch: 'master'
+    gerrit-branch: 'stable/8.0-agentless'
     email-to: 'rkhozinov@mirantis.com'
     released-plugin-path: '/storage/dvs/released/dvs-2.0.0.noarch.rpm'
 
@@ -209,10 +209,6 @@
           name: USE_SNAPSHOTS
           default: '{use-snapshots}'
           descrition: 'Will be used existing environment'
-#      - string:
-#          name: POOL_PUBLIC
-#          default: '172.16.0.0/24:24'
-#          description: 'Snapshot name for vsphere lab'
       - string:
           name: VCENTER_SNAPSHOT
           default: 'vcenterha'
@@ -255,10 +251,6 @@
           name: USE_SNAPSHOTS
           default: '{use-snapshots}'
           descrition: 'Will be used existing environment'
-#      - string:
-#          name: POOL_PUBLIC
-#          default: '172.16.0.0/24:24'
-#          description: 'Snapshot name for vsphere lab'
       - string:
           name: TEST_GROUP
           default: '{testgroup}'
