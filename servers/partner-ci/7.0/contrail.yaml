@@ -366,7 +366,14 @@
           name: ENV_PREFIX
           default: '{fuel-release}.{plugin-name}'
           description: 'The name of devops env. Needed to properly work of existing mode of devops'
-
+      - string:
+          name: TESTRAIL_PLAN_NAME
+          default: ''
+          description: ''
+      - string:
+          name: TESTRAIL_CONFIGURATION
+          default: ''
+          description: ''
 
 - defaults:
     name: global
