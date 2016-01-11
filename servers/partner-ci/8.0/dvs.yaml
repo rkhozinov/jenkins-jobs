@@ -209,10 +209,10 @@
           name: USE_SNAPSHOTS
           default: '{use-snapshots}'
           descrition: 'Will be used existing environment'
-      - string:
-          name: POOL_PUBLIC
-          default: '172.16.0.0/24:24'
-          description: 'Snapshot name for vsphere lab'
+#      - string:
+#          name: POOL_PUBLIC
+#          default: '172.16.0.0/24:24'
+#          description: 'Snapshot name for vsphere lab'
       - string:
           name: VCENTER_SNAPSHOT
           default: 'vcenterha'
@@ -255,10 +255,10 @@
           name: USE_SNAPSHOTS
           default: '{use-snapshots}'
           descrition: 'Will be used existing environment'
-      - string:
-          name: POOL_PUBLIC
-          default: '172.16.0.0/24:24'
-          description: 'Snapshot name for vsphere lab'
+#      - string:
+#          name: POOL_PUBLIC
+#          default: '172.16.0.0/24:24'
+#          description: 'Snapshot name for vsphere lab'
       - string:
           name: TEST_GROUP
           default: '{testgroup}'
