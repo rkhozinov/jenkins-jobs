@@ -4,7 +4,7 @@
     plugin-version: '2.0'
     plugin-name: 'vcenter'
 
-    download-iso-name: '8.0.dvs.canary'
+    download-iso-name: '8.0.dvs-agentless.canary'
     nightly-name: '{fuel-release}.{plugin-name}.nightly'
     custom-name: '{fuel-release}.{plugin-name}.custom'
 
@@ -43,6 +43,8 @@
       - vcenter_multiroles_ceilometer
       - vcenter_multiroles_cindervmdk_and_ceph
       - vcenter_multiroles_cindervmdk_and_cinder
+      - vcenter_delete_controller
+      - vcenter_delete_cindervmware
     jobs:
       - '{nightly-name}'
       - '{custom-name}'
@@ -417,6 +419,18 @@
              kill-phase-on: NEVER
              property-file: iso_file
            - name: '{fuel-release}.{plugin-name}.vcenter_add_controller'
+             current-parameters: true
+             predefined-parameters: |
+               TEST_GROUP_PREFIX=system_test.vcenter.scale_vcenter_dvs
+             kill-phase-on: NEVER
+             property-file: iso_file
+           - name: '{fuel-release}.{plugin-name}.vcenter_delete_cindervmware'
+             current-parameters: true
+             predefined-parameters: |
+               TEST_GROUP_PREFIX=system_test.vcenter.scale_vcenter_dvs
+             kill-phase-on: NEVER
+             property-file: iso_file
+           - name: '{fuel-release}.{plugin-name}.vcenter_delete_controller'
              current-parameters: true
              predefined-parameters: |
                TEST_GROUP_PREFIX=system_test.vcenter.scale_vcenter_dvs

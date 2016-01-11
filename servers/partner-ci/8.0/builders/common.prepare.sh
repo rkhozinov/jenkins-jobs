@@ -111,7 +111,7 @@ fix_logger
 source "$VENV_PATH/bin/activate"
 
 if [[ "${FORCE_ERASE}" -eq "true" ]]; then
-   delete_envs
+  delete_envs
 else
   # determine free space before run the cleaner
   free_space=$(df -h | grep '/$' | awk '{print $4}' | tr -d G)
