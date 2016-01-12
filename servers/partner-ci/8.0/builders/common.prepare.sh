@@ -80,6 +80,11 @@ function prepare_venv {
     wget $REQS_PATH
     export REQS_PATH="$(pwd)/requirements.txt"
 
+    if [[ "${REQS_BRANCH}" == "stable/8.0" ]]; then
+      # bug: https://bugs.launchpad.net/fuel/+bug/1528193
+      sed -i 's/python-neutronclient.*/python-neutronclient==3.1.0/' $REQS_PATH
+    fi
+
     [ ! -d $VENV_PATH ] && virtualenv "${VENV_PATH}" || echo "${VENV_PATH} already exist"
     source "${VENV_PATH}/bin/activate"
     pip --version
