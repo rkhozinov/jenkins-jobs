@@ -19,7 +19,8 @@
     disable-ssl: false
     bonding: false
     update-master: true
-    debug: false
+
+    debug: true
     runner-timeout: 600
     test-timeout: 500
 
@@ -36,6 +37,7 @@
       - contrail_ha
       - contrail_ha_baseos
       - contrail_ceilometer
+      - contrail_bonding
 
     jobs:
       - '{build-name}'
@@ -673,6 +675,7 @@
 
 - job-template:
     name: '{nightly-name}'
+
     project-type: multijob
     disabled: false
     node: runner
@@ -722,6 +725,13 @@
             - name: '{fuel-release}.{plugin-name}.{plugin-version}.contrail_ceilometer.juniper'
               predefined-parameters: |
                  CONTRAIL_DISTRIBUTION=juniper
+              current-parameters: true
+              kill-phase-on: NEVER
+
+            - name: '{fuel-release}.{plugin-name}.{plugin-version}.contrail_bonding.juniper'
+              predefined-parameters: |
+                 CONTRAIL_DISTRIBUTION=juniper
+                 BONDING=true
               current-parameters: true
               kill-phase-on: NEVER
 

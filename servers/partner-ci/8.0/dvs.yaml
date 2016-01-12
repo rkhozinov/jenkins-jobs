@@ -43,6 +43,8 @@
       - dvs_vcenter_bind_port
       - dvs_vcenter_add_delete_controller
       - dvs_vcenter_add_delete_nodes
+      - dvs_vcenter_reset_controller
+      - dvs_vcenter_net_template
 
     jobs:
       - '{build-name}'
@@ -295,7 +297,7 @@
           description: 'Amount of nodes in the test lab'
       - string:
           name: ADMIN_NODE_MEMORY
-          default: '4096'
+          default: '8192'
           description: 'Amount of vitrual RAM for admin node'
       - string:
           name: SLAVE_NODE_MEMORY
@@ -313,7 +315,14 @@
           name: ENV_PREFIX
           default: '{fuel-release}.{plugin-name}'
           description: 'The name of devops env. Needed to properly work of existing mode of devops'
-
+      - string:
+          name: TESTRAIL_PLAN_NAME
+          default: ''
+          description: ''
+      - string:
+          name: TESTRAIL_CONFIGURATION
+          default: ''
+          description: ''
 
 - defaults:
     name: global
@@ -709,6 +718,8 @@
           project: '{canary-name}'
           which-build: last-successful
           stable: true
+
+      -
       - inject:
           properties-file: iso_file
       - multijob:
@@ -760,3 +771,12 @@
              kill-phase-on: NEVER
              property-file: iso_file
 
+           - name: '{fuel-release}.{plugin-name}.dvs_vcenter_reset_controller'
+             current-parameters: true
+             kill-phase-on: NEVER
+             property-file: iso_file
+
+           - name: '{fuel-release}.{plugin-name}.dvs_vcenter_net_template'
+             current-parameters: true
+             kill-phase-on: NEVER
+             property-file: iso_file
