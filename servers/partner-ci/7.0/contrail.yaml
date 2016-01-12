@@ -404,7 +404,6 @@
               # need to delete packages, because we don't wipe workspace,
               # but packages could be duplicated
             - shell: rm -f .*rpm.*
-
       - archive:
           artifacts: 'build.properties'
           allow-empty: false
@@ -412,7 +411,7 @@
           artifacts: 'properties'
           allow-empty: false
       - archive:
-          artifacts: '**/nosetests.xml'
+          artifacts: 'nosetests.xml'
           allow-empty: true
           fingerprint: true
       - archive:
@@ -422,8 +421,11 @@
       - xunit:
           types:
             - junit:
-                pattern: '**/nosetest.xml'
+                pattern: 'nosetest.xml'
                 skip-if-no-test-files: true
+      - junit:
+          results: nosetests.xml
+          health-scale-factor: 1.0
       - email:
           recipients: '{email-to}'
 
