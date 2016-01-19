@@ -211,10 +211,6 @@
           name: USE_SNAPSHOTS
           default: '{use-snapshots}'
           descrition: 'Will be used existing environment'
-#      - string:
-#          name: POOL_PUBLIC
-#          default: '172.16.0.0/24:24'
-#          description: 'Snapshot name for vsphere lab'
       - string:
           name: VCENTER_SNAPSHOT
           default: 'vcenterha'
@@ -257,10 +253,6 @@
           name: USE_SNAPSHOTS
           default: '{use-snapshots}'
           descrition: 'Will be used existing environment'
-#      - string:
-#          name: POOL_PUBLIC
-#          default: '172.16.0.0/24:24'
-#          description: 'Snapshot name for vsphere lab'
       - string:
           name: TEST_GROUP
           default: '{testgroup}'
@@ -718,10 +710,15 @@
           project: '{canary-name}'
           which-build: last-successful
           stable: true
-
-      -
-      - inject:
-          properties-file: iso_file
+      - shell: |
+         # if 'ISO_FILE' parameter is empty, then
+         # need to export data from 'iso_file'
+         # else
+         # need to use ISO_FILE data for tests
+          if [ -z "${{ISO_FILE}}" ]; then
+              source 'iso_file'
+              export ISO_FILE=${{ISO_FILE}}
+          fi
       - multijob:
           name: 'System tests for dvs{fuel-release}.{plugin-version} vcenter5'
           condition: COMPLETED
