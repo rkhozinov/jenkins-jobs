@@ -13,9 +13,12 @@
 
     nightly-timer: 'H 22 * * *'
     regression-timer: 'H 18 * * *'
+    
+    nightly-disabled: false  
 
     use-snapshots: false
     force-erase: true
+    recreate-venv: false
     disable-ssl: true
     update-master: true
 
@@ -204,6 +207,10 @@
           name: FORCE_ERASE
           default: '{force-erase}'
           description: "Erase all envs before test"
+      - bool:
+          name: RECREATE_VENV
+          default: '{recreate-venv}'
+          description: "Recreate virtual environemnt before tests"
       - string:
           name: VCENTER_SNAPSHOT
           default: 'vcenterha'
@@ -249,7 +256,6 @@
           default: '{fuel-release}.{plugin-name}'
           description: 'The name of devops env. Needed to properly work of existing mode of devops'
 
-
 ## parameters for jobs created per test-group and custom test job
 - test-parameters: &test-parameters
     name: 'test-parameters'
@@ -266,6 +272,10 @@
           name: FORCE_ERASE
           default: '{force-erase}'
           description: "Erase all envs before test"
+      - bool:
+          name: RECREATE_VENV
+          default: '{recreate-venv}'
+          description: "Recreate virtual environemnt before tests"
       - string:
           name: TEST_GROUP
           default: '{testgroup}'
@@ -348,7 +358,14 @@
           name: ENV_PREFIX
           default: '{fuel-release}.{plugin-name}'
           description: 'The name of devops env. Needed to properly work of existing mode of devops'
-
+      - string:
+          name: TESTRAIL_PLAN_NAME
+          default: ''
+          description: ''
+      - string:
+          name: TESTRAIL_CONFIGURATION
+          default: ''
+          description: ''
 
 - defaults:
     name: global
@@ -601,7 +618,7 @@
 - job-template:
     name: '{nightly-name}'
     project-type: multijob
-    disabled: true
+    disabled: '{nightly-disabled}'
     node: runner
     <<: *runner-parameters
     <<: *runner-wrappers
