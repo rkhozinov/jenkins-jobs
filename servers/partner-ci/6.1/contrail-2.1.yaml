@@ -13,9 +13,12 @@
 
     nightly-timer: 'H 23 * * *'
     regression-timer: 'H 18 * * *'
+    
+    nightly-disabled: true  
 
     use-snapshots: false
     force-erase: true
+    recreate-venv: false
     disable-ssl: false
     bonding: false
     update-master: true
@@ -203,6 +206,10 @@
           default: '{force-erase}'
           description: "Erase all envs before test"
       - bool:
+          name: RECREATE_VENV
+          default: '{recreate-venv}'
+          description: "Recreate virtual environemnt before tests"
+      - bool:
           name: UPDATE_MASTER
           default: '{update-master}'
           description: 'turns on update fuel master node to maintenance update'
@@ -270,6 +277,10 @@
           name: FORCE_ERASE
           default: '{force-erase}'
           description: "Erase all envs before test"
+      - bool:
+          name: RECREATE_VENV
+          default: '{recreate-venv}'
+          description: "Recreate virtual environemnt before tests"
       - bool:
           name: UPDATE_MASTER
           default: '{update-master}'
@@ -471,6 +482,7 @@
     description: 'The test "{testgroup}" for {fuel-release}.{plugin-name}.{plugin-version} open contrail'
     concurrent: true
 
+# jobs for regression test
 - job-template:
     name: '{fuel-release}.{plugin-name}.{plugin-version}.{testgroup}.juniper'
     description: 'The test "{testgroup}" for {fuel-release}.{plugin-name}.{plugin-version} juniper contrail'
@@ -668,7 +680,7 @@
 - job-template:
     name: '{nightly-name}'
     project-type: multijob
-    disabled: false
+    disabled: '{nightly-disabled}'
     node: runner
     <<: *runner-parameters
     <<: *runner-wrappers
