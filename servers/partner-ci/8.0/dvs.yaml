@@ -15,9 +15,12 @@
 
     nightly-timer: 'H 22 * * *'
     regression-timer: 'H 18 * * *'
+    
+    nightly-disabled: false  
 
     use-snapshots: false
     force-erase: true
+    recreate-venv: false
     disable-ssl: true
     update-master: true
 
@@ -208,13 +211,17 @@
           default: '{force-erase}'
           description: "Erase all envs before test"
       - bool:
-          name: USE_SNAPSHOTS
-          default: '{use-snapshots}'
-          descrition: 'Will be used existing environment'
+          name: RECREATE_VENV
+          default: '{recreate-venv}'
+          description: "Recreate virtual environemnt before tests"
       - string:
           name: VCENTER_SNAPSHOT
           default: 'vcenterha'
           description: 'Snapshot name for vcenter lab'
+      - bool:
+          name: USE_SNAPSHOTS
+          default: '{use-snapshots}'
+          descrition: 'Will be used existing environment'
       - string:
           name: ISO_FILE
           default: '{iso-file}'
@@ -249,6 +256,10 @@
           name: FORCE_ERASE
           default: '{force-erase}'
           description: "Erase all envs before test"
+      - bool:
+          name: RECREATE_VENV
+          default: '{recreate-venv}'
+          description: "Recreate virtual environemnt before tests"
       - bool:
           name: USE_SNAPSHOTS
           default: '{use-snapshots}'
@@ -672,7 +683,7 @@
 - job-template:
     name: '{nightly-name}'
     project-type: multijob
-    disabled: false
+    disabled: '{nightly-disabled}'
     node: runner
     <<: *runner-parameters
     <<: *runner-wrappers

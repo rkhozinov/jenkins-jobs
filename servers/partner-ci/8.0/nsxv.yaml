@@ -15,9 +15,12 @@
 
     nightly-timer: 'H 22 * * *'
     regression-timer: 'H 18 * * *'
+    
+    nightly-disabled: false  
 
     use-snapshots: false
     force-erase: true
+    recreate-venv: false
     disable-ssl: true
     update-master: true
 
@@ -204,13 +207,17 @@
           default: '{force-erase}'
           description: "Erase all envs before test"
       - bool:
-          name: USE_SNAPSHOTS
-          default: '{use-snapshots}'
-          descrition: 'Will be used existing environment'
+          name: RECREATE_VENV
+          default: '{recreate-venv}'
+          description: "Recreate virtual environemnt before tests"
       - string:
           name: VCENTER_SNAPSHOT
           default: 'nsxv'
           description: 'Snapshot name for vcenter lab'
+      - bool:
+          name: USE_SNAPSHOTS
+          default: '{use-snapshots}'
+          descrition: 'Will be used existing environment'
       - string:
           name: ISO_FILE
           default: '{iso-file}'
@@ -245,6 +252,10 @@
           name: FORCE_ERASE
           default: '{force-erase}'
           description: "Erase all envs before test"
+      - bool:
+          name: RECREATE_VENV
+          default: '{recreate-venv}'
+          description: "Recreate virtual environemnt before tests"
       - bool:
           name: USE_SNAPSHOTS
           default: '{use-snapshots}'
@@ -303,7 +314,14 @@
           name: ENV_PREFIX
           default: '{fuel-release}.{plugin-name}'
           description: 'The name of devops env. Needed to properly work of existing mode of devops'
-
+      - string:
+          name: TESTRAIL_PLAN_NAME
+          default: ''
+          description: ''
+      - string:
+          name: TESTRAIL_CONFIGURATION
+          default: ''
+          description: ''
 
 - defaults:
     name: global
@@ -661,7 +679,7 @@
 - job-template:
     name: '{nightly-name}'
     project-type: multijob
-    disabled: false
+    disabled: '{nightly-disabled}'
     node: runner
     <<: *runner-parameters
     <<: *runner-wrappers
@@ -699,8 +717,15 @@
           project: '{canary-name}'
           which-build: last-successful
           stable: true
-      - inject:
-          properties-file: iso_file
+      - shell: |
+         # if 'ISO_FILE' parameter is empty, then
+         # need to export data from 'iso_file'
+         # else
+         # need to use ISO_FILE data for tests
+          if [ -z "${{ISO_FILE}}" ]; then
+              source 'iso_file'
+              export ISO_FILE=${{ISO_FILE}}
+          fi
       - multijob:
           name: 'System tests for nsxv {fuel-release}.{plugin-version} vcenter5'
           condition: COMPLETED
