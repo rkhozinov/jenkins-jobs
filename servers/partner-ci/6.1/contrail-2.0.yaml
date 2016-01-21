@@ -733,7 +733,7 @@
                 BONDING=true
               current-parameters: true
               kill-phase-on: NEVER
-           - name: '{fuel-release}.{plugin-name}.{plugin-version}.deploy_contrail_plugin_with_the_same_names.open'
+            - name: '{fuel-release}.{plugin-name}.{plugin-version}.deploy_contrail_plugin_with_the_same_names.open'
               predefined-parameters: CONTRAIL_DISTRIBUTION=open
               current-parameters: true
               kill-phase-on: NEVER
@@ -767,7 +767,7 @@
                 BONDING=true
               current-parameters: true
               kill-phase-on: NEVER
-           - name: '{fuel-release}.{plugin-name}.{plugin-version}.deploy_contrail_plugin_with_the_same_names.juniper'
+            - name: '{fuel-release}.{plugin-name}.{plugin-version}.deploy_contrail_plugin_with_the_same_names.juniper'
               predefined-parameters: CONTRAIL_DISTRIBUTION=juniper
               current-parameters: true
               kill-phase-on: NEVER
