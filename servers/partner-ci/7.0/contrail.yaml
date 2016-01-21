@@ -13,8 +13,8 @@
 
     nightly-timer: 'H 20 * * *'
     regression-timer: 'H 19 * * *'
-    
-    nightly-disabled: false  
+
+    nightly-disabled: true
 
     use-snapshots: false
     force-erase: true
