@@ -74,16 +74,25 @@ function delete_systest_envs {
    done
 }
 
-function prepare_venv {
-    #rm -rf "${VENV_PATH}"
+## Recreate all an virtual env
+function recreate_venv {
+   [ -d $VENV_PATH ] && rm -rf ${VENV_PATH} || echo "The directory ${VENV_PATH} doesn't exist"
+   virtualenv --clear "${VENV_PATH}"
+}
+
+function get_venv_requirements {
     rm -f requirements.txt*
     wget $REQS_PATH
     export REQS_PATH="$(pwd)/requirements.txt"
+
+    # change version for some package
     if [[ "${REQS_BRANCH}" != "master" ]]; then
       # bug: https://bugs.launchpad.net/fuel/+bug/1528193
-      sed -i 's/python-novaclient>=2.15.0/python-novaclient==2.35.0/' requirements.txt
+      sed -i 's/python-novaclient>=2.15.0/python-novaclient==2.35.0/' $REQS_PATH
     fi
-    [ ! -d $VENV_PATH ] && virtualenv "${VENV_PATH}" || echo "${VENV_PATH} already exist"
+}
+   
+function prepare_venv {
     source "${VENV_PATH}/bin/activate"
     pip --version
     [ $? -ne 0 ] && easy_install -U pip
@@ -108,13 +117,18 @@ function fix_logger {
 
 ####################################################################################
 
-prepare_venv
+[[ "${RECREATE_VENV}" == "true" ]] && recreate_venv || true
+
+get_venv_requirements
+
+[ -d $VENV_PATH ] && prepare_venv || exit 1
+
 fix_logger
 
 source "$VENV_PATH/bin/activate"
 
 if [[ "${FORCE_ERASE}" -eq "true" ]]; then
-   delete_envs
+  delete_envs
 else
   # determine free space before run the cleaner
   free_space=$(df -h | grep '/$' | awk '{print $4}' | tr -d G)
