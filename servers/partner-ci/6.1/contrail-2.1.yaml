@@ -19,7 +19,7 @@
     disable-ssl: false
     bonding: false
     update-master: true
-    debug: false
+    debug: true
     runner-timeout: 600
     test-timeout: 500
 
@@ -27,7 +27,8 @@
     gerrit-repo: 'fuel-plugin-contrail'
     gerrit-branch: 'stable/2.1'
     email-to: 'rkhozinov@mirantis.com'
-    released-plugin-path: '/storage/contrail/released/contrail-2.1-2.1.0-1.noarch.rpm'
+
+    released-plugin-path: '/storage/contrail/released/contrail-2.1-2.1.1-1.noarch.rpm'
 
     testgroup:
       - check_bonding_with_contrail
