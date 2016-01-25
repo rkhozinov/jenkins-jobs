@@ -77,7 +77,7 @@ function delete_systest_envs {
 ## Recreate all an virtual env
 function recreate_venv {
    [ -d $VENV_PATH ] && rm -rf ${VENV_PATH} || echo "The directory ${VENV_PATH} doesn't exist"
-   virtualenv --clear "${VENV_PATH}"
+   virtualenv --system-site-packages "${VENV_PATH}"
 }
 
 function get_venv_requirements {

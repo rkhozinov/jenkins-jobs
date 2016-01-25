@@ -14,9 +14,11 @@
     nightly-timer: 'H 22 * * *'
     regression-timer: 'H 18 * * *'
 
+    nightly-disabled: false
     use-snapshots: false
     force-erase: true
-    disable-ssl: true
+    recreate-venv: true
+    disable-ssl: false
     update-master: true
 
     debug: true
@@ -202,6 +204,14 @@
           name: FORCE_ERASE
           default: '{force-erase}'
           description: "Erase all envs before test"
+      - bool:
+          name: RECREATE_VENV
+          default: '{recreate-venv}'
+          description: "Recreate virtual environemnt before tests"
+      - bool:
+          name: UPDATE_MASTER
+          default: '{update-master}'
+          description: 'turns on update fuel master node to maintenance update'
       - string:
           name: VCENTER_SNAPSHOT
           default: 'vcenterha'
@@ -210,10 +220,6 @@
           name: USE_SNAPSHOTS
           default: '{use-snapshots}'
           descrition: 'Will be used existing environment'
-      - bool:
-          name: UPDATE_MASTER
-          default: '{update-master}'
-          description: 'turns on update fuel master node to maintenance update'
       - string:
           name: MIRROR
           default: 'http://mirror.seed-cz1.fuel-infra.org'
@@ -247,7 +253,6 @@
           default: '{fuel-release}.{plugin-name}'
           description: 'The name of devops env. Needed to properly work of existing mode of devops'
 
-
 ## parameters for jobs created per test-group and custom test job
 - test-parameters: &test-parameters
     name: 'test-parameters'
@@ -264,6 +269,10 @@
           name: FORCE_ERASE
           default: '{force-erase}'
           description: "Erase all envs before test"
+      - bool:
+          name: RECREATE_VENV
+          default: '{recreate-venv}'
+          description: "Recreate virtual environemnt before tests"
       - string:
           name: TEST_GROUP
           default: '{testgroup}'
@@ -346,7 +355,14 @@
           name: ENV_PREFIX
           default: '{fuel-release}.{plugin-name}'
           description: 'The name of devops env. Needed to properly work of existing mode of devops'
-
+      - string:
+          name: TESTRAIL_PLAN_NAME
+          default: ''
+          description: ''
+      - string:
+          name: TESTRAIL_CONFIGURATION
+          default: ''
+          description: ''
 
 - defaults:
     name: global
@@ -366,9 +382,9 @@
           project: '{build-name}'
           which-build: last-successful
       - shell:
-          !include-raw-escape builders/common.prepare.sh
+          !include-raw-escape: builders/common.prepare.sh
       - shell:
-          !include-raw-escape builders/dvs.test.sh
+          !include-raw-escape: builders/dvs.test.sh
     publishers:
       - postbuildscript:
           script-only-if-succeeded: False
@@ -377,7 +393,6 @@
               # need to delete packages, because we don't wipe workspace,
               # but packages could be duplicated
             - shell: rm -f .*rpm.*
-
       - archive:
           artifacts: 'build.properties'
           allow-empty: false
@@ -385,7 +400,7 @@
           artifacts: 'properties'
           allow-empty: false
       - archive:
-          artifacts: '**/nosetests.xml'
+          artifacts: 'nosetests.xml'
           allow-empty: true
           fingerprint: true
       - archive:
@@ -395,8 +410,11 @@
       - xunit:
           types:
             - junit:
-                pattern: '**/nosetest.xml'
+                pattern: 'nosetest.xml'
                 skip-if-no-test-files: true
+      - junit:
+          results: nosetests.xml
+          health-scale-factor: 1.0
       - email:
           recipients: '{email-to}'
 
@@ -423,9 +441,9 @@
           weight: 1
     builders:
       - shell:
-          !include-raw-escape './builders/build-plugin.sh'
+          !include-raw-escape: './builders/build-plugin.sh'
       - shell:
-          !include-raw-escape './builders/rpm-check.sh'
+          !include-raw-escape: './builders/rpm-check.sh'
     publishers:
       - postbuildscript:
           script-only-if-succeeded: False
@@ -440,7 +458,7 @@
       - email:
           recipients: '{email-to}'
 
-# jobs for system tests
+## jobs for system test
 - job-template:
     name: '{fuel-release}.{plugin-name}.{testgroup}'
     description: 'The test "{testgroup}" for {fuel-release}.{plugin-name}.{plugin-version}'
@@ -534,7 +552,7 @@
           which-build: last-successful
           stable: true
       - multijob:
-          name: 'BVT tests for dvs.vcenter5'
+          name: 'The BVT test for {fuel-release}.{plugin-name}.{plugin-version}'
           condition: COMPLETED
           projects:
            - name: '{fuel-release}.{plugin-name}.bvt.test'
@@ -599,8 +617,8 @@
 - job-template:
     name: '{nightly-name}'
     project-type: multijob
-    disabled: true
     node: runner
+    disabled: '{nightly-disabled}'
     <<: *runner-parameters
     <<: *runner-wrappers
     properties:
@@ -630,7 +648,7 @@
           which-build: last-successful
           stable: true
       - multijob:
-          name: 'System tests for {fuel-release}.{plugin-version} vcenter5'
+          name: 'System tests for dvs {fuel-release}.{plugin-version} vcenter5'
           condition: COMPLETED
           projects:
            - name: '{fuel-release}.{plugin-name}.dvs_vcenter_ha_mode'
