@@ -244,6 +244,10 @@
           default: ''
           description: 'The path to the contrail package on storage'
       - string:
+          name: VSRX_TEMPLATE_PATH
+          default: '/storage/contrail/vSRX1.template'
+          description: 'The path to the vsrx template'
+      - string:
           name: CONTRAIL_PLUGIN_PACK_UB_PATH
           default: ''
           description: 'The path to the contrail package on storage'
@@ -315,6 +319,10 @@
       - string:
           name: CONTRAIL_PLUGIN_PATH
           default: ''
+      - string:
+          name: VSRX_TEMPLATE_PATH
+          default: '/storage/contrail/vSRX1.template'
+          description: 'The path to the vsrx template'
       - string:
           name: CONTRAIL_PLUGIN_PACK_UB_PATH
           default: ''
