@@ -11,8 +11,11 @@
     nightly-timer: 'H 22 * * *'
     regression-timer: 'H 18 * * *'
 
+    nightly-disabled: false
+
     use-snapshots: false
     force-erase: true
+    recreate-venv: false
     disable-ssl: true
     update-master: true
 
@@ -191,6 +194,10 @@
           name: FORCE_ERASE
           default: '{force-erase}'
           description: "Erase all envs before test"
+      - bool:
+          name: RECREATE_VENV
+          default: '{recreate-venv}'
+          description: "Recreate virtual environemnt before tests"
       - string:
           name: TEST_GROUP_PREFIX
           default: 'system_test.vcenter.deploy_vcenter_dvs_run_ostf'
@@ -203,6 +210,10 @@
           name: VCENTER_SNAPSHOT
           default: 'vcenterha'
           description: 'Snapshot name for vcenter lab'
+      - bool:
+          name: USE_SNAPSHOTS
+          default: '{use-snapshots}'
+          descrition: 'Will be used existing environment'
       - string:
           name: ISO_FILE
           default: '{iso-file}'
@@ -219,10 +230,6 @@
           name: ENV_PREFIX
           default: '{fuel-release}.{plugin-name}'
           description: 'The name of devops env. Needed to properly work of existing mode of devops'
-      - bool:
-          name: USE_SNAPSHOTS
-          default: '{use-snapshots}'
-          descrition: 'Will be used existing environment'
 
 
 ## parameters for jobs created per test-group and custom test job
@@ -241,6 +248,14 @@
           name: FORCE_ERASE
           default: '{force-erase}'
           description: "Erase all envs before test"
+      - bool:
+          name: RECREATE_VENV
+          default: '{recreate-venv}'
+          description: "Recreate virtual environemnt before tests"
+      - bool:
+          name: USE_SNAPSHOTS
+          default: '{use-snapshots}'
+          descrition: 'Will be used existing environment'
       - string:
           name: POOL_PUBLIC
           default: '172.16.0.0/24:24'
@@ -285,11 +300,11 @@
           description: 'Amount of nodes in the test lab'
       - string:
           name: ADMIN_NODE_MEMORY
-          default: '4096'
+          default: '8192'
           description: 'Amount of vitrual RAM for admin node'
       - string:
           name: SLAVE_NODE_MEMORY
-          default: '4096'
+          default: '8192'
           description: 'Amount of vitrual RAM per slave node'
       - string:
           name: ADMIN_NODE_CPU
@@ -303,10 +318,14 @@
           name: ENV_PREFIX
           default: '{fuel-release}.{plugin-name}'
           description: 'The name of devops env. Needed to properly work of existing mode of devops'
-      - bool:
-          name: USE_SNAPSHOTS
-          default: '{use-snapshots}'
-          descrition: 'Will be used existing environment'
+      - string:
+          name: TESTRAIL_PLAN_NAME
+          default: ''
+          description: ''
+      - string:
+          name: TESTRAIL_CONFIGURATION
+          default: ''
+          description: ''
 
 - defaults:
     name: global
@@ -374,7 +393,7 @@
 - job-template:
     name: '{nightly-name}'
     project-type: multijob
-    disabled: false
+    disabled: true
     node: runner
     <<: *runner-parameters
     <<: *runner-wrappers
@@ -406,8 +425,13 @@
       - copyartifact:
           project: '{download-iso-name}'
           which-build: last-successful
-      - inject:
-          properties-file: iso_file
+      - shell: |
+          if [[ -z "${{ISO_FILE}}" ]]; then
+             source 'iso_file'
+             export ISO_FILE=${{ISO_FILE}}
+          else
+             echo "iso file is ${{ISO_FILE}}"
+          fi
       - multijob:
           name: 'System tests for dvs{fuel-release}.{plugin-version} vcenter5'
           condition: COMPLETED
@@ -415,84 +439,99 @@
            - name: '{fuel-release}.{plugin-name}.vcenter_add_cindervmware'
              current-parameters: true
              predefined-parameters: |
+               ISO_FILE=${{ISO_FILE}}
                TEST_GROUP_PREFIX=system_test.vcenter.scale_vcenter_dvs
              kill-phase-on: NEVER
-             property-file: iso_file
            - name: '{fuel-release}.{plugin-name}.vcenter_add_controller'
              current-parameters: true
              predefined-parameters: |
+               ISO_FILE=${{ISO_FILE}}
                TEST_GROUP_PREFIX=system_test.vcenter.scale_vcenter_dvs
              kill-phase-on: NEVER
-             property-file: iso_file
            - name: '{fuel-release}.{plugin-name}.vcenter_delete_cindervmware'
              current-parameters: true
              predefined-parameters: |
+               ISO_FILE=${{ISO_FILE}}
                TEST_GROUP_PREFIX=system_test.vcenter.scale_vcenter_dvs
              kill-phase-on: NEVER
-             property-file: iso_file
            - name: '{fuel-release}.{plugin-name}.vcenter_delete_controller'
              current-parameters: true
              predefined-parameters: |
+               ISO_FILE=${{ISO_FILE}}
                TEST_GROUP_PREFIX=system_test.vcenter.scale_vcenter_dvs
              kill-phase-on: NEVER
-             property-file: iso_file
            - name: '{fuel-release}.{plugin-name}.vcenter_ceilometer_and_computevmware'
+             predefined-parameters: |
+               ISO_FILE=${{ISO_FILE}}
              current-parameters: true
              kill-phase-on: NEVER
-             property-file: iso_file
            - name: '{fuel-release}.{plugin-name}.vcenter_ceph_and_computevmware'
+             predefined-parameters: |
+               ISO_FILE=${{ISO_FILE}}
              current-parameters: true
              kill-phase-on: NEVER
-             property-file: iso_file
            - name: '{fuel-release}.{plugin-name}.vcenter_cindervmdk_and_computevmware'
+             predefined-parameters: |
+               ISO_FILE=${{ISO_FILE}}
              current-parameters: true
              kill-phase-on: NEVER
-             property-file: iso_file
            - name: '{fuel-release}.{plugin-name}.vcenter_computevmware'
+             predefined-parameters: |
+               ISO_FILE=${{ISO_FILE}}
              current-parameters: true
              kill-phase-on: NEVER
-             property-file: iso_file
            - name: '{fuel-release}.{plugin-name}.vcenter_dvs_bvt'
+             predefined-parameters: |
+               ISO_FILE=${{ISO_FILE}}
              current-parameters: true
              kill-phase-on: NEVER
-             property-file: iso_file
            - name: '{fuel-release}.{plugin-name}.vcenter_dvs_smoke'
+             predefined-parameters: |
+               ISO_FILE=${{ISO_FILE}}
              current-parameters: true
              kill-phase-on: NEVER
-             property-file: iso_file
            - name: '{fuel-release}.{plugin-name}.vcenter_glance_backend_and_computevmware'
+             predefined-parameters: |
+               ISO_FILE=${{ISO_FILE}}
              current-parameters: true
              kill-phase-on: NEVER
-             property-file: iso_file
            - name: '{fuel-release}.{plugin-name}.vcenter_ha_ceilometer'
+             predefined-parameters: |
+               ISO_FILE=${{ISO_FILE}}
              current-parameters: true
              kill-phase-on: NEVER
-             property-file: iso_file
            - name: '{fuel-release}.{plugin-name}.vcenter_ha_ceph'
+             predefined-parameters: |
+               ISO_FILE=${{ISO_FILE}}
              current-parameters: true
              kill-phase-on: NEVER
-             property-file: iso_file
            - name: '{fuel-release}.{plugin-name}.vcenter_ha_cinder_and_ceph'
+             predefined-parameters: |
+               ISO_FILE=${{ISO_FILE}}
              current-parameters: true
              kill-phase-on: NEVER
-             property-file: iso_file
            - name: '{fuel-release}.{plugin-name}.vcenter_ha_multiple_clusters'
+             predefined-parameters: |
+               ISO_FILE=${{ISO_FILE}}
              current-parameters: true
              kill-phase-on: NEVER
-             property-file: iso_file
            - name: '{fuel-release}.{plugin-name}.vcenter_multiroles_ceilometer'
+             predefined-parameters: |
+               ISO_FILE=${{ISO_FILE}}
              current-parameters: true
              kill-phase-on: NEVER
-             property-file: iso_file
            - name: '{fuel-release}.{plugin-name}.vcenter_multiroles_cindervmdk_and_ceph'
+             predefined-parameters: |
+               ISO_FILE=${{ISO_FILE}}
              current-parameters: true
              kill-phase-on: NEVER
-             property-file: iso_file
            - name: '{fuel-release}.{plugin-name}.vcenter_multiroles_cindervmdk_and_cinder'
+             predefined-parameters: |
+               ISO_FILE=${{ISO_FILE}}
              current-parameters: true
              kill-phase-on: NEVER
-             property-file: iso_file
            - name: '{fuel-release}.{plugin-name}.vcenter_cindervmdk'
+             predefined-parameters: |
+               ISO_FILE=${{ISO_FILE}}
              current-parameters: true
              kill-phase-on: NEVER
-             property-file: iso_file
