@@ -41,6 +41,8 @@
       - contrail_ha_baseos
       - contrail_ceilometer
       - contrail_bonding
+      - contrail_vlan
+      - contrail_jumbo
 
     jobs:
       - '{build-name}'
@@ -72,7 +74,7 @@
           refspec: $GERRIT_REFSPEC
           branches:
             - $GERRIT_BRANCH
-          choosing-strategy: gerrit
+          choosing-strategy: default
           submodule:
             disable: false
             tracking: true
@@ -739,6 +741,18 @@
               kill-phase-on: NEVER
 
             - name: '{fuel-release}.{plugin-name}.{plugin-version}.contrail_ceilometer.juniper'
+              predefined-parameters: |
+                 CONTRAIL_DISTRIBUTION=juniper
+              current-parameters: true
+              kill-phase-on: NEVER
+
+            - name: '{fuel-release}.{plugin-name}.{plugin-version}.contrail_vlan'
+              predefined-parameters: |
+                 CONTRAIL_DISTRIBUTION=juniper
+              current-parameters: true
+              kill-phase-on: NEVER
+
+            - name: '{fuel-release}.{plugin-name}.{plugin-version}.contrail_jumbo'
               predefined-parameters: |
                  CONTRAIL_DISTRIBUTION=juniper
               current-parameters: true
