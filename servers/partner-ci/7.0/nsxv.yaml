@@ -598,7 +598,7 @@
     builders:
       - multijob:
           name: 'regression test'
-          condition: COMPLETED
+          condition: SUCCESSFUL
           projects:
             - name: '{fuel-release}.{plugin-name}.regression.test'
               predefined-parameters: |
