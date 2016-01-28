@@ -4,7 +4,7 @@
     plugin-version: '2.0'
     plugin-name: 'vcenter'
 
-    download-iso-name: '8.0.dvs-agentless.build'
+    download-iso-name: '8.0.dvs-agentless.canary'
     nightly-name: '{fuel-release}.{plugin-name}.nightly'
     custom-name: '{fuel-release}.{plugin-name}.custom'
 
@@ -63,7 +63,7 @@
           refspec: $GERRIT_REFSPEC
           branches:
             - $GERRIT_BRANCH
-          choosing-strategy: gerrit
+          choosing-strategy: default
           submodule:
             disable: false
             tracking: true
@@ -219,6 +219,10 @@
           default: '{iso-file}'
           description: 'ISO file name that is on the tpi-s1 in /storage/downloads'
       - string:
+          name: PLUGIN_VERSION
+          default: ''
+          description: 'plugin version from metadata'
+      - string:
           name: GERRIT_REFSPEC
           default: 'refs/heads/{gerrit-branch}'
           description: 'Refspecs for commits in fuel-qa gerrit separated with spaces'
@@ -234,7 +238,6 @@
           name: ENV_PREFIX
           default: '{fuel-release}.{plugin-name}'
           description: 'The name of devops env. Needed to properly work of existing mode of devops'
-
 
 ## parameters for jobs created per test-group and custom test job
 - test-parameters: &test-parameters
@@ -279,6 +282,10 @@
           name: ISO_FILE
           default: '{iso-file}'
           description: 'ISO file name that is on the tpi-s1 in /storage/downloads'
+      - string:
+          name: PLUGIN_VERSION
+          default: ''
+          description: 'plugin version from metadata'
       - string:
           name: ISO_STORAGE
           default: '/storage/downloads'
@@ -346,12 +353,12 @@
     <<: *test-wrappers
     builders:
       - copyartifact:
-          project: '{download-iso-name}'
+          project: '${{ARTIFACTS_JOB_NAME}}'
           which-build: last-successful
       - shell:
-          !include-raw-escape builders/common.prepare.sh
+          !include-raw-escape: builders/common.prepare.sh
       - shell:
-          !include-raw-escape builders/vcenter.test.sh
+          !include-raw-escape: builders/vcenter.test.sh
     publishers:
       - postbuildscript:
           script-only-if-succeeded: False
@@ -360,7 +367,6 @@
               # need to delete packages, because we don't wipe workspace,
               # but packages could be duplicated
             - shell: rm -f .*rpm.*
-
       - archive:
           artifacts: 'build.properties'
           allow-empty: false
@@ -368,7 +374,7 @@
           artifacts: 'properties'
           allow-empty: false
       - archive:
-          artifacts: '**/nosetests.xml'
+          artifacts: 'nosetests.xml'
           allow-empty: true
           fingerprint: true
       - archive:
@@ -378,8 +384,11 @@
       - xunit:
           types:
             - junit:
-                pattern: '**/nosetest.xml'
+                pattern: 'nosetest.xml'
                 skip-if-no-test-files: true
+      - junit:
+          results: nosetests.xml
+          health-scale-factor: 1.0
       - email:
           recipients: '{email-to}'
 
@@ -416,6 +425,9 @@
           artifacts: 'build.properties'
           allow-empty: false
       - archive:
+          artifacts: 'build.plugin_version'
+          allow-empty: false
+      - archive:
           artifacts: 'iso_file'
           allow-empty: false
       - email:
@@ -427,15 +439,18 @@
     builders:
       # copy latest stable plugin package that has passed dvs bvt on the stable iso
       - copyartifact:
-          #project: '{download-iso-name}'
           project: "${{ARTIFACTS_JOB_NAME}}"
           which-build: last-successful
+          stable: true
       - shell: |
+          #!/bin/bash
           if [ -z "${{ISO_FILE}}" ]; then
-             source 'iso_file'
-             export ISO_FILE=${{ISO_FILE}}
-          else
-             echo "iso file is ${{ISO_FILE}}"
+              source 'iso_file'
+              export ISO_FILE=${{ISO_FILE}}
+          fi
+          if [ -z "${{PLUGIN_VERSION}}" ]; then
+              source build.plugin_version
+              export PLUGIN_VERSION=${{PLUGIN_VERSION}}
           fi
       - multijob:
           name: 'System tests for dvs{fuel-release}.{plugin-version} vcenter5'
@@ -444,99 +459,118 @@
            - name: '{fuel-release}.{plugin-name}.vcenter_add_cindervmware'
              current-parameters: true
              predefined-parameters: |
+               PLUGIN_VERSION=${{PLUGIN_VERSION}}
                ISO_FILE=${{ISO_FILE}}
                TEST_GROUP_PREFIX=system_test.vcenter.scale_vcenter_dvs
              kill-phase-on: NEVER
            - name: '{fuel-release}.{plugin-name}.vcenter_add_controller'
              current-parameters: true
              predefined-parameters: |
+               PLUGIN_VERSION=${{PLUGIN_VERSION}}
                ISO_FILE=${{ISO_FILE}}
                TEST_GROUP_PREFIX=system_test.vcenter.scale_vcenter_dvs
              kill-phase-on: NEVER
            - name: '{fuel-release}.{plugin-name}.vcenter_delete_cindervmware'
              current-parameters: true
              predefined-parameters: |
+               PLUGIN_VERSION=${{PLUGIN_VERSION}}
                ISO_FILE=${{ISO_FILE}}
                TEST_GROUP_PREFIX=system_test.vcenter.scale_vcenter_dvs
              kill-phase-on: NEVER
            - name: '{fuel-release}.{plugin-name}.vcenter_delete_controller'
              current-parameters: true
              predefined-parameters: |
+               PLUGIN_VERSION=${{PLUGIN_VERSION}}
                ISO_FILE=${{ISO_FILE}}
                TEST_GROUP_PREFIX=system_test.vcenter.scale_vcenter_dvs
              kill-phase-on: NEVER
            - name: '{fuel-release}.{plugin-name}.vcenter_ceilometer_and_computevmware'
              predefined-parameters: |
+               PLUGIN_VERSION=${{PLUGIN_VERSION}}
                ISO_FILE=${{ISO_FILE}}
              current-parameters: true
              kill-phase-on: NEVER
            - name: '{fuel-release}.{plugin-name}.vcenter_ceph_and_computevmware'
              predefined-parameters: |
+               PLUGIN_VERSION=${{PLUGIN_VERSION}}
                ISO_FILE=${{ISO_FILE}}
              current-parameters: true
              kill-phase-on: NEVER
            - name: '{fuel-release}.{plugin-name}.vcenter_cindervmdk_and_computevmware'
              predefined-parameters: |
+               PLUGIN_VERSION=${{PLUGIN_VERSION}}
                ISO_FILE=${{ISO_FILE}}
              current-parameters: true
              kill-phase-on: NEVER
            - name: '{fuel-release}.{plugin-name}.vcenter_computevmware'
              predefined-parameters: |
+               PLUGIN_VERSION=${{PLUGIN_VERSION}}
                ISO_FILE=${{ISO_FILE}}
              current-parameters: true
              kill-phase-on: NEVER
            - name: '{fuel-release}.{plugin-name}.vcenter_dvs_bvt'
              predefined-parameters: |
+               PLUGIN_VERSION=${{PLUGIN_VERSION}}
                ISO_FILE=${{ISO_FILE}}
              current-parameters: true
              kill-phase-on: NEVER
            - name: '{fuel-release}.{plugin-name}.vcenter_dvs_smoke'
              predefined-parameters: |
+               PLUGIN_VERSION=${{PLUGIN_VERSION}}
                ISO_FILE=${{ISO_FILE}}
              current-parameters: true
              kill-phase-on: NEVER
            - name: '{fuel-release}.{plugin-name}.vcenter_glance_backend_and_computevmware'
              predefined-parameters: |
+               PLUGIN_VERSION=${{PLUGIN_VERSION}}
                ISO_FILE=${{ISO_FILE}}
              current-parameters: true
              kill-phase-on: NEVER
            - name: '{fuel-release}.{plugin-name}.vcenter_ha_ceilometer'
              predefined-parameters: |
+               PLUGIN_VERSION=${{PLUGIN_VERSION}}
                ISO_FILE=${{ISO_FILE}}
              current-parameters: true
              kill-phase-on: NEVER
            - name: '{fuel-release}.{plugin-name}.vcenter_ha_ceph'
              predefined-parameters: |
+               PLUGIN_VERSION=${{PLUGIN_VERSION}}
                ISO_FILE=${{ISO_FILE}}
              current-parameters: true
              kill-phase-on: NEVER
            - name: '{fuel-release}.{plugin-name}.vcenter_ha_cinder_and_ceph'
              predefined-parameters: |
+               PLUGIN_VERSION=${{PLUGIN_VERSION}}
                ISO_FILE=${{ISO_FILE}}
              current-parameters: true
              kill-phase-on: NEVER
            - name: '{fuel-release}.{plugin-name}.vcenter_ha_multiple_clusters'
              predefined-parameters: |
+               PLUGIN_VERSION=${{PLUGIN_VERSION}}
                ISO_FILE=${{ISO_FILE}}
              current-parameters: true
              kill-phase-on: NEVER
            - name: '{fuel-release}.{plugin-name}.vcenter_multiroles_ceilometer'
              predefined-parameters: |
+               PLUGIN_VERSION=${{PLUGIN_VERSION}}
                ISO_FILE=${{ISO_FILE}}
              current-parameters: true
              kill-phase-on: NEVER
            - name: '{fuel-release}.{plugin-name}.vcenter_multiroles_cindervmdk_and_ceph'
              predefined-parameters: |
+               PLUGIN_VERSION=${{PLUGIN_VERSION}}
                ISO_FILE=${{ISO_FILE}}
              current-parameters: true
              kill-phase-on: NEVER
            - name: '{fuel-release}.{plugin-name}.vcenter_multiroles_cindervmdk_and_cinder'
              predefined-parameters: |
+               PLUGIN_VERSION=${{PLUGIN_VERSION}}
                ISO_FILE=${{ISO_FILE}}
              current-parameters: true
              kill-phase-on: NEVER
            - name: '{fuel-release}.{plugin-name}.vcenter_cindervmdk'
              predefined-parameters: |
+               PLUGIN_VERSION=${{PLUGIN_VERSION}}
                ISO_FILE=${{ISO_FILE}}
              current-parameters: true
              kill-phase-on: NEVER

@@ -15,8 +15,8 @@
 
     nightly-timer: 'H 22 * * *'
     regression-timer: 'H 18 * * *'
-    
-    nightly-disabled: false  
+
+    nightly-disabled: false
 
     use-snapshots: false
     force-erase: true
@@ -79,7 +79,7 @@
           refspec: $GERRIT_REFSPEC
           branches:
             - $GERRIT_BRANCH
-          choosing-strategy: gerrit
+          choosing-strategy: default
           submodule:
             disable: false
             tracking: true
@@ -227,6 +227,10 @@
           default: '{iso-file}'
           description: 'ISO file name that is on the tpi-s1 in /storage/downloads'
       - string:
+          name: PLUGIN_VERSION
+          default: ''
+          description: 'plugin version from metadata'
+      - string:
           name: GERRIT_REFSPEC
           default: 'refs/heads/{gerrit-branch}'
           description: 'Refspecs for commits in fuel-qa gerrit separated with spaces'
@@ -235,10 +239,13 @@
           default: 'origin/{gerrit-branch}'
           description: 'The branch for fuel-qa gerrit'
       - string:
+          name: ARTIFACTS_JOB_NAME
+          default: '{bvt-name}'
+          description: 'The branch for fuel-qa gerrit'
+      - string:
           name: ENV_PREFIX
           default: '{fuel-release}.{plugin-name}'
           description: 'The name of devops env. Needed to properly work of existing mode of devops'
-
 
 ## parameters for jobs created per test-group and custom test job
 - test-parameters: &test-parameters
@@ -276,6 +283,10 @@
           default: '{iso-file}'
           description: 'ISO file name that is on the tpi-s1 in /storage/downloads'
       - string:
+          name: PLUGIN_VERSION
+          default: ''
+          description: 'plugin version from metadata'
+      - string:
           name: ISO_STORAGE
           default: '/storage/downloads'
           description: 'Storage for iso files'
@@ -304,7 +315,7 @@
           description: 'Amount of vitrual RAM for admin node'
       - string:
           name: SLAVE_NODE_MEMORY
-          default: '4096'
+          default: '8192'
           description: 'Amount of vitrual RAM per slave node'
       - string:
           name: ADMIN_NODE_CPU
@@ -342,12 +353,12 @@
     <<: *test-wrappers
     builders:
       - copyartifact:
-          project: '{build-name}'
+          project: "${{ARTIFACTS_JOB_NAME}}"
           which-build: last-successful
       - shell:
-          !include-raw-escape builders/common.prepare.sh
+          !include-raw-escape: builders/common.prepare.sh
       - shell:
-          !include-raw-escape builders/dvs.test.sh
+          !include-raw-escape: builders/dvs.test.sh
     publishers:
       - postbuildscript:
           script-only-if-succeeded: False
@@ -356,7 +367,6 @@
               # need to delete packages, because we don't wipe workspace,
               # but packages could be duplicated
             - shell: rm -f .*rpm.*
-
       - archive:
           artifacts: 'build.properties'
           allow-empty: false
@@ -364,7 +374,7 @@
           artifacts: 'properties'
           allow-empty: false
       - archive:
-          artifacts: '**/nosetests.xml'
+          artifacts: 'nosetests.xml'
           allow-empty: true
           fingerprint: true
       - archive:
@@ -374,8 +384,11 @@
       - xunit:
           types:
             - junit:
-                pattern: '**/nosetest.xml'
+                pattern: 'nosetest.xml'
                 skip-if-no-test-files: true
+      - junit:
+          results: nosetests.xml
+          health-scale-factor: 1.0
       - email:
           recipients: '{email-to}'
 
@@ -395,26 +408,37 @@
           <<: *generic-gerrit-projects
     parameters:
       - string:
-          name: 'GERRIT_REFSPEC'
+          name: GERRIT_BRANCH
+          default: 'origin/{gerrit-branch}'
+          description: 'The branch for fuel-qa gerrit'
+      - string:
+          name: GERRIT_REFSPEC
           default: 'refs/heads/{gerrit-branch}'
     properties:
       - heavy-job:
           weight: 1
     builders:
       - shell:
-          !include-raw-escape './builders/build-plugin.sh'
+          !include-raw-escape: './builders/build-plugin.sh'
       - shell:
-          !include-raw-escape './builders/rpm-check.sh'
+          !include-raw-escape: './builders/rpm-check.sh'
     publishers:
       - postbuildscript:
           script-only-if-succeeded: False
           builders:
-             - shell: env > build.properties
+             - shell: |
+                 #!/bin/bash
+                 export PLUGIN_VERSION=$(grep "^version" metadata.yaml | cut -d ' ' -f2)
+                 echo PLUGIN_VERSION="${{PLUGIN_VERSION}} > build.plugin_version
+                 env > build.properties
       - archive:
           artifacts: '*.rpm'
           allow-empty: false
       - archive:
           artifacts: 'build.properties'
+          allow-empty: false
+      - archive:
+          artifacts: 'build.plugin_version'
           allow-empty: false
       - email:
           recipients: '{email-to}'
@@ -505,6 +529,9 @@
           artifacts: 'build.properties'
           allow-empty: false
       - archive:
+          artifacts: 'build.plugin_version'
+          allow-empty: false
+      - archive:
           artifacts: 'smoke.properties'
           allow-empty: false
       - email:
@@ -556,6 +583,9 @@
           allow-empty: false
       - archive:
           artifacts: 'build.properties'
+          allow-empty: false
+      - archive:
+          artifacts: 'build.plugin_version'
           allow-empty: false
       - archive:
           artifacts: 'bvt.properties'
@@ -668,6 +698,9 @@
           artifacts: 'build.properties'
           allow-empty: false
       - archive:
+          artifacts: 'build.plugin_version'
+          allow-empty: false
+      - archive:
           artifacts: 'canary.properties'
           allow-empty: false
       - archive:
@@ -702,6 +735,9 @@
           artifacts: 'build.properties'
           allow-empty: false
       - archive:
+          artifacts: 'build.plugin_version'
+          allow-empty: false
+      - archive:
           artifacts: 'iso_file'
           allow-empty: false
       - email:
@@ -713,7 +749,7 @@
     builders:
       # copy latest stable plugin package that has passed dvs bvt on the stable iso
       - copyartifact:
-          project: '{bvt-name}'
+          project: "${{ARTIFACTS_JOB_NAME}}"
           which-build: last-successful
           stable: true
       # copy latest stable iso that has passed fuel and dvs smoke and bvt tests
@@ -722,13 +758,14 @@
           which-build: last-successful
           stable: true
       - shell: |
-         # if 'ISO_FILE' parameter is empty, then
-         # need to export data from 'iso_file'
-         # else
-         # need to use ISO_FILE data for tests
           if [ -z "${{ISO_FILE}}" ]; then
               source 'iso_file'
               export ISO_FILE=${{ISO_FILE}}
+          fi
+      - shell: |
+          if [ -z "${{PLUGIN_VERSION}}" ]; then
+              source 'build.plugin_version'
+              export PLUGIN_VERSION=${{PLUGIN_VERSION}}
           fi
       - multijob:
           name: 'System tests for dvs{fuel-release}.{plugin-version} vcenter5'

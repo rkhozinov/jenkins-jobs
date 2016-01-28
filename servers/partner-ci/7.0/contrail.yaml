@@ -14,7 +14,7 @@
     nightly-timer: 'H 20 * * *'
     regression-timer: 'H 19 * * *'
 
-    nightly-disabled: true
+    nightly-disabled: false
 
     use-snapshots: false
     force-erase: true
@@ -43,6 +43,8 @@
       - contrail_bonding
       - contrail_vlan
       - contrail_jumbo
+      - contrail_ceph_multirole
+      - contrail_cinder_multirole
 
     jobs:
       - '{build-name}'
@@ -242,6 +244,10 @@
           default: '3.0'
           description: 'There is a version of juniper packages stored in common sotrage'
       - string:
+          name: PLUGIN_VERSION
+          default: ''
+          description: 'plugin version from metadata'
+      - string:
           name: CONTRAIL_PLUGIN_PATH
           default: ''
           description: 'The path to the contrail package on storage'
@@ -260,6 +266,10 @@
       - string:
           name: GERRIT_BRANCH
           default: 'origin/{gerrit-branch}'
+          description: 'The branch for fuel-qa gerrit'
+      - string:
+          name: ARTIFACTS_JOB_NAME
+          default: '{bvt-name}'
           description: 'The branch for fuel-qa gerrit'
       - string:
           name: ENV_PREFIX
@@ -304,6 +314,10 @@
           name: ISO_FILE
           default: '{iso-file}'
           description: 'ISO file name that is on the tpi-s1 in /storage/downloads'
+      - string:
+          name: PLUGIN_VERSION
+          default: ''
+          description: 'plugin version from metadata'
       - string:
           name: ISO_STORAGE
           default: '/storage/downloads'
@@ -467,7 +481,11 @@
           <<: *generic-gerrit-projects
     parameters:
       - string:
-          name: 'GERRIT_REFSPEC'
+          name: GERRIT_BRANCH
+          default: 'origin/{gerrit-branch}'
+          description: 'The branch for fuel-qa gerrit'
+      - string:
+          name: GERRIT_REFSPEC
           default: 'refs/heads/{gerrit-branch}'
     properties:
       - heavy-job:
@@ -481,12 +499,18 @@
       - postbuildscript:
           script-only-if-succeeded: False
           builders:
-             - shell: env > build.properties
+             - shell: |
+                 export PLUGIN_VERSION=$(grep "^version" metadata.yaml | cut -d ' ' -f2)
+                 echo "${{PLUGIN_VERSION}}" > build.plugin_version
+                 env > build.properties
       - archive:
           artifacts: '*.rpm'
           allow-empty: false
       - archive:
           artifacts: 'build.properties'
+          allow-empty: false
+      - archive:
+          artifacts: 'build.plugin_version'
           allow-empty: false
       - email:
           recipients: '{email-to}'
@@ -587,6 +611,9 @@
           artifacts: 'build.properties'
           allow-empty: false
       - archive:
+          artifacts: 'build.plugin_version'
+          allow-empty: false
+      - archive:
           artifacts: 'smoke.properties'
           allow-empty: false
       - email:
@@ -639,6 +666,9 @@
           allow-empty: false
       - archive:
           artifacts: 'build.properties'
+          allow-empty: false
+      - archive:
+          artifacts: 'build.plugin_version'
           allow-empty: false
       - archive:
           artifacts: 'bvt.properties'
@@ -695,7 +725,7 @@
 - job-template:
     name: '{nightly-name}'
     project-type: multijob
-    disabled: '{nightly-disabled}'
+    disabled: false
     node: runner
     <<: *runner-parameters
     <<: *runner-wrappers
@@ -713,6 +743,9 @@
       - archive:
           artifacts: 'build.properties'
           allow-empty: false
+      - archive:
+          artifacts: 'build.plugin_version'
+          allow-empty: false
       - email:
           recipients: '{email-to}'
     scm: []
@@ -722,9 +755,19 @@
     builders:
       # copy latest stable plugin package that has passed dvs bvt on the stable iso
       - copyartifact:
-          project: '{bvt-name}'
+          project: "${{ARTIFACTS_JOB_NAME}}"
           which-build: last-successful
           stable: true
+    #      - shell: |
+    #          if [ -z "${{ISO_FILE}}" ]; then
+    #              source 'iso_file'
+    #              export ISO_FILE=${{ISO_FILE}}
+    #          fi
+    #      - shell: |
+    #          if [ -z "${{PLUGIN_VERSION}}" ]; then
+    #              source 'build.plugin_version'
+    #              export PLUGIN_VERSION=${{PLUGIN_VERSION}}
+    #          fi
       - multijob:
           name: 'Smoke tests for open/juniper contrail. Juniper or contrail version is provided in variable by multijob'
           condition: COMPLETED
@@ -734,6 +777,7 @@
                  CONTRAIL_DISTRIBUTION=juniper
               current-parameters: true
               kill-phase-on: NEVER
+
             - name: '{fuel-release}.{plugin-name}.{plugin-version}.contrail_ha_baseos.juniper'
               predefined-parameters: |
                  CONTRAIL_DISTRIBUTION=juniper
@@ -759,6 +803,20 @@
               kill-phase-on: NEVER
 
             - name: '{fuel-release}.{plugin-name}.{plugin-version}.contrail_bonding.juniper'
+              predefined-parameters: |
+                 CONTRAIL_DISTRIBUTION=juniper
+                 BONDING=true
+              current-parameters: true
+              kill-phase-on: NEVER
+
+            - name: '{fuel-release}.{plugin-name}.{plugin-version}.contrail_ceph_multirole.juniper'
+              predefined-parameters: |
+                 CONTRAIL_DISTRIBUTION=juniper
+                 BONDING=true
+              current-parameters: true
+              kill-phase-on: NEVER
+
+            - name: '{fuel-release}.{plugin-name}.{plugin-version}.contrail_cinder_multirole.juniper'
               predefined-parameters: |
                  CONTRAIL_DISTRIBUTION=juniper
                  BONDING=true
