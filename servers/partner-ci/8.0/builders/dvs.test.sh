@@ -5,6 +5,8 @@
 
 [[ -z "${ISO_FILE}" ]] && exit 1 || true
 
+[[ -z "${PLUGIN_VERSION}" ]] && exit 1 || export DVS_PLUGIN_VERSION=$PLUGIN_VERSION
+
 export ISO_PATH="${ISO_STORAGE}/${ISO_FILE}"
 export ISO_VERSION=$(cut -d'-' -f3-3 <<< $ISO_FILE) 
 export FUEL_RELEASE=$(cut -d'-' -f2-2 <<< $ISO_FILE | tr -d '.')
