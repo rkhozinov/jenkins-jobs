@@ -10,6 +10,7 @@
     regression-name: '{fuel-release}.{plugin-name}.{plugin-version}.regression'
     nightly-name: '{fuel-release}.{plugin-name}.{plugin-version}.nightly'
     custom-name: '{fuel-release}.{plugin-name}.{plugin-version}.custom'
+    reporter-name: '{fuel-release}.{plugin-name}.{plugin-version}.reporter'
 
     nightly-timer: 'H 23 * * *'
     regression-timer: 'H 18 * * *'
@@ -48,10 +49,12 @@
       - deploy_ha_with_pub_net_all_nodes
       - deploy_ha_with_vlan_tagging
       - deploy_contrail_plugin_with_the_same_names
+      - contrail_spec_pass
     jobs:
       - '{build-name}'
       - '{nightly-name}'
       - '{custom-name}'
+      - '{reporter-name}'
 
       - '{smoke-name}'
       - '{fuel-release}.{plugin-name}.{plugin-version}.smoke.test.open'
@@ -530,6 +533,111 @@
     concurrent: true
 
 - job-template:
+    name: '{reporter-name}'
+    disabled: false
+    description: 'Testrail reporter for {fuel-release}.{plugin-name}.{plugin-version}'
+    concurrent: true
+    project-type: multijob
+    node: runner
+    parameters:
+      - string:
+          name: TESTRAIL_URL
+          default: 'https://mirantis.testrail.com'
+          description: ""
+      - string:
+          name: TESTRAIL_PROJECT
+          default: 'Contrail plugin'
+          description: "Project name"
+      - string:
+          name: TESTRAIL_MILESTONE
+          default: 'Fuel Contrail Plugin v2.1.0'
+          description: ""
+      - string:
+          name: TESTRAIL_TEST_SUITE
+          default: 'Contrail Plugin v2.x.x'
+          description: ""
+      - string:
+          name: TESTRAIL_TEST_PLAN
+          default: 'Fuel Contrail Plugin v2.1.1 #3'
+          description: ""
+#      - string:
+#          name: TESTRAIL_TEST_SECTION
+#          default: 'nosetests.xml'
+#          description: ""
+#      - string:
+#          name: TESTRAIL_TEST_INCLUDE
+#          default: 'nosetests.xml'
+#          description: ""
+#      - string:
+#          name: TESTRAIL_TEST_EXCLUDE
+#          default: 'nosetests.xml'
+#          description: ""
+      - string:
+          name: TESTRAIL_LOG_LEVEL
+          default: 'INFO'
+          description: "Log level of reporter"
+      - string:
+          name: TESTRAIL_LOG_DIR
+          default: 'testrail_reporter.log'
+          description: ""
+      - string:
+          name: TEST_RESULTS_XUNIT_FILENAME
+          default: 'nosetests.xml'
+          description: ""
+    scm:
+      - git:
+          name: ''
+          url: 'https://github.com/ehles/trep.git'
+          #refspec: $GERRIT_REFSPEC
+          branches:
+            - master
+          choosing-strategy: default
+          #submodule:
+          #  disable: false
+          #  tracking: true
+          #  recursive: true
+          clean:
+            # we don't clean and re-initialize the repo
+            before: false
+          # we don't clean a workspace, so we need to remove rpms manually
+          wipe-workspace: false
+    builders:
+      - copyartifact:
+          project: '{build-name}'
+          which-build: last-successful
+          stable: true
+      - multijob:
+          name: 'Smoke tests for open/juniper contrail'
+          condition: COMPLETED
+          projects:
+            - name: '{fuel-release}.{plugin-name}.{plugin-version}.smoke.test.open'
+              current-parameters: true
+              predefined-parameters: |
+                TEST_GROUP=deploy_contrail
+                CONTRAIL_DISTRIBUTION=open
+              kill-phase-on: NEVER
+
+            - name: '{fuel-release}.{plugin-name}.{plugin-version}.smoke.test.juniper'
+              current-parameters: true
+              predefined-parameters: |
+                TEST_GROUP=deploy_contrail
+                CONTRAIL_DISTRIBUTION=juniper
+              kill-phase-on: NEVER
+    publishers:
+      - postbuildscript:
+          script-only-if-succeeded: False
+          builders:
+            - shell: env > smoke.properties
+      - archive:
+          artifacts: 'build.properties'
+          allow-empty: false
+      - archive:
+          artifacts: 'smoke.properties'
+          allow-empty: false
+      - email:
+          recipients: '{email-to}'
+
+- job-template:
     name: '{smoke-name}'
     disabled: false
     description: 'The Smoke test for {fuel-release}.{plugin-name}.{plugin-version}'
@@ -579,7 +687,7 @@
           allow-empty: false
       - email:
           recipients: '{email-to}'
-
+  
 - job-template:
     name: '{bvt-name}'
     description: 'The BVT test for {fuel-release}.{plugin-name}.{plugin-version}'
@@ -783,6 +891,11 @@
               predefined-parameters: CONTRAIL_DISTRIBUTION=juniper
               current-parameters: true
               kill-phase-on: NEVER
+
+            - name: '{fuel-release}.{plugin-name}.{plugin-version}.contrail_spec_pass.juniper'
+              predefined-parameters: CONTRAIL_DISTRIBUTION=juniper
+              current-parameters: true
+              kill-phase-on: NEVER
  
             - name: '{fuel-release}.{plugin-name}.{plugin-version}.contrail_jumbo_frame.open'
               predefined-parameters: CONTRAIL_DISTRIBUTION=open
@@ -825,6 +938,11 @@
               kill-phase-on: NEVER
 
             - name: '{fuel-release}.{plugin-name}.{plugin-version}.deploy_contrail_plugin_with_the_same_names.open'
+              predefined-parameters: CONTRAIL_DISTRIBUTION=open
+              current-parameters: true
+              kill-phase-on: NEVER
+
+            - name: '{fuel-release}.{plugin-name}.{plugin-version}.contrail_spec_pass.open'
               predefined-parameters: CONTRAIL_DISTRIBUTION=open
               current-parameters: true
               kill-phase-on: NEVER
