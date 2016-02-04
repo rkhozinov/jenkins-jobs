@@ -787,8 +787,8 @@
           stable: true
       - shell: |
               #!/bin/bash
-              [ -z "${{ISO_FILE}}"       ] && cat iso_file > properties 
-              [ -z "${{PLUGIN_VERSION}}" ] && cat build.plugin_version >> properties 
+              [ -z "${{ISO_FILE}}"       ] && cat iso_file > properties
+              [ -z "${{PLUGIN_VERSION}}" ] && cat build.plugin_version >> properties
               # echo "DEBUG=${{DEBUG}}"       >> properties
               # echo "DISABLE_SSL=${{DISABLE_SSL}}" >> properties
               # echo "FORCE_ERASE=${{FORCE_ERASE}}" >> properties

@@ -3,14 +3,15 @@
 # activate bash xtrace for script
 [[ "${DEBUG}" == "true" ]] && set -x || set +x
 
-[[ -z "${ISO_FILE}" ]] && exit 1 || true
+[[ -z "${ISO_FILE}" ]] && ( echo 'ISO_FILE is empty' ; exit 1 ) || true
 
-[[ -z "${PLUGIN_VERSION}" ]] && exit 1 || export DVS_PLUGIN_VERSION=${PLUGIN_VERSION}
+[[ -z "${PLUGIN_VERSION}" ]] && ( echo 'PLUGIN_VERSION is empty' ; exit 1 ) || export DVS_PLUGIN_VERSION=${PLUGIN_VERSION}
+
+export FUEL_RELEASE=$(cut -d'-' -f2-2 <<< $ISO_FILE | tr -d '.')
+[[ -z "${FUEL_RELEASE}" ]] && ( echo 'FUEL_RELEASE is empty'; exit 1) || true
 
 export ISO_PATH="${ISO_STORAGE}/${ISO_FILE}"
-export ISO_VERSION=$(cut -d'-' -f3-3 <<< $ISO_FILE) 
-export FUEL_RELEASE=$(cut -d'-' -f2-2 <<< $ISO_FILE | tr -d '.')
-
+export ISO_VERSION=$(cut -d'-' -f3-3 <<< $ISO_FILE)
 export ENV_NAME="${ENV_PREFIX}.${ISO_VERSION}"
 export VENV_PATH="${HOME}/${FUEL_RELEASE}-venv"
 
