@@ -441,6 +441,10 @@
           health-scale-factor: 1.0
       - email:
           recipients: '{email-to}'
+      - trigger-parameterized-builds:
+        - project: '{reporter-name}'
+          predefined-parameters: TEST_JOB_NAME=${{JOB_NAME}}
+          fail-on-missing: true
 
 # job for building plugin package
 - job-template:
@@ -531,6 +535,39 @@
     name: '{custom-name}'
     description: 'The custom test for {fuel-release}.{plugin-name}.{plugin-version}'
     concurrent: true
+    publishers:
+      - postbuildscript:
+          script-only-if-succeeded: False
+          builders:
+            - shell: env > properties
+              # need to delete packages, because we don't wipe workspace,
+              # but packages could be duplicated
+            - shell: rm -f .*rpm.*
+      - archive:
+          artifacts: 'build.properties'
+          allow-empty: false
+      - archive:
+          artifacts: 'properties'
+          allow-empty: false
+      - archive:
+          artifacts: 'nosetests.xml'
+          allow-empty: true
+          fingerprint: true
+      - archive:
+          artifacts: 'logs/*'
+          allow-empty: true
+          fingerprint: true
+      - xunit:
+          types:
+            - junit:
+                pattern: 'nosetest.xml'
+                skip-if-no-test-files: true
+      - junit:
+          results: nosetests.xml
+          health-scale-factor: 1.0
+      - email:
+          recipients: '{email-to}'
+      - trigger-parameterized-builds: []
 
 - job-template:
     name: '{reporter-name}'
@@ -540,6 +577,9 @@
     project-type: multijob
     node: runner
     parameters:
+      - string:
+          name: TEST_JOB_NAME
+          description: 'The name of a test for getting test results'
       - string:
           name: TESTRAIL_URL
           default: 'https://mirantis.testrail.com'
@@ -586,54 +626,28 @@
           description: ""
     scm:
       - git:
-          name: ''
           url: 'https://github.com/ehles/trep.git'
-          #refspec: $GERRIT_REFSPEC
           branches:
-            - master
-          choosing-strategy: default
-          #submodule:
-          #  disable: false
-          #  tracking: true
-          #  recursive: true
+            - 'origin/master'
+          #choosing-strategy: default
           clean:
-            # we don't clean and re-initialize the repo
             before: false
-          # we don't clean a workspace, so we need to remove rpms manually
           wipe-workspace: false
     builders:
       - copyartifact:
-          project: '{build-name}'
-          which-build: last-successful
+          project: ${{TEST_JOB_NAME}}
+          filter: ${{TEST_RESULTS_XUNIT_FILENAME}}
+          which-build: last-completed
           stable: true
-      - multijob:
-          name: 'Smoke tests for open/juniper contrail'
-          condition: COMPLETED
-          projects:
-            - name: '{fuel-release}.{plugin-name}.{plugin-version}.smoke.test.open'
-              current-parameters: true
-              predefined-parameters: |
-                TEST_GROUP=deploy_contrail
-                CONTRAIL_DISTRIBUTION=open
-              kill-phase-on: NEVER
-
-            - name: '{fuel-release}.{plugin-name}.{plugin-version}.smoke.test.juniper'
-              current-parameters: true
-              predefined-parameters: |
-                TEST_GROUP=deploy_contrail
-                CONTRAIL_DISTRIBUTION=juniper
-              kill-phase-on: NEVER
+      - shell: |
+          #!/bin/bash
+          ls -al
+          pwd
+          venv_path='/home/jenkins/trep'
+          [ -d $venv_path ] && source $venv_path/bin/activate
+          ls -al
+          trep -c ${{WORKSPACE}}/start/trep.yaml
     publishers:
-      - postbuildscript:
-          script-only-if-succeeded: False
-          builders:
-            - shell: env > smoke.properties
-      - archive:
-          artifacts: 'build.properties'
-          allow-empty: false
-      - archive:
-          artifacts: 'smoke.properties'
-          allow-empty: false
       - email:
           recipients: '{email-to}'
 
