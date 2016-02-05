@@ -16,6 +16,7 @@ export ENV_NAME="${ENV_PREFIX}.${ISO_VERSION}"
 export VENV_PATH="${HOME}/${FUEL_RELEASE}-venv"
 
 [[ -z "${DVS_PLUGIN_PATH}" ]] && export DVS_PLUGIN_PATH=$(ls -t ${WORKSPACE}/fuel-plugin-vmware-dvs*.rpm | head -n 1) || true
+[[ -z "${PLUGIN_PATH}" ]] && export PLUGIN_PATH=$DVS_PLUGIN_PATH
 
 source $VENV_PATH/bin/activate
 
@@ -38,7 +39,7 @@ echo plugin-checksum: $(md5sum -b $DVS_PLUGIN_PATH)
 #~/tpi_systest_mod.sh -i /storage/downloads/fuel-8.0-<build_number> -t system_test.vcenter.<test_name>.<yaml_file>
 
 /btsync/tpi_systest_mod.sh -d ${OPENSTACK_RELEASE} \
-                           -n ${NODES_COUNT} \
+                           -n "${NODES_COUNT}" \
                            -i ${ISO_PATH} \
                            -t "${TEST_GROUP_PREFIX}(${TEST_GROUP})" \
                            $systest_parameters
