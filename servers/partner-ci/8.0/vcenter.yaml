@@ -368,6 +368,7 @@
     builders:
       - copyartifact:
           project: "${{PKG_JOB_NAME}}"
+          filter: "*.rpm"
           which-build: last-successful
       - shell:
           !include-raw-escape: builders/common.prepare.sh
@@ -432,6 +433,9 @@
           script-only-if-succeeded: False
           builders:
             - shell: env > nightly.properties
+              # need to delete packages, because we don't wipe workspace,
+              # but packages could be duplicated
+            - shell: rm -f .*rpm.*
       - archive:
           artifacts: 'nightly.properties'
           allow-empty: false
@@ -456,31 +460,19 @@
       # copy latest stable plugin package that has passed dvs bvt on the stable iso
       - copyartifact:
           project: "${{PKG_JOB_NAME}}"
+          filter: "build.plugin_version"
           which-build: last-successful
           stable: true
       # copy latest stable iso that has passed fuel and dvs slmoke and bvt tests
       - copyartifact:
           project: "${{ISO_JOB_NAME}}"
+          filter: "iso_file"
           which-build: last-successful
           stable: true
       - shell: |
               #!/bin/bash
               [ -z "${{ISO_FILE}}"       ] && cat iso_file > properties
               [ -z "${{PLUGIN_VERSION}}" ] && cat build.plugin_version >> properties
-              # echo "DEBUG=${{DEBUG}}"       >> properties
-              # echo "DISABLE_SSL=${{DISABLE_SSL}}" >> properties
-              # echo "FORCE_ERASE=${{FORCE_ERASE}}" >> properties
-              # echo "RECREATE_VENV=${{RECREATE_VENV}}" >> properties
-              # echo "VCENTER_SNAPSHOT=${{VCENTER_SNAPSHOT}}" >> properties
-              # echo "USE_SNAPSHOTS=${{USE_SNAPSHOTS}}"
-              # echo "ISO_FILE=${{ISO_FILE}}"
-              # echo "PLUGIN_VERSION=${{PLUGIN_VERSION}}"
-              # echo "GERRIT_REFSPEC=${{GERRIT_REFSPEC}}"
-              # echo "GERRIT_BRANCH=${{GERRIT_BRANCH}}"
-              # echo "PKG_JOB_NAME=${{PKG_JOB_NAME}}"
-              # echo "ISO_JOB_NAME=${{ISO_JOB_NAME}}"
-              # echo "ENV_PREFIX}}"
-              #
       - inject:
           properties-file: properties
       - multijob:
@@ -491,132 +483,100 @@
              current-parameters: true
              property-file: properties
              predefined-parameters: |
-               #PLUGIN_VERSION=${{#PLUGIN_VERSION}}
-               #ISO_FILE=${{#ISO_FILE}}
                TEST_GROUP_PREFIX=system_test.vcenter.scale_vcenter_dvs
              kill-phase-on: NEVER
+
            - name: '{fuel-release}.{plugin-name}.vcenter_add_controller'
              current-parameters: true
              property-file: properties
              predefined-parameters: |
-               #PLUGIN_VERSION=${{#PLUGIN_VERSION}}
-               #ISO_FILE=${{#ISO_FILE}}
                TEST_GROUP_PREFIX=system_test.vcenter.scale_vcenter_dvs
              kill-phase-on: NEVER
+
            - name: '{fuel-release}.{plugin-name}.vcenter_delete_cindervmware'
              current-parameters: true
              property-file: properties
              predefined-parameters: |
-               #PLUGIN_VERSION=${{#PLUGIN_VERSION}}
-               #ISO_FILE=${{#ISO_FILE}}
                TEST_GROUP_PREFIX=system_test.vcenter.scale_vcenter_dvs
              kill-phase-on: NEVER
+
            - name: '{fuel-release}.{plugin-name}.vcenter_delete_controller'
              current-parameters: true
              property-file: properties
              predefined-parameters: |
-               #PLUGIN_VERSION=${{#PLUGIN_VERSION}}
-               #ISO_FILE=${{#ISO_FILE}}
                TEST_GROUP_PREFIX=system_test.vcenter.scale_vcenter_dvs
              kill-phase-on: NEVER
+
            - name: '{fuel-release}.{plugin-name}.vcenter_ceilometer_and_computevmware'
              property-file: properties
-             #predefined-parameters: |
-               #PLUGIN_VERSION=${{#PLUGIN_VERSION}}
-               #ISO_FILE=${{#ISO_FILE}}
              current-parameters: true
              kill-phase-on: NEVER
+
            - name: '{fuel-release}.{plugin-name}.vcenter_ceph_and_computevmware'
              property-file: properties
-             #predefined-parameters: |
-               #PLUGIN_VERSION=${{#PLUGIN_VERSION}}
-               #ISO_FILE=${{#ISO_FILE}}
              current-parameters: true
              kill-phase-on: NEVER
+
            - name: '{fuel-release}.{plugin-name}.vcenter_cindervmdk_and_computevmware'
              property-file: properties
-             #predefined-parameters: |
-               #PLUGIN_VERSION=${{#PLUGIN_VERSION}}
-               #ISO_FILE=${{#ISO_FILE}}
              current-parameters: true
              kill-phase-on: NEVER
+
            - name: '{fuel-release}.{plugin-name}.vcenter_computevmware'
              property-file: properties
-             #predefined-parameters: |
-               #PLUGIN_VERSION=${{#PLUGIN_VERSION}}
-               #ISO_FILE=${{#ISO_FILE}}
              current-parameters: true
              kill-phase-on: NEVER
+
            - name: '{fuel-release}.{plugin-name}.vcenter_dvs_bvt'
              property-file: properties
-             redefined-parameters: |
-               #PLUGIN_VERSION=${{#PLUGIN_VERSION}}
-               #ISO_FILE=${{#ISO_FILE}}
              current-parameters: true
              kill-phase-on: NEVER
+
            - name: '{fuel-release}.{plugin-name}.vcenter_dvs_smoke'
              property-file: properties
-             #predefined-parameters: |
-               #PLUGIN_VERSION=${{#PLUGIN_VERSION}}
-               #ISO_FILE=${{#ISO_FILE}}
              current-parameters: true
              kill-phase-on: NEVER
+
            - name: '{fuel-release}.{plugin-name}.vcenter_glance_backend_and_computevmware'
              property-file: properties
-             #predefined-parameters: |
-               #PLUGIN_VERSION=${{#PLUGIN_VERSION}}
-               #ISO_FILE=${{#ISO_FILE}}
              current-parameters: true
              kill-phase-on: NEVER
+
            - name: '{fuel-release}.{plugin-name}.vcenter_ha_ceilometer'
              property-file: properties
-             #predefined-parameters: |
-               #PLUGIN_VERSION=${{#PLUGIN_VERSION}}
-               #ISO_FILE=${{#ISO_FILE}}
              current-parameters: true
              kill-phase-on: NEVER
+
            - name: '{fuel-release}.{plugin-name}.vcenter_ha_ceph'
              property-file: properties
-             #predefined-parameters: |
-               #PLUGIN_VERSION=${{#PLUGIN_VERSION}}
-               #ISO_FILE=${{#ISO_FILE}}
              current-parameters: true
              kill-phase-on: NEVER
+
            - name: '{fuel-release}.{plugin-name}.vcenter_ha_cinder_and_ceph'
              property-file: properties
-             #predefined-parameters: |
-               #PLUGIN_VERSION=${{#PLUGIN_VERSION}}
-               #ISO_FILE=${{#ISO_FILE}}
              current-parameters: true
              kill-phase-on: NEVER
+
            - name: '{fuel-release}.{plugin-name}.vcenter_ha_multiple_clusters'
              property-file: properties
-             #predefined-parameters: |
-               #PLUGIN_VERSION=${{#PLUGIN_VERSION}}
-               #ISO_FILE=${{#ISO_FILE}}
              current-parameters: true
              kill-phase-on: NEVER
+
            - name: '{fuel-release}.{plugin-name}.vcenter_multiroles_ceilometer'
              property-file: properties
-             #predefined-parameters: |
-               #PLUGIN_VERSION=${{#PLUGIN_VERSION}}
-               #ISO_FILE=${{#ISO_FILE}}
              current-parameters: true
              kill-phase-on: NEVER
+
            - name: '{fuel-release}.{plugin-name}.vcenter_multiroles_cindervmdk_and_ceph'
              property-file: properties
-             #predefined-parameters: |
-               #PLUGIN_VERSION=${{#PLUGIN_VERSION}}
-               #ISO_FILE=${{#ISO_FILE}}
              current-parameters: true
              kill-phase-on: NEVER
+
            - name: '{fuel-release}.{plugin-name}.vcenter_multiroles_cindervmdk_and_cinder'
              property-file: properties
-             #predefined-parameters: |
-               #PLUGIN_VERSION=${{#PLUGIN_VERSION}}
-               #ISO_FILE=${{#ISO_FILE}}
              current-parameters: true
              kill-phase-on: NEVER
+
            - name: '{fuel-release}.{plugin-name}.vcenter_cindervmdk'
              property-file: properties
              current-parameters: true
