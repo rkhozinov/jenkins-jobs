@@ -13,6 +13,7 @@
     nightly-name: '{fuel-release}.{plugin-name}.nightly'
     custom-name: '{fuel-release}.{plugin-name}.custom'
 
+
     nightly-timer: 'H 22 * * *'
     regression-timer: 'H 18 * * *'
 
@@ -79,7 +80,7 @@
           refspec: $GERRIT_REFSPEC
           branches:
             - $GERRIT_BRANCH
-          choosing-strategy: default
+          choosing-strategy: gerrit
           submodule:
             disable: false
             tracking: true
@@ -239,9 +240,13 @@
           default: 'origin/{gerrit-branch}'
           description: 'The branch for fuel-qa gerrit'
       - string:
-          name: ARTIFACTS_JOB_NAME
-          default: '{bvt-name}'
-          description: 'The branch for fuel-qa gerrit'
+          name: PKG_JOB_NAME
+          default: '{build-name}'
+          description: 'The name of job for copying of plugin pkg artefacts'
+      - string:
+          name: ISO_JOB_NAME
+          default: '{canary-name}'
+          description: 'The name of job for copying of stable iso build name'
       - string:
           name: ENV_PREFIX
           default: '{fuel-release}.{plugin-name}'
@@ -330,6 +335,14 @@
           default: '{fuel-release}.{plugin-name}'
           description: 'The name of devops env. Needed to properly work of existing mode of devops'
       - string:
+          name: PKG_JOB_NAME
+          default: '{build-name}'
+          description: 'The name of job for copying of plugin pkg artefacts'
+      - string:
+          name: ISO_JOB_NAME
+          default: '{canary-name}'
+          description: 'The name of job for copying of stable iso build name'
+      - string:
           name: TESTRAIL_PLAN_NAME
           default: ''
           description: ''
@@ -353,7 +366,8 @@
     <<: *test-wrappers
     builders:
       - copyartifact:
-          project: "${{ARTIFACTS_JOB_NAME}}"
+          project: "${{PKG_JOB_NAME}}"
+          filter: "*.rpm"
           which-build: last-successful
       - shell:
           !include-raw-escape: builders/common.prepare.sh
@@ -428,8 +442,8 @@
           builders:
              - shell: |
                  #!/bin/bash
-                 export PLUGIN_VERSION=$(grep "^version" metadata.yaml | cut -d ' ' -f2)
-                 echo PLUGIN_VERSION="${{PLUGIN_VERSION}} > build.plugin_version
+                 plugin_version=$(grep '^version' metadata.yaml | cut -d ' ' -f2)
+                 echo PLUGIN_VERSION=${{plugin_version}} | tr -d "'"> build.plugin_version
                  env > build.properties
       - archive:
           artifacts: '*.rpm'
@@ -501,14 +515,22 @@
     builders:
       - copyartifact:
           project: '{build-name}'
+          filter: 'build.*'
           which-build: last-successful
           stable: true
       - copyartifact:
           project: '{canary-name}'
+          filter: 'iso_file'
           which-build: last-successful
           stable: true
+      - shell: |
+              #!/bin/bash
+              [ -z "${{ISO_FILE}}"       ] && cat iso_file > properties
+              [ -z "${{PLUGIN_VERSION}}" ] && cat build.plugin_version >> properties
       - inject:
-          properties-file: iso_file
+          properties-file: properties
+      #- inject:
+      #    properties-file: iso_file
       - multijob:
           name: 'The smoke test for {fuel-release}.{plugin-name}.{plugin-version}'
           condition: COMPLETED
@@ -517,7 +539,7 @@
              current-parameters: true
              predefined-parameters: |
                 TEST_GROUP=dvs_vcenter_smoke
-             property-file: iso_file
+             property-file: properties
              kill-phase-on: NEVER
 
     publishers:
@@ -555,21 +577,27 @@
     builders:
       - copyartifact:
           project: '{build-name}'
+          filter: 'build.*'
           which-build: last-successful
           stable: true
       - copyartifact:
           project: '{canary-name}'
+          filter: 'iso_file'
           which-build: last-successful
           stable: true
+      - shell: |
+              #!/bin/bash
+              [ -z "${{ISO_FILE}}"       ] && cat iso_file > properties
+              [ -z "${{PLUGIN_VERSION}}" ] && cat build.plugin_version >> properties
       - inject:
-          properties-file: iso_file
+          properties-file: properties
       - multijob:
           name: 'The BVT test for {fuel-release}.{plugin-name}.{plugin-version}'
           condition: COMPLETED
           projects:
            - name: '{fuel-release}.{plugin-name}.bvt.test'
              current-parameters: true
-             property-file: iso_file
+             property-file: properties
              predefined-parameters: |
                 TEST_GROUP=dvs_vcenter_bvt
              kill-phase-on: NEVER
@@ -660,14 +688,19 @@
       - copyartifact:
           project: '{build-name}'
           which-build: last-successful
+          filter: 'build.plugin_version'
           stable: true
       - copyartifact:
           project: '{download-iso-name}'
+          filter: 'iso_file'
           which-build: last-successful
           stable: true
+      - shell: |
+              #!/bin/bash
+              [ -z "${{ISO_FILE}}"       ] && cat iso_file > properties
+              [ -z "${{PLUGIN_VERSION}}" ] && cat build.plugin_version >> properties
       - inject:
-          properties-file: iso_file
-
+          properties-file: properties
       - multijob:
           name: 'Smoke tests for dvs.vcenter5'
           condition: SUCCESSFUL
@@ -675,8 +708,9 @@
            - name: '{fuel-release}.{plugin-name}.canary.skinny'
              predefined-parameters: |
                 TEST_GROUP=dvs_vcenter_smoke
+                PKG_JOB_NAME={build-name}
              current-parameters: true
-             property-file: iso_file
+             property-file: properties
              kill-phase-on: NEVER
 
 #      - multijob:
@@ -706,12 +740,8 @@
       - archive:
           artifacts: 'iso_file'
           allow-empty: false
-      - archive:
-          artifacts: '*.rpm'
-          allow-empty: false
       - email:
           recipients: '{email-to}'
-
 
 - job-template:
     name: '{nightly-name}'
@@ -745,28 +775,25 @@
     scm: []
     triggers:
       - timed: '{nightly-timer}'
-
     builders:
       # copy latest stable plugin package that has passed dvs bvt on the stable iso
       - copyartifact:
-          project: "${{ARTIFACTS_JOB_NAME}}"
+          project: "${{PKG_JOB_NAME}}"
+          filter: "build.plugin_version"
           which-build: last-successful
           stable: true
       # copy latest stable iso that has passed fuel and dvs smoke and bvt tests
       - copyartifact:
-          project: '{canary-name}'
+          project: "${{ISO_JOB_NAME}}"
+          filter: "iso_file"
           which-build: last-successful
           stable: true
       - shell: |
-          if [ -z "${{ISO_FILE}}" ]; then
-              source 'iso_file'
-              export ISO_FILE=${{ISO_FILE}}
-          fi
-      - shell: |
-          if [ -z "${{PLUGIN_VERSION}}" ]; then
-              source 'build.plugin_version'
-              export PLUGIN_VERSION=${{PLUGIN_VERSION}}
-          fi
+              #!/bin/bash
+              [ -z "${{ISO_FILE}}"       ] && cat iso_file > properties
+              [ -z "${{PLUGIN_VERSION}}" ] && cat build.plugin_version >> properties
+      - inject:
+          properties-file: properties
       - multijob:
           name: 'System tests for dvs{fuel-release}.{plugin-version} vcenter5'
           condition: COMPLETED
@@ -774,54 +801,52 @@
            - name: '{fuel-release}.{plugin-name}.dvs_vcenter_systest_setup'
              current-parameters: true
              kill-phase-on: NEVER
-             property-file: iso_file
+             property-file: properties
            - name: '{fuel-release}.{plugin-name}.dvs_vcenter_networks'
              current-parameters: true
              kill-phase-on: NEVER
-             property-file: iso_file
+             property-file: properties
            - name: '{fuel-release}.{plugin-name}.dvs_vcenter_ping_public'
              current-parameters: true
              kill-phase-on: NEVER
-             property-file: iso_file
+             property-file: properties
            - name: '{fuel-release}.{plugin-name}.dvs_vcenter_5_instances'
              current-parameters: true
              kill-phase-on: NEVER
-             property-file: iso_file
+             property-file: properties
            - name: '{fuel-release}.{plugin-name}.dvs_vcenter_security'
              current-parameters: true
              kill-phase-on: NEVER
-             property-file: iso_file
+             property-file: properties
            - name: '{fuel-release}.{plugin-name}.dvs_vcenter_tenants_isolation'
              current-parameters: true
              kill-phase-on: NEVER
-             property-file: iso_file
+             property-file: properties
            - name: '{fuel-release}.{plugin-name}.dvs_vcenter_same_ip'
              current-parameters: true
              kill-phase-on: NEVER
-             property-file: iso_file
+             property-file: properties
            - name: '{fuel-release}.{plugin-name}.dvs_vcenter_uninstall'
              current-parameters: true
              kill-phase-on: NEVER
-             property-file: iso_file
+             property-file: properties
            - name: '{fuel-release}.{plugin-name}.dvs_vcenter_bind_port'
              current-parameters: true
              kill-phase-on: NEVER
-             property-file: iso_file
+             property-file: properties
            - name: '{fuel-release}.{plugin-name}.dvs_vcenter_add_delete_controller'
              current-parameters: true
              kill-phase-on: NEVER
-             property-file: iso_file
+             property-file: properties
            - name: '{fuel-release}.{plugin-name}.dvs_vcenter_add_delete_nodes'
              current-parameters: true
              kill-phase-on: NEVER
-             property-file: iso_file
-
+             property-file: properties
            - name: '{fuel-release}.{plugin-name}.dvs_vcenter_reset_controller'
              current-parameters: true
              kill-phase-on: NEVER
-             property-file: iso_file
-
+             property-file: properties
            - name: '{fuel-release}.{plugin-name}.dvs_vcenter_net_template'
              current-parameters: true
              kill-phase-on: NEVER
-             property-file: iso_file
+             property-file: properties

@@ -16,8 +16,8 @@
 
     nightly-disabled: false
 
-    use-snapshots: false
-    force-erase: true
+    use-snapshots: true
+    force-erase: false
     recreate-venv: false
     disable-ssl: false
     bonding: false
@@ -71,21 +71,17 @@
     name: 'common-scm'
     scm:
       - git:
-          name: ''
           url: 'https://review.openstack.org/openstack/{gerrit-repo}'
           refspec: $GERRIT_REFSPEC
           branches:
             - $GERRIT_BRANCH
           choosing-strategy: default
+          skip-tag: true
           submodule:
             disable: false
             tracking: true
             recursive: true
-          clean:
-            # we don't clean and re-initialize the repo
-            before: false
-          # we don't clean a workspace, so we need to remove rpms manually
-          wipe-workspace: false
+          wipe-workspace: true
 
 ## list of gerrit events to trigger build job
 - build-gerrit-events: &build-gerrit-events
@@ -764,6 +760,10 @@
     #              export ISO_FILE=${{ISO_FILE}}
     #          fi
     #      - shell: |
+    #              source 'iso_file'
+    #              export ISO_FILE=${{ISO_FILE}}
+    #          fi
+    #      - shell: |
     #          if [ -z "${{PLUGIN_VERSION}}" ]; then
     #              source 'build.plugin_version'
     #              export PLUGIN_VERSION=${{PLUGIN_VERSION}}
@@ -775,30 +775,40 @@
             - name: '{fuel-release}.{plugin-name}.{plugin-version}.contrail_ha.juniper'
               predefined-parameters: |
                  CONTRAIL_DISTRIBUTION=juniper
+                 FORCE_ERASE=true
+                 USE_SNAPSHOTS=false
               current-parameters: true
               kill-phase-on: NEVER
 
             - name: '{fuel-release}.{plugin-name}.{plugin-version}.contrail_ha_baseos.juniper'
               predefined-parameters: |
                  CONTRAIL_DISTRIBUTION=juniper
+                 FORCE_ERASE=true
+                 USE_SNAPSHOTS=false
               current-parameters: true
               kill-phase-on: NEVER
 
             - name: '{fuel-release}.{plugin-name}.{plugin-version}.contrail_ceilometer.juniper'
               predefined-parameters: |
                  CONTRAIL_DISTRIBUTION=juniper
+                 FORCE_ERASE=true
+                 USE_SNAPSHOTS=false
               current-parameters: true
               kill-phase-on: NEVER
 
             - name: '{fuel-release}.{plugin-name}.{plugin-version}.contrail_vlan'
               predefined-parameters: |
                  CONTRAIL_DISTRIBUTION=juniper
+                 FORCE_ERASE=true
+                 USE_SNAPSHOTS=false
               current-parameters: true
               kill-phase-on: NEVER
 
             - name: '{fuel-release}.{plugin-name}.{plugin-version}.contrail_jumbo'
               predefined-parameters: |
                  CONTRAIL_DISTRIBUTION=juniper
+                 FORCE_ERASE=true
+                 USE_SNAPSHOTS=false
               current-parameters: true
               kill-phase-on: NEVER
 
@@ -806,6 +816,8 @@
               predefined-parameters: |
                  CONTRAIL_DISTRIBUTION=juniper
                  BONDING=true
+                 FORCE_ERASE=true
+                 USE_SNAPSHOTS=false
               current-parameters: true
               kill-phase-on: NEVER
 
@@ -813,6 +825,8 @@
               predefined-parameters: |
                  CONTRAIL_DISTRIBUTION=juniper
                  BONDING=true
+                 FORCE_ERASE=true
+                 USE_SNAPSHOTS=false
               current-parameters: true
               kill-phase-on: NEVER
 
@@ -820,6 +834,8 @@
               predefined-parameters: |
                  CONTRAIL_DISTRIBUTION=juniper
                  BONDING=true
+                 FORCE_ERASE=true
+                 USE_SNAPSHOTS=false
               current-parameters: true
               kill-phase-on: NEVER
 

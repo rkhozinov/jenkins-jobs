@@ -85,11 +85,7 @@
             disable: false
             tracking: true
             recursive: true
-          clean:
-            # we don't clean and re-initialize the repo
-            before: false
-          # we don't clean a workspace, so we need to remove rpms manually
-          wipe-workspace: false
+          wipe-workspace: true
 
 ## list of gerrit events to trigger build job
 - build-gerrit-events: &build-gerrit-events
@@ -203,6 +199,10 @@
           name: DEBUG
           default: '{debug}'
           description: "Set -x (xtrace) for jobs' bash scripts"
+      - label:
+          name: node
+          default: dvs
+          description: "The node on which to run the job"
       - bool:
           name: DISABLE_SSL
           default: '{disable-ssl}'
@@ -375,12 +375,12 @@
           !include-raw-escape: builders/dvs.test.sh
     publishers:
       - postbuildscript:
-          script-only-if-succeeded: False
+          script-only-if-succeeded: false
           builders:
-            - shell: env > properties
-              # need to delete packages, because we don't wipe workspace,
-              # but packages could be duplicated
-            - shell: rm -f .*rpm.*
+           - shell: env > properties
+             # need to delete packages, because we don't wipe workspace,
+             # but packages could be duplicated
+           - shell: rm -f .*rpm.*
       - archive:
           artifacts: 'build.properties'
           allow-empty: false
@@ -525,12 +525,10 @@
           stable: true
       - shell: |
               #!/bin/bash
-              [ -z "${{ISO_FILE}}"       ] && cat iso_file > properties 
-              [ -z "${{PLUGIN_VERSION}}" ] && cat build.plugin_version >> properties
+              [ -z "${{ISO_FILE}}"       ] && cat iso_file > additional_params
+              [ -z "${{PLUGIN_VERSION}}" ] && cat build.plugin_version >> additional_params
       - inject:
-          properties-file: properties
-      #- inject:
-      #    properties-file: iso_file
+          properties-file: additional_params
       - multijob:
           name: 'The smoke test for {fuel-release}.{plugin-name}.{plugin-version}'
           condition: COMPLETED
@@ -539,7 +537,7 @@
              current-parameters: true
              predefined-parameters: |
                 TEST_GROUP=dvs_vcenter_smoke
-             property-file: properties
+             property-file: additional_params
              kill-phase-on: NEVER
 
     publishers:
@@ -587,17 +585,17 @@
           stable: true
       - shell: |
               #!/bin/bash
-              [ -z "${{ISO_FILE}}"       ] && cat iso_file > properties 
-              [ -z "${{PLUGIN_VERSION}}" ] && cat build.plugin_version >> properties 
+              [ -z "${{ISO_FILE}}"       ] && cat iso_file > additional_params
+              [ -z "${{PLUGIN_VERSION}}" ] && cat build.plugin_version >> additional_params
       - inject:
-          properties-file: properties
+          properties-file: additional_params
       - multijob:
           name: 'The BVT test for {fuel-release}.{plugin-name}.{plugin-version}'
           condition: COMPLETED
           projects:
            - name: '{fuel-release}.{plugin-name}.bvt.test'
              current-parameters: true
-             property-file: properties
+             property-file: additional_params
              predefined-parameters: |
                 TEST_GROUP=dvs_vcenter_bvt
              kill-phase-on: NEVER
@@ -611,19 +609,19 @@
           allow-empty: false
       - archive:
           artifacts: 'build.properties'
-          allow-empty: false
+          allow-empty: true
       - archive:
           artifacts: 'build.plugin_version'
-          allow-empty: false
+          allow-empty: true
       - archive:
           artifacts: 'bvt.properties'
-          allow-empty: false
+          allow-empty: true
       - archive:
           artifacts: 'canary.properties'
-          allow-empty: false
+          allow-empty: true
       - archive:
           artifacts: 'iso_file'
-          allow-empty: false
+          allow-empty: true
       - email:
           recipients: '{email-to}'
 
@@ -697,10 +695,10 @@
           stable: true
       - shell: |
               #!/bin/bash
-              [ -z "${{ISO_FILE}}"       ] && cat iso_file > properties 
-              [ -z "${{PLUGIN_VERSION}}" ] && cat build.plugin_version >> properties 
+              [ -z "${{ISO_FILE}}"       ] && cat iso_file > additional_params
+              [ -z "${{PLUGIN_VERSION}}" ] && cat build.plugin_version >> additional_params
       - inject:
-          properties-file: properties
+          properties-file: additional_params
       - multijob:
           name: 'Smoke tests for dvs.vcenter5'
           condition: SUCCESSFUL
@@ -710,7 +708,7 @@
                 TEST_GROUP=dvs_vcenter_smoke
                 PKG_JOB_NAME={build-name}
              current-parameters: true
-             property-file: properties
+             property-file: additional_params
              kill-phase-on: NEVER
 
 #      - multijob:
@@ -732,6 +730,9 @@
           artifacts: 'build.properties'
           allow-empty: false
       - archive:
+          artifacts: 'additional_params'
+          allow-empty: false
+      - archive:
           artifacts: 'build.plugin_version'
           allow-empty: false
       - archive:
@@ -746,7 +747,7 @@
 - job-template:
     name: '{nightly-name}'
     project-type: multijob
-    disabled: '{nightly-disabled}'
+    disabled: false
     node: runner
     <<: *runner-parameters
     <<: *runner-wrappers
@@ -755,11 +756,14 @@
           weight: 1
     publishers:
       - postbuildscript:
-          script-only-if-succeeded: False
+          script-only-if-succeeded: false
           builders:
             - shell: env > nightly.properties
       - archive:
           artifacts: 'nightly.properties'
+          allow-empty: false
+      - archive:
+          artifacts: 'additional_params'
           allow-empty: false
       - archive:
           artifacts: 'build.properties'
@@ -782,18 +786,18 @@
           filter: "build.plugin_version"
           which-build: last-successful
           stable: true
-      # copy latest stable iso that has passed fuel and dvs slmoke and bvt tests
+      # copy latest stable iso that has passed fuel and dvs smoke and bvt tests
       - copyartifact:
           project: "${{ISO_JOB_NAME}}"
           filter: "iso_file"
           which-build: last-successful
           stable: true
       - shell: |
-              #!/bin/bash
-              [ -z "${{ISO_FILE}}"       ] && cat iso_file > properties
-              [ -z "${{PLUGIN_VERSION}}" ] && cat build.plugin_version >> properties
+          #!/bin/bash
+          [ -z "${{ISO_FILE}}"       ] && cat iso_file > additional_params
+          [ -z "${{PLUGIN_VERSION}}" ] && cat build.plugin_version >> additional_params
       - inject:
-          properties-file: properties
+          properties-file: additional_params
       - multijob:
           name: 'System tests for dvs{fuel-release}.{plugin-version} vcenter5'
           condition: COMPLETED
@@ -801,52 +805,52 @@
            - name: '{fuel-release}.{plugin-name}.dvs_vcenter_systest_setup'
              current-parameters: true
              kill-phase-on: NEVER
-             property-file: properties
+             property-file: additional_params
            - name: '{fuel-release}.{plugin-name}.dvs_vcenter_networks'
              current-parameters: true
              kill-phase-on: NEVER
-             property-file: properties
+             property-file: additional_params
            - name: '{fuel-release}.{plugin-name}.dvs_vcenter_ping_public'
              current-parameters: true
              kill-phase-on: NEVER
-             property-file: properties
+             property-file: additional_params
            - name: '{fuel-release}.{plugin-name}.dvs_vcenter_5_instances'
              current-parameters: true
              kill-phase-on: NEVER
-             property-file: properties
+             property-file: additional_params
            - name: '{fuel-release}.{plugin-name}.dvs_vcenter_security'
              current-parameters: true
              kill-phase-on: NEVER
-             property-file: properties
+             property-file: additional_params
            - name: '{fuel-release}.{plugin-name}.dvs_vcenter_tenants_isolation'
              current-parameters: true
              kill-phase-on: NEVER
-             property-file: properties
+             property-file: additional_params
            - name: '{fuel-release}.{plugin-name}.dvs_vcenter_same_ip'
              current-parameters: true
              kill-phase-on: NEVER
-             property-file: properties
+             property-file: additional_params
            - name: '{fuel-release}.{plugin-name}.dvs_vcenter_uninstall'
              current-parameters: true
              kill-phase-on: NEVER
-             property-file: properties
+             property-file: additional_params
            - name: '{fuel-release}.{plugin-name}.dvs_vcenter_bind_port'
              current-parameters: true
              kill-phase-on: NEVER
-             property-file: properties
+             property-file: additional_params
            - name: '{fuel-release}.{plugin-name}.dvs_vcenter_add_delete_controller'
              current-parameters: true
              kill-phase-on: NEVER
-             property-file: properties
+             property-file: additional_params
            - name: '{fuel-release}.{plugin-name}.dvs_vcenter_add_delete_nodes'
              current-parameters: true
              kill-phase-on: NEVER
-             property-file: properties
+             property-file: additional_params
            - name: '{fuel-release}.{plugin-name}.dvs_vcenter_reset_controller'
              current-parameters: true
              kill-phase-on: NEVER
-             property-file: properties
+             property-file: additional_params
            - name: '{fuel-release}.{plugin-name}.dvs_vcenter_net_template'
              current-parameters: true
              kill-phase-on: NEVER
-             property-file: properties
+             property-file: additional_params
