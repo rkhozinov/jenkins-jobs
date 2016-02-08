@@ -25,7 +25,7 @@ source $VENV_PATH/bin/activate
 
 systest_parameters=''
 [[ $USE_SNAPSHOTS == "true"  ]] && systest_parameters+=' -k' || echo new env will be created
-[[ $ERASE_AFTER   == "true"  ]] && echo the env will be erased after test || systest_parameters+=' -K'
+[[ $ERASE_AFTER   == "true"  ]] && systest_parameters+=' -K' || echo the env will be erased after test
 
 echo test-group: $TEST_GROUP
 echo env-name: $ENV_NAME
@@ -37,5 +37,7 @@ echo iso-path: $ISO_PATH
 echo plugin-path: $CONTRAIL_PLUGIN_PATH
 echo ubuntu-plugin-path: $CONTRAIL_PLUGIN_PACK_UB_PATH
 echo plugin-checksum: $(md5sum -b $DVS_PLUGIN_PATH)
+
+git log  --pretty=oneline | head
 
 ./plugin_test/utils/jenkins/system_tests.sh -t test ${systest_parameters} -i ${ISO_PATH} -j ${JOB_NAME} -o --group=${TEST_GROUP}

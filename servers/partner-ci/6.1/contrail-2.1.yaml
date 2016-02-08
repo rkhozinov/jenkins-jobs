@@ -86,11 +86,7 @@
             disable: false
             tracking: true
             recursive: true
-          clean:
-            # we don't clean and re-initialize the repo
-            before: false
-          # we don't clean a workspace, so we need to remove rpms manually
-          wipe-workspace: false
+          wipe-workspace: true
 
 ## list of gerrit events to trigger build job
 - build-gerrit-events: &build-gerrit-events
@@ -443,7 +439,9 @@
           recipients: '{email-to}'
       - trigger-parameterized-builds:
         - project: '{reporter-name}'
-          predefined-parameters: TEST_JOB_NAME=${{JOB_NAME}}
+          predefined-parameters: |
+            TEST_JOB_NAME=${{JOB_NAME}}
+            TEST_BUILD_NUMBER=${{BUILD_NUMBER}}
           fail-on-missing: true
 
 # job for building plugin package
@@ -576,52 +574,73 @@
     concurrent: true
     project-type: multijob
     node: runner
+    wrappers:
+      - ansicolor:
+          colormap: xterm
+      - inject-passwords:
+          global: true
+          mask-password-params: true
     parameters:
       - string:
           name: TEST_JOB_NAME
           description: 'The name of a test for getting test results'
       - string:
-          name: TESTRAIL_URL
+          name: TEST_JOB_BUILD_NUMBER
+          description: 'The number of a build'
+      - string:
+          name: TREP_TESTRAIL_URL
           default: 'https://mirantis.testrail.com'
           description: ""
       - string:
-          name: TESTRAIL_PROJECT
+          name: TREP_TESTRAIL_PROJECT
           default: 'Contrail plugin'
           description: "Project name"
       - string:
-          name: TESTRAIL_MILESTONE
+          name: TREP_TESTRAIL_MILESTONE
           default: 'Fuel Contrail Plugin v2.1.0'
           description: ""
       - string:
-          name: TESTRAIL_TEST_SUITE
+          name: TREP_TESTRAIL_TEST_SUITE
           default: 'Contrail Plugin v2.x.x'
           description: ""
       - string:
-          name: TESTRAIL_TEST_PLAN
+          name: TREP_TESTRAIL_SUITE_DESCRIPTION
+          default: "Test suite description"
+          description: ""
+      - string:
+          name: TREP_TESTRAIL_PLAN
           default: 'Fuel Contrail Plugin v2.1.1 #3'
           description: ""
+      - string:
+          name: TREP_TESTRAIL_PLAN_DESCRIPTION
+          default: "Test plan description"
+          description: ""
+      - string:
+          name: TREP_TESTRAIL_RUN_DESCRIPTION
+          default: "Test run description"
+          description: ""
 #      - string:
-#          name: TESTRAIL_TEST_SECTION
+#          name: TREP_TESTRAIL_TREP_TEST_SECTION
 #          default: 'nosetests.xml'
 #          description: ""
 #      - string:
-#          name: TESTRAIL_TEST_INCLUDE
+#          name: TREP_TESTRAIL_TREP_TEST_INCLUDE
 #          default: 'nosetests.xml'
 #          description: ""
 #      - string:
-#          name: TESTRAIL_TEST_EXCLUDE
+#          name: TREP_TESTRAIL_TREP_TEST_EXCLUDE
 #          default: 'nosetests.xml'
 #          description: ""
       - string:
-          name: TESTRAIL_LOG_LEVEL
+          name: TREP_TESTRAIL_LOG_LEVEL
           default: 'INFO'
           description: "Log level of reporter"
       - string:
-          name: TESTRAIL_LOG_DIR
+          name: TREP_TESTRAIL_LOG_FILE
           default: 'testrail_reporter.log'
           description: ""
       - string:
-          name: TEST_RESULTS_XUNIT_FILENAME
+          name: TREP_TEST_RESULTS_XUNIT_FILENAME
           default: 'nosetests.xml'
           description: ""
     scm:
@@ -636,17 +655,12 @@
     builders:
       - copyartifact:
           project: ${{TEST_JOB_NAME}}
-          filter: ${{TEST_RESULTS_XUNIT_FILENAME}}
-          which-build: last-completed
+          filter: ${{TREP_TEST_RESULTS_XUNIT_FILENAME}}
+          which-build: specific-build
+          build-number: ${{TEST_JOB_BUILD_NUMBER}}
           stable: true
-      - shell: |
-          #!/bin/bash
-          ls -al
-          pwd
-          venv_path='/home/jenkins/trep'
-          [ -d $venv_path ] && source $venv_path/bin/activate
-          ls -al
-          trep -c ${{WORKSPACE}}/start/trep.yaml
+      - shell:
+          !include-raw-escape './builders/reporter.sh'
     publishers:
       - email:
           recipients: '{email-to}'

@@ -3,9 +3,14 @@
 # activate bash xtrace for script
 [[ "${DEBUG}" == "true" ]] && set -x || set +x
 
-[[ -z "${ISO_FILE}" ]] && ( echo 'ISO_FILE is empty' ; exit 1 ) || true
+[ -z $ISO_FILE -a -f iso_file ] \
+                                && source iso_file \
+                                || (echo "ISO_FILE is empty"; exit 1)
 
-[[ -z "${PLUGIN_VERSION}" ]] && ( echo 'PLUGIN_VERSION is empty' ; exit 1 ) || export DVS_PLUGIN_VERSION=${PLUGIN_VERSION}
+[ -z $PLUGIN_VERSION -a -f build.plugin_version ] \
+                                && (source build.plugin_version; export DVS_PLUGIN_VERSION=$PLUGIN_VERSION )
+                                || (echo "PLUGIN_VERSION is empty"; exit 1)
+
 
 export FUEL_RELEASE=$(cut -d'-' -f2-2 <<< $ISO_FILE | tr -d '.')
 [[ -z "${FUEL_RELEASE}" ]] && ( echo 'FUEL_RELEASE is empty'; exit 1) || true
