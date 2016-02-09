@@ -169,6 +169,7 @@
           type: no-activity
           write-description: "Timeout is exceeded"
           timeout: '{test-timeout}'
+
 ## properties for test jobs
 - test-properties: &test-properties
     name: 'test-properties'
@@ -412,26 +413,34 @@
           artifacts: 'logs/*'
           allow-empty: true
           fingerprint: true
-      - xunit:
-          types:
-            - junit:
-                pattern: 'nosetest.xml'
-                skip-if-no-test-files: true
-      - junit:
-          results: nosetests.xml
-          health-scale-factor: 1.0
       - email:
           recipients: '{email-to}'
-      - postbuildscript:
-          script-only-if-succeeded: False
-          builders:
-            - shell: |
-                #!/bin/bash
-                [[ "${{PUBLISH_RESULTS}}" == "true" ]] && exit 0
-      - trigger-parameterized-builds:
-        - project: '{reporter-name}'
-          property-file: reporter.properties
-          fail-on-missing: true
+      - conditional-publisher:
+          - condition-kind: file-exists
+            condition-filename: 'nosetests.xml'
+            action:
+              - xunit:
+                  types:
+                    - junit:
+                        pattern: 'nosetests.xml'
+                        skip-if-no-test-files: true
+      - conditional-publisher:
+          - condition-kind: file-exists
+            condition-filename: 'nosetests.xml'
+            action:
+              - junit:
+                  results: 'nosetests.xml'
+                  health-scale-factor: 1.0
+      - conditional-publisher:
+          - condition-kind: shell
+            condition-command: |
+               #!/bin/bash
+               [[ "${{PUBLISH_RESULTS}}" == "true" ]] && exit 0 || exit 1
+            action:
+              - trigger-parameterized-builds:
+                - project: '{reporter-name}'
+                  property-file: reporter.properties
+                  fail-on-missing: true
 
 # jobs for system tests
 - job-template:
@@ -473,7 +482,7 @@
       - xunit:
           types:
             - junit:
-                pattern: 'nosetest.xml'
+                pattern: 'nosetests.xml'
                 skip-if-no-test-files: true
       - junit:
           results: nosetests.xml
@@ -496,10 +505,6 @@
           global: true
           mask-password-params: true
     parameters:
-      - bool:
-          name: PUBLISH_RESULTS
-          default: '{obj:publish_results}'
-          description: 'The name of devops env. Needed to properly work of existing mode of devops'
       - string:
           name: ISO_VERSION
           description: 'ISO number for form the test plan string'
@@ -620,25 +625,9 @@
       - archive:
           artifacts: 'nightly.properties'
           allow-empty: true
-      - archive:
-          artifacts: 'build.properties'
-          allow-empty: true
-      - archive:
-          artifacts: 'build.plugin_version'
-          allow-empty: true
-      - archive:
-          artifacts: 'iso_file'
-          allow-empty: true
-      - archive:
-          artifacts: 'additional_params'
-          allow-empty: true
-      - archive:
-          artifacts: 'properties'
-          allow-empty: true
       - email:
           recipients: '{email-to}'
       - trigger-parameterized-builds: []
-
     builders:
       - multijob:
           name: 'System tests for dvs{fuel-release}.{plugin-version} vcenter5'

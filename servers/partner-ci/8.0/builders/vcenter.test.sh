@@ -18,7 +18,7 @@ if [ -z $PLUGIN_VERSION  ]; then
    # but if use doesn't want custom iso, we should get iso from artifacts
    [ -f $PLUGIN_VERSION_ARTIFACT ] && source $PLUGIN_VERSION_ARTIFACT || (echo "The PLUGIN_VERSION is empty"; exit 1)
    # check variable again - it shouldn't be empty
-   [ -z $PLUGIN_VERSION  ] && (echo "PLUGIN_VERSION variable is empty"; exit 1)
+   [ -z $PLUGIN_VERSION  ] && (echo "PLUGIN_VERSION variable is empty"; exit 1) || export DVS_PLUGIN_VERSION=$PLUGIN_VERSION
 fi
 
 #remove old logs and test data
@@ -57,18 +57,16 @@ ISO_FILE=$ISO_FILE
 TEST_JOB_NAME=$JOB_NAME
 TEST_BUILD_NUMBER=$BUILD_NUMBER
 PLUGIN_VERSION=$PLUGIN_VERSION
-PUBLISH_RESULTS=$PUBLISH_RESULTS
-
 REPORTER_PROPERTIES
 
 
 source $VENV_PATH/bin/activate
 
-#/btsync/tpi_systest_mod.sh -d ${OPENSTACK_RELEASE} \
-#                           -n "${NODES_COUNT}" \
-#                           -i ${ISO_PATH} \
-#                           -t "${TEST_GROUP_PREFIX}(${TEST_GROUP})" \
-#                           $systest_parameters
+/btsync/tpi_systest_mod.sh -d ${OPENSTACK_RELEASE} \
+                           -n "${NODES_COUNT}" \
+                           -i ${ISO_PATH} \
+                           -t "${TEST_GROUP_PREFIX}(${TEST_GROUP})" \
+                           $systest_parameters
 
 #./plugin_test/utils/jenkins/system_tests.sh -t test ${systest_parameters} -i ${ISO_PATH} -j ${JOB_NAME} -o --group=${TEST_GROUP}
 

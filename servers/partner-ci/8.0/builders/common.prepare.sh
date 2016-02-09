@@ -130,11 +130,11 @@ function fix_logger {
 
 ####################################################################################
 
-[[ "${RECREATE_VENV}" == "true" ]] && recreate_venv || true
+[[ "${RECREATE_VENV}" == "true" ]] && recreate_venv
 
 get_venv_requirements
 
-[ -d $VENV_PATH ] && prepare_venv || (echo "$VENV_PATH doesn't exist"; exit 1)
+[ -d $VENV_PATH ] && prepare_venv || (echo "$VENV_PATH doesn't exist $VENV_PATH will be recreated"; recreate_venv )
 
 fix_logger
 
