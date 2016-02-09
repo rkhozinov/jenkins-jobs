@@ -1,39 +1,38 @@
-#!/bin/bash -x
+#!/bin/bash -e
 
 # activate bash xtrace for script
 [[ "${DEBUG}" == "true" ]] && set -x || set +x
 
+ISO_FILE_ARTIFACT='iso_file'
+# if user entered custom iso we should use it
 if [ -z $ISO_FILE  ]; then
-   if [ -f iso_file ]; then
-       source iso_file
-   else
-       echo "There's not iso_file"
-       exit 1
-   fi
+   # but if use doesn't want custom iso, we should get iso from artifacts
+   [ -f $ISO_FILE_ARTIFACT ] && source $ISO_FILE_ARTIFACT || (echo "There's not iso_file"; exit 1)
+   # check variable again - it shouldn't be empty
+   [ -z $ISO_FILE  ] && (echo "ISO_FILE variable is empty"; exit 1)
 fi
 
-
-if [ -z $PLUGIN_VERSION ]; then
-    if [ -f build.plugin_version ]; then
-        source build.plugin_version;
-        export DVS_PLUGIN_VERSION=$PLUGIN_VERSION
-    else
-        echo "There is not build.plugin_version file"
-        exit 1
-    fi
+PLUGIN_VERSION_ARTIFACT='build.plugin_version'
+# if user entered custom iso we should use it
+if [ -z $PLUGIN_VERSION  ]; then
+   # but if use doesn't want custom iso, we should get iso from artifacts
+   [ -f $PLUGIN_VERSION_ARTIFACT ] && source $PLUGIN_VERSION_ARTIFACT || (echo "The PLUGIN_VERSION is empty"; exit 1)
+   # check variable again - it shouldn't be empty
+   [ -z $PLUGIN_VERSION  ] && (echo "PLUGIN_VERSION variable is empty"; exit 1)
 fi
+
+#remove old logs and test data
+[ -f nosetest.xml ] && rm -f nosetests.xml
+rm -rf logs/*
 
 export FUEL_RELEASE=$(cut -d '-' -f2-2 <<< $ISO_FILE | tr -d '.')
-
 export ISO_PATH="${ISO_STORAGE}/${ISO_FILE}"
-export ISO_VERSION=$(cut -d'-' -f3-3 <<< $ISO_FILE)
+export ISO_VERSION=$(echo $ISO_FILE | cut -d'-' -f3-3 | tr -d '.iso' )
 export ENV_NAME="${ENV_PREFIX}.${ISO_VERSION}"
 export VENV_PATH="${HOME}/${FUEL_RELEASE}-venv"
 
 [[ -z "${DVS_PLUGIN_PATH}" ]] && export DVS_PLUGIN_PATH=$(ls -t ${WORKSPACE}/fuel-plugin-vmware-dvs*.rpm | head -n 1) || true
-[[ -z "${PLUGIN_PATH}" ]] && export PLUGIN_PATH=$DVS_PLUGIN_PATH
-
-source $VENV_PATH/bin/activate
+[[ -z "${PLUGIN_PATH}"     ]] && export PLUGIN_PATH=$DVS_PLUGIN_PATH
 
 systest_parameters=''
 [[ $USE_SNAPSHOTS  == 'true' ]] && systest_parameters+=' --existing' || echo snapshots for env is not be used
@@ -41,6 +40,7 @@ systest_parameters=''
 #[[ $ERASE_AFTER    == 'true' ]] && systest_parameters+=' --erase' || echo the env will not be erased after test
 
 [ -z $TEST_GROUP_PREFIX ] && exit 1 || echo test-group-prefix: $TEST_GROUP_PREFIX
+
 echo test-group: $TEST_GROUP
 echo env-name: $ENV_NAME
 echo use-snapshots: $USE_SNAPSHOTS
@@ -51,13 +51,24 @@ echo iso-path: $ISO_PATH
 echo plugin-path: $DVS_PLUGIN_PATH
 echo plugin-checksum: $(md5sum -b $DVS_PLUGIN_PATH)
 
-#~/tpi_systest_mod.sh -i /storage/downloads/fuel-8.0-<build_number> -t system_test.vcenter.<test_name>.<yaml_file>
+cat << REPORTER_PROPERTIES > reporter.properties
+ISO_VERSION=$ISO_VERSION
+ISO_FILE=$ISO_FILE
+TEST_JOB_NAME=$JOB_NAME
+TEST_BUILD_NUMBER=$BUILD_NUMBER
+PLUGIN_VERSION=$PLUGIN_VERSION
+PUBLISH_RESULTS=$PUBLISH_RESULTS
 
-/btsync/tpi_systest_mod.sh -d ${OPENSTACK_RELEASE} \
-                           -n "${NODES_COUNT}" \
-                           -i ${ISO_PATH} \
-                           -t "${TEST_GROUP_PREFIX}(${TEST_GROUP})" \
-                           $systest_parameters
+REPORTER_PROPERTIES
+
+
+source $VENV_PATH/bin/activate
+
+#/btsync/tpi_systest_mod.sh -d ${OPENSTACK_RELEASE} \
+#                           -n "${NODES_COUNT}" \
+#                           -i ${ISO_PATH} \
+#                           -t "${TEST_GROUP_PREFIX}(${TEST_GROUP})" \
+#                           $systest_parameters
 
 #./plugin_test/utils/jenkins/system_tests.sh -t test ${systest_parameters} -i ${ISO_PATH} -j ${JOB_NAME} -o --group=${TEST_GROUP}
 

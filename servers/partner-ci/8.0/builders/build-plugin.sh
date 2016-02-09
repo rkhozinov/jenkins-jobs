@@ -1,6 +1,8 @@
 #!/bin/bash
 set -e
 
+git log  --pretty=oneline | head
+
 find . -name '*.erb' -print0 | xargs -0 -P1 -L1 -I '%' erb -P -x -T '-' % | ruby -c
 find . -name '*.pp' -print0 | xargs -0 -P1 -L1 puppet parser validate --verbose
 find . -name '*.pp' -print0 | xargs -0 -r -P1 -L1 puppet-lint \
