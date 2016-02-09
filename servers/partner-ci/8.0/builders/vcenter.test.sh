@@ -1,19 +1,29 @@
-#!/bin/bash -e
+#!/bin/bash -x
 
 # activate bash xtrace for script
 [[ "${DEBUG}" == "true" ]] && set -x || set +x
 
-[ -z $ISO_FILE -a -f iso_file ] \
-                                && source iso_file \
-                                || (echo "ISO_FILE is empty"; exit 1)
+if [ -z $ISO_FILE  ]; then
+   if [ -f iso_file ]; then
+       source iso_file
+   else
+       echo "There's not iso_file"
+       exit 1
+   fi
+fi
 
-[ -z $PLUGIN_VERSION -a -f build.plugin_version ] \
-                                && (source build.plugin_version; export DVS_PLUGIN_VERSION=$PLUGIN_VERSION )
-                                || (echo "PLUGIN_VERSION is empty"; exit 1)
 
+if [ -z $PLUGIN_VERSION ]; then
+    if [ -f build.plugin_version ]; then
+        source build.plugin_version;
+        export DVS_PLUGIN_VERSION=$PLUGIN_VERSION
+    else
+        echo "There is not build.plugin_version file"
+        exit 1
+    fi
+fi
 
-export FUEL_RELEASE=$(cut -d'-' -f2-2 <<< $ISO_FILE | tr -d '.')
-[[ -z "${FUEL_RELEASE}" ]] && ( echo 'FUEL_RELEASE is empty'; exit 1) || true
+export FUEL_RELEASE=$(cut -d '-' -f2-2 <<< $ISO_FILE | tr -d '.')
 
 export ISO_PATH="${ISO_STORAGE}/${ISO_FILE}"
 export ISO_VERSION=$(cut -d'-' -f3-3 <<< $ISO_FILE)

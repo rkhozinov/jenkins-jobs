@@ -32,4 +32,6 @@ echo iso-path: $ISO_PATH
 echo plugin-path: $DVS_PLUGIN_PATH
 echo plugin-checksum: $(md5sum -b $DVS_PLUGIN_PATH)
 
+git log  --pretty=oneline | head
+
 ./plugin_test/utils/jenkins/system_tests.sh -t test ${systest_parameters} -i ${ISO_PATH} -j ${JOB_NAME} -o --group=${TEST_GROUP}
