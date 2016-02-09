@@ -815,7 +815,6 @@
             - name: '{fuel-release}.{plugin-name}.{plugin-version}.contrail_bonding.juniper'
               predefined-parameters: |
                  CONTRAIL_DISTRIBUTION=juniper
-                 BONDING=true
                  FORCE_ERASE=true
                  USE_SNAPSHOTS=false
               current-parameters: true
@@ -824,7 +823,6 @@
             - name: '{fuel-release}.{plugin-name}.{plugin-version}.contrail_ceph_multirole.juniper'
               predefined-parameters: |
                  CONTRAIL_DISTRIBUTION=juniper
-                 BONDING=true
                  FORCE_ERASE=true
                  USE_SNAPSHOTS=false
               current-parameters: true
@@ -833,7 +831,6 @@
             - name: '{fuel-release}.{plugin-name}.{plugin-version}.contrail_cinder_multirole.juniper'
               predefined-parameters: |
                  CONTRAIL_DISTRIBUTION=juniper
-                 BONDING=true
                  FORCE_ERASE=true
                  USE_SNAPSHOTS=false
               current-parameters: true

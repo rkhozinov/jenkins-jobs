@@ -17,13 +17,14 @@
 
     nightly_disabled: false
 
-    use-snapshots: false
-    force-erase: true
-    recreate-venv: false
-    disable-ssl: true
-    update-master: true
-
+    use_snapshots: false
+    force_erase: true
+    recreate_venv: false
+    disable_ssl: true
+    update_master: true
     debug: true
+    publish_results: false
+
     runner-timeout: 600
     test-timeout: 500
 
@@ -54,9 +55,15 @@
       - vcenter_delete_cindervmware
     jobs:
       - '{nightly-name}'
-      - '{custom-name}'
+      - '{custom-name}':
+          testgroup_parameter_type: choice
+          testgroup_value_type: choices
+          testgroup_value: '{obj:testgroup}'
       - '{reporter-name}'
-      - '{fuel-release}.{plugin-name}.{testgroup}'
+      - '{fuel-release}.{plugin-name}.{testgroup}':
+          testgroup_parameter_type: string
+          testgroup_value_type: default
+          testgroup_value: '{testgroup}'
 
 ## common git settings to get sources
 - common-scm: &common-scm
@@ -73,7 +80,7 @@
             disable: false
             tracking: true
             recursive: true
-          wipe-workspace: true
+          wipe-workspace: false
 
 ## list of gerrit events to trigger build job
 - build-gerrit-events: &build-gerrit-events
@@ -162,7 +169,6 @@
           type: no-activity
           write-description: "Timeout is exceeded"
           timeout: '{test-timeout}'
-
 ## properties for test jobs
 - test-properties: &test-properties
     name: 'test-properties'
@@ -189,15 +195,15 @@
           description: "Set -x (xtrace) for jobs' bash scripts"
       - bool:
           name: DISABLE_SSL
-          default: '{disable-ssl}'
+          default: '{disable_ssl}'
           description: "Disable ssh for openstack horizon"
       - bool:
           name: FORCE_ERASE
-          default: '{force-erase}'
+          default: '{force_erase}'
           description: "Erase all envs before test"
       - bool:
           name: RECREATE_VENV
-          default: '{recreate-venv}'
+          default: '{recreate_venv}'
           description: "Recreate virtual environemnt before tests"
       - string:
           name: TEST_GROUP_PREFIX
@@ -213,7 +219,7 @@
           description: 'Snapshot name for vcenter lab'
       - bool:
           name: USE_SNAPSHOTS
-          default: '{use-snapshots}'
+          default: '{use_snapshots}'
           descrition: 'Will be used existing environment'
       - string:
           name: ISO_FILE
@@ -243,6 +249,10 @@
           name: ENV_PREFIX
           default: '{fuel-release}.{plugin-name}'
           description: 'The name of devops env. Needed to properly work of existing mode of devops'
+      - bool:
+          name: PUBLISH_RESULTS
+          default: '{obj:publish_results}'
+          description: 'The name of devops env. Needed to properly work of existing mode of devops'
 
 ## parameters for jobs created per test-group and custom test job
 - test-parameters: &test-parameters
@@ -258,19 +268,19 @@
           description: "Hostname or label to run test"
       - bool:
           name: DISABLE_SSL
-          default: '{disable-ssl}'
+          default: '{disable_ssl}'
           description: "Disable ssh for openstack horizon"
       - bool:
           name: FORCE_ERASE
-          default: '{force-erase}'
+          default: '{force_erase}'
           description: "Erase all envs before test"
       - bool:
           name: RECREATE_VENV
-          default: '{recreate-venv}'
+          default: '{recreate_venv}'
           description: "Recreate virtual environemnt before tests"
       - bool:
           name: USE_SNAPSHOTS
-          default: '{use-snapshots}'
+          default: '{use_snapshots}'
           descrition: 'Will be used existing environment'
       - string:
           name: POOL_PUBLIC
@@ -280,9 +290,9 @@
           name: TEST_GROUP_PREFIX
           default: 'system_test.vcenter.deploy_vcenter_dvs_run_ostf'
           description: 'Snapshot name for vsphere lab'
-      - choice:
+      - '{testgroup_parameter_type}':
           name: TEST_GROUP
-          choices: '{obj:testgroup}'
+          '{testgroup_value_type}': '{obj:testgroup_value}'
           description: "test-group name"
       - string:
           name: VCENTER_SNAPSHOT
@@ -347,11 +357,14 @@
           name: ISO_JOB_NAME
           default: '{default-iso-job-name}'
           description: 'The name of job for copying of stable iso build name'
+      - bool:
+          name: PUBLISH_RESULTS
+          default: '{obj:publish_results}'
+          description: 'The name of devops env. Needed to properly work of existing mode of devops'
 
 - defaults:
     name: global
     disabled: false
-#    node: 'vcenter'
     logrotate:
       daysToKeep: 7
       numToKeep: 10
@@ -369,16 +382,10 @@
           project: "${{ISO_JOB_NAME}}"
           filter: "iso_file"
           which-build: last-successful
-      - shell: |
-              #!/bin/bash
-              [ -z "${{ISO_FILE}}"       ] && cat iso_file > additional_params
-              [ -z "${{PLUGIN_VERSION}}" ] && cat build.plugin_version >> additional_params
-      - inject:
-          properties-file: additional_params
       - shell:
           !include-raw-escape: builders/common.prepare.sh
-#      - shell:
-#          !include-raw-escape: builders/vcenter.test.sh
+      - shell:
+          !include-raw-escape: builders/vcenter.test.sh
     publishers:
       - postbuildscript:
           script-only-if-succeeded: False
@@ -386,14 +393,17 @@
             - shell: env > properties
             - shell: rm -f .*rpm.*
       - archive:
-          artifacts: 'additional_params'
-          allow-empty: true
-      - archive:
           artifacts: 'build.properties'
           allow-empty: true
+          fingerprint: true
+      - archive:
+          artifacts: 'reporter.properties'
+          allow-empty: false
+          fingerprint: true
       - archive:
           artifacts: 'properties'
           allow-empty: true
+          fingerprint: true
       - archive:
           artifacts: 'nosetests.xml'
           allow-empty: true
@@ -412,12 +422,15 @@
           health-scale-factor: 1.0
       - email:
           recipients: '{email-to}'
+      - postbuildscript:
+          script-only-if-succeeded: False
+          builders:
+            - shell: |
+                #!/bin/bash
+                [[ "${{PUBLISH_RESULTS}}" == "true" ]] && exit 0
       - trigger-parameterized-builds:
         - project: '{reporter-name}'
-          predefined-parameters: |
-            ISO_VERSION=${{ISO_VERSION}}
-            TEST_JOB_NAME=${{JOB_NAME}}
-            TEST_BUILD_NUMBER=${{BUILD_NUMBER}}
+          property-file: reporter.properties
           fail-on-missing: true
 
 # jobs for system tests
@@ -445,6 +458,9 @@
             - shell: rm -f .*rpm.*
       - archive:
           artifacts: 'properties'
+          allow-empty: true
+      - archive:
+          artifacts: 'reporter.properties'
           allow-empty: true
       - archive:
           artifacts: 'nosetests.xml'
@@ -480,6 +496,10 @@
           global: true
           mask-password-params: true
     parameters:
+      - bool:
+          name: PUBLISH_RESULTS
+          default: '{obj:publish_results}'
+          description: 'The name of devops env. Needed to properly work of existing mode of devops'
       - string:
           name: ISO_VERSION
           description: 'ISO number for form the test plan string'
@@ -510,8 +530,12 @@
           default: "Test suite description"
           description: ""
       - string:
+          name: TREP_TESTRAIL_PLAN_PREFIX
+          default: '8.0 iso #'
+          description: ""
+      - string:
           name: TREP_TESTRAIL_PLAN
-          default: "8.0 iso #${{ISO_VERSION}}"
+          default: $TREP_TESTRAIL_PLAN_PREFIX$ISO_VERSION
           description: ""
       - string:
           name: TREP_TESTRAIL_PLAN_DESCRIPTION
@@ -564,6 +588,13 @@
       - shell:
           !include-raw-escape './builders/reporter.sh'
     publishers:
+      - postbuildscript:
+          script-only-if-succeeded: false
+          builders:
+            - shell: env > properties
+      - archive:
+          artifacts: 'properties'
+          allow-empty: true
       - email:
           recipients: '{email-to}'
 
@@ -585,8 +616,6 @@
           script-only-if-succeeded: false
           builders:
             - shell: env > nightly.properties
-              # need to delete packages, because we don't wipe workspace,
-              # but packages could be duplicated
             - shell: rm -f .*rpm.*
       - archive:
           artifacts: 'nightly.properties'
@@ -611,127 +640,109 @@
       - trigger-parameterized-builds: []
 
     builders:
-      # copy latest stable plugin package that has passed dvs bvt on the stable iso
-      - copyartifact:
-          project: "${{PKG_JOB_NAME}}"
-          filter: "build.*"
-          which-build: last-successful
-          stable: true
-      # copy latest stable iso that has passed fuel and dvs slmoke and bvt tests
-      - copyartifact:
-          project: "${{ISO_JOB_NAME}}"
-          filter: "iso_file"
-          which-build: last-successful
-          stable: true
-      - shell: |
-              #!/bin/bash
-              [ -z "${{ISO_FILE}}"       ] && cat iso_file > additional_params
-              [ -z "${{PLUGIN_VERSION}}" ] && cat build.plugin_version >> additional_params
-      - inject:
-          properties-file: additional_params
       - multijob:
           name: 'System tests for dvs{fuel-release}.{plugin-version} vcenter5'
           condition: COMPLETED
           projects:
            - name: '{fuel-release}.{plugin-name}.vcenter_add_cindervmware'
              current-parameters: true
-             property-file: additional_params
+             #property-file: additional_params
              predefined-parameters: |
                TEST_GROUP_PREFIX=system_test.vcenter.scale_vcenter_dvs
              kill-phase-on: NEVER
 
            - name: '{fuel-release}.{plugin-name}.vcenter_add_controller'
              current-parameters: true
-             property-file: additional_params
+             #property-file: additional_params
              predefined-parameters: |
                TEST_GROUP_PREFIX=system_test.vcenter.scale_vcenter_dvs
              kill-phase-on: NEVER
 
            - name: '{fuel-release}.{plugin-name}.vcenter_delete_cindervmware'
              current-parameters: true
-             property-file: additional_params
+             #property-file: additional_params
              predefined-parameters: |
                TEST_GROUP_PREFIX=system_test.vcenter.scale_vcenter_dvs
              kill-phase-on: NEVER
 
            - name: '{fuel-release}.{plugin-name}.vcenter_delete_controller'
              current-parameters: true
-             property-file: additional_params
+             #property-file: additional_params
              predefined-parameters: |
                TEST_GROUP_PREFIX=system_test.vcenter.scale_vcenter_dvs
              kill-phase-on: NEVER
 
            - name: '{fuel-release}.{plugin-name}.vcenter_ceilometer_and_computevmware'
-             property-file: additional_params
+             #property-file: additional_params
              current-parameters: true
              kill-phase-on: NEVER
 
            - name: '{fuel-release}.{plugin-name}.vcenter_ceph_and_computevmware'
-             property-file: additional_params
+             #property-file: additional_params
              current-parameters: true
              kill-phase-on: NEVER
 
            - name: '{fuel-release}.{plugin-name}.vcenter_cindervmdk_and_computevmware'
-             property-file: additional_params
+             #property-file: additional_params
              current-parameters: true
              kill-phase-on: NEVER
 
            - name: '{fuel-release}.{plugin-name}.vcenter_computevmware'
-             property-file: additional_params
+             #property-file: additional_params
              current-parameters: true
              kill-phase-on: NEVER
 
            - name: '{fuel-release}.{plugin-name}.vcenter_dvs_bvt'
-             property-file: additional_params
+             #property-file: additional_params
              current-parameters: true
              kill-phase-on: NEVER
 
            - name: '{fuel-release}.{plugin-name}.vcenter_dvs_smoke'
-             property-file: additional_params
+             #property-file: additional_params
              current-parameters: true
              kill-phase-on: NEVER
 
            - name: '{fuel-release}.{plugin-name}.vcenter_glance_backend_and_computevmware'
-             property-file: additional_params
+             #property-file: additional_params
              current-parameters: true
              kill-phase-on: NEVER
 
            - name: '{fuel-release}.{plugin-name}.vcenter_ha_ceilometer'
-             property-file: additional_params
+             #property-file: additional_params
              current-parameters: true
              kill-phase-on: NEVER
 
            - name: '{fuel-release}.{plugin-name}.vcenter_ha_ceph'
-             property-file: additional_params
+             #property-file: additional_params
              current-parameters: true
              kill-phase-on: NEVER
 
            - name: '{fuel-release}.{plugin-name}.vcenter_ha_cinder_and_ceph'
-             property-file: additional_params
+             #property-file: additional_params
              current-parameters: true
              kill-phase-on: NEVER
 
            - name: '{fuel-release}.{plugin-name}.vcenter_ha_multiple_clusters'
-             property-file: additional_params
+             #property-file: additional_params
              current-parameters: true
              kill-phase-on: NEVER
 
            - name: '{fuel-release}.{plugin-name}.vcenter_multiroles_ceilometer'
-             property-file: additional_params
+             #property-file: additional_params
              current-parameters: true
              kill-phase-on: NEVER
 
            - name: '{fuel-release}.{plugin-name}.vcenter_multiroles_cindervmdk_and_ceph'
-             property-file: additional_params
+             #property-file: additional_params
              current-parameters: true
              kill-phase-on: NEVER
 
            - name: '{fuel-release}.{plugin-name}.vcenter_multiroles_cindervmdk_and_cinder'
-             property-file: additional_params
+             #property-file: additional_params
              current-parameters: true
              kill-phase-on: NEVER
 
            - name: '{fuel-release}.{plugin-name}.vcenter_cindervmdk'
-             property-file: additional_params
+             #property-file: additional_params
              current-parameters: true
              kill-phase-on: NEVER

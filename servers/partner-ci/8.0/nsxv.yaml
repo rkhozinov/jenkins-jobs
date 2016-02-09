@@ -70,12 +70,11 @@
     name: 'common-scm'
     scm:
       - git:
-          name: ''
           url: 'https://review.openstack.org/openstack/{gerrit-repo}'
           refspec: $GERRIT_REFSPEC
           branches:
             - $GERRIT_BRANCH
-          choosing-strategy: default
+          choosing-strategy: gerrit
           submodule:
             disable: false
             tracking: true

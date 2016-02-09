@@ -1,25 +1,28 @@
-#!/bin/bash -x
+#!/bin/bash -e
+
+git log  --pretty=oneline | head
 
 # activate bash xtrace for script
 [[ "${DEBUG}" == "true" ]] && set -x || set +x
 
+ISO_FILE_ARTIFACT='iso_file'
+# if user entered custom iso we should use it
 if [ -z $ISO_FILE  ]; then
-   if [ -f iso_file ]; then
-       source iso_file
-   else
-       echo "There's not iso_file"
-       exit 1
-   fi
+   # but if use doesn't want custom iso, we should get iso from artifacts
+   [ -f $ISO_FILE_ARTIFACT ] && source $ISO_FILE_ARTIFACT || (echo "There's not iso_file"; exit 1)
+   # check variable again - it shouldn't be empty
+   [ -z $ISO_FILE ] && (echo "ISO_FILE variable is empty"; exit 1)
 fi
 
 #remove old logs and test data
-rm -f nosetests.xml
+[ -f nosetest.xml ] && rm -f nosetests.xml
 rm -rf logs/*
 
-export ISO_VERSION=$(cut -d'-' -f3-3<<< $ISO_FILE)
+export ISO_PATH="${ISO_STORAGE}/${ISO_FILE}"
+[ ! -f $ISO_PATH ] && (echo "The $ISO_PATH isn't exist"; exit 1)
+export ISO_VERSION=$(echo $ISO_FILE | cut -d'-' -f3-3 | tr -d '.iso' )
 echo iso build number is $ISO_VERSION
 export REQUIRED_FREE_SPACE=200
-export ISO_PATH="${ISO_STORAGE}/${ISO_FILE}"
 export FUEL_RELEASE=$(cut -d'-' -f2-2 <<< $ISO_FILE | tr -d '.')
 export VENV_PATH="${HOME}/${FUEL_RELEASE}-venv"
 
@@ -48,7 +51,7 @@ REQS_PATH="https://raw.githubusercontent.com/openstack/fuel-qa/${REQS_BRANCH}/fu
 ## may have many deployed and runned envs, those may cause errors during test
 
 function delete_envs {
-   [ -z $VIRTUAL_ENV ] && exit 1
+   [ -z $VIRTUAL_ENV ] && (echo "VIRTUAL_ENV is empty"; exit 1)
    dos.py sync
    env_list=$(dos.py list | tail -n +3)
    if [[ ! -z "${env_list}" ]]; then
@@ -60,7 +63,7 @@ function delete_envs {
 ## we should poweroff all unused envs, if there're exist.
 
 function destroy_envs {
-   [ -z $VIRTUAL_ENV ] && exit 1
+   [ -z $VIRTUAL_ENV ] && (echo "VIRTUAL_ENV is empty"; exit 1)
    dos.py sync
    env_list=$(dos.py list | tail -n +3)
    if [[ ! -z "${env_list}" ]]; then
@@ -72,7 +75,7 @@ function destroy_envs {
 ## if it exists. This behaviour is needed to use restoring from snapshots.
 
 function delete_systest_envs {
-   [ -z $VIRTUAL_ENV ] && exit 1
+   [ -z $VIRTUAL_ENV ] && (echo "VIRTUAL_ENV is empty"; exit 1)
    dos.py sync
 
    for env in $(dos.py list | grep $ENV_PREFIX); do
@@ -131,7 +134,7 @@ function fix_logger {
 
 get_venv_requirements
 
-[ -d $VENV_PATH ] && prepare_venv || exit 1
+[ -d $VENV_PATH ] && prepare_venv || (echo "$VENV_PATH doesn't exist"; exit 1)
 
 fix_logger
 
