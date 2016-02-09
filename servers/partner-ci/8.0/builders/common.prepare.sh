@@ -1,13 +1,16 @@
-#!/bin/bash -e
+#!/bin/bash -x
 
 # activate bash xtrace for script
 [[ "${DEBUG}" == "true" ]] && set -x || set +x
 
-# for manually run of this job
-
-#[ -z  $ISO_FILE ] && export ISO_FILE=${ISO_FILE}
-#[ -z  $ISO_FILE ] && expoo t ISO_FILE=${ISO_FILE}
-[[ -z "${ISO_FILE}" ]] && ( echo 'ISO_FILE is empty' ; exit 1 ) || true
+if [ -z $ISO_FILE  ]; then
+   if [ -f iso_file ]; then
+       source iso_file
+   else
+       echo "There's not iso_file"
+       exit 1
+   fi
+fi
 
 #remove old logs and test data
 rm -f nosetests.xml

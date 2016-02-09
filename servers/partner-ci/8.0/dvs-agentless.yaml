@@ -199,10 +199,6 @@
           name: DEBUG
           default: '{debug}'
           description: "Set -x (xtrace) for jobs' bash scripts"
-      - label:
-          name: node
-          default: dvs
-          description: "The node on which to run the job"
       - bool:
           name: DISABLE_SSL
           default: '{disable-ssl}'
@@ -260,6 +256,10 @@
           name: DEBUG
           default: '{debug}'
           description: "Set -x (xtrace) for jobs' bash scripts"
+      - label:
+          name: node
+          default: dvs
+          description: "The node on which to run the job"
       - bool:
           name: DISABLE_SSL
           default: '{disable-ssl}'
@@ -276,9 +276,9 @@
           name: USE_SNAPSHOTS
           default: '{use-snapshots}'
           descrition: 'Will be used existing environment'
-      - string:
+      - choice:
           name: TEST_GROUP
-          default: '{testgroup}'
+          choices: '{obj:testgroup}'
       - string:
           name: VCENTER_SNAPSHOT
           default: 'vcenterha'
@@ -342,14 +342,6 @@
           name: ISO_JOB_NAME
           default: '{canary-name}'
           description: 'The name of job for copying of stable iso build name'
-      - string:
-          name: TESTRAIL_PLAN_NAME
-          default: ''
-          description: ''
-      - string:
-          name: TESTRAIL_CONFIGURATION
-          default: ''
-          description: ''
 
 - defaults:
     name: global
@@ -369,6 +361,10 @@
           project: "${{PKG_JOB_NAME}}"
           filter: "*.rpm"
           which-build: last-successful
+      - copyartifact:
+          project: "${{PKG_JOB_NAME}}"
+          filter: "build.*"
+          which-build: last-successful
       - shell:
           !include-raw-escape: builders/common.prepare.sh
       - shell:
@@ -383,10 +379,10 @@
            - shell: rm -f .*rpm.*
       - archive:
           artifacts: 'build.properties'
-          allow-empty: false
+          allow-empty: true
       - archive:
           artifacts: 'properties'
-          allow-empty: false
+          allow-empty: true
       - archive:
           artifacts: 'nosetests.xml'
           allow-empty: true

@@ -55,6 +55,7 @@
     jobs:
       - '{nightly-name}'
       - '{custom-name}'
+      - '{reporter-name}'
       - '{fuel-release}.{plugin-name}.{testgroup}'
 
 ## common git settings to get sources
@@ -376,8 +377,8 @@
           properties-file: additional_params
       - shell:
           !include-raw-escape: builders/common.prepare.sh
-      - shell:
-          !include-raw-escape: builders/vcenter.test.sh
+#      - shell:
+#          !include-raw-escape: builders/vcenter.test.sh
     publishers:
       - postbuildscript:
           script-only-if-succeeded: False
@@ -385,11 +386,14 @@
             - shell: env > properties
             - shell: rm -f .*rpm.*
       - archive:
+          artifacts: 'additional_params'
+          allow-empty: true
+      - archive:
           artifacts: 'build.properties'
-          allow-empty: false
+          allow-empty: true
       - archive:
           artifacts: 'properties'
-          allow-empty: false
+          allow-empty: true
       - archive:
           artifacts: 'nosetests.xml'
           allow-empty: true
@@ -440,16 +444,16 @@
               # but packages could be duplicated
             - shell: rm -f .*rpm.*
       - archive:
-          artifacts: '.*properties'
-          allow-empty: false
+          artifacts: 'properties'
+          allow-empty: true
       - archive:
           artifacts: 'nosetests.xml'
           allow-empty: true
-          fingerprint: true
+#          fingerprint: true
       - archive:
           artifacts: 'logs/*'
           allow-empty: true
-          fingerprint: true
+#          fingerprint: true
       - xunit:
           types:
             - junit:
@@ -459,7 +463,7 @@
           results: nosetests.xml
           health-scale-factor: 1.0
       - email:
-          recipients: '${{USER}}@mirantis.com'
+          recipients: "${{BUILD_USER}}@mirantis.com"
       - trigger-parameterized-builds: []
 
 - job-template:
