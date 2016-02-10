@@ -55,37 +55,31 @@
 
     jobs:
       - '{build-name}'
-      - '{nightly-name}'
+      - '{nightly-name}':
       - '{reporter-name}'
-
       - '{fuel-release}.{plugin-name}.{testgroup}':
           testgroup_parameter_type: string
           testgroup_value_type: default
           testgroup_value: '{testgroup}'
-
       - '{custom-name}':
           testgroup_parameter_type: choice
           testgroup_value_type: choices
           testgroup_value: '{obj:testgroup}'
-
       - '{smoke-name}'
       - '{fuel-release}.{plugin-name}.smoke.test':
           testgroup_parameter_type: string
           testgroup_value_type: default
           testgroup_value: '{testgroup}'
-
       - '{bvt-name}'
       - '{fuel-release}.{plugin-name}.bvt.test':
           testgroup_parameter_type: string
           testgroup_value_type: default
           testgroup_value: '{testgroup}'
-
       - '{regression-name}'
       - '{fuel-release}.{plugin-name}.regression.test':
           testgroup_parameter_type: string
           testgroup_value_type: default
           testgroup_value: '{testgroup}'
-
       - '{canary-name}'
       - '{fuel-release}.{plugin-name}.canary.skinny':
           testgroup_parameter_type: string
@@ -225,7 +219,7 @@
       - bool:
           name: PUBLISH_RESULTS
           default: '{obj:publish_results}'
-          description: 'The name of devops env. Needed to properly work of existing mode of devops'
+          description: 'Reports results to testrail'
       - bool:
           name: DEBUG
           default: '{debug}'
@@ -290,7 +284,7 @@
       - bool:
           name: PUBLISH_RESULTS
           default: '{obj:publish_results}'
-          description: 'The name of devops env. Needed to properly work of existing mode of devops'
+          description: 'Reports results to testrail'
       - bool:
           name: DEBUG
           default: '{debug}'
@@ -547,13 +541,13 @@
     description: 'The test for {fuel-release}.{plugin-name}.{plugin-version}'
     concurrent: true
 
-# jobs for regression tests
+## jobs for regression tests
 - job-template:
     name: '{fuel-release}.{plugin-name}.regression.test'
     description: 'The regression test for {fuel-release}.{plugin-name}.{plugin-version}'
     concurrent: true
 
-# jobs for test a new iso
+## jobs for test a new iso
 - job-template:
     name: '{fuel-release}.{plugin-name}.canary.skinny'
     description: 'The dvs_vcenter_smoke test  for {fuel-release}.{plugin-name}.{plugin-version}'
@@ -577,9 +571,6 @@
       - archive:
           artifacts: '.*properties'
           allow-empty: true
-#      - archive:
-#          artifacts: 'reporter.properties'
-#          allow-empty: true
       - archive:
           artifacts: 'nosetests.xml'
           allow-empty: true
@@ -728,6 +719,13 @@
           <<: *smoke-gerrit-events
           <<: *generic-gerrit-projects
     builders:
+      - copyartifact:
+           project: "${{PKG_JOB_NAME}}"
+           which-build: last-successful
+      - copyartifact:
+          project: "${{ISO_JOB_NAME}}"
+          filter: "iso_file"
+          which-build: last-successful
       - multijob:
           name: 'The smoke test for {fuel-release}.{plugin-name}.{plugin-version}'
           condition: COMPLETED
@@ -744,7 +742,13 @@
             - shell: env > properties
             - shell: rm -f .*rpm.*
       - archive:
-          artifacts: 'smoke.properties'
+          artifacts: '*properties'
+          allow-empty: false
+      - archive:
+          artifacts: 'iso_file'
+          allow-empty: false
+      - archive:
+          artifacts: 'build.plugin_version'
           allow-empty: false
       - email:
           recipients: '{email-to}'
@@ -766,10 +770,12 @@
           <<: *generic-gerrit-projects
     builders:
       - copyartifact:
-          project: '{build-name}'
-          filter: 'build.*'
+          project: "${{PKG_JOB_NAME}}"
           which-build: last-successful
-          stable: true
+      - copyartifact:
+          project: "${{ISO_JOB_NAME}}"
+          filter: "iso_file"
+          which-build: last-successful
       - multijob:
           name: 'The BVT test for {fuel-release}.{plugin-name}.{plugin-version}'
           condition: COMPLETED
@@ -785,8 +791,14 @@
           builders:
              - shell: env > bvt.properties
       - archive:
-          artifacts: 'bvt.properties'
-          allow-empty: true
+          artifacts: '*properties'
+          allow-empty: false
+      - archive:
+          artifacts: 'iso_file'
+          allow-empty: false
+      - archive:
+          artifacts: 'build.plugin_version'
+          allow-empty: false
       - email:
           recipients: '{email-to}'
 
@@ -844,10 +856,17 @@
           result: 'success'
     builders:
       - trigger-builds:
-        - project: '{build-name}'
+        - project: "${{PKG_JOB_NAME}}"
           current-parameters: true
           git-revision: false
           block: true
+      - copyartifact:
+          project: "${{PKG_JOB_NAME}}"
+          which-build: last-successful
+      - copyartifact:
+          project: '{download-iso-name}'
+          filter: "iso_file"
+          which-build: last-successful
       - multijob:
           name: 'Smoke tests for dvs.vcenter5'
           condition: SUCCESSFUL
@@ -874,7 +893,13 @@
           builders:
             - shell: env > canary.properties
       - archive:
-          artifacts: 'canary.properties'
+          artifacts: '*properties'
+          allow-empty: false
+      - archive:
+          artifacts: 'iso_file'
+          allow-empty: false
+      - archive:
+          artifacts: 'build.plugin_version'
           allow-empty: false
       - email:
           recipients: '{email-to}'
@@ -899,11 +924,24 @@
             - shell: env > nightly.properties
             - shell: rm -f .*rpm.*
       - archive:
-          artifacts: 'nightly.properties'
-          allow-empty: true
+          artifacts: '*properties'
+          allow-empty: false
+      - archive:
+          artifacts: 'iso_file'
+          allow-empty: false
+      - archive:
+          artifacts: 'build.plugin_version'
+          allow-empty: false
       - email:
           recipients: '{email-to}'
     builders:
+      - copyartifact:
+          project: "${{PKG_JOB_NAME}}"
+          which-build: last-successful
+      - copyartifact:
+          project: "${{ISO_JOB_NAME}}"
+          filter: "iso_file"
+          which-build: last-successful
       - multijob:
           name: 'System tests for dvs{fuel-release}.{plugin-version} vcenter5'
           condition: COMPLETED
