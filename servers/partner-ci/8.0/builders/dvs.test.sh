@@ -56,4 +56,4 @@ TEST_BUILD_NUMBER=$BUILD_NUMBER
 PLUGIN_VERSION=$PLUGIN_VERSION
 REPORTER_PROPERTIES
 
-#./plugin_test/utils/jenkins/system_tests.sh -t test ${systest_parameters} -i ${ISO_PATH} -j ${JOB_NAME} -o --group=${TEST_GROUP}
+./plugin_test/utils/jenkins/system_tests.sh -t test ${systest_parameters} -i ${ISO_PATH} -j ${JOB_NAME} -o --group=${TEST_GROUP}
