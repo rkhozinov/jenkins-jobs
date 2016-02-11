@@ -13,6 +13,9 @@
     nightly-name: '{fuel-release}.{plugin-name}.nightly'
     custom-name: '{fuel-release}.{plugin-name}.custom'
 
+    default-pkg-job-name: '8.0.dvs-agentless.build'
+    default-iso-job-name: '8.0.dvs-agentless.canary'
+
     nightly-timer: 'H 22 * * *'
     regression-timer: 'H 18 * * *'
 
@@ -55,7 +58,7 @@
 
     jobs:
       - '{build-name}'
-      - '{nightly-name}':
+      - '{nightly-name}'
       - '{reporter-name}'
       - '{fuel-release}.{plugin-name}.{testgroup}':
           testgroup_parameter_type: string
@@ -80,7 +83,9 @@
           testgroup_parameter_type: string
           testgroup_value_type: default
           testgroup_value: '{testgroup}'
-      - '{canary-name}'
+      - '{canary-name}':
+#          default-pkg-job-name: '{default-pkg-iso-name}'
+          default-iso-job-name: '{download-iso-name}'
       - '{fuel-release}.{plugin-name}.canary.skinny':
           testgroup_parameter_type: string
           testgroup_value_type: default
@@ -262,11 +267,11 @@
           description: 'The branch for fuel-qa gerrit'
       - string:
           name: PKG_JOB_NAME
-          default: '{build-name}'
+          default: '{default-pkg-job-name}'
           description: 'The name of job for copying of plugin pkg artefacts'
       - string:
           name: ISO_JOB_NAME
-          default: '{canary-name}'
+          default: '{default-iso-job-name}'
           description: 'The name of job for copying of stable iso build name'
       - string:
           name: ENV_PREFIX
@@ -378,9 +383,9 @@
     disabled: false
     logrotate:
       daysToKeep: 7
-      numToKeep: 10
+      numToKeep: 50
       artifactDaysToKeep: 7
-      artifactNumToKeep: 10
+      artifactNumToKeep: 50
     <<: *test-properties
     <<: *test-parameters
     <<: *common-scm
@@ -415,18 +420,6 @@
           artifacts: 'iso_file'
           allow-empty: true
           fingerprint: true
-#      - archive:
-#          artifacts: 'build.properties'
-#          allow-empty: true
-#          fingerprint: true
-#      - archive:
-#          artifacts: 'reporter.properties'
-#          allow-empty: false
-#          fingerprint: true
-#      - archive:
-#          artifacts: 'properties'
-#          allow-empty: true
-#          fingerprint: true
       - archive:
           artifacts: 'nosetests.xml'
           allow-empty: true
@@ -700,6 +693,9 @@
       - archive:
           artifacts: 'properties'
           allow-empty: true
+      - archive:
+          artifacts: ${{TREP_TEST_RESULTS_XUNIT_FILENAME}}
+          allow-empty: true
       - email:
           recipients: '{email-to}'
 
@@ -852,7 +848,7 @@
     scm:  []
     triggers:
       - reverse:
-          jobs: '{download-iso-name}'
+          jobs: "${{ISO_JOB_NAME}}"
           result: 'success'
     builders:
       - trigger-builds:
@@ -864,7 +860,7 @@
           project: "${{PKG_JOB_NAME}}"
           which-build: last-successful
       - copyartifact:
-          project: '{download-iso-name}'
+          project: "${{ISO_JOB_NAME}}"
           filter: "iso_file"
           which-build: last-successful
       - multijob:
@@ -935,13 +931,11 @@
       - email:
           recipients: '{email-to}'
     builders:
-      - copyartifact:
-          project: "${{PKG_JOB_NAME}}"
-          which-build: last-successful
-      - copyartifact:
-          project: "${{ISO_JOB_NAME}}"
-          filter: "iso_file"
-          which-build: last-successful
+      - trigger-builds:
+        - project: "${{PKG_JOB_NAME}}"
+          current-parameters: true
+          git-revision: false
+          block: true
       - multijob:
           name: 'System tests for dvs{fuel-release}.{plugin-version} vcenter5'
           condition: COMPLETED
@@ -982,14 +976,14 @@
              current-parameters: true
              kill-phase-on: NEVER
              #property-file: additional_params
-           - name: '{fuel-release}.{plugin-name}.dvs_vcenter_add_delete_controller'
-             current-parameters: true
-             kill-phase-on: NEVER
-             #property-file: additional_params
-           - name: '{fuel-release}.{plugin-name}.dvs_vcenter_add_delete_nodes'
-             current-parameters: true
-             kill-phase-on: NEVER
-             #property-file: additional_params
+#           - name: '{fuel-release}.{plugin-name}.dvs_vcenter_add_delete_controller'
+#             current-parameters: true
+#             kill-phase-on: NEVER
+#             #property-file: additional_params
+#           - name: '{fuel-release}.{plugin-name}.dvs_vcenter_add_delete_nodes'
+#             current-parameters: true
+#             kill-phase-on: NEVER
+#             #property-file: additional_params
            - name: '{fuel-release}.{plugin-name}.dvs_vcenter_reset_controller'
              current-parameters: true
              kill-phase-on: NEVER
