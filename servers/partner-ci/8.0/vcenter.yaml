@@ -23,7 +23,7 @@
     disable_ssl: true
     update_master: true
     debug: true
-    publish_results: false
+    publish_results: true
 
     runner-timeout: 600
     test-timeout: 500
@@ -59,7 +59,40 @@
           testgroup_parameter_type: choice
           testgroup_value_type: choices
           testgroup_value: '{obj:testgroup}'
-      - '{reporter-name}'
+
+      - '{fuel-release}.{plugin-name}.reporter.nigthly':
+          testrail_suite_name: "[8.0][PCE] vCenter" 
+          testrail_suite_desc: "Suite description" 
+          testrail_plan_prefix: "$TREP_TESTRAIL_MILESTONE iso #" 
+          testrail_plan_name: "$PLAN_PREFIX$ISO_VERSION"
+          testrail_plan_desc: "Test plan description"
+          testrail_run_name: "$TREP_TESTRAIL_SUITE"
+          testrail_run_desc: "Test run description"
+          testrail_item_case: "$TEST_GROUP"
+          debug_level: "DEBUG"
+
+      - '{fuel-release}.{plugin-name}.reporter.smoke':
+          testrail_suite_name: "[8.0][PCE] vCenter Smoke/BVT" 
+          testrail_suite_desc: "Suite description" 
+          testrail_plan_prefix: "$TREP_TESTRAIL_MILESTONE iso #" 
+          testrail_plan_name: "$PLAN_PREFIX$ISO_VERSION"
+          testrail_plan_desc: "Test plan description"
+          testrail_run_name: "$TREP_TESTRAIL_SUITE"
+          testrail_run_desc: "Test run description"
+          testrail_item_case: "$TEST_GROUP"
+          debug_level: "DEBUG"
+
+      - '{fuel-release}.{plugin-name}.reporter.bvt':
+          testrail_suite_name: "[8.0][PCE] vCenter Smoke/BVT" 
+          testrail_suite_desc: "Suite description" 
+          testrail_plan_prefix: "$TREP_TESTRAIL_MILESTONE iso #" 
+          testrail_plan_name: "$PLAN_PREFIX$ISO_VERSION"
+          testrail_plan_desc: "Test plan description"
+          testrail_run_name: "$TREP_TESTRAIL_SUITE"
+          testrail_run_desc: "Test run description"
+          testrail_item_case: "$TEST_GROUP"
+          debug_level: "DEBUG"
+
       - '{fuel-release}.{plugin-name}.{testgroup}':
           testgroup_parameter_type: string
           testgroup_value_type: default
@@ -363,6 +396,139 @@
           default: '{obj:publish_results}'
           description: 'The name of devops env. Needed to properly work of existing mode of devops'
 
+## parameters for jobs created per reporter-group and custom reporter job
+- reporter-parameters: &reporter-parameters
+    name: 'reporter-parameters'
+    parameters:
+      - string:
+          name: ISO_VERSION
+          description: "ISO number for form the test plan string"
+      - string:
+          name: TEST_JOB_NAME
+          description: "The name of a test for getting test results"
+      - string:
+          name: TEST_JOB_BUILD_NUMBER
+          description: "The number of a build"
+      - string:
+          name: TREP_TESTRAIL_URL
+          default: "https://mirantis.testrail.com"
+          description: ""
+      - string:
+          name: TREP_TESTRAIL_PROJECT
+          default: "Mirantis OpenStack"
+          description: "Project name"
+      - string:
+          name: TREP_TESTRAIL_MILESTONE
+          default: "{fuel-release}"
+          description: "Testrail milestone (fuel release version is commonly used )"
+      - string:
+          name: TREP_TESTRAIL_SUITE
+          default: "{testrail_suite_name}"
+          description: "The test suite name, ex.[8.0][PCE] vCenter Smoke/BVT"
+      - string:
+          name: TREP_TESTRAIL_SUITE_DESCRIPTION
+          default: "{testrail_suite_desc}"
+#          default: "Test suite description"
+          description: ""
+      - string:
+          name: PLAN_PREFIX
+#          default: "$TREP_TESTRAIL_MILESTONE iso #"
+          default: "{testrail_plan_prefix}"
+          description: ""
+      - string:
+          name: TREP_TESTRAIL_PLAN
+#          default: $PLAN_PREFIX$ISO_VERSION
+          default: "{testrail_plan_name}"
+          description: ""
+      - string:
+          name: TREP_TESTRAIL_PLAN_DESCRIPTION
+#          default: "Test plan description"
+          default: "{testrail_plan_desc}"
+          description: ""
+      - string:
+          name: TREP_TESTRAIL_RUN
+#          default: "Test run description"
+          default: "{testrail_run_name}"
+          description: ""
+      - string:
+          name: TREP_TESTRAIL_RUN_DESCRIPTION
+#          default: "Test run description"
+          default: "{testrail_run_desc}"
+          description: ""
+      - string:
+          name: TREP_TESTRAIL_TEST_SECTION
+          default: "All"
+          description: ""
+      - string:
+          name: TREP_TESTRAIL_TEST_INCLUDE
+          default: ""
+          description: ""
+      - string:
+          name: TREP_TESTRAIL_TEST_EXCLUDE
+          default: ""
+          description: ""
+      - string:
+          name: TREP_LOG_LEVEL
+          default: "{debug_level}"
+          description: "Log level of reporter"
+      - string:
+          name: TREP_LOG_FILE
+          default: "testrail_reporter.log"
+          description: ""
+      - string:
+          name: TREP_TEST_RESULTS_SOURCE
+          default: "xunit_items"
+          description: ""
+      - string:
+          name: TREP_TEST_RESULTS_XUNIT_FILENAME
+          default: "nosetests.xml"
+          description: ""
+      - string:
+          name: TREP_TEST_RESULTS_XUNIT_ITEMS_FILENAME
+          default: "nosetests.xml"
+          description: ""
+      - string:
+          name: TREP_TEST_RESULTS_XUNIT_ITEMS_CASE_NAME
+          default: "{testrail_item_case}"
+          description: ""
+
+- reporter-builders: &reporter-builders
+    name: 'reporter-builders'
+    builders:
+      - copyartifact:
+          project: ${{TEST_JOB_NAME}}
+          filter: ${{TREP_TEST_RESULTS_XUNIT_FILENAME}}
+          which-build: specific-build
+          build-number: ${{TEST_JOB_BUILD_NUMBER}}
+          stable: true
+      - shell:
+          !include-raw-escape './builders/reporter.sh'
+
+- reporter-publishers: &reporter-publishers
+    name: 'reporter-publishers'
+    publishers:
+      - postbuildscript:
+          script-only-if-succeeded: false
+          builders:
+            - shell: env > properties
+      - archive:
+          artifacts: 'properties'
+          allow-empty: true
+      - email:
+          recipients: '{email-to}'
+
+- reporter-scm: &reporter-scm
+    name: 'reporter-scm'
+    scm:
+      - git:
+          url: 'https://github.com/ehles/trep.git'
+          branches:
+            - 'origin/master'
+          #choosing-strategy: default
+          clean:
+            before: false
+          wipe-workspace: false
+
 - defaults:
     name: global
     disabled: false
@@ -432,15 +598,59 @@
                   results: 'nosetests.xml'
                   health-scale-factor: 1.0
       - conditional-publisher:
-          - condition-kind: shell
-            condition-command: |
-               #!/bin/bash
-               [[ "${{PUBLISH_RESULTS}}" == "true" ]] && exit 0 || exit 1
-            action:
-              - trigger-parameterized-builds:
-                - project: '{reporter-name}'
-                  property-file: reporter.properties
-                  fail-on-missing: true
+        - condition-kind: boolean-expression
+          condition-expression: "${{PUBLISH_RESULTS}}"
+          action:
+            - trigger-parameterized-builds:
+              - project: '{fuel-release}.{plugin-name}.reporter.nigthly'
+                property-file: reporter.properties
+                fail-on-missing: true
+#      - conditional-publisher:
+#          - condition-kind: shell
+#            condition-command: |
+#               #!/bin/bash
+#               [[ "${{PUBLISH_RESULTS}}" == "true" ]] && exit 0 || exit 1
+#            action:
+#              - trigger-parameterized-builds:
+#                - project: '{reporter-name}'
+#                  property-file: reporter.properties
+#                  fail-on-missing: true
+
+- job-template:
+    name: '{fuel-release}.{plugin-name}.reporter.smoke'
+    disabled: false
+    description: 'Reporter for {fuel-release}.{plugin-name}.{plugin-version}.smoke'
+    concurrent: true
+    node: runner
+    <<: *reporter-parameters
+    <<: *test-wrappers
+    <<: *reporter-builders
+    <<: *reporter-publishers
+    <<: *reporter-scm
+
+- job-template:
+    name: '{fuel-release}.{plugin-name}.reporter.bvt'
+    disabled: false
+    description: 'Reporter for {fuel-release}.{plugin-name}.{plugin-version}.bvt'
+    concurrent: true
+    node: runner
+    <<: *reporter-parameters
+    <<: *test-wrappers
+    <<: *reporter-builders
+    <<: *reporter-publishers
+    <<: *reporter-scm
+
+- job-template:
+    name: '{fuel-release}.{plugin-name}.reporter.nigthly'
+    disabled: false
+    description: 'Reporter for {fuel-release}.{plugin-name}.{plugin-version}.nightly'
+    concurrent: true
+    node: runner
+    <<: *reporter-parameters
+    <<: *test-wrappers
+    <<: *reporter-builders
+    <<: *reporter-publishers
+    <<: *reporter-scm
 
 # jobs for system tests
 - job-template:
@@ -489,135 +699,7 @@
           health-scale-factor: 1.0
       - email:
           recipients: "${{BUILD_USER}}@mirantis.com"
-      - trigger-parameterized-builds: []
-
-- job-template:
-    name: '{reporter-name}'
-    disabled: false
-    description: 'Testrail reporter for {fuel-release}.{plugin-name}.{plugin-version}'
-    concurrent: true
-    project-type: multijob
-    node: runner
-    wrappers:
-      - ansicolor:
-          colormap: xterm
-      - inject-passwords:
-          global: true
-          mask-password-params: true
-    parameters:
-      - string:
-          name: ISO_VERSION
-          description: "ISO number for form the test plan string"
-      - string:
-          name: TEST_JOB_NAME
-          description: "The name of a test for getting test results"
-      - string:
-          name: TEST_JOB_BUILD_NUMBER
-          description: "The number of a build"
-      - string:
-          name: TREP_TESTRAIL_URL
-          default: "https://mirantis.testrail.com"
-          description: ""
-      - string:
-          name: TREP_TESTRAIL_PROJECT
-          default: "Mirantis OpenStack"
-          description: "Project name"
-      - string:
-          name: TREP_TESTRAIL_MILESTONE
-          default: "8.0"
-          description: ""
-      - string:
-          name: TREP_TESTRAIL_SUITE
-          default: "[8.0][PCE] vCenter"
-          description: "The test suite name, ex.[8.0][PCE] vCenter Smoke/BVT"
-      - string:
-          name: TREP_TESTRAIL_SUITE_DESCRIPTION
-          default: "Test suite description"
-          description: ""
-      - string:
-          name: PLAN_PREFIX
-          default: "$TREP_TESTRAIL_MILESTONE iso #"
-          description: ""
-      - string:
-          name: TREP_TESTRAIL_PLAN
-          default: $PLAN_PREFIX$ISO_VERSION
-          description: ""
-      - string:
-          name: TREP_TESTRAIL_PLAN_DESCRIPTION
-          default: "Test plan description"
-          description: ""
-      - string:
-          name: TREP_TESTRAIL_RUN
-          default: "Test run description"
-          description: ""
-      - string:
-          name: TREP_TESTRAIL_RUN_DESCRIPTION
-          default: "Test run description"
-          description: ""
-      - string:
-          name: TREP_TESTRAIL_TEST_SECTION
-          default: "All"
-          description: ""
-      - string:
-          name: TREP_TESTRAIL_TEST_INCLUDE
-          default: ""
-          description: ""
-      - string:
-          name: TREP_TESTRAIL_TEST_EXCLUDE
-          default: ""
-          description: ""
-      - string:
-          name: TREP_LOG_LEVEL
-          default: "DEBUG"
-          description: "Log level of reporter"
-      - string:
-          name: TREP_LOG_FILE
-          default: "testrail_reporter.log"
-          description: ""#
-      - string:
-          name: TREP_TEST_RESULTS_SOURCE
-          default: "xunit_items"
-          description: ""
-      - string:
-          name: TREP_TEST_RESULTS_XUNIT_FILENAME
-          default: "nosetests.xml"
-          description: ""
-      - string:
-          name: TREP_TEST_RESULTS_XUNIT_ITEMS_FILENAME
-          default: "nosetests.xml"
-          description: ""
-      - string:
-          name: TREP_TEST_RESULTS_XUNIT_ITEMS_CASE_NAME
-          default: "$TEST_GROUP"
-          description: ""
-    scm:
-      - git:
-          url: 'https://github.com/ehles/trep.git'
-          branches:
-            - 'origin/master'
-          #choosing-strategy: default
-          clean:
-            before: false
-          wipe-workspace: false
-    builders:
-      - copyartifact:
-          project: ${{TEST_JOB_NAME}}
-          filter: ${{TREP_TEST_RESULTS_XUNIT_FILENAME}}
-          which-build: specific-build
-          build-number: ${{TEST_JOB_BUILD_NUMBER}}
-          stable: true
-      - shell:
-          !include-raw-escape './builders/reporter.sh'
-    publishers:
-      - postbuildscript:
-          script-only-if-succeeded: false
-          builders:
-            - shell: env > properties
-      - archive:
-          artifacts: 'properties'
-          allow-empty: true
-      - email:
-          recipients: '{email-to}'
+#      - trigger-parameterized-builds: []
 
 - job-template:
     name: '{nightly-name}'
@@ -643,7 +725,7 @@
           allow-empty: true
       - email:
           recipients: '{email-to}'
-      - trigger-parameterized-builds: []
+#      - trigger-parameterized-builds: []
     builders:
       - multijob:
           name: 'System tests for dvs{fuel-release}.{plugin-version} vcenter5'
