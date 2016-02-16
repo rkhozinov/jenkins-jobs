@@ -45,6 +45,8 @@
       - contrail_jumbo
       - contrail_ceph_multirole
       - contrail_cinder_multirole
+      - contrail_cinder_ceph_multirole
+
 
     jobs:
       - '{build-name}'
@@ -75,7 +77,7 @@
           refspec: $GERRIT_REFSPEC
           branches:
             - $GERRIT_BRANCH
-          choosing-strategy: default
+          choosing-strategy: gerrit
           skip-tag: true
           submodule:
             disable: false
@@ -468,7 +470,7 @@
     concurrent: true
     disabled: false
     description: |
-      '<a href=https://github.com/openstack/{gerrit-repo}>
+      '<a href=https://review.openstack.org/openstack/{gerrit-repo}>
       Build {plugin-name} plugin from fuel-plugins project</a>'
     <<: *common-scm
     triggers:
@@ -511,6 +513,51 @@
       - email:
           recipients: '{email-to}'
 
+# job for building plugin package
+- job-template:
+    name: '{build-name}.custom'
+    node: 'runner'
+    concurrent: true
+    disabled: false
+    description: |
+      '<a href=https://review.openstack.org/openstack/{gerrit-repo}>
+      Build {plugin-name} plugin from fuel-plugins project</a>'
+    <<: *common-scm
+    parameters:
+      - string:
+          name: GERRIT_BRANCH
+          default: 'origin/{gerrit-branch}'
+          description: 'The branch for fuel-qa gerrit'
+      - string:
+          name: GERRIT_REFSPEC
+          default: 'refs/heads/{gerrit-branch}'
+    properties:
+      - heavy-job:
+          weight: 1
+    builders:
+      - shell:
+          !include-raw-escape: './builders/build-plugin.sh'
+      - shell:
+          !include-raw-escape: './builders/rpm-check.sh'
+    publishers:
+      - postbuildscript:
+          script-only-if-succeeded: False
+          builders:
+             - shell: |
+                 export PLUGIN_VERSION=$(grep "^version" metadata.yaml | cut -d ' ' -f2)
+                 echo "${{PLUGIN_VERSION}}" > build.plugin_version
+                 env > build.properties
+      - archive:
+          artifacts: '*.rpm'
+          allow-empty: false
+      - archive:
+          artifacts: 'build.properties'
+          allow-empty: false
+      - archive:
+          artifacts: 'build.plugin_version'
+          allow-empty: false
+      - email:
+          recipients: '{email-to}'
 ## jobs for system test
 - job-template:
     name: '{fuel-release}.{plugin-name}.{plugin-version}.{testgroup}.open'
@@ -796,7 +843,7 @@
               current-parameters: true
               kill-phase-on: NEVER
 
-            - name: '{fuel-release}.{plugin-name}.{plugin-version}.contrail_vlan'
+            - name: '{fuel-release}.{plugin-name}.{plugin-version}.contrail_vlan.juniper'
               predefined-parameters: |
                  CONTRAIL_DISTRIBUTION=juniper
                  FORCE_ERASE=true
@@ -804,7 +851,7 @@
               current-parameters: true
               kill-phase-on: NEVER
 
-            - name: '{fuel-release}.{plugin-name}.{plugin-version}.contrail_jumbo'
+            - name: '{fuel-release}.{plugin-name}.{plugin-version}.contrail_jumbo.juniper'
               predefined-parameters: |
                  CONTRAIL_DISTRIBUTION=juniper
                  FORCE_ERASE=true
@@ -829,6 +876,14 @@
               kill-phase-on: NEVER
 
             - name: '{fuel-release}.{plugin-name}.{plugin-version}.contrail_cinder_multirole.juniper'
+              predefined-parameters: |
+                 CONTRAIL_DISTRIBUTION=juniper
+                 FORCE_ERASE=true
+                 USE_SNAPSHOTS=false
+              current-parameters: true
+              kill-phase-on: NEVER
+
+            - name: '{fuel-release}.{plugin-name}.{plugin-version}.contrail_cinder_ceph_multirole.juniper'
               predefined-parameters: |
                  CONTRAIL_DISTRIBUTION=juniper
                  FORCE_ERASE=true
