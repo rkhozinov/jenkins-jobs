@@ -507,72 +507,88 @@
     parameters:
       - string:
           name: ISO_VERSION
-          description: 'ISO number for form the test plan string'
+          description: "ISO number for form the test plan string"
       - string:
           name: TEST_JOB_NAME
-          description: 'The name of a test for getting test results'
+          description: "The name of a test for getting test results"
       - string:
           name: TEST_JOB_BUILD_NUMBER
-          description: 'The number of a build'
+          description: "The number of a build"
       - string:
           name: TREP_TESTRAIL_URL
-          default: 'https://mirantis.testrail.com'
+          default: "https://mirantis.testrail.com"
           description: ""
       - string:
           name: TREP_TESTRAIL_PROJECT
-          default: 'Mirantis OpenStack'
+          default: "Mirantis OpenStack"
           description: "Project name"
       - string:
           name: TREP_TESTRAIL_MILESTONE
-          default: '8.0'
+          default: "8.0"
           description: ""
       - string:
           name: TREP_TESTRAIL_SUITE
-          default: '[8.0][PCE] vCenter Smoke/BVT'
-          description: "The test suite name, ex. '[8.0][PCE] vCenter Smoke/BVT'"
+          default: "[8.0][PCE] vCenter"
+          description: "The test suite name, ex.[8.0][PCE] vCenter Smoke/BVT"
       - string:
           name: TREP_TESTRAIL_SUITE_DESCRIPTION
           default: "Test suite description"
           description: ""
       - string:
-          name: TREP_TESTRAIL_PLAN_PREFIX
-          default: '8.0 iso #'
+          name: PLAN_PREFIX
+          default: "$TREP_TESTRAIL_MILESTONE iso #"
           description: ""
       - string:
           name: TREP_TESTRAIL_PLAN
-          default: $TREP_TESTRAIL_PLAN_PREFIX$ISO_VERSION
+          default: $PLAN_PREFIX$ISO_VERSION
           description: ""
       - string:
           name: TREP_TESTRAIL_PLAN_DESCRIPTION
           default: "Test plan description"
           description: ""
       - string:
+          name: TREP_TESTRAIL_RUN
+          default: "Test run description"
+          description: ""
+      - string:
           name: TREP_TESTRAIL_RUN_DESCRIPTION
           default: "Test run description"
           description: ""
-#      - string:
-#          name: TREP_TESTRAIL_TREP_TEST_SECTION
-#          default: 'nosetests.xml'
-#          description: ""
-#      - string:
-#          name: TREP_TESTRAIL_TREP_TEST_INCLUDE
-#          default: 'nosetests.xml'
-#          description: ""
-#      - string:
-#          name: TREP_TESTRAIL_TREP_TEST_EXCLUDE
-#          default: 'nosetests.xml'
-#          description: ""
       - string:
-          name: TREP_TESTRAIL_LOG_LEVEL
-          default: 'INFO'
+          name: TREP_TESTRAIL_TEST_SECTION
+          default: "All"
+          description: ""
+      - string:
+          name: TREP_TESTRAIL_TEST_INCLUDE
+          default: ""
+          description: ""
+      - string:
+          name: TREP_TESTRAIL_TEST_EXCLUDE
+          default: ""
+          description: ""
+      - string:
+          name: TREP_LOG_LEVEL
+          default: "DEBUG"
           description: "Log level of reporter"
       - string:
-          name: TREP_TESTRAIL_LOG_FILE
-          default: 'testrail_reporter.log'
+          name: TREP_LOG_FILE
+          default: "testrail_reporter.log"
+          description: ""#
+      - string:
+          name: TREP_TEST_RESULTS_SOURCE
+          default: "xunit_items"
           description: ""
       - string:
           name: TREP_TEST_RESULTS_XUNIT_FILENAME
-          default: 'nosetests.xml'
+          default: "nosetests.xml"
+          description: ""
+      - string:
+          name: TREP_TEST_RESULTS_XUNIT_ITEMS_FILENAME
+          default: "nosetests.xml"
+          description: ""
+      - string:
+          name: TREP_TEST_RESULTS_XUNIT_ITEMS_CASE_NAME
+          default: "$TEST_GROUP"
           description: ""
     scm:
       - git:

@@ -242,9 +242,21 @@
           default: '{recreate_venv}'
           description: "Recreate virtual environemnt before tests"
       - string:
-          name: VCENTER_SNAPSHOT
+          name: WORKSTATION_SNAPSHOT
           default: 'vcenterha'
           description: 'Snapshot name for vcenter lab'
+      - string:
+          name: WORKSTATION_NODES
+          default: 'esxi1 esxi2 esxi3 vcenter trusty'
+          description: "List of workstation's nodes"
+      - string:
+          name: VCENTER_IP
+          default: '172.16.0.254'
+          description: "IP address of the vCenter server"
+      - string:
+          name: VCENTER_CLUSTERS
+          default: 'Cluster1,Cluster2'
+          description: "List of vCenter's clusters"
       - bool:
           name: USE_SNAPSHOTS
           default: '{use_snapshots}'
@@ -315,9 +327,21 @@
           '{testgroup_value_type}': '{obj:testgroup_value}'
           description: "test-group name"
       - string:
-          name: VCENTER_SNAPSHOT
+          name: WORKSTATION_SNAPSHOT
           default: 'vcenterha'
           description: 'Snapshot name for vcenter lab'
+      - string:
+          name: WORKSTATION_NODES
+          default: 'esxi1 esxi2 esxi3 vcenter trusty'
+          description: "List of workstation's nodes"
+      - string:
+          name: VCENTER_IP
+          default: '172.16.0.254'
+          description: "IP address of the vCenter server"
+      - string:
+          name: VCENTER_CLUSTERS
+          default: 'Cluster1,Cluster2'
+          description: "List of vCenter's clusters"
       - string:
           name: ISO_FILE
           default: '{iso-file}'
@@ -643,6 +667,7 @@
           name: TREP_TESTRAIL_RUN_DESCRIPTION
           default: "Test run description"
           description: ""
+
 #      - string:
 #          name: TREP_TESTRAIL_TREP_TEST_SECTION
 #          default: 'nosetests.xml'
@@ -656,11 +681,11 @@
 #          default: 'nosetests.xml'
 #          description: ""
       - string:
-          name: TREP_TESTRAIL_LOG_LEVEL
+          name: TREP_LOG_LEVEL
           default: 'INFO'
           description: "Log level of reporter"
       - string:
-          name: TREP_TESTRAIL_LOG_FILE
+          name: TREP_LOG_FILE
           default: 'testrail_reporter.log'
           description: ""
       - string:
