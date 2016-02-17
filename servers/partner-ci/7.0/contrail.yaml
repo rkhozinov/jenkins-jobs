@@ -46,7 +46,8 @@
       - contrail_ceph_multirole
       - contrail_cinder_multirole
       - contrail_cinder_ceph_multirole
-
+      - contrail_plugin_add_delete_controller_node
+      - contrail_plugin_add_delete_compute_node
 
     jobs:
       - '{build-name}'
@@ -891,6 +892,21 @@
               current-parameters: true
               kill-phase-on: NEVER
 
+            - name: '{fuel-release}.{plugin-name}.{plugin-version}.contrail_plugin_add_delete_controller_node.juniper'
+              predefined-parameters: |
+                 CONTRAIL_DISTRIBUTION=juniper
+                 FORCE_ERASE=true
+                 USE_SNAPSHOTS=false
+              current-parameters: true
+              kill-phase-on: NEVER
+
+            - name: '{fuel-release}.{plugin-name}.{plugin-version}.contrail_plugin_add_delete_compute_node.juniper'
+              predefined-parameters: |
+                 CONTRAIL_DISTRIBUTION=juniper
+                 FORCE_ERASE=true
+                 USE_SNAPSHOTS=false
+              current-parameters: true
+              kill-phase-on: NEVER
 #            - name: '{fuel-release}.{plugin-name}.{plugin-version}.contrail_ha.open'
 #              predefined-parameters: |
 #                 CONTRAIL_DISTRIBUTION=open
