@@ -644,7 +644,13 @@
             - shell: env > nightly.properties
             - shell: rm -f .*rpm.*
       - archive:
-          artifacts: 'nightly.properties'
+          artifacts: '*properties'
+          allow-empty: false
+      - archive:
+          artifacts: 'iso_file'
+          allow-empty: true
+      - archive:
+          artifacts: 'build.plugin_version'
           allow-empty: true
       - email:
           recipients: '{email-to}'
