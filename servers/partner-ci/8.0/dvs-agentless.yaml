@@ -58,36 +58,22 @@
 
     jobs:
       - '{build-name}'
-      - '{nightly-name}'
-      - '{custom-name}':
+
+      - '{nightly-name}':
+          build_package: true
+
+      - '{custom-name}.qa':
+          testgroup_parameter_type: string
+          testgroup_value_type: default
+          testgroup_value: '{testgroup}'
+
+      - '{custom-name}.dev':
           testgroup_parameter_type: choice
           testgroup_value_type: choices
           testgroup_value: '{obj:testgroup}'
 
-      - '{fuel-release}.{plugin-name}.reporter.nigthly':
+      - '{reporter-name}':
           testrail_suite_name: "[8.0][PCE] vCenter"
-          testrail_suite_desc: "Suite description"
-          testrail_plan_prefix: "$TREP_TESTRAIL_MILESTONE iso #"
-          testrail_plan_name: "$PLAN_PREFIX$ISO_VERSION"
-          testrail_plan_desc: "Test plan description"
-          testrail_run_name: "$TREP_TESTRAIL_SUITE"
-          testrail_run_desc: "Test run description"
-          testrail_item_case: "$TEST_GROUP"
-          debug_level: "DEBUG"
-
-      - '{fuel-release}.{plugin-name}.reporter.smoke':
-          testrail_suite_name: "[8.0][PCE] vCenter Smoke/BVT"
-          testrail_suite_desc: "Suite description"
-          testrail_plan_prefix: "$TREP_TESTRAIL_MILESTONE iso #"
-          testrail_plan_name: "$PLAN_PREFIX$ISO_VERSION"
-          testrail_plan_desc: "Test plan description"
-          testrail_run_name: "$TREP_TESTRAIL_SUITE"
-          testrail_run_desc: "Test run description"
-          testrail_item_case: "$TEST_GROUP"
-          debug_level: "DEBUG"
-
-      - '{fuel-release}.{plugin-name}.reporter.bvt':
-          testrail_suite_name: "[8.0][PCE] vCenter Smoke/BVT"
           testrail_suite_desc: "Suite description"
           testrail_plan_prefix: "$TREP_TESTRAIL_MILESTONE iso #"
           testrail_plan_name: "$PLAN_PREFIX$ISO_VERSION"
@@ -251,6 +237,31 @@
             - contrail
           option: category
 
+## properties for test jobs
+- custom-builders: &custom-builders
+    name: 'custom-builders'
+    builders:
+      - conditional-step:
+          condition-kind: boolean-expression
+          condition-expression: ${{BUILD_PKG}}
+          steps:
+            - trigger-builds:
+              - project: "${{PKG_JOB_NAME}}"
+                current-parameters: false
+                git-revision: false
+                block: true
+      - copyartifact:
+          project: "${{PKG_JOB_NAME}}"
+          which-build: last-successful
+      - copyartifact:
+          project: "${{ISO_JOB_NAME}}"
+          filter: "iso_file"
+          which-build: last-successful
+      - shell:
+          !include-raw-escape: builders/common.prepare.sh
+      - shell:
+          !include-raw-escape: builders/vcenter.test.sh
+
 ## parameters for smoke, bvt and nightly multijobs
 - runner-parameters: &runner-parameters
     name: 'runner-parameters'
@@ -336,6 +347,10 @@
           name: PUBLISH_RESULTS
           default: '{obj:publish_results}'
           description: 'Reports results to testrail'
+      - bool:
+          name: BUILD_PKG
+          default: 'false'
+          description: "Triggers build of package from $PKG_JOB_NAME (only for custom)"
       - bool:
           name: DEBUG
           default: '{debug}'
@@ -437,19 +452,89 @@
           description: 'The name of job for copying of stable iso build name'
 
 
-## parameters for jobs created per reporter-group and custom reporter job
-- reporter-parameters: &reporter-parameters
-    name: 'reporter-parameters'
+- defaults:
+    name: global
+    disabled: false
+    logrotate:
+      daysToKeep: 7
+      numToKeep: 50
+      artifactDaysToKeep: 7
+      artifactNumToKeep: 50
+    <<: *test-properties
+    <<: *test-parameters
+    <<: *common-scm
+    <<: *test-wrappers
+    builders:
+      - copyartifact:
+          project: "${{PKG_JOB_NAME}}"
+          which-build: last-successful
+      - copyartifact:
+          project: "${{ISO_JOB_NAME}}"
+          filter: "iso_file"
+          which-build: last-successful
+      - shell:
+          !include-raw-escape: builders/common.prepare.sh
+      - shell:
+          !include-raw-escape: builders/dvs.test.sh
+    publishers:
+      - postbuildscript:
+          script-only-if-succeeded: False
+          builders:
+            - shell: env > properties
+            - shell: rm -f .*rpm.*
+      - archive:
+          artifacts: '*properties'
+          allow-empty: true
+          fingerprint: true
+      - archive:
+          artifacts: 'build.plugin_version'
+          allow-empty: true
+          fingerprint: true
+      - archive:
+          artifacts: 'iso_file'
+          allow-empty: true
+          fingerprint: true
+      - archive:
+          artifacts: 'nosetests.xml'
+          allow-empty: true
+          fingerprint: true
+      - archive:
+          artifacts: 'logs/*'
+          allow-empty: true
+          fingerprint: true
+      - email:
+          recipients: '{email-to}'
+      - conditional-publisher:
+          - condition-kind: file-exists
+            condition-filename: 'nosetests.xml'
+            action:
+              - xunit:
+                  types:
+                    - junit:
+                        pattern: 'nosetests.xml'
+                        skip-if-no-test-files: true
+              - junit:
+                  results: 'nosetests.xml'
+                  health-scale-factor: 1.0
+      - conditional-publisher:
+        - condition-kind: boolean-expression
+          condition-expression: "${{PUBLISH_RESULTS}}"
+          action:
+            - trigger-parameterized-builds:
+              - project: '{fuel-release}.{plugin-name}.reporter'
+                property-file: reporter.properties
+                fail-on-missing: true
+
+- job-template:
+    name: '{reporter-name}'
+    disabled: false
+    description: 'Reporter for {fuel-release}.{plugin-name}.{plugin-version}'
+    concurrent: true
+    node: runner
     parameters:
       - string:
           name: ISO_VERSION
           description: "ISO number for form the test plan string"
-      - string:
-          name: PLUGIN_VERSION
-          description: "Plugin version"
-      - string:
-          name: PKG_JOB_BUILD_NUMBER
-          description: "Plugin build number"
       - string:
           name: TEST_JOB_NAME
           description: "The name of a test for getting test results"
@@ -532,34 +617,6 @@
           name: TREP_TEST_RESULTS_XUNIT_ITEMS_CASE_NAME
           default: "{testrail_item_case}"
           description: "Reporter tool's additional config"
-
-- reporter-builders: &reporter-builders
-    name: 'reporter-builders'
-    builders:
-      - copyartifact:
-          project: ${{TEST_JOB_NAME}}
-          filter: ${{TREP_TEST_RESULTS_XUNIT_FILENAME}}
-          which-build: specific-build
-          build-number: ${{TEST_JOB_BUILD_NUMBER}}
-          stable: true
-      - shell:
-          !include-raw-escape './builders/reporter.sh'
-
-- reporter-publishers: &reporter-publishers
-    name: 'reporter-publishers'
-    publishers:
-      - postbuildscript:
-          script-only-if-succeeded: false
-          builders:
-            - shell: env > properties
-      - archive:
-          artifacts: 'properties'
-          allow-empty: true
-      - email:
-          recipients: '{email-to}'
-
-- reporter-scm: &reporter-scm
-    name: 'reporter-scm'
     scm:
       - git:
           url: 'https://github.com/ehles/trep.git'
@@ -570,115 +627,26 @@
             before: false
           wipe-workspace: false
 
-- defaults:
-    name: global
-    disabled: false
-    logrotate:
-      daysToKeep: 7
-      numToKeep: 50
-      artifactDaysToKeep: 7
-      artifactNumToKeep: 50
-    <<: *test-properties
-    <<: *test-parameters
-    <<: *common-scm
-    <<: *test-wrappers
     builders:
       - copyartifact:
-          project: "${{PKG_JOB_NAME}}"
-          which-build: last-successful
-      - copyartifact:
-          project: "${{ISO_JOB_NAME}}"
-          filter: "iso_file"
-          which-build: last-successful
+          project: ${{TEST_JOB_NAME}}
+          filter: ${{TREP_TEST_RESULTS_XUNIT_FILENAME}}
+          which-build: specific-build
+          build-number: ${{TEST_JOB_BUILD_NUMBER}}
+          stable: true
       - shell:
-          !include-raw-escape: builders/common.prepare.sh
-      - shell:
-          !include-raw-escape: builders/dvs.test.sh
+          !include-raw-escape './builders/reporter.sh'
+
     publishers:
       - postbuildscript:
-          script-only-if-succeeded: False
+          script-only-if-succeeded: false
           builders:
             - shell: env > properties
-            - shell: rm -f .*rpm.*
       - archive:
-          artifacts: '*properties'
+          artifacts: 'properties'
           allow-empty: true
-          fingerprint: true
-      - archive:
-          artifacts: 'build.plugin_version'
-          allow-empty: true
-          fingerprint: true
-      - archive:
-          artifacts: 'iso_file'
-          allow-empty: true
-          fingerprint: true
-      - archive:
-          artifacts: 'nosetests.xml'
-          allow-empty: true
-          fingerprint: true
-      - archive:
-          artifacts: 'logs/*'
-          allow-empty: true
-          fingerprint: true
       - email:
           recipients: '{email-to}'
-      - conditional-publisher:
-          - condition-kind: file-exists
-            condition-filename: 'nosetests.xml'
-            action:
-              - xunit:
-                  types:
-                    - junit:
-                        pattern: 'nosetests.xml'
-                        skip-if-no-test-files: true
-              - junit:
-                  results: 'nosetests.xml'
-                  health-scale-factor: 1.0
-      - conditional-publisher:
-        - condition-kind: boolean-expression
-          condition-expression: "${{PUBLISH_RESULTS}}"
-          action:
-            - trigger-parameterized-builds:
-              - project: '{fuel-release}.{plugin-name}.reporter.nigthly'
-                property-file: reporter.properties
-                fail-on-missing: true
-
-- job-template:
-    name: '{fuel-release}.{plugin-name}.reporter.smoke'
-    disabled: false
-    description: 'Reporter for {fuel-release}.{plugin-name}.{plugin-version}.smoke'
-    concurrent: true
-    node: runner
-    <<: *reporter-parameters
-    <<: *test-wrappers
-    <<: *reporter-builders
-    <<: *reporter-publishers
-    <<: *reporter-scm
-
-- job-template:
-    name: '{fuel-release}.{plugin-name}.reporter.bvt'
-    disabled: false
-    description: 'Reporter for {fuel-release}.{plugin-name}.{plugin-version}.bvt'
-    concurrent: true
-    node: runner
-    <<: *reporter-parameters
-    <<: *test-wrappers
-    <<: *reporter-builders
-    <<: *reporter-publishers
-    <<: *reporter-scm
-
-- job-template:
-    name: '{fuel-release}.{plugin-name}.reporter.nigthly'
-    disabled: false
-    description: 'Reporter for {fuel-release}.{plugin-name}.{plugin-version}.nightly'
-    concurrent: true
-    node: runner
-    <<: *reporter-parameters
-    <<: *test-wrappers
-    <<: *reporter-builders
-    <<: *reporter-publishers
-    <<: *reporter-scm
-
 # job for building plugin package
 - job-template:
     name: '{build-name}'
@@ -766,56 +734,68 @@
     concurrent: true
 
 - job-template:
-    name: '{custom-name}'
+    name: '{custom-name}.qa'
     description: 'The custom test for {fuel-release}.{plugin-name}.{plugin-version}'
     concurrent: true
-    publishers:
-      - postbuildscript:
-          script-only-if-succeeded: False
-          builders:
-            - shell: env > properties
-            - shell: rm -f .*rpm.*
-      - archive:
-          artifacts: '.*properties'
-          allow-empty: true
-      - archive:
-          artifacts: 'nosetests.xml'
-          allow-empty: true
-          fingerprint: true
-      - archive:
-          artifacts: 'logs/*'
-          allow-empty: true
-          fingerprint: true
-      - xunit:
-          types:
-            - junit:
-                pattern: 'nosetests.xml'
-                skip-if-no-test-files: true
-      - junit:
-          results: nosetests.xml
-          health-scale-factor: 1.0
-      - email:
-          recipients: "${{BUILD_USER}}@mirantis.com"
-      - conditional-publisher:
-          - condition-kind: file-exists
-            condition-filename: 'nosetests.xml'
-            action:
-              - xunit:
-                  types:
-                    - junit:
-                        pattern: 'nosetests.xml'
-                        skip-if-no-test-files: true
-              - junit:
-                  results: 'nosetests.xml'
-                  health-scale-factor: 1.0
-      - conditional-publisher:
-        - condition-kind: boolean-expression
-          condition-expression: "${{PUBLISH_RESULTS}}"
-          action:
-            - trigger-parameterized-builds:
-              - project: '{fuel-release}.{plugin-name}.reporter.nigthly'
-                property-file: reporter.properties
-                fail-on-missing: true
+    <<: *custom-builders
+
+- job-template:
+    name: '{custom-name}.dev'
+    description: 'The custom test for {fuel-release}.{plugin-name}.{plugin-version}'
+    concurrent: true
+    <<: *custom-builders
+
+#- job-template:
+#    name: '{custom-name}'
+#    description: 'The custom test for {fuel-release}.{plugin-name}.{plugin-version}'
+#    concurrent: true
+#    publishers:
+#      - postbuildscript:
+#          script-only-if-succeeded: False
+#          builders:
+#            - shell: env > properties
+#            - shell: rm -f .*rpm.*
+#      - archive:
+#          artifacts: '.*properties'
+#          allow-empty: true
+#      - archive:
+#          artifacts: 'nosetests.xml'
+#          allow-empty: true
+#          fingerprint: true
+#      - archive:
+#          artifacts: 'logs/*'
+#          allow-empty: true
+#          fingerprint: true
+#      - xunit:
+#          types:
+#            - junit:
+#                pattern: 'nosetests.xml'
+#                skip-if-no-test-files: true
+#      - junit:
+#          results: nosetests.xml
+#          health-scale-factor: 1.0
+#      - email:
+#          recipients: "${{BUILD_USER}}@mirantis.com"
+#      - conditional-publisher:
+#          - condition-kind: file-exists
+#            condition-filename: 'nosetests.xml'
+#            action:
+#              - xunit:
+#                  types:
+#                    - junit:
+#                        pattern: 'nosetests.xml'
+#                        skip-if-no-test-files: true
+#              - junit:
+#                  results: 'nosetests.xml'
+#                  health-scale-factor: 1.0
+#      - conditional-publisher:
+#        - condition-kind: boolean-expression
+#          condition-expression: "${{PUBLISH_RESULTS}}"
+#          action:
+#            - trigger-parameterized-builds:
+#              - project: '{fuel-release}.{plugin-name}.reporter.nigthly'
+#                property-file: reporter.properties
+#                fail-on-missing: true
 - job-template:
     name: '{smoke-name}'
     disabled: false
@@ -1041,18 +1021,22 @@
           allow-empty: false
       - archive:
           artifacts: 'iso_file'
-          allow-empty: false
+          allow-empty: true
       - archive:
           artifacts: 'build.plugin_version'
-          allow-empty: false
+          allow-empty: true
       - email:
           recipients: '{email-to}'
     builders:
-      - trigger-builds:
-        - project: "${{PKG_JOB_NAME}}"
-          current-parameters: true
-          git-revision: false
-          block: true
+      - conditional-step:
+          condition-kind: boolean-expression
+          condition-expression: ${{MJ_BUILD_PKG}}
+          steps:
+            - trigger-builds:
+              - project: "${{PKG_JOB_NAME}}"
+                current-parameters: false
+                git-revision: false
+                block: true
       - multijob:
           name: 'System tests for dvs{fuel-release}.{plugin-version} vcenter5'
           condition: COMPLETED
@@ -1060,39 +1044,39 @@
            - name: '{fuel-release}.{plugin-name}.dvs_vcenter_systest_setup'
              current-parameters: true
              kill-phase-on: NEVER
-             #property-file: additional_params
            - name: '{fuel-release}.{plugin-name}.dvs_vcenter_networks'
              current-parameters: true
              kill-phase-on: NEVER
-             #property-file: additional_params
            - name: '{fuel-release}.{plugin-name}.dvs_vcenter_ping_public'
              current-parameters: true
              kill-phase-on: NEVER
-             #property-file: additional_params
            - name: '{fuel-release}.{plugin-name}.dvs_vcenter_5_instances'
              current-parameters: true
              kill-phase-on: NEVER
-             #property-file: additional_params
            - name: '{fuel-release}.{plugin-name}.dvs_vcenter_security'
              current-parameters: true
              kill-phase-on: NEVER
-             #property-file: additional_params
            - name: '{fuel-release}.{plugin-name}.dvs_vcenter_tenants_isolation'
              current-parameters: true
              kill-phase-on: NEVER
-             #property-file: additional_params
            - name: '{fuel-release}.{plugin-name}.dvs_vcenter_same_ip'
              current-parameters: true
              kill-phase-on: NEVER
-             #property-file: additional_params
            - name: '{fuel-release}.{plugin-name}.dvs_vcenter_uninstall'
              current-parameters: true
              kill-phase-on: NEVER
-             #property-file: additional_params
            - name: '{fuel-release}.{plugin-name}.dvs_vcenter_bind_port'
              current-parameters: true
              kill-phase-on: NEVER
-             #property-file: additional_params
+           - name: '{fuel-release}.{plugin-name}.dvs_vcenter_reset_controller'
+             current-parameters: true
+             kill-phase-on: NEVER
+           - name: '{fuel-release}.{plugin-name}.dvs_vcenter_net_template'
+             current-parameters: true
+             kill-phase-on: NEVER
+           - name: '{fuel-release}.{plugin-name}.dvs_vcenter_shutdown_controller'
+             current-parameters: true
+             kill-phase-on: NEVER
 #           - name: '{fuel-release}.{plugin-name}.dvs_vcenter_add_delete_controller'
 #             current-parameters: true
 #             kill-phase-on: NEVER
@@ -1101,15 +1085,3 @@
 #             current-parameters: true
 #             kill-phase-on: NEVER
 #             #property-file: additional_params
-           - name: '{fuel-release}.{plugin-name}.dvs_vcenter_reset_controller'
-             current-parameters: true
-             kill-phase-on: NEVER
-             #property-file: additional_params
-           - name: '{fuel-release}.{plugin-name}.dvs_vcenter_net_template'
-             current-parameters: true
-             kill-phase-on: NEVER
-             #property-file: additional_params
-           - name: '{fuel-release}.{plugin-name}.dvs_vcenter_shutdown_controller'
-             current-parameters: true
-             kill-phase-on: NEVER
-             #property-file: additional_params
