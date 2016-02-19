@@ -30,6 +30,8 @@
     update_master: true
     debug: true
     publish_results: false
+    multijob_build_package: true
+    testjob_build_package: true
 
     runner-timeout: 600
     test-timeout: 500
@@ -58,9 +60,7 @@
 
     jobs:
       - '{build-name}'
-
-      - '{nightly-name}':
-          build_package: true
+      - '{nightly-name}'
 
       - '{custom-name}.qa':
           testgroup_parameter_type: string
@@ -73,7 +73,8 @@
           testgroup_value: '{obj:testgroup}'
 
       - '{reporter-name}':
-          testrail_suite_name: "[8.0][PCE] vCenter"
+          testrail_project_name: "VMware DVS plugin"
+          testrail_suite_name: "[8.0][PCE] VMware DVS plugin v2.1.0"
           testrail_suite_desc: "Suite description"
           testrail_plan_prefix: "$TREP_TESTRAIL_MILESTONE iso #"
           testrail_plan_name: "$PLAN_PREFIX$ISO_VERSION"
@@ -88,12 +89,17 @@
           testgroup_value_type: default
           testgroup_value: '{testgroup}'
 
-      - '{smoke-name}'
+      - '{smoke-name}':
+          multijob_build_package: false
+
       - '{fuel-release}.{plugin-name}.smoke.test':
           testgroup_parameter_type: string
           testgroup_value_type: default
           testgroup_value: '{testgroup}'
-      - '{bvt-name}'
+
+      - '{bvt-name}':
+          multijob_build_package: false
+
       - '{fuel-release}.{plugin-name}.bvt.test':
           testgroup_parameter_type: string
           testgroup_value_type: default
@@ -271,9 +277,13 @@
           default: '{obj:publish_results}'
           description: 'Reports results to testrail'
       - bool:
-          name: DEBUG
+          name: DEBU
           default: '{debug}'
           description: "Set -x (xtrace) for jobs' bash scripts"
+      - bool:
+          name: MJ_BUILD_PKG
+          default: '{multijob_build_package}'
+          description: "Triggers build of package of $PKG_JOB_NAME before run of tests"
       - bool:
           name: DISABLE_SSL
           default: '{disable_ssl}'
@@ -349,7 +359,7 @@
           description: 'Reports results to testrail'
       - bool:
           name: BUILD_PKG
-          default: 'false'
+          default: '{testjob_build_pkg}'
           description: "Triggers build of package from $PKG_JOB_NAME (only for custom)"
       - bool:
           name: DEBUG
@@ -547,7 +557,7 @@
           description: ""
       - string:
           name: TREP_TESTRAIL_PROJECT
-          default: "Mirantis OpenStack"
+          default: "{testrail_project_name}"
           description: "Project name"
       - string:
           name: TREP_TESTRAIL_MILESTONE
