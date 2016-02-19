@@ -686,11 +686,11 @@
                TEST_GROUP_PREFIX=system_test.vcenter.scale_vcenter_dvs
              kill-phase-on: NEVER
 
-           - name: '{fuel-release}.{plugin-name}.vcenter_delete_controller'
-             current-parameters: true
-             predefined-parameters: |
-               TEST_GROUP_PREFIX=system_test.vcenter.scale_vcenter_dvs
-             kill-phase-on: NEVER
+#           - name: '{fuel-release}.{plugin-name}.vcenter_delete_controller'
+#             current-parameters: true
+#             predefined-parameters: |
+#               TEST_GROUP_PREFIX=system_test.vcenter.scale_vcenter_dvs
+#             kill-phase-on: NEVER
 
            - name: '{fuel-release}.{plugin-name}.vcenter_ceilometer_and_computevmware'
              current-parameters: true
