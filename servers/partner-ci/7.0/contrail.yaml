@@ -29,7 +29,7 @@
 
     iso-file: 'fuel-7.0-301-2015-09-22_20-01-53.iso'
     gerrit-repo: 'fuel-plugin-contrail'
-    gerrit-branch: 'master'
+    gerrit-branch: 'stable/3.0'
     email-to: 'rkhozinov@mirantis.com okosse@mirantis.com ivovk@mirantis.com'
     released-plugin-path: '/storage/contrail/released/contrail-3.0.noarch.rpm'
 
