@@ -582,11 +582,20 @@
           mask-password-params: true
     parameters:
       - string:
+          name: ISO_VERSION
+          description: "ISO number for form the test plan string"
+      - string:
           name: TEST_JOB_NAME
           description: 'The name of a test for getting test results'
       - string:
+          name: PLUGIN_VERSION
+          description: "ISO number for form the test plan string"
+      - string:
           name: TEST_JOB_BUILD_NUMBER
           description: 'The number of a build'
+      - string:
+          name: PKG_JOB_BUILD_NUMBER
+          description: "The number of a build"
       - string:
           name: TREP_TESTRAIL_URL
           default: 'https://mirantis.testrail.com'
@@ -609,28 +618,32 @@
           description: ""
       - string:
           name: TREP_TESTRAIL_PLAN
-          default: 'Fuel Contrail Plugin v2.1.1 #3'
+          default: 'Fuel Contrail Plugin v2.1.1 #${{PKG_JOB_BUILD_NUMBER}}'
           description: ""
       - string:
           name: TREP_TESTRAIL_PLAN_DESCRIPTION
           default: "Test plan description"
           description: ""
       - string:
+          name: TREP_TESTRAIL_RUN
+          default: "{testrail_run_name}"
+          description: "Testrail test run name"
+      - string:
           name: TREP_TESTRAIL_RUN_DESCRIPTION
           default: "Test run description"
           description: ""
-#      - string:
-#          name: TREP_TESTRAIL_TREP_TEST_SECTION
-#          default: 'nosetests.xml'
-#          description: ""
-#      - string:
-#          name: TREP_TESTRAIL_TREP_TEST_INCLUDE
-#          default: 'nosetests.xml'
-#          description: ""
-#      - string:
-#          name: TREP_TESTRAIL_TREP_TEST_EXCLUDE
-#          default: 'nosetests.xml'
-#          description: ""
+      - string:
+          name: TREP_TESTRAIL_TREP_TEST_SECTION
+          default: 'nosetests.xml'
+          description: ""
+      - string:
+          name: TREP_TESTRAIL_TREP_TEST_INCLUDE
+          default: 'nosetests.xml'
+          description: ""
+      - string:
+          name: TREP_TESTRAIL_TREP_TEST_EXCLUDE
+          default: 'nosetests.xml'
+          description: ""
       - string:
           name: TREP_TESTRAIL_LOG_LEVEL
           default: 'INFO'
@@ -640,9 +653,21 @@
           default: 'testrail_reporter.log'
           description: ""
       - string:
+          name: TREP_TEST_RESULTS_SOURCE
+          default: "xunit_items"
+          description: "Reporter tool's additional config"
+      - string:
           name: TREP_TEST_RESULTS_XUNIT_FILENAME
-          default: 'nosetests.xml'
-          description: ""
+          default: "nosetests.xml"
+          description: "File with tests results"
+      - string:
+          name: TREP_TEST_RESULTS_XUNIT_ITEMS_FILENAME
+          default: "nosetests.xml"
+          description: "File with tests results"
+      - string:
+          name: TREP_TEST_RESULTS_XUNIT_ITEMS_CASE_NAME
+          default: ""
+          description: "Reporter tool's additional config"
     scm:
       - git:
           url: 'https://github.com/ehles/trep.git'
