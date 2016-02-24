@@ -21,6 +21,15 @@ if [ -z $PLUGIN_VERSION  ]; then
    [ -z $PLUGIN_VERSION  ] && (echo "PLUGIN_VERSION variable is empty"; exit 1) || export DVS_PLUGIN_VERSION=$PLUGIN_VERSION
 fi
 
+
+if [ $PUBLISH_RESULTS -a -f build.properties ]; then
+    export PKG_JOB_BUILD_NUMBER=$(cat build.properties | grep BUILD_NUMBER)
+else
+    echo "build.properties file is not available so the results couldn't be publihsed"
+    exit 1
+fi
+
+
 #remove old logs and test data
 [ -f nosetest.xml ] && rm -f nosetests.xml
 rm -rf logs/*
@@ -52,7 +61,8 @@ cat << REPORTER_PROPERTIES > reporter.properties
 ISO_VERSION=$ISO_VERSION
 ISO_FILE=$ISO_FILE
 TEST_JOB_NAME=$JOB_NAME
-TEST_BUILD_NUMBER=$BUILD_NUMBER
+TEST_JOB_BUILD_NUMBER=$BUILD_NUMBER
+PKG_JOB_BUILD_NUMBER=$PKG_JOB_BUILD_NUMBER
 PLUGIN_VERSION=$PLUGIN_VERSION
 REPORTER_PROPERTIES
 
