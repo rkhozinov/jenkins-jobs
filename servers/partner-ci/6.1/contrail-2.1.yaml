@@ -585,17 +585,17 @@
           name: ISO_VERSION
           description: "ISO number for form the test plan string"
       - string:
-          name: TEST_JOB_NAME
-          description: 'The name of a test for getting test results'
-      - string:
           name: PLUGIN_VERSION
           description: "ISO number for form the test plan string"
       - string:
+          name: TEST_JOB_NAME
+          description: 'The name of a test for getting test results'
+      - string:
           name: TEST_JOB_BUILD_NUMBER
-          description: 'The number of a build'
+          description: 'The number of a build of the test job'
       - string:
           name: PKG_JOB_BUILD_NUMBER
-          description: "The number of a build"
+          description: "The number of a build of the package build job"
       - string:
           name: TREP_TESTRAIL_URL
           default: 'https://mirantis.testrail.com'
@@ -609,7 +609,7 @@
           default: 'Fuel Contrail Plugin v2.1.0'
           description: ""
       - string:
-          name: TREP_TESTRAIL_TEST_SUITE
+          name: TREP_TESTRAIL_SUITE
           default: 'Contrail Plugin v2.x.x'
           description: ""
       - string:
@@ -626,7 +626,7 @@
           description: ""
       - string:
           name: TREP_TESTRAIL_RUN
-          default: "{testrail_run_name}"
+          default: "$TREP_TESTRAIL_SUITE"
           description: "Testrail test run name"
       - string:
           name: TREP_TESTRAIL_RUN_DESCRIPTION
@@ -645,13 +645,13 @@
           default: 'nosetests.xml'
           description: ""
       - string:
-          name: TREP_TESTRAIL_LOG_LEVEL
-          default: 'INFO'
+          name: TREP_LOG_LEVEL
+          default: "DEBUG"
           description: "Log level of reporter"
       - string:
-          name: TREP_TESTRAIL_LOG_FILE
-          default: 'testrail_reporter.log'
-          description: ""
+          name: TREP_LOG_FILE
+          default: "testrail_reporter.log"
+          description: "Log filename for reporter tool"
       - string:
           name: TREP_TEST_RESULTS_SOURCE
           default: "xunit_items"
