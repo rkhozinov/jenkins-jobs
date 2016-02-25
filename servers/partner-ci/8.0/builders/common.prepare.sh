@@ -151,4 +151,3 @@ else
   # poweroff all envs
   destroy_envs
 fi
-

@@ -16,6 +16,7 @@
     nightly-name: '{fuel-release}.{plugin-name}.nightly'
     custom-name: '{fuel-release}.{plugin-name}.custom'
 
+
     nightly-timer: 'H 22 * * *'
     regression-timer: 'H 18 * * *'
 
@@ -34,7 +35,7 @@
     testjob_build_pkg: false
 
     runner-timeout: 600
-    test-timeout: 500
+    test-timeout: 300
 
     iso-file: ''
     gerrit-repo: 'fuel-plugin-vmware-dvs'
@@ -73,13 +74,14 @@
           testgroup_value: '{obj:testgroup}'
 
       - '{reporter-name}':
-          testrail_project_name: "VMware DVS plugin"
-          testrail_suite_name: "[8.0][PCE] VMware DVS plugin v2.1.0"
+          testrail_project: "VMware DVS plugin"
+          testrail_suite: "[8.0][PCE] VMware DVS plugin v${{PLUGIN_VERSION}}"
           testrail_suite_desc: "Suite description"
-          testrail_plan_prefix: "$TREP_TESTRAIL_MILESTONE iso #"
-          testrail_plan_name: "$PLAN_PREFIX$ISO_VERSION"
+          testrail_milestone: "2.0.0"
+          testrail_plan_prefix: ""
+          testrail_plan: "$TREP_TESTRAIL_SUITE iso #${{ISO_VERSION}} build#${{PKG_JOB_BUILD_NUMBER}}"
           testrail_plan_desc: "Test plan description"
-          testrail_run_name: "$TREP_TESTRAIL_SUITE"
+          testrail_run: "$TREP_TESTRAIL_SUITE"
           testrail_run_desc: "Test run description"
           testrail_item_case: "$TEST_GROUP"
           debug_level: "DEBUG"
@@ -140,6 +142,7 @@
           branches:
             - $GERRIT_BRANCH
           choosing-strategy: gerrit
+          skip-tag: true
           submodule:
             disable: false
             tracking: true
@@ -497,7 +500,7 @@
       - postbuildscript:
           script-only-if-succeeded: False
           builders:
-            - shell: env > properties; rm -f .*rpm.*  
+            - shell: env > properties; rm -f .*rpm.*
       - archive:
           artifacts: '*properties'
           allow-empty: true
@@ -569,27 +572,23 @@
           description: ""
       - string:
           name: TREP_TESTRAIL_PROJECT
-          default: "{testrail_project_name}"
+          default: "{testrail_project}"
           description: "Project name"
       - string:
           name: TREP_TESTRAIL_MILESTONE
-          default: "{fuel-release}"
+          default: "{testrail_milestone}"
           description: "Testrail milestone (fuel release version is commonly used )"
       - string:
           name: TREP_TESTRAIL_SUITE
-          default: "{testrail_suite_name}"
+          default: "{testrail_suite}"
           description: "The test suite name, ex.[8.0][PCE] vCenter Smoke/BVT"
       - string:
           name: TREP_TESTRAIL_SUITE_DESCRIPTION
           default: "{testrail_suite_desc}"
           description: "Testrail suite description"
       - string:
-          name: PLAN_PREFIX
-          default: "{testrail_plan_prefix}"
-          description: "Variable that's used for fill $TREP_TESTRAIL_PLAN"
-      - string:
           name: TREP_TESTRAIL_PLAN
-          default: "{testrail_plan_name}"
+          default: "{testrail_plan}"
           description: "Testrail testplan name"
       - string:
           name: TREP_TESTRAIL_PLAN_DESCRIPTION
@@ -597,7 +596,7 @@
           description: "Testrail testplan description"
       - string:
           name: TREP_TESTRAIL_RUN
-          default: "{testrail_run_name}"
+          default: "{testrail_run}"
           description: "Testrail test run name"
       - string:
           name: TREP_TESTRAIL_RUN_DESCRIPTION
@@ -738,13 +737,13 @@
     description: 'The test for {fuel-release}.{plugin-name}.{plugin-version}'
     concurrent: true
 
-## jobs for regression tests
+# jobs for regression tests
 - job-template:
     name: '{fuel-release}.{plugin-name}.regression.test'
     description: 'The regression test for {fuel-release}.{plugin-name}.{plugin-version}'
     concurrent: true
 
-## jobs for test a new iso
+# jobs for test a new iso
 - job-template:
     name: '{fuel-release}.{plugin-name}.canary.skinny'
     description: 'The dvs_vcenter_smoke test  for {fuel-release}.{plugin-name}.{plugin-version}'
@@ -767,57 +766,6 @@
     concurrent: true
     <<: *custom-builders
 
-#- job-template:
-#    name: '{custom-name}'
-#    description: 'The custom test for {fuel-release}.{plugin-name}.{plugin-version}'
-#    concurrent: true
-#    publishers:
-#      - postbuildscript:
-#          script-only-if-succeeded: False
-#          builders:
-#            - shell: env > properties
-#            - shell: rm -f .*rpm.*
-#      - archive:
-#          artifacts: '.*properties'
-#          allow-empty: true
-#      - archive:
-#          artifacts: 'nosetests.xml'
-#          allow-empty: true
-#          fingerprint: true
-#      - archive:
-#          artifacts: 'logs/*'
-#          allow-empty: true
-#          fingerprint: true
-#      - xunit:
-#          types:
-#            - junit:
-#                pattern: 'nosetests.xml'
-#                skip-if-no-test-files: true
-#      - junit:
-#          results: nosetests.xml
-#          health-scale-factor: 1.0
-#      - email:
-#          recipients: "${{BUILD_USER}}@mirantis.com"
-#      - conditional-publisher:
-#          - condition-kind: file-exists
-#            condition-filename: 'nosetests.xml'
-#            action:
-#              - xunit:
-#                  types:
-#                    - junit:
-#                        pattern: 'nosetests.xml'
-#                        skip-if-no-test-files: true
-#              - junit:
-#                  results: 'nosetests.xml'
-#                  health-scale-factor: 1.0
-#      - conditional-publisher:
-#        - condition-kind: boolean-expression
-#          condition-expression: "${{PUBLISH_RESULTS}}"
-#          action:
-#            - trigger-parameterized-builds:
-#              - project: '{fuel-release}.{plugin-name}.reporter.nigthly'
-#                property-file: reporter.properties
-#                fail-on-missing: true
 - job-template:
     name: '{smoke-name}'
     disabled: false
@@ -854,8 +802,7 @@
       - postbuildscript:
           script-only-if-succeeded: False
           builders:
-            - shell: env > properties
-            - shell: rm -f .*rpm.*
+            - shell: env > properties; rm -f .*rpm.*
       - archive:
           artifacts: '*properties'
           allow-empty: false
@@ -970,11 +917,15 @@
           jobs: "${{ISO_JOB_NAME}}"
           result: 'success'
     builders:
-      - trigger-builds:
-        - project: "${{PKG_JOB_NAME}}"
-          current-parameters: true
-          git-revision: false
-          block: true
+      - conditional-step:
+          condition-kind: boolean-expression
+          condition-expression: ${{MJ_BUILD_PKG}}
+          steps:
+            - trigger-builds:
+              - project: "${{PKG_JOB_NAME}}"
+                current-parameters: false
+                git-revision: false
+                block: true
       - copyartifact:
           project: "${{PKG_JOB_NAME}}"
           which-build: last-successful
@@ -1036,8 +987,7 @@
       - postbuildscript:
           script-only-if-succeeded: false
           builders:
-            - shell: env > nightly.properties
-            - shell: rm -f .*rpm.*
+            - shell: env > properties; rm -f .*rpm.*
       - archive:
           artifacts: '*properties'
           allow-empty: false
