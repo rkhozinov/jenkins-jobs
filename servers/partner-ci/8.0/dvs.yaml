@@ -47,7 +47,7 @@
       - dvs_vcenter_systest_setup
       - dvs_vcenter_networks
       - dvs_vcenter_ping_public
-      - dvs_vcenter_5_instances
+      - dvs_intances_one_group
       - dvs_vcenter_security
       - dvs_vcenter_tenants_isolation
       - dvs_vcenter_same_ip
@@ -322,7 +322,7 @@
           default: 'Cluster1,Cluster2'
           description: "List of vCenter's clusters"
       - string:
-          name: DVS_SWITCHS
+          name: DVS_SWITCHES
           default: 'dvSwitch1,dvSwitch2'
           description: "List of vCenter's clusters"
       - bool:
@@ -415,7 +415,7 @@
           default: 'Cluster1,Cluster2'
           description: "List of vCenter's clusters"
       - string:
-          name: DVS_SWITCHS
+          name: DVS_SWITCHES
           default: 'dvSwitch1,dvSwitch2'
           description: "List of vCenter's clusters"
       - string:
@@ -1028,7 +1028,7 @@
            - name: '{fuel-release}.{plugin-name}.dvs_vcenter_ping_public'
              current-parameters: true
              kill-phase-on: NEVER
-           - name: '{fuel-release}.{plugin-name}.dvs_vcenter_5_instances'
+           - name: '{fuel-release}.{plugin-name}.dvs_intances_one_group'
              current-parameters: true
              kill-phase-on: NEVER
            - name: '{fuel-release}.{plugin-name}.dvs_vcenter_security'
