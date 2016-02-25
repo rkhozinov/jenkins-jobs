@@ -47,7 +47,7 @@
       - dvs_vcenter_systest_setup
       - dvs_vcenter_networks
       - dvs_vcenter_ping_public
-      - dvs_vcenter_5_instances
+      - dvs_instances_one_group
       - dvs_vcenter_security
       - dvs_vcenter_tenants_isolation
       - dvs_vcenter_same_ip
@@ -1022,7 +1022,7 @@
            - name: '{fuel-release}.{plugin-name}.dvs_vcenter_ping_public'
              current-parameters: true
              kill-phase-on: NEVER
-           - name: '{fuel-release}.{plugin-name}.dvs_vcenter_5_instances'
+           - name: '{fuel-release}.{plugin-name}.dvs_instances_one_group'
              current-parameters: true
              kill-phase-on: NEVER
            - name: '{fuel-release}.{plugin-name}.dvs_vcenter_security'
