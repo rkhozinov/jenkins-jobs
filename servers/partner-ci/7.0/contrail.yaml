@@ -234,7 +234,7 @@
           name: MIRROR_UBUNTU
           default: >
             'deb ${{MIRROR}}/pkgs/ubuntu/ trusty main universe multiverse |
-           deb ${{MIRROR}}/pkgs/ubuntu/ trusty-updates main universe multiverse'
+             deb ${{MIRROR}}/pkgs/ubuntu/ trusty-updates main universe multiverse'
           description: 'proposed repositories to update ubuntu cluster'
       - string:
           name: DEB_UPDATES
