@@ -11,23 +11,18 @@
     regression-name: '{fuel-release}.{plugin-name}.{plugin-version}.regression'
     nightly-name: '{fuel-release}.{plugin-name}.{plugin-version}.nightly'
     custom-name: '{fuel-release}.{plugin-name}.{plugin-version}.custom'
-
     nightly-timer: 'H 20 * * *'
     regression-timer: 'H 19 * * *'
-
     nightly-disabled: false
-
-    use-snapshots: true
+    use-snapshots: false
     force-erase: false
     recreate-venv: false
     disable-ssl: false
     bonding: false
     update-master: true
-
     debug: true
     runner-timeout: 600
     test-timeout: 500
-
     iso-file: 'fuel-7.0-301-2015-09-22_20-01-53.iso'
     gerrit-repo: 'fuel-plugin-contrail'
     gerrit-branch: 'stable/3.0'
@@ -49,6 +44,8 @@
       - contrail_cinder_ceph_multirole
       - contrail_plugin_add_delete_controller_node
       - contrail_plugin_add_delete_compute_node
+      - contrail_add_control
+      - contrail_ha_with_delete_contrail_node
 
     jobs:
       - '{build-name}'
@@ -275,7 +272,7 @@
           description: 'The branch for fuel-qa gerrit'
       - string:
           name: ARTIFACTS_JOB_NAME
-          default: '{bvt-name}'
+          default: '{build-name}'
           description: 'The branch for fuel-qa gerrit'
       - string:
           name: ENV_PREFIX
@@ -413,13 +410,9 @@
           default: '{fuel-release}.{plugin-name}'
           description: 'The prefix for a devops env name'
       - string:
-          name: TESTRAIL_PLAN_NAME
-          default: ''
-          description: ''
-      - string:
-          name: TESTRAIL_CONFIGURATION
-          default: ''
-          description: ''
+          name: ARTIFACTS_JOB_NAME
+          default: '{build-name}'
+          description: 'The branch for fuel-qa gerrit'
 
 - defaults:
     name: global
@@ -436,7 +429,7 @@
     <<: *test-wrappers
     builders:
       - copyartifact:
-          project: '{build-name}'
+          project: "${{ARTIFACTS_JOB_NAME}}"
           which-build: last-successful
       - shell:
           !include-raw-escape builders/common.prepare.sh
@@ -570,6 +563,7 @@
           allow-empty: false
       - email:
           recipients: '{email-to}'
+
 # jobs for system test
 - job-template:
     name: '{fuel-release}.{plugin-name}.{plugin-version}.{testgroup}.open'
@@ -635,7 +629,6 @@
     triggers:
       - gerrit:
           <<: *smoke-gerrit-events
-
           <<: *generic-gerrit-projects
     builders:
       - copyartifact:
@@ -646,7 +639,6 @@
           name: 'Smoke test for open/juniper contrail'
           condition: COMPLETED
           projects:
-
             - name: '{fuel-release}.{plugin-name}.{plugin-version}.smoke.test.juniper'
               current-parameters: true
               predefined-parameters: |
@@ -787,98 +779,105 @@
     scm: []
     triggers:
       - timed: '{nightly-timer}'
-
     builders:
-      - copyartifact:
-          project: "${{ARTIFACTS_JOB_NAME}}"
-          which-build: last-successful
-          stable: true
+      - multijob:
+          name: 'Build package'
+          condition: SUCCESSFUL
+          projects:
+            - name: '{build-name}'
+              current-parameters: false
+              kill-phase-on: FAILURE
       - multijob:
           name: >
-            'Smoke tests for open/juniper contrail.
-             Juniper or contrail version is provided in variable by multijob'
+            'Smoke/bvt tests to check before running of nighlty tests.
+             The nightly tests scope will be runned only if smoke/bvt will have successful state'
+          condition: SUCCESSFUL
+          projects:
+            - name: '{fuel-release}.{plugin-name}.{plugin-version}.contrail_smoke.juniper'
+              predefined-parameters: |
+                 CONTRAIL_DISTRIBUTION=juniper
+              current-parameters: true
+              kill-phase-on: FAILURE
+            - name: '{fuel-release}.{plugin-name}.{plugin-version}.contrail_bvt.juniper'
+              predefined-parameters: |
+                 CONTRAIL_DISTRIBUTION=juniper
+              current-parameters: true
+              kill-phase-on: FAILURE
+      - multijob:
+          name: >
+            'Nightly tests for {fuel-release}.{plugin-name}.{plugin-version}'
           condition: COMPLETED
           projects:
             - name: '{fuel-release}.{plugin-name}.{plugin-version}.contrail_ha.juniper'
               predefined-parameters: |
                  CONTRAIL_DISTRIBUTION=juniper
-                 FORCE_ERASE=true
-                 USE_SNAPSHOTS=false
               current-parameters: true
               kill-phase-on: NEVER
             - name: '{fuel-release}.{plugin-name}.{plugin-version}.contrail_ha_baseos.juniper'
               predefined-parameters: |
                  CONTRAIL_DISTRIBUTION=juniper
-                 FORCE_ERASE=true
-                 USE_SNAPSHOTS=false
               current-parameters: true
               kill-phase-on: NEVER
             - name: '{fuel-release}.{plugin-name}.{plugin-version}.contrail_ceilometer.juniper'
               predefined-parameters: |
                  CONTRAIL_DISTRIBUTION=juniper
-                 FORCE_ERASE=true
-                 USE_SNAPSHOTS=false
               current-parameters: true
               kill-phase-on: NEVER
             - name: '{fuel-release}.{plugin-name}.{plugin-version}.contrail_vlan.juniper'
               predefined-parameters: |
                  CONTRAIL_DISTRIBUTION=juniper
-                 FORCE_ERASE=true
-                 USE_SNAPSHOTS=false
               current-parameters: true
               kill-phase-on: NEVER
             - name: '{fuel-release}.{plugin-name}.{plugin-version}.contrail_jumbo.juniper'
               predefined-parameters: |
                  CONTRAIL_DISTRIBUTION=juniper
-                 FORCE_ERASE=true
-                 USE_SNAPSHOTS=false
               current-parameters: true
               kill-phase-on: NEVER
  
             - name: '{fuel-release}.{plugin-name}.{plugin-version}.contrail_bonding.juniper'
               predefined-parameters: |
                  CONTRAIL_DISTRIBUTION=juniper
-                 FORCE_ERASE=true
-                 USE_SNAPSHOTS=false
               current-parameters: true
               kill-phase-on: NEVER
  
             - name: '{fuel-release}.{plugin-name}.{plugin-version}.contrail_ceph_multirole.juniper'
               predefined-parameters: |
                  CONTRAIL_DISTRIBUTION=juniper
-                 FORCE_ERASE=true
-                 USE_SNAPSHOTS=false
               current-parameters: true
               kill-phase-on: NEVER
  
             - name: '{fuel-release}.{plugin-name}.{plugin-version}.contrail_cinder_multirole.juniper'
               predefined-parameters: |
                  CONTRAIL_DISTRIBUTION=juniper
-                 FORCE_ERASE=true
-                 USE_SNAPSHOTS=false
               current-parameters: true
               kill-phase-on: NEVER
  
             - name: '{fuel-release}.{plugin-name}.{plugin-version}.contrail_cinder_ceph_multirole.juniper'
               predefined-parameters: |
                  CONTRAIL_DISTRIBUTION=juniper
-                 FORCE_ERASE=true
-                 USE_SNAPSHOTS=false
               current-parameters: true
               kill-phase-on: NEVER
  
             - name: '{fuel-release}.{plugin-name}.{plugin-version}.contrail_plugin_add_delete_controller_node.juniper'
               predefined-parameters: |
                  CONTRAIL_DISTRIBUTION=juniper
-                 FORCE_ERASE=true
-                 USE_SNAPSHOTS=false
               current-parameters: true
               kill-phase-on: NEVER
  
             - name: '{fuel-release}.{plugin-name}.{plugin-version}.contrail_plugin_add_delete_compute_node.juniper'
               predefined-parameters: |
                  CONTRAIL_DISTRIBUTION=juniper
-                 FORCE_ERASE=true
-                 USE_SNAPSHOTS=false
+              current-parameters: true
+              kill-phase-on: NEVER
+
+            - name: '{fuel-release}.{plugin-name}.{plugin-version}.contrail_add_control.juniper'
+              predefined-parameters: |
+                 CONTRAIL_DISTRIBUTION=juniper
+              current-parameters: true
+              kill-phase-on: NEVER
+
+            - name: '{fuel-release}.{plugin-name}.{plugin-version}.contrail_ha_with_delete_contrail_node.juniper'
+              predefined-parameters: |
+                 CONTRAIL_DISTRIBUTION=juniper
               current-parameters: true
               kill-phase-on: NEVER
