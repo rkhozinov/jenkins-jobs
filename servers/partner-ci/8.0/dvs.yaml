@@ -1,3 +1,4 @@
+---
 - project:
     name: 'predefined_parameters'
     fuel-release: '8.0'
@@ -6,8 +7,10 @@
 
     default-pkg-job-name: '8.0.dvs.build'
     default-iso-job-name: '8.0.dvs.canary'
-
     build-name: '{fuel-release}.{plugin-name}.build'
+    flake8-name: '{fuel-release}.{plugin-name}.flake8'
+    radon-name: '{fuel-release}.{plugin-name}.radon'
+    shellcheck-name: '{fuel-release}.{plugin-name}.shellcheck'
     smoke-name: '{fuel-release}.{plugin-name}.smoke'
     bvt-name: '{fuel-release}.{plugin-name}.bvt'
     regression-name: '{fuel-release}.{plugin-name}.regression'
@@ -15,15 +18,10 @@
     download-iso-name: 'download_iso'
     nightly-name: '{fuel-release}.{plugin-name}.nightly'
     custom-name: '{fuel-release}.{plugin-name}.custom'
-
-
     nightly-timer: 'H 22 * * *'
     regression-timer: 'H 18 * * *'
-
     reporter-name: '{fuel-release}.{plugin-name}.reporter'
-
     nightly_disabled: false
-
     use_snapshots: false
     force_erase: true
     recreate_venv: false
@@ -33,10 +31,8 @@
     publish_results: false
     multijob_build_pkg: true
     testjob_build_pkg: false
-
     runner-timeout: 600
     test-timeout: 300
-
     iso-file: ''
     gerrit-repo: 'fuel-plugin-vmware-dvs'
     gerrit-branch: 'master'
@@ -47,7 +43,7 @@
       - dvs_vcenter_systest_setup
       - dvs_vcenter_networks
       - dvs_vcenter_ping_public
-      - dvs_intances_one_group
+      - dvs_instances_one_group
       - dvs_vcenter_security
       - dvs_vcenter_tenants_isolation
       - dvs_vcenter_same_ip
@@ -61,6 +57,10 @@
 
     jobs:
       - '{build-name}'
+      - '{flake8-name}'
+      - '{radon-name}'
+      - '{shellcheck-name}'
+
       - '{nightly-name}'
 
       - '{custom-name}.qa':
@@ -117,7 +117,6 @@
           testgroup_value: '{testgroup}'
 
       - '{canary-name}':
-#          default-pkg-job-name: '{default-pkg-iso-name}'
           default-iso-job-name: '{download-iso-name}'
 
       - '{fuel-release}.{plugin-name}.canary.skinny':
@@ -130,8 +129,7 @@
           testgroup_value_type: default
           testgroup_value: '{testgroup}'
 
-
-## common git settings to get sources
+# common git settings to get sources
 - common-scm: &common-scm
     name: 'common-scm'
     scm:
@@ -148,7 +146,24 @@
             recursive: true
           wipe-workspace: false
 
-## list of gerrit events to trigger build job
+# common git settings to get sources
+- common-scm: &checkers-scm
+    name: 'checkers-scm'
+    scm:
+      - git:
+          url: 'https://review.openstack.org/openstack/{gerrit-repo}'
+          refspec: $GERRIT_REFSPEC
+          branches:
+            - $GERRIT_BRANCH
+          choosing-strategy: gerrit
+          skip-tag: true
+          submodule:
+            disable: true
+            tracking: false
+            recursive: false
+          wipe-workspace: false
+
+# list of gerrit events to trigger build job
 - build-gerrit-events: &build-gerrit-events
     name: 'build-gerrit-events'
     trigger-on:
@@ -158,8 +173,8 @@
           exclude-trivial-rebase: true
           exclude-no-code-change: true
 
-## configuration of gerrit event for the smoke multijob
-## smoke multijob should run on patchset, draft events
+# configuration of gerrit event for the smoke multijob
+# smoke multijob should run on patchset, draft events
 - smoke-gerrit-events: &smoke-gerrit-events
     name: 'smoke-gerrit-events'
     trigger-on:
@@ -168,14 +183,14 @@
           exclude-trivial-rebase: true
           exclude-no-code-change: true
 
-## configuration of gerrit event for the bvt multijob
-## bvt multijob should run only on merge event
+# configuration of gerrit event for the bvt multijob
+# bvt multijob should run only on merge event
 - bvt-gerrit-events: &bvt-gerrit-events
     name: 'bvt-gerrit-events'
     trigger-on:
       - change-merged-event
 
-## the main part of gerrit section as yaml anchor
+# the main part of gerrit section as yaml anchor
 - generic-gerrit-projects: &generic-gerrit-projects
     name: 'generic-gerrit-projects'
     projects:
@@ -201,7 +216,31 @@
       unstable: true
       notbuilt: true
 
-## properties for smoke, bvt and nightly multijobs
+# the main part of gerrit section as yaml anchor
+- generic-gerrit-projects: &test-gerrit-projects
+    name: 'test-gerrit-projects'
+    projects:
+      - project-compare-type: 'PLAIN'
+        project-pattern: 'openstack/{gerrit-repo}'
+        branches:
+          - branch-compare-type: 'ANT'
+            branch-pattern: '{gerrit-branch}'
+        file-paths:
+          - compare-type: 'ANT'
+            pattern: 'plugin_test/**'
+    silent: false
+    override-votes: true
+    server-name: 'review.openstack.org'
+    custom-url: '* $JOB_NAME $BUILD_URL'
+    escape-quotes: true
+    readable-message: true
+    skip-vote:
+      successfull: false
+      failed: false
+      unstable: true
+      notbuilt: true
+
+# properties for smoke, bvt and nightly multijobs
 - runner-properties: &runner-properties
     name: 'runner-properties'
     properties:
@@ -214,14 +253,14 @@
           block-level: 'GLOBAL'
           queue-scanning: 'BUILDABLE'
 
-## properties for smoke, bvt and nightly multijobs
+# properties for smoke, bvt and nightly multijobs
 - runner-wrappers: &runner-wrappers
     name: 'runner-wrappers'
     wrappers:
       - ansicolor:
           colormap: xterm
 
-## properties for smoke, bvt and nightly multijobs
+# properties for smoke, bvt and nightly multijobs
 - test-wrappers: &test-wrappers
     name: 'test-wrappers'
     wrappers:
@@ -236,7 +275,7 @@
           write-description: "Timeout is exceeded"
           timeout: '{test-timeout}'
 
-## properties for test jobs
+# properties for test jobs
 - test-properties: &test-properties
     name: 'test-properties'
     properties:
@@ -249,10 +288,11 @@
             - vcenter
             - dvs
             - nsx
+            - nsxv
             - contrail
           option: category
 
-## properties for test jobs
+# properties for test jobs
 - custom-builders: &custom-builders
     name: 'custom-builders'
     builders:
@@ -261,10 +301,10 @@
           condition-expression: ${{BUILD_PKG}}
           steps:
             - trigger-builds:
-              - project: "${{PKG_JOB_NAME}}"
-                current-parameters: false
-                git-revision: false
-                block: true
+                - project: "${{PKG_JOB_NAME}}"
+                  current-parameters: false
+                  git-revision: false
+                  block: true
       - copyartifact:
           project: "${{PKG_JOB_NAME}}"
           which-build: last-successful
@@ -277,7 +317,7 @@
       - shell:
           !include-raw-escape: builders/vcenter.test.sh
 
-## parameters for smoke, bvt and nightly multijobs
+# parameters for smoke, bvt and nightly multijobs
 - runner-parameters: &runner-parameters
     name: 'runner-parameters'
     parameters:
@@ -358,7 +398,7 @@
           default: '{fuel-release}.{plugin-name}'
           description: 'The name of devops env. Needed to properly work of existing mode of devops'
 
-## parameters for jobs created per test-group and custom test job
+# parameters for jobs created per test-group and custom test job
 - test-parameters: &test-parameters
     name: 'test-parameters'
     parameters:
@@ -478,7 +518,6 @@
           default: '{canary-name}'
           description: 'The name of job for copying of stable iso build name'
 
-
 - defaults:
     name: global
     disabled: false
@@ -543,13 +582,13 @@
                   results: 'nosetests.xml'
                   health-scale-factor: 1.0
       - conditional-publisher:
-        - condition-kind: boolean-expression
-          condition-expression: "${{PUBLISH_RESULTS}}"
-          action:
-            - trigger-parameterized-builds:
-              - project: '{fuel-release}.{plugin-name}.reporter'
-                property-file: reporter.properties
-                fail-on-missing: true
+          - condition-kind: boolean-expression
+            condition-expression: "${{PUBLISH_RESULTS}}"
+            action:
+              - trigger-parameterized-builds:
+                  - project: '{fuel-release}.{plugin-name}.reporter'
+                    property-file: reporter.properties
+                    fail-on-missing: true
 
 - job-template:
     name: '{reporter-name}'
@@ -650,7 +689,7 @@
           url: 'https://github.com/ehles/trep.git'
           branches:
             - 'origin/master'
-          #choosing-strategy: default
+          # choosing-strategy: default
           clean:
             before: false
           wipe-workspace: false
@@ -675,6 +714,126 @@
           allow-empty: true
       - email:
           recipients: '{email-to}'
+
+- job-template:
+    name: '{flake8-name}'
+    node: 'runner'
+    concurrent: true
+    disabled: false
+    <<: *checkers-scm
+    <<: *runner-wrappers
+    triggers:
+      - gerrit:
+          <<: *build-gerrit-events
+          <<: *test-gerrit-projects
+    parameters:
+      - string:
+          name: GERRIT_BRANCH
+          default: 'origin/{gerrit-branch}'
+          description: 'The branch for fuel-qa gerrit'
+      - string:
+          name: GERRIT_REFSPEC
+          default: 'refs/heads/{gerrit-branch}'
+      - string:
+          name: ARGS
+          default: >
+             --doctest --exclude .git,fuel-qa,__init__.py
+             --ignore=H302,H802 --show-source --statistics
+          description: "Default args from fuel-qa gate job"
+    properties:
+      - heavy-job:
+          weight: 1
+    builders:
+      - shell: |
+          #!/bin/bash -xe
+          set -o pipefail
+          flake8 ${{ARGS}} ./ | tee -i flake8.log
+    publishers:
+      - archive:
+          artifacts: '*.log'
+          fingerprint: true
+          allow-empty: true
+
+- job-template:
+    name: '{radon-name}'
+    node: 'runner'
+    concurrent: true
+    disabled: false
+    <<: *checkers-scm
+    <<: *runner-wrappers
+    triggers:
+      - gerrit:
+          <<: *build-gerrit-events
+          <<: *test-gerrit-projects
+    parameters:
+      - string:
+          name: GERRIT_BRANCH
+          default: 'origin/{gerrit-branch}'
+          description: 'The branch for fuel-qa gerrit'
+      - string:
+          name: GERRIT_REFSPEC
+          default: 'refs/heads/{gerrit-branch}'
+      - string:
+          name: RADON_ARGS
+          default: '--total-average -nb --ignore fuel-qa'
+          description: "radon will out average complexity and files with B and worse rank"
+      - string:
+          name: XENON_ARGS
+          default: '--ignore fuel-qa --max-absolute A --max-modules A --max-average A'
+          description: "Default args for checking average code complexity"
+    properties:
+      - heavy-job:
+          weight: 1
+    builders:
+      - shell: |
+          #!/bin/bash -xe
+          radon cc ./ ${{RADON_ARGS}} | tee -i radon_cc.log
+          radon mi ./ -nb --ignore fuel-qa | tee -i radon_mi.log
+          set -o pipefail
+          xenon ${{XENON_ARGS}} ./ | tee -i xenon.log
+    publishers:
+      - archive:
+          artifacts: '*.log'
+          fingerprint: true
+          allow-empty: true
+
+- job-template:
+    name: '{shellcheck-name}'
+    node: 'runner'
+    concurrent: true
+    disabled: false
+    <<: *checkers-scm
+    <<: *runner-wrappers
+    triggers:
+      - gerrit:
+          <<: *build-gerrit-events
+          <<: *generic-gerrit-projects
+    parameters:
+      - string:
+          name: GERRIT_BRANCH
+          default: 'origin/{gerrit-branch}'
+          description: 'The branch for fuel-qa gerrit'
+      - string:
+          name: GERRIT_REFSPEC
+          default: 'refs/heads/{gerrit-branch}'
+      - string:
+          name: ARGS
+          default: '-e SC2086,SC2046'
+          description: 'shellcheck argurments'
+    properties:
+      - heavy-job:
+          weight: 1
+    builders:
+      - shell: |
+          #!/bin/bash -xe
+          set -o pipefail
+          shellcheck ${{ARGS}} $(find . -name '*.sh') | tee -i shellcheck.log
+    publishers:
+      - archive:
+          artifacts: '*.log'
+          fingerprint: true
+          allow-empty: true
+
 # job for building plugin pkg
 - job-template:
     name: '{build-name}'
@@ -709,10 +868,11 @@
       - postbuildscript:
           script-only-if-succeeded: False
           builders:
-             - shell: |
-                 export PLUGIN_VERSION=$(grep "^version" metadata.yaml | cut -d ' ' -f2)
-                 echo "PLUGIN_VERSION=${{PLUGIN_VERSION}}" > build.plugin_version
-                 env > build.properties
+            - shell: |
+                #!/bin/bash
+                plugin_version=$(grep '^version' metadata.yaml | cut -d ' ' -f2)
+                echo PLUGIN_VERSION=${{plugin_version}} | tr -d "'"> build.plugin_version
+                env > build.properties
       - archive:
           artifacts: '*.rpm'
           allow-empty: false
@@ -731,13 +891,13 @@
     description: 'The test "{testgroup}" for {fuel-release}.{plugin-name}.{plugin-version}'
     concurrent: true
 
-## jobs for bvt tests
+# jobs for bvt tests
 - job-template:
     name: '{fuel-release}.{plugin-name}.bvt.test'
     description: 'The test for {fuel-release}.{plugin-name}.{plugin-version}'
     concurrent: true
 
-## jobs for smoke tests
+# jobs for smoke tests
 - job-template:
     name: '{fuel-release}.{plugin-name}.smoke.test'
     description: 'The test for {fuel-release}.{plugin-name}.{plugin-version}'
@@ -782,15 +942,15 @@
     <<: *runner-parameters
     <<: *runner-properties
     <<: *runner-wrappers
-    scm:  []
+    scm: []
     triggers:
       - gerrit:
           <<: *smoke-gerrit-events
           <<: *generic-gerrit-projects
     builders:
       - copyartifact:
-           project: "${{PKG_JOB_NAME}}"
-           which-build: last-successful
+          project: "${{PKG_JOB_NAME}}"
+          which-build: last-successful
       - copyartifact:
           project: "${{ISO_JOB_NAME}}"
           filter: "iso_file"
@@ -799,11 +959,11 @@
           name: 'The smoke test for {fuel-release}.{plugin-name}.{plugin-version}'
           condition: COMPLETED
           projects:
-           - name: '{fuel-release}.{plugin-name}.smoke.test'
-             current-parameters: true
-             predefined-parameters: |
-                TEST_GROUP=dvs_vcenter_smoke
-             kill-phase-on: NEVER
+            - name: '{fuel-release}.{plugin-name}.smoke.test'
+              current-parameters: true
+              predefined-parameters: |
+                 TEST_GROUP=dvs_vcenter_smoke
+              kill-phase-on: NEVER
     publishers:
       - postbuildscript:
           script-only-if-succeeded: False
@@ -831,7 +991,7 @@
     <<: *runner-parameters
     <<: *runner-properties
     <<: *runner-wrappers
-    scm:  []
+    scm: []
     triggers:
       - gerrit:
           <<: *bvt-gerrit-events
@@ -848,16 +1008,16 @@
           name: 'The BVT test for {fuel-release}.{plugin-name}.{plugin-version}'
           condition: COMPLETED
           projects:
-           - name: '{fuel-release}.{plugin-name}.bvt.test'
-             current-parameters: true
-             predefined-parameters: |
-                TEST_GROUP=dvs_vcenter_bvt
-             kill-phase-on: NEVER
+            - name: '{fuel-release}.{plugin-name}.bvt.test'
+              current-parameters: true
+              predefined-parameters: |
+                 TEST_GROUP=dvs_vcenter_bvt
+              kill-phase-on: NEVER
     publishers:
       - postbuildscript:
           script-only-if-succeeded: False
           builders:
-             - shell: env > bvt.properties
+            - shell: env > bvt.properties
       - archive:
           artifacts: '*properties'
           allow-empty: false
@@ -882,14 +1042,14 @@
     properties:
       - heavy-job:
           weight: 1
-    scm:  []
+    scm: []
     triggers:
       - timed: '{regression-timer}'
     publishers:
       - postbuildscript:
           script-only-if-succeeded: False
           builders:
-             - shell: env > regression.properties
+            - shell: env > regression.properties
       - archive:
           artifacts: 'regression.properties'
           allow-empty: false
@@ -917,7 +1077,7 @@
     <<: *runner-parameters
     <<: *runner-properties
     <<: *runner-wrappers
-    scm:  []
+    scm: []
     triggers:
       - reverse:
           jobs: "${{ISO_JOB_NAME}}"
@@ -928,10 +1088,10 @@
           condition-expression: ${{MJ_BUILD_PKG}}
           steps:
             - trigger-builds:
-              - project: "${{PKG_JOB_NAME}}"
-                current-parameters: false
-                git-revision: false
-                block: true
+                - project: "${{PKG_JOB_NAME}}"
+                  current-parameters: false
+                  git-revision: false
+                  block: true
       - copyartifact:
           project: "${{PKG_JOB_NAME}}"
           which-build: last-successful
@@ -943,22 +1103,11 @@
           name: 'Smoke tests for dvs.vcenter5'
           condition: SUCCESSFUL
           projects:
-           - name: '{fuel-release}.{plugin-name}.canary.skinny'
-             predefined-parameters: |
-                TEST_GROUP=dvs_vcenter_smoke
-             current-parameters: true
-             kill-phase-on: NEVER
-
-#      - multijob:
-#          name: 'BVT tests for dvs.vcenter5'
-#          condition: SUCCESSFUL
-#          projects:
-#           - name: '{fuel-release}.{plugin-name}.canary.fat'
-#             predefined-parameters: |
-#                TEST_GROUP=dvs_vcenter_bvt
-#             current-parameters: true
-#             property-file: iso_file
-#             kill-phase-on: NEVER
+            - name: '{fuel-release}.{plugin-name}.canary.skinny'
+              predefined-parameters: |
+                 TEST_GROUP=dvs_vcenter_smoke
+              current-parameters: true
+              kill-phase-on: NEVER
 
     publishers:
       - postbuildscript:
@@ -1011,55 +1160,47 @@
           condition-expression: ${{MJ_BUILD_PKG}}
           steps:
             - trigger-builds:
-              - project: "${{PKG_JOB_NAME}}"
-                current-parameters: false
-                git-revision: false
-                block: true
+                - project: "${{PKG_JOB_NAME}}"
+                  current-parameters: false
+                  git-revision: false
+                  block: true
       - multijob:
           name: 'System tests for dvs{fuel-release}.{plugin-version} vcenter5'
           condition: COMPLETED
           projects:
-           - name: '{fuel-release}.{plugin-name}.dvs_vcenter_systest_setup'
-             current-parameters: true
-             kill-phase-on: NEVER
-           - name: '{fuel-release}.{plugin-name}.dvs_vcenter_networks'
-             current-parameters: true
-             kill-phase-on: NEVER
-           - name: '{fuel-release}.{plugin-name}.dvs_vcenter_ping_public'
-             current-parameters: true
-             kill-phase-on: NEVER
-           - name: '{fuel-release}.{plugin-name}.dvs_intances_one_group'
-             current-parameters: true
-             kill-phase-on: NEVER
-           - name: '{fuel-release}.{plugin-name}.dvs_vcenter_security'
-             current-parameters: true
-             kill-phase-on: NEVER
-           - name: '{fuel-release}.{plugin-name}.dvs_vcenter_tenants_isolation'
-             current-parameters: true
-             kill-phase-on: NEVER
-           - name: '{fuel-release}.{plugin-name}.dvs_vcenter_same_ip'
-             current-parameters: true
-             kill-phase-on: NEVER
-           - name: '{fuel-release}.{plugin-name}.dvs_vcenter_uninstall'
-             current-parameters: true
-             kill-phase-on: NEVER
-           - name: '{fuel-release}.{plugin-name}.dvs_vcenter_bind_port'
-             current-parameters: true
-             kill-phase-on: NEVER
-           - name: '{fuel-release}.{plugin-name}.dvs_vcenter_reset_controller'
-             current-parameters: true
-             kill-phase-on: NEVER
-           - name: '{fuel-release}.{plugin-name}.dvs_vcenter_net_template'
-             current-parameters: true
-             kill-phase-on: NEVER
-           - name: '{fuel-release}.{plugin-name}.dvs_vcenter_shutdown_controller'
-             current-parameters: true
-             kill-phase-on: NEVER
-#           - name: '{fuel-release}.{plugin-name}.dvs_vcenter_add_delete_controller'
-#             current-parameters: true
-#             kill-phase-on: NEVER
-#             #property-file: additional_params
-#           - name: '{fuel-release}.{plugin-name}.dvs_vcenter_add_delete_nodes'
-#             current-parameters: true
-#             kill-phase-on: NEVER
-#             #property-file: additional_params
+            - name: '{fuel-release}.{plugin-name}.dvs_vcenter_systest_setup'
+              current-parameters: true
+              kill-phase-on: NEVER
+            - name: '{fuel-release}.{plugin-name}.dvs_vcenter_networks'
+              current-parameters: true
+              kill-phase-on: NEVER
+            - name: '{fuel-release}.{plugin-name}.dvs_vcenter_ping_public'
+              current-parameters: true
+              kill-phase-on: NEVER
+            - name: '{fuel-release}.{plugin-name}.dvs_instances_one_group'
+              current-parameters: true
+              kill-phase-on: NEVER
+            - name: '{fuel-release}.{plugin-name}.dvs_vcenter_security'
+              current-parameters: true
+              kill-phase-on: NEVER
+            - name: '{fuel-release}.{plugin-name}.dvs_vcenter_tenants_isolation'
+              current-parameters: true
+              kill-phase-on: NEVER
+            - name: '{fuel-release}.{plugin-name}.dvs_vcenter_same_ip'
+              current-parameters: true
+              kill-phase-on: NEVER
+            - name: '{fuel-release}.{plugin-name}.dvs_vcenter_uninstall'
+              current-parameters: true
+              kill-phase-on: NEVER
+            - name: '{fuel-release}.{plugin-name}.dvs_vcenter_bind_port'
+              current-parameters: true
+              kill-phase-on: NEVER
+            - name: '{fuel-release}.{plugin-name}.dvs_vcenter_reset_controller'
+              current-parameters: true
+              kill-phase-on: NEVER
+            - name: '{fuel-release}.{plugin-name}.dvs_vcenter_net_template'
+              current-parameters: true
+              kill-phase-on: NEVER
+            - name: '{fuel-release}.{plugin-name}.dvs_vcenter_shutdown_controller'
+              current-parameters: true
+              kill-phase-on: NEVER
