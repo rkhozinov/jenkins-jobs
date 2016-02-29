@@ -133,7 +133,6 @@
     name: 'common-scm'
     scm:
       - git:
-          name: ''
           url: 'https://review.openstack.org/openstack/{gerrit-repo}'
           refspec: $GERRIT_REFSPEC
           branches:
@@ -144,6 +143,23 @@
             disable: false
             tracking: true
             recursive: true
+          wipe-workspace: false
+
+# common git settings to get sources
+- common-scm: &checkers-scm
+    name: 'checkers-scm'
+    scm:
+      - git:
+          url: 'https://review.openstack.org/openstack/{gerrit-repo}'
+          refspec: $GERRIT_REFSPEC
+          branches:
+            - $GERRIT_BRANCH
+          choosing-strategy: gerrit
+          skip-tag: true
+          submodule:
+            disable: true
+            tracking: false
+            recursive: false
           wipe-workspace: false
 
 # list of gerrit events to trigger build job
@@ -695,7 +711,7 @@
     node: 'runner'
     concurrent: true
     disabled: false
-    <<: *common-scm
+    <<: *checkers-scm
     <<: *runner-wrappers
     triggers:
       - gerrit:
@@ -734,7 +750,7 @@
     node: 'runner'
     concurrent: true
     disabled: false
-    <<: *common-scm
+    <<: *checkers-scm
     <<: *runner-wrappers
     triggers:
       - gerrit:
@@ -777,7 +793,7 @@
     node: 'runner'
     concurrent: true
     disabled: false
-    <<: *common-scm
+    <<: *checkers-scm
     <<: *runner-wrappers
     triggers:
       - gerrit:
