@@ -693,7 +693,6 @@
           clean:
             before: false
           wipe-workspace: false
-
     builders:
       - copyartifact:
           project: ${{TEST_JOB_NAME}}
@@ -702,8 +701,7 @@
           build-number: ${{TEST_JOB_BUILD_NUMBER}}
           stable: true
       - shell:
-          !include-raw-escape './builders/reporter.sh'
-
+          !include-raw-escape: './builders/reporter.sh'
     publishers:
       - postbuildscript:
           script-only-if-succeeded: false
@@ -1111,6 +1109,7 @@
 
     publishers:
       - postbuildscript:
+          script-only-if-succeeded: False
           builders:
             - shell: env > canary.properties
       - archive:
