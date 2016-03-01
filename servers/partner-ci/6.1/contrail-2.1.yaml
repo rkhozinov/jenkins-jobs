@@ -23,7 +23,6 @@
     disable-ssl: false
     bonding: false
     update-master: true
-
     debug: true
     runner-timeout: 600
     test-timeout: 500
@@ -76,19 +75,19 @@
     name: 'common-scm'
     scm:
       - git:
-          name: ''
           url: 'https://review.openstack.org/openstack/{gerrit-repo}'
           refspec: $GERRIT_REFSPEC
           branches:
             - $GERRIT_BRANCH
           choosing-strategy: gerrit
+          skip-tag: true
           submodule:
             disable: false
             tracking: true
             recursive: true
           wipe-workspace: true
 
-## list of gerrit events to trigger build job
+# list of gerrit events to trigger build job
 - build-gerrit-events: &build-gerrit-events
     name: 'build-gerrit-events'
     trigger-on:
@@ -98,8 +97,8 @@
           exclude-trivial-rebase: true
           exclude-no-code-change: true
 
-## configuration of gerrit event for the smoke multijob
-## smoke multijob should run on patchset, draft events
+# configuration of gerrit event for the smoke multijob
+# smoke multijob should run on patchset, draft events
 - smoke-gerrit-events: &smoke-gerrit-events
     name: 'smoke-gerrit-events'
     trigger-on:
@@ -108,14 +107,14 @@
           exclude-trivial-rebase: true
           exclude-no-code-change: true
 
-## configuration of gerrit event for the bvt multijob
-## bvt multijob should run only on merge event
+# configuration of gerrit event for the bvt multijob
+# bvt multijob should run only on merge event
 - bvt-gerrit-events: &bvt-gerrit-events
     name: 'bvt-gerrit-events'
     trigger-on:
       - change-merged-event
 
-## the main part of gerrit section as yaml anchor
+# the main part of gerrit section as yaml anchor
 - generic-gerrit-projects: &generic-gerrit-projects
     name: 'generic-gerrit-projects'
     projects:
@@ -141,7 +140,7 @@
       unstable: true
       notbuilt: true
 
-## properties for smoke, bvt and nightly multijobs
+# properties for smoke, bvt and nightly multijobs
 - runner-properties: &runner-properties
     name: 'runner-properties'
     properties:
@@ -154,14 +153,14 @@
           block-level: 'GLOBAL'
           queue-scanning: 'BUILDABLE'
 
-## properties for smoke, bvt and nightly multijobs
+# properties for smoke, bvt and nightly multijobs
 - runner-wrappers: &runner-wrappers
     name: 'runner-wrappers'
     wrappers:
       - ansicolor:
           colormap: xterm
 
-## properties for smoke, bvt and nightly multijobs
+# properties for smoke, bvt and nightly multijobs
 - test-wrappers: &test-wrappers
     name: 'test-wrappers'
     wrappers:
@@ -173,7 +172,7 @@
           write-description: "Timeout is exceeded"
           timeout: '{test-timeout}'
 
-## properties for test jobs
+# properties for test jobs
 - test-properties: &test-properties
     name: 'test-properties'
     properties:
@@ -186,10 +185,11 @@
             - vcenter
             - dvs
             - nsx
+            - nsxv
             - contrail
           option: category
 
-## parameters for smoke, bvt and nightly multijobs
+# parameters for smoke, bvt and nightly multijobs
 - runner-parameters: &runner-parameters
     name: 'runner-parameters'
     parameters:
@@ -215,7 +215,7 @@
           description: 'turns on update fuel master node to maintenance update'
       - bool:
           name: BONDING
-          default: '{bonding}'
+          default: '{obj:bonding}'
       - bool:
           name: USE_SNAPSHOTS
           default: '{use-snapshots}'
@@ -223,7 +223,8 @@
       - string:
           name: MIRROR
           default: 'http://mirror.seed-cz1.fuel-infra.org'
-          description: 'mirror for package repositories. this mirror is optimized for CZ'
+          description: |
+              'mirror for package repositories. this mirror is optimized for CZ'
       - string:
           name: UPDATE_FUEL_MIRROR
           default: "${{MIRROR}}/mos/snapshots/centos-6-stable/mos6.1/updates ${{MIRROR}}/mos/snapshots/centos-6-stable/mos6.1/security"
@@ -261,7 +262,7 @@
           default: '{fuel-release}.{plugin-name}'
           description: 'The name of devops env. Needed to properly work of existing mode of devops'
 
-## parameters for jobs created per test-group and custom test job
+# parameters for jobs created per test-group and custom test job
 - test-parameters: &test-parameters
     name: 'test-parameters'
     parameters:
@@ -287,7 +288,7 @@
           description: 'turns on update fuel master node to maintenance update'
       - bool:
           name: BONDING
-          default: '{bonding}'
+          default: '{obj:bonding}'
       - bool:
           name: USE_SNAPSHOTS
           default: '{use-snapshots}'
@@ -410,8 +411,8 @@
           script-only-if-succeeded: False
           builders:
             - shell: env > properties
-              # need to delete packages, because we don't wipe workspace,
-              # but packages could be duplicated
+            # need to delete packages, because we don't wipe workspace,
+            # but packages could be duplicated
             - shell: rm -f .*rpm.*
       - archive:
           artifacts: 'build.properties'
@@ -460,16 +461,20 @@
           <<: *generic-gerrit-projects
     parameters:
       - string:
-          name: 'GERRIT_REFSPEC'
+          name: GERRIT_BRANCH
+          default: 'origin/{gerrit-branch}'
+          description: 'The branch for fuel-qa gerrit'
+      - string:
+          name: GERRIT_REFSPEC
           default: 'refs/heads/{gerrit-branch}'
     properties:
       - heavy-job:
           weight: 1
     builders:
       - shell:
-          !include-raw-escape './builders/build-plugin.sh'
+          !include-raw-escape: './builders/build-plugin.sh'
       - shell:
-          !include-raw-escape './builders/rpm-check.sh'
+          !include-raw-escape: './builders/rpm-check.sh'
     publishers:
       - postbuildscript:
           script-only-if-succeeded: False
@@ -484,7 +489,7 @@
       - email:
           recipients: '{email-to}'
 
-## jobs for system test
+# jobs for system test
 - job-template:
     name: '{fuel-release}.{plugin-name}.{plugin-version}.{testgroup}.open'
     description: 'The test "{testgroup}" for {fuel-release}.{plugin-name}.{plugin-version} open contrail'
@@ -496,7 +501,7 @@
     description: 'The test "{testgroup}" for {fuel-release}.{plugin-name}.{plugin-version} juniper contrail'
     concurrent: true
 
-## jobs for bvt tests
+# jobs for bvt tests
 - job-template:
     name: '{fuel-release}.{plugin-name}.{plugin-version}.bvt.test.open'
     description: 'The test for {fuel-release}.{plugin-name}.{plugin-version} open contrail'
@@ -507,7 +512,7 @@
     description: 'The test for {fuel-release}.{plugin-name}.{plugin-version} juniper contrail'
     concurrent: true
 
-## jobs for smoke tests
+# jobs for smoke tests
 - job-template:
     name: '{fuel-release}.{plugin-name}.{plugin-version}.smoke.test.open'
     description: 'The test for {fuel-release}.{plugin-name}.{plugin-version} open contrail'
@@ -518,7 +523,7 @@
     description: 'The test for {fuel-release}.{plugin-name}.{plugin-version} juniper contrail'
     concurrent: true
 
-## jobs for regression tests
+# jobs for regression tests
 - job-template:
     name: '{fuel-release}.{plugin-name}.{plugin-version}.regression.test.open'
     description: 'The test for {fuel-release}.{plugin-name}.{plugin-version} open contrail'
@@ -685,7 +690,7 @@
           build-number: ${{TEST_JOB_BUILD_NUMBER}}
           stable: true
       - shell:
-          !include-raw-escape './builders/reporter.sh'
+          !include-raw-escape: './builders/reporter.sh'
     publishers:
       - email:
           recipients: '{email-to}'
@@ -693,14 +698,15 @@
 - job-template:
     name: '{smoke-name}'
     disabled: false
-    description: 'The Smoke test for {fuel-release}.{plugin-name}.{plugin-version}'
+    description: >
+      'The Smoke test for {fuel-release}.{plugin-name}.{plugin-version}'
     concurrent: true
     project-type: multijob
     node: runner
     <<: *runner-parameters
     <<: *runner-properties
     <<: *runner-wrappers
-    scm:  []
+    scm: []
     triggers:
       - gerrit:
           <<: *smoke-gerrit-events
@@ -711,7 +717,7 @@
           which-build: last-successful
           stable: true
       - multijob:
-          name: 'Smoke tests for open/juniper contrail'
+          name: 'Smoke test for open/juniper contrail'
           condition: COMPLETED
           projects:
             - name: '{fuel-release}.{plugin-name}.{plugin-version}.smoke.test.open'
@@ -740,7 +746,7 @@
           allow-empty: false
       - email:
           recipients: '{email-to}'
-  
+
 - job-template:
     name: '{bvt-name}'
     description: 'The BVT test for {fuel-release}.{plugin-name}.{plugin-version}'
@@ -751,7 +757,7 @@
     <<: *runner-parameters
     <<: *runner-properties
     <<: *runner-wrappers
-    scm:  []
+    cm: []
     triggers:
       - gerrit:
           <<: *bvt-gerrit-events
@@ -782,7 +788,7 @@
       - postbuildscript:
           script-only-if-succeeded: False
           builders:
-             - shell: env > bvt.properties
+            - shell: env > bvt.properties
       - archive:
           artifacts: '*.rpm'
           allow-empty: false
@@ -807,14 +813,14 @@
     properties:
       - heavy-job:
           weight: 1
-    scm:  []
+    scm: []
     triggers:
       - timed: '{regression-timer}'
     publishers:
       - postbuildscript:
           script-only-if-succeeded: False
           builders:
-             - shell: env > regression.properties
+            - shell: env > regression.properties
       - archive:
           artifacts: 'regression.properties'
           allow-empty: false
@@ -834,7 +840,7 @@
               kill-phase-on: NEVER
 
             - name: '{fuel-release}.{plugin-name}.{plugin-version}.regression.test.juniper'
-              predefined-parameters:  |
+              predefined-parameters: |
                 TEST_GROUP=contrail_bvt
                 CONTRAIL_DISTRIBUTION=juniper
                 CONTRAIL_PLUGIN_PATH={released-plugin-path}
@@ -867,7 +873,6 @@
     scm: []
     triggers:
       - timed: '{nightly-timer}'
-
     builders:
       # copy latest stable plugin package that has passed dvs bvt on the stable iso
       - copyartifact:
