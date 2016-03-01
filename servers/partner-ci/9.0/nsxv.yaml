@@ -1,11 +1,11 @@
 - project:
     name: 'predefined_parameters'
-    fuel-release: '8.0'
+    fuel-release: '9.0'
     plugin-version: '1.1.0'
     plugin-name: 'nsxv'
 
-    default-pkg-job-name: '8.0.nsxv.build'
-    default-iso-job-name: '8.0.nxxv.canary'
+    default-pkg-job-name: '9.0.nsxv.build'
+    default-iso-job-name: '9.0.nxxv.canary'
 
     build-name: '{fuel-release}.{plugin-name}.build'
     smoke-name: '{fuel-release}.{plugin-name}.smoke'
@@ -39,7 +39,7 @@
 
     iso-file: ''
     gerrit-repo: 'fuel-plugin-nsxv'
-    gerrit-branch: '8.0'
+    gerrit-branch: 'master'
     email-to: 'rkhozinov@mirantis.com'
     released-plugin-path: '/storage/nsxv/released/nsxv-1.1-1.1.0-1.noarch.rpm'
 
@@ -56,59 +56,59 @@
       - nsxv_create_and_delete_vms
     jobs:
       - '{build-name}'
-      - '{nightly-name}'
 
       - '{custom-name}.qa':
           testgroup_parameter_type: string
           testgroup_value_type: default
           testgroup_value: '{testgroup}'
 
-      - '{custom-name}.dev':
-          testgroup_parameter_type: choice
-          testgroup_value_type: choices
-          testgroup_value: '{obj:testgroup}'
-
-      - '{reporter-name}':
-          testrail_project: "VMware NSX-v plugin"
-          testrail_suite: "[8.0][PCE] Vmware NSX-v plugin 2.0"
-          testrail_suite_desc: "Suite description"
-          testrail_milestone: "2.0.0"
-          testrail_plan: "[8.0][PCE] NSXv plugin 2.0.0 build#${{PKG_JOB_BUILD_NUMBER}} iso#${{ISO_VERSION}}"
-          testrail_plan_desc: "Test plan description"
-          testrail_run: "$TREP_TESTRAIL_SUITE"
-          testrail_run_desc: "Test run description"
-          testrail_item_case: "$TEST_GROUP"
-          debug_level: "DEBUG"
-
-      - '{fuel-release}.{plugin-name}.{testgroup}':
-          testgroup_parameter_type: string
-          testgroup_value_type: default
-          testgroup_value: '{testgroup}'
-
-      - '{smoke-name}':
-          multijob_build_pkg: false
-
-      - '{fuel-release}.{plugin-name}.smoke.test':
-          testjob_build_pkg: false
-          testgroup_parameter_type: string
-          testgroup_value_type: default
-          testgroup_value: '{testgroup}'
-
-      - '{bvt-name}':
-          multijob_build_pkg: false
-
-      - '{fuel-release}.{plugin-name}.bvt.test':
-          testjob_build_pkg: false
-          testgroup_parameter_type: string
-          testgroup_value_type: default
-          testgroup_value: '{testgroup}'
-
-      - '{regression-name}'
-
-      - '{fuel-release}.{plugin-name}.regression.test':
-          testgroup_parameter_type: string
-          testgroup_value_type: default
-          testgroup_value: '{testgroup}'
+  #      - '{custom-name}.dev':
+  #          testgroup_parameter_type: choice
+  #          testgroup_value_type: choices
+  #          testgroup_value: '{obj:testgroup}'
+  #
+  #      - '{nightly-name}'
+  #      - '{reporter-name}':
+  #          testrail_project: "VMware NSX-v plugin"
+  #          testrail_suite: "[9.0][PCE] Vmware NSX-v plugin 2.0"
+  #          testrail_suite_desc: "Suite description"
+  #          testrail_milestone: "2.0.0"
+  #          testrail_plan: "[9.0][PCE] NSXv plugin 2.0.0 build#${{PKG_JOB_BUILD_NUMBER}} iso#${{ISO_VERSION}}"
+  #          testrail_plan_desc: "Test plan description"
+  #          testrail_run: "$TREP_TESTRAIL_SUITE"
+  #          testrail_run_desc: "Test run description"
+  #          testrail_item_case: "$TEST_GROUP"
+  #          debug_level: "DEBUG"
+  #
+  #      - '{fuel-release}.{plugin-name}.{testgroup}':
+  #          testgroup_parameter_type: string
+  #          testgroup_value_type: default
+  #          testgroup_value: '{testgroup}'
+  #
+  #      - '{smoke-name}':
+  #          multijob_build_pkg: false
+  #
+  #      - '{fuel-release}.{plugin-name}.smoke.test':
+  #          testjob_build_pkg: false
+  #          testgroup_parameter_type: string
+  #          testgroup_value_type: default
+  #          testgroup_value: '{testgroup}'
+  #
+  #      - '{bvt-name}':
+  #          multijob_build_pkg: false
+  #
+  #      - '{fuel-release}.{plugin-name}.bvt.test':
+  #          testjob_build_pkg: false
+  #          testgroup_parameter_type: string
+  #          testgroup_value_type: default
+  #          testgroup_value: '{testgroup}'
+  #
+  #      - '{regression-name}'
+  #
+  #      - '{fuel-release}.{plugin-name}.regression.test':
+  #          testgroup_parameter_type: string
+  #          testgroup_value_type: default
+  #          testgroup_value: '{testgroup}'
 
       - '{canary-name}':
           default-iso-job-name: '{download-iso-name}'
@@ -118,10 +118,10 @@
           testgroup_value_type: default
           testgroup_value: '{testgroup}'
 
-      - '{fuel-release}.{plugin-name}.canary.fat':
-          testgroup_parameter_type: string
-          testgroup_value_type: default
-          testgroup_value: '{testgroup}'
+  #      - '{fuel-release}.{plugin-name}.canary.fat':
+  #          testgroup_parameter_type: string
+  #          testgroup_value_type: default
+  #          testgroup_value: '{testgroup}'
 
 ## common git settings to get sources
 - common-scm: &common-scm
@@ -580,7 +580,7 @@
       - string:
           name: TREP_TESTRAIL_SUITE
           default: "{testrail_suite}"
-          description: "The test suite name, ex.[8.0][PCE] vCenter Smoke/BVT"
+          description: "The test suite name, ex.[9.0][PCE] vCenter Smoke/BVT"
       - string:
           name: TREP_TESTRAIL_SUITE_DESCRIPTION
           default: "{testrail_suite_desc}"
