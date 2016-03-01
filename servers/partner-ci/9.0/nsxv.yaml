@@ -1,12 +1,10 @@
 - project:
     name: 'predefined_parameters'
     fuel-release: '9.0'
-    plugin-version: '1.1.0'
+    plugin-version: '3.0'
     plugin-name: 'nsxv'
-
     default-pkg-job-name: '9.0.nsxv.build'
     default-iso-job-name: '9.0.nxxv.canary'
-
     build-name: '{fuel-release}.{plugin-name}.build'
     smoke-name: '{fuel-release}.{plugin-name}.smoke'
     bvt-name: '{fuel-release}.{plugin-name}.bvt'
@@ -15,15 +13,10 @@
     download-iso-name: 'download_iso'
     nightly-name: '{fuel-release}.{plugin-name}.nightly'
     custom-name: '{fuel-release}.{plugin-name}.custom'
-
-
     nightly-timer: 'H 22 * * *'
     regression-timer: 'H 18 * * *'
-
     reporter-name: '{fuel-release}.{plugin-name}.reporter'
-
     nightly_disabled: false
-
     use_snapshots: false
     force_erase: true
     recreate_venv: false
@@ -33,10 +26,8 @@
     publish_results: false
     multijob_build_pkg: true
     testjob_build_pkg: false
-
     runner-timeout: 600
     test-timeout: 300
-
     iso-file: ''
     gerrit-repo: 'fuel-plugin-nsxv'
     gerrit-branch: 'master'
@@ -85,23 +76,23 @@
   #          testgroup_value_type: default
   #          testgroup_value: '{testgroup}'
   #
-  #      - '{smoke-name}':
-  #          multijob_build_pkg: false
-  #
-  #      - '{fuel-release}.{plugin-name}.smoke.test':
-  #          testjob_build_pkg: false
-  #          testgroup_parameter_type: string
-  #          testgroup_value_type: default
-  #          testgroup_value: '{testgroup}'
-  #
-  #      - '{bvt-name}':
-  #          multijob_build_pkg: false
-  #
-  #      - '{fuel-release}.{plugin-name}.bvt.test':
-  #          testjob_build_pkg: false
-  #          testgroup_parameter_type: string
-  #          testgroup_value_type: default
-  #          testgroup_value: '{testgroup}'
+      - '{smoke-name}':
+          multijob_build_pkg: false
+
+      - '{fuel-release}.{plugin-name}.smoke.test':
+          testjob_build_pkg: false
+          testgroup_parameter_type: string
+          testgroup_value_type: default
+          testgroup_value: '{testgroup}'
+
+      - '{bvt-name}':
+          multijob_build_pkg: false
+
+      - '{fuel-release}.{plugin-name}.bvt.test':
+          testjob_build_pkg: false
+          testgroup_parameter_type: string
+          testgroup_value_type: default
+          testgroup_value: '{testgroup}'
   #
   #      - '{regression-name}'
   #
