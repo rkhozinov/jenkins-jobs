@@ -4,13 +4,14 @@
     fuel-release: '7.0'
     plugin-version: '3.0'
     plugin-name: 'contrail'
-
     build-name: '{fuel-release}.{plugin-name}.{plugin-version}.build'
     smoke-name: '{fuel-release}.{plugin-name}.{plugin-version}.smoke'
     bvt-name: '{fuel-release}.{plugin-name}.{plugin-version}.bvt'
     regression-name: '{fuel-release}.{plugin-name}.{plugin-version}.regression'
     nightly-name: '{fuel-release}.{plugin-name}.{plugin-version}.nightly'
     custom-name: '{fuel-release}.{plugin-name}.{plugin-version}.custom'
+    reporter-name: '{fuel-release}.{plugin-name}.{plugin-version}.reporter'
+
     nightly-timer: 'H 20 * * *'
     regression-timer: 'H 19 * * *'
     nightly-disabled: false
@@ -19,6 +20,7 @@
     recreate-venv: false
     disable-ssl: false
     bonding: false
+    kvm: false
     update-master: true
     debug: true
     runner-timeout: 600
@@ -51,6 +53,7 @@
       - '{build-name}'
       - '{nightly-name}'
       - '{custom-name}'
+      - '{reporter-name}'
 
       - '{smoke-name}'
       # - '{fuel-release}.{plugin-name}.{plugin-version}.smoke.test.open'
@@ -214,6 +217,9 @@
           name: BONDING
           default: '{obj:bonding}'
       - bool:
+          name: KVM_USE
+          default: '{obj:kvm}'
+      - bool:
           name: USE_SNAPSHOTS
           default: '{use-snapshots}'
           descrition: 'Will be used existing environment'
@@ -308,6 +314,9 @@
           name: BONDING
           default: '{obj:bonding}'
       - bool:
+          name: KVM_USE
+          default: '{obj:kvm}'
+      - bool:
           name: USE_SNAPSHOTS
           default: '{use-snapshots}'
           descrition: 'Will be used existing environment'
@@ -378,7 +387,7 @@
       - string:
           name: GERRIT_REFSPEC
           default: 'refs/heads/{gerrit-branch}'
-          description: 'Refspecs for commits in fuel-qa'
+          description: 'Refspecs for commits in fuel-qa gerrit separated with spaces'
       - string:
           name: GERRIT_BRANCH
           default: 'origin/{gerrit-branch}'
@@ -409,7 +418,7 @@
       - string:
           name: ENV_PREFIX
           default: '{fuel-release}.{plugin-name}'
-          description: 'The prefix for a devops env name'
+          description: 'The name of devops env. Needed to properly work of existing mode of devops'
       - string:
           name: ARTIFACTS_JOB_NAME
           default: '{build-name}'
@@ -468,6 +477,12 @@
           health-scale-factor: 1.0
       - email:
           recipients: '{email-to}'
+      - trigger-parameterized-builds:
+        - project: '{reporter-name}'
+          predefined-parameters: |
+            TEST_JOB_NAME=${{JOB_NAME}}
+            TEST_BUILD_NUMBER=${{BUILD_NUMBER}}
+          fail-on-missing: true
 
 # job for building plugin package
 - job-template:
@@ -476,7 +491,7 @@
     concurrent: true
     disabled: false
     description: |
-      '<a href=https://review.openstack.org/openstack/{gerrit-repo}>
+      '<a href=https://github.com/openstack/{gerrit-repo}>
       Build {plugin-name} plugin from fuel-plugins project</a>'
     <<: *common-scm
     triggers:
@@ -614,6 +629,162 @@
     name: '{custom-name}'
     description: 'The custom test for {fuel-release}.{plugin-name}.{plugin-version}'
     concurrent: true
+    publishers:
+      - postbuildscript:
+          script-only-if-succeeded: False
+          builders:
+            - shell: env > properties
+              # need to delete packages, because we don't wipe workspace,
+              # but packages could be duplicated
+            - shell: rm -f .*rpm.*
+      - archive:
+          artifacts: 'build.properties'
+          allow-empty: false
+      - archive:
+          artifacts: 'properties'
+          allow-empty: false
+      - archive:
+          artifacts: 'nosetests.xml'
+          allow-empty: true
+          fingerprint: true
+      - archive:
+          artifacts: 'logs/*'
+          allow-empty: true
+          fingerprint: true
+      - xunit:
+          types:
+            - junit:
+                pattern: 'nosetest.xml'
+                skip-if-no-test-files: true
+      - junit:
+          results: nosetests.xml
+          health-scale-factor: 1.0
+      - email:
+          recipients: '{email-to}'
+      - trigger-parameterized-builds: []
+
+- job-template:
+    name: '{reporter-name}'
+    disabled: false
+    description: 'Testrail reporter for {fuel-release}.{plugin-name}.{plugin-version}'
+    concurrent: true
+    project-type: multijob
+    node: runner
+    wrappers:
+      - ansicolor:
+          colormap: xterm
+      - inject-passwords:
+          global: true
+          mask-password-params: true
+    parameters:
+      - string:
+          name: ISO_VERSION
+          description: "ISO number for form the test plan string"
+      - string:
+          name: PLUGIN_VERSION
+          description: "ISO number for form the test plan string"
+      - string:
+          name: TEST_JOB_NAME
+          description: 'The name of a test for getting test results'
+      - string:
+          name: TEST_JOB_BUILD_NUMBER
+          description: 'The number of a build of the test job'
+      - string:
+          name: PKG_JOB_BUILD_NUMBER
+          description: "The number of a build of the package build job"
+      - string:
+          name: TREP_TESTRAIL_URL
+          default: 'https://mirantis.testrail.com'
+          description: ""
+      - string:
+          name: TREP_TESTRAIL_PROJECT
+          default: 'Contrail plugin'
+          description: "Project name"
+      - string:
+          name: TREP_TESTRAIL_MILESTONE
+          default: 'Fuel Contrail Plugin v2.1.0'
+          description: ""
+      - string:
+          name: TREP_TESTRAIL_SUITE
+          default: 'Contrail Plugin v2.x.x'
+          description: ""
+      - string:
+          name: TREP_TESTRAIL_SUITE_DESCRIPTION
+          default: "Test suite description"
+          description: ""
+      - string:
+          name: TREP_TESTRAIL_PLAN
+          default: 'Fuel Contrail Plugin v2.1.1 #${{PKG_JOB_BUILD_NUMBER}}'
+          description: ""
+      - string:
+          name: TREP_TESTRAIL_PLAN_DESCRIPTION
+          default: "Test plan description"
+          description: ""
+      - string:
+          name: TREP_TESTRAIL_RUN
+          default: "$TREP_TESTRAIL_SUITE"
+          description: "Testrail test run name"
+      - string:
+          name: TREP_TESTRAIL_RUN_DESCRIPTION
+          default: "Test run description"
+          description: ""
+      - string:
+          name: TREP_TESTRAIL_TREP_TEST_SECTION
+          default: 'nosetests.xml'
+          description: ""
+      - string:
+          name: TREP_TESTRAIL_TREP_TEST_INCLUDE
+          default: 'nosetests.xml'
+          description: ""
+      - string:
+          name: TREP_TESTRAIL_TREP_TEST_EXCLUDE
+          default: 'nosetests.xml'
+          description: ""
+      - string:
+          name: TREP_LOG_LEVEL
+          default: "DEBUG"
+          description: "Log level of reporter"
+      - string:
+          name: TREP_LOG_FILE
+          default: "testrail_reporter.log"
+          description: "Log filename for reporter tool"
+      - string:
+          name: TREP_TEST_RESULTS_SOURCE
+          default: "xunit_items"
+          description: "Reporter tool's additional config"
+      - string:
+          name: TREP_TEST_RESULTS_XUNIT_FILENAME
+          default: "nosetests.xml"
+          description: "File with tests results"
+      - string:
+          name: TREP_TEST_RESULTS_XUNIT_ITEMS_FILENAME
+          default: "nosetests.xml"
+          description: "File with tests results"
+      - string:
+          name: TREP_TEST_RESULTS_XUNIT_ITEMS_CASE_NAME
+          default: ""
+          description: "Reporter tool's additional config"
+    scm:
+      - git:
+          url: 'https://github.com/ehles/trep.git'
+          branches:
+            - 'origin/master'
+          #choosing-strategy: default
+          clean:
+            before: false
+          wipe-workspace: false
+    builders:
+      - copyartifact:
+          project: ${{TEST_JOB_NAME}}
+          filter: ${{TREP_TEST_RESULTS_XUNIT_FILENAME}}
+          which-build: specific-build
+          build-number: ${{TEST_JOB_BUILD_NUMBER}}
+          stable: true
+      - shell:
+          !include-raw-escape: './builders/reporter.sh'
+    publishers:
+      - email:
+          recipients: '{email-to}'
 
 - job-template:
     name: '{smoke-name}'
