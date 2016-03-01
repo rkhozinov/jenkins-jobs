@@ -16,10 +16,7 @@ export VENV_PATH="${HOME}/${FUEL_RELEASE}-venv"
                                  || echo CONTRAIL_PLUGIN_PATH=$CONTRAIL_PLUGIN_PATH
 
 
-#export JUNIPER_PKG_PATH="/storage/contrail/2.20/"
 export JUNIPER_PKG_PATH="/storage/contrail/${CONTRAIL_VERSION}/"
-#export CONTRAIL_PLUGIN_PACK_CEN_PATH=$(find ${JUNIPER_PKG_PATH} -type f -name '*rpm' )
-#export CONTRAIL_PLUGIN_PACK_UB_PATH=$(find ${JUNIPER_PKG_PATH} -type f -name '*deb' )
 export CONTRAIL_PLUGIN_PACK_UB_PATH=$(find $JUNIPER_PKG_PATH -maxdepth 1 -name 'contrail-install-packages*.deb' -exec stat -c "%y %n" {} + | sort -r | head -n 1 | cut -d' ' -f 4)
 source $VENV_PATH/bin/activate
 
