@@ -589,10 +589,10 @@
     parameters:
       - string:
           name: ISO_VERSION
-          description: "ISO number for form the test plan string"
+          description: "ISO number"
       - string:
           name: PLUGIN_VERSION
-          description: "ISO number for form the test plan string"
+          description: "Plugin version number"
       - string:
           name: TEST_JOB_NAME
           description: "The name of a test for getting test results"
@@ -679,7 +679,8 @@
           url: 'https://github.com/ehles/trep.git'
           branches:
             - 'origin/master'
-          #choosing-strategy: default
+          # choosing-strategy: default
+          skip-tag: true
           clean:
             before: false
           wipe-workspace: false
