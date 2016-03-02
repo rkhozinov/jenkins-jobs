@@ -667,7 +667,15 @@
     description: |
       '<a href=https://github.com/openstack/{gerrit-repo}>
       Build {plugin-name} plugin from fuel-plugins project</a>'
-    <<: *common-scm
+    scm:
+      - git:
+          url: 'https://review.openstack.org/openstack/{gerrit-repo}'
+          refspec: $GERRIT_REFSPEC
+          branches:
+            - $GERRIT_BRANCH
+          choosing-strategy: gerrit
+          skip-tag: true
+          wipe-workspace: false
     triggers:
       - gerrit:
           <<: *build-gerrit-events
