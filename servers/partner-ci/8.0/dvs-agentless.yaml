@@ -74,11 +74,10 @@
 
       - '{reporter-name}':
           testrail_project: "VMware DVS plugin"
+          testrail_milestone: "2.0.0"
           testrail_suite: "[8.0][PCE] VMware DVS plugin v${{PLUGIN_VERSION}}"
           testrail_suite_desc: "Suite description"
-          testrail_milestone: "2.0.0"
-          testrail_plan_prefix: ""
-          testrail_plan: "$TREP_TESTRAIL_SUITE iso #${{ISO_VERSION}} build#${{PKG_JOB_BUILD_NUMBER}}"
+          testrail_plan: "$TREP_TESTRAIL_SUITE build#${{PKG_JOB_BUILD_NUMBER}} iso#${{ISO_VERSION}}"
           testrail_plan_desc: "Test plan description"
           testrail_run: "$TREP_TESTRAIL_SUITE"
           testrail_run_desc: "Test run description"
@@ -661,7 +660,7 @@
           description: "Log filename for reporter tool"
       - string:
           name: TREP_TEST_RESULTS_SOURCE
-          default: "xunit_items"
+          default: "xunit"
           description: "Reporter tool's additional config"
       - string:
           name: TREP_TEST_RESULTS_XUNIT_FILENAME
@@ -669,7 +668,7 @@
           description: "File with tests results"
       - string:
           name: TREP_TEST_RESULTS_XUNIT_ITEMS_FILENAME
-          default: "nosetests.xml"
+          default: "${{TREP_TEST_RESULTS_XUNIT_FILENAME}}"
           description: "File with tests results"
       - string:
           name: TREP_TEST_RESULTS_XUNIT_ITEMS_CASE_NAME
@@ -702,6 +701,9 @@
             - shell: env > properties
       - archive:
           artifacts: 'properties'
+          allow-empty: true
+      - archive:
+          artifacts: ${{TREP_LOG_FILE}}
           allow-empty: true
       - email:
           recipients: '{email-to}'
