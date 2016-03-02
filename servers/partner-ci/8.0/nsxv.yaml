@@ -5,7 +5,7 @@
     plugin-name: 'nsxv'
 
     default-pkg-job-name: '8.0.nsxv.build'
-    default-iso-job-name: '8.0.nxxv.canary'
+    default-iso-job-name: '8.0.nsxv.canary'
 
     build-name: '{fuel-release}.{plugin-name}.build'
     smoke-name: '{fuel-release}.{plugin-name}.smoke'
@@ -15,7 +15,6 @@
     download-iso-name: 'download_iso'
     nightly-name: '{fuel-release}.{plugin-name}.nightly'
     custom-name: '{fuel-release}.{plugin-name}.custom'
-
 
     nightly-timer: 'H 22 * * *'
     regression-timer: 'H 18 * * *'
@@ -37,7 +36,7 @@
     runner-timeout: 600
     test-timeout: 300
 
-    iso-file: ''
+    iso-file: 'fuel-8.0-570.iso'
     gerrit-repo: 'fuel-plugin-nsxv'
     gerrit-branch: '8.0'
     email-to: 'rkhozinov@mirantis.com'
@@ -123,7 +122,7 @@
           testgroup_value_type: default
           testgroup_value: '{testgroup}'
 
-## common git settings to get sources
+# common git settings to get sources
 - common-scm: &common-scm
     name: 'common-scm'
     scm:
@@ -300,7 +299,7 @@
           description: "Recreate virtual environemnt before tests"
       - string:
           name: WORKSTATION_SNAPSHOT
-          default: 'nsxv'
+          default: 'nsxv_6.2'
           description: 'Snapshot name for vcenter lab'
       - string:
           name: WORKSTATION_NODES
@@ -313,10 +312,6 @@
       - string:
           name: VCENTER_CLUSTERS
           default: 'Cluster1,Cluster2'
-          description: "List of vCenter's clusters"
-      - string:
-          name: DVS_SWITCHS
-          default: 'dvSwitch1,dvSwitch2'
           description: "List of vCenter's clusters"
       - bool:
           name: USE_SNAPSHOTS
@@ -393,7 +388,7 @@
           description: "test-group name"
       - string:
           name: WORKSTATION_SNAPSHOT
-          default: 'nsxv'
+          default: 'nsxv_6.2'
           description: 'Snapshot name for vcenter lab'
       - string:
           name: WORKSTATION_NODES
@@ -406,10 +401,6 @@
       - string:
           name: VCENTER_CLUSTERS
           default: 'Cluster1,Cluster2'
-          description: "List of vCenter's clusters"
-      - string:
-          name: DVS_SWITCHS
-          default: 'dvSwitch1,dvSwitch2'
           description: "List of vCenter's clusters"
       - string:
           name: ISO_FILE
