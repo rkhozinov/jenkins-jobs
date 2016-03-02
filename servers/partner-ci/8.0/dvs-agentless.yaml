@@ -862,7 +862,7 @@
           weight: 1
     builders:
       - shell:
-          !include-raw-escape: './builders/build-plugin.sh'
+          !include-raw-escape: './builders/build-plugin-dvs.sh'
       - shell:
           !include-raw-escape: './builders/rpm-check.sh'
     publishers:
