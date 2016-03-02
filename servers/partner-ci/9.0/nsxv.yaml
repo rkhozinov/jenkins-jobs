@@ -4,7 +4,7 @@
     plugin-version: '3.0'
     plugin-name: 'nsxv'
     default-pkg-job-name: '9.0.nsxv.build'
-    default-iso-job-name: '9.0.nxxv.canary'
+    default-iso-job-name: '9.0.nsxv.canary'
     build-name: '{fuel-release}.{plugin-name}.build'
     smoke-name: '{fuel-release}.{plugin-name}.smoke'
     bvt-name: '{fuel-release}.{plugin-name}.bvt'
@@ -291,7 +291,7 @@
           description: "Recreate virtual environemnt before tests"
       - string:
           name: WORKSTATION_SNAPSHOT
-          default: 'nsxv'
+          default: 'nsxv_6.2'
           description: 'Snapshot name for vcenter lab'
       - string:
           name: WORKSTATION_NODES
@@ -304,10 +304,6 @@
       - string:
           name: VCENTER_CLUSTERS
           default: 'Cluster1,Cluster2'
-          description: "List of vCenter's clusters"
-      - string:
-          name: DVS_SWITCHS
-          default: 'dvSwitch1,dvSwitch2'
           description: "List of vCenter's clusters"
       - bool:
           name: USE_SNAPSHOTS
@@ -384,7 +380,7 @@
           description: "test-group name"
       - string:
           name: WORKSTATION_SNAPSHOT
-          default: 'nsxv'
+          default: 'nsxv_6.2'
           description: 'Snapshot name for vcenter lab'
       - string:
           name: WORKSTATION_NODES
@@ -397,10 +393,6 @@
       - string:
           name: VCENTER_CLUSTERS
           default: 'Cluster1,Cluster2'
-          description: "List of vCenter's clusters"
-      - string:
-          name: DVS_SWITCHS
-          default: 'dvSwitch1,dvSwitch2'
           description: "List of vCenter's clusters"
       - string:
           name: ISO_FILE
