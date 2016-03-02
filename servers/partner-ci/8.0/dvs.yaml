@@ -21,7 +21,7 @@
     nightly-timer: 'H 22 * * *'
     regression-timer: 'H 18 * * *'
     reporter-name: '{fuel-release}.{plugin-name}.reporter'
-    nightly_disabled: false
+    nightly_disabled: true
     use_snapshots: false
     force_erase: true
     recreate_venv: false
