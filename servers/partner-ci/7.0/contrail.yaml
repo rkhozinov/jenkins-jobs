@@ -12,7 +12,7 @@
     custom-name: '{fuel-release}.{plugin-name}.{plugin-version}.custom'
     reporter-name: '{fuel-release}.{plugin-name}.{plugin-version}.reporter'
 
-    default-pkg-job-name: '{build-name}'
+    default-pkg-job-name: '{fuel-release}.{plugin-name}.{plugin-version}.build'
 
     nightly-timer: 'H 20 * * *'
     regression-timer: 'H 19 * * *'
