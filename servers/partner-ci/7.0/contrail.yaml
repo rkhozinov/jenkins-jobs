@@ -12,12 +12,11 @@
     custom-name: '{fuel-release}.{plugin-name}.{plugin-version}.custom'
     reporter-name: '{fuel-release}.{plugin-name}.{plugin-version}.reporter'
 
-    default-pkg-job-name: '{fuel-release}.{plugin-name}.{plugin-version}.build'
-
     nightly-timer: 'H 20 * * *'
-    regression-timer: 'H 19 * * *'
+    regression_timer: 'H 18 * * *'
 
     nightly_disabled: false
+    regression_disabled: true
     use_snapshots: false
     force_erase: false
     recreate_venv: false
@@ -81,7 +80,7 @@
           testrail_run: "$TREP_TESTRAIL_SUITE"
           testrail_run_desc: "Test run description"
           testrail_item_case: "$TEST_GROUP"
-          debug_level: "DEBUG"
+          trep_debug_level: "DEBUG"
 
       - '{fuel-release}.{plugin-name}.{plugin-version}.{testgroup}.juniper':
           testgroup_parameter_type: string
@@ -267,6 +266,14 @@
           name: MJ_BUILD_PKG
           default: '{multijob_build_pkg}'
           description: "Triggers build of pkg of $PKG_JOB_NAME before run of tests"
+      - string:
+          name: PKG_JOB_NAME
+          default: '{build-name}'
+          description: 'The name of job for copying of plugin pkg artefacts'
+      - string:
+          name: PKG_JOB_BUILD_NUMBER
+          default: ''
+          description: 'The name of job for copying of plugin pkg artefacts'
       - bool:
           name: DISABLE_SSL
           default: '{disable_ssl}'
@@ -348,10 +355,6 @@
           default: 'origin/{gerrit-branch}'
           description: 'The branch for fuel-qa gerrit'
       - string:
-          name: PKG_JOB_NAME
-          default: '{default-pkg-job-name}'
-          description: 'The name of job for copying of plugin pkg artefacts'
-      - string:
           name: ENV_PREFIX
           default: '{fuel-release}.{plugin-name}'
           description: 'The name of devops env. Needed to properly work of existing mode of devops'
@@ -372,6 +375,14 @@
           name: BUILD_PKG
           default: '{testjob_build_pkg}'
           description: "Triggers build of pkg from $PKG_JOB_NAME (only for custom)"
+      - string:
+          name: PKG_JOB_NAME
+          default: '{build-name}'
+          description: 'The name of job for copying of plugin pkg artefacts'
+      - string:
+          name: PKG_JOB_BUILD_NUMBER
+          default: ''
+          description: 'The name of job for copying of plugin pkg artefacts'
       - bool:
           name: DEBUG
           default: '{debug}'
@@ -502,10 +513,6 @@
           name: ENV_PREFIX
           default: '{fuel-release}.{plugin-name}'
           description: 'The name of devops env. Needed to properly work of existing mode of devops'
-      - string:
-          name: PKG_JOB_NAME
-          default: '{build-name}'
-          description: 'The name of job for copying of plugin pkg artefacts'
 
 - defaults:
     name: global
@@ -521,9 +528,27 @@
     <<: *common-scm
     <<: *test-wrappers
     builders:
-      - copyartifact:
-          project: "${{PKG_JOB_NAME}}"
-          which-build: last-successful
+      - conditional-step:
+          condition-kind: build-cause
+          cause: USER_CAUSE 
+          steps:
+            - shell: "echo the job could not be runned by user; exit 1"  
+
+      - conditional-step:
+          condition-kind: shell
+          condition-command: "[ ! -z ${{PKG_JOB_NAME}} ] && [ -z ${{PKG_JOB_BUILD_NUMBER}} ]"
+          steps:
+            - copyartifact:
+                project: ${{PKG_JOB_NAME}}
+                which-build: last-successful
+      - conditional-step:
+          condition-kind: shell
+          condition-command: "[ ! -z ${{PKG_JOB_NAME}} ] && [ ! -z ${{PKG_JOB_BUILD_NUMBER}} ]"
+          steps:
+            - copyartifact:
+                project: ${{PKG_JOB_NAME}}
+                which-build: specific-build
+                build-number: ${{PKG_JOB_BUILD_NUMBER}}
       - shell:
           !include-raw-escape builders/common.prepare.sh
       - shell:
@@ -535,6 +560,10 @@
             - shell: env > properties; rm -f .*rpm.*
       - archive:
           artifacts: '*properties'
+          allow-empty: true
+          fingerprint: true
+      - archive:
+          artifacts: 'build.plugin_version'
           allow-empty: true
           fingerprint: true
       - archive:
@@ -783,6 +812,10 @@
           name: TEST_JOB_NAME
           description: "The name of a test for getting test results"
       - string:
+          name: DATE
+          description: "The date of a test run"
+          default: ''
+      - string:
           name: TEST_JOB_BUILD_NUMBER
           description: "The number of a build"
       - string:
@@ -838,7 +871,7 @@
           description: "Tests to exclude from results"
       - string:
           name: TREP_LOG_LEVEL
-          default: "{debug_level}"
+          default: "{trep_debug_level}"
           description: "Log level of reporter"
       - string:
           name: TREP_LOG_FILE
@@ -878,7 +911,7 @@
           build-number: ${{TEST_JOB_BUILD_NUMBER}}
           stable: true
       - shell:
-          !include-raw-escape: './builders/reporter.sh'
+          !include-raw-escape: 'builders/reporter.sh'
     publishers:
       - postbuildscript:
           script-only-if-succeeded: false
@@ -933,9 +966,6 @@
       - archive:
           artifacts: 'build.plugin_version'
           allow-empty: false
-      - archive:
-          artifacts: 'smoke.properties'
-          allow-empty: false
       - email:
           recipients: '{email-to}'
 
@@ -979,16 +1009,13 @@
       - archive:
           artifacts: 'build.plugin_version'
           allow-empty: false
-      - archive:
-          artifacts: 'bvt.properties'
-          allow-empty: false
       - email:
           recipients: '{email-to}'
 
 - job-template:
     name: '{regression-name}'
     description: 'The regression test for {fuel-release}.{plugin-name}.{plugin-version}'
-    disabled: true
+    disabled: '{obj:regression_disabled}'
     concurrent: true
     project-type: multijob
     node: runner
@@ -999,27 +1026,29 @@
           weight: 1
     scm: []
     triggers:
-      - timed: '{regression-timer}'
+      - timed: '{regression_timer}'
     publishers:
       - postbuildscript:
           script-only-if-succeeded: False
           builders:
             - shell: env > regression.properties
       - archive:
-          artifacts: 'regression.properties'
-          allow-empty: false
+          artifacts: '*.properties'
+          allow-empty: true
       - email:
           recipients: '{email-to}'
     builders:
       - multijob:
-          name: 'regression test for open/juniper contrail'
-          condition: FAILURE
+          name: '1st phase - regression test'
+          condition: COMPLETED
           projects:
             - name: '{fuel-release}.{plugin-name}.{plugin-version}.regression.test.juniper'
               predefined-parameters: |
                 TEST_GROUP=contrail_bvt
                 CONTRAIL_DISTRIBUTION=juniper
                 CONTRAIL_PLUGIN_PATH={released-plugin-path}
+                PLUGIN_VERSION={plugin-version}
+                PKG_JOB_BUILD_NUMBER=released
               current-parameters: true
               kill-phase-on: NEVER
 
@@ -1039,10 +1068,7 @@
           builders:
             - shell: env > nightly.properties
       - archive:
-          artifacts: 'nightly.properties'
-          allow-empty: false
-      - archive:
-          artifacts: 'build.properties'
+          artifacts: '*properties'
           allow-empty: false
       - archive:
           artifacts: 'build.plugin_version'
@@ -1053,13 +1079,22 @@
     triggers:
       - timed: '{nightly-timer}'
     builders:
-      - multijob:
-          name: 'Build package'
-          condition: SUCCESSFUL
-          projects:
-            - name: '{build-name}'
-              current-parameters: false
-              kill-phase-on: FAILURE
+      - conditional-step:
+          condition-kind: boolean-expression
+          condition-expression: ${{MJ_BUILD_PKG}}
+          steps:
+            - trigger-builds:
+                - project: "${{PKG_JOB_NAME}}"
+                  current-parameters: false
+                  git-revision: false
+                  block: true
+      - copyartifact:
+          project: "${{PKG_JOB_NAME}}"
+          which-build: last-successful
+      - shell: |
+          #!/bin/bash
+          [ ! -f build.properties ] && (echo "build.properties doesn't exist"; exit 1)
+          echo "PKG_JOB_BUILD_NUMBER=$(grep "BUILD_NUMBER" < build.properties | cut -d= -f2)" > build_number
       - multijob:
           name: >
             'Smoke/bvt tests to check before running of nighlty tests.
@@ -1067,11 +1102,13 @@
           condition: SUCCESSFUL
           projects:
             - name: '{fuel-release}.{plugin-name}.{plugin-version}.contrail_smoke.juniper'
+              property-file: build_number
               predefined-parameters: |
                  CONTRAIL_DISTRIBUTION=juniper
               current-parameters: true
               kill-phase-on: FAILURE
             - name: '{fuel-release}.{plugin-name}.{plugin-version}.contrail_bvt.juniper'
+              property-file: build_number
               predefined-parameters: |
                  CONTRAIL_DISTRIBUTION=juniper
               current-parameters: true
@@ -1082,74 +1119,88 @@
           condition: COMPLETED
           projects:
             - name: '{fuel-release}.{plugin-name}.{plugin-version}.contrail_ha.juniper'
+              property-file: build_number
               predefined-parameters: |
                  CONTRAIL_DISTRIBUTION=juniper
               current-parameters: true
               kill-phase-on: NEVER
             - name: '{fuel-release}.{plugin-name}.{plugin-version}.contrail_ha_baseos.juniper'
+              property-file: build_number
               predefined-parameters: |
                  CONTRAIL_DISTRIBUTION=juniper
               current-parameters: true
               kill-phase-on: NEVER
             - name: '{fuel-release}.{plugin-name}.{plugin-version}.contrail_ceilometer.juniper'
+              property-file: build_number
               predefined-parameters: |
                  CONTRAIL_DISTRIBUTION=juniper
               current-parameters: true
               kill-phase-on: NEVER
             - name: '{fuel-release}.{plugin-name}.{plugin-version}.contrail_vlan.juniper'
+              property-file: build_number
               predefined-parameters: |
                  CONTRAIL_DISTRIBUTION=juniper
               current-parameters: true
               kill-phase-on: NEVER
             - name: '{fuel-release}.{plugin-name}.{plugin-version}.contrail_jumbo.juniper'
+              property-file: build_number
               predefined-parameters: |
                  CONTRAIL_DISTRIBUTION=juniper
               current-parameters: true
               kill-phase-on: NEVER
  
+              property-file: build_number
             - name: '{fuel-release}.{plugin-name}.{plugin-version}.contrail_bonding.juniper'
               predefined-parameters: |
                  CONTRAIL_DISTRIBUTION=juniper
               current-parameters: true
               kill-phase-on: NEVER
- 
+              property-file: build_number
+
             - name: '{fuel-release}.{plugin-name}.{plugin-version}.contrail_ceph_multirole.juniper'
               predefined-parameters: |
                  CONTRAIL_DISTRIBUTION=juniper
               current-parameters: true
+              property-file: build_number
               kill-phase-on: NEVER
  
             - name: '{fuel-release}.{plugin-name}.{plugin-version}.contrail_cinder_multirole.juniper'
               predefined-parameters: |
                  CONTRAIL_DISTRIBUTION=juniper
+              property-file: build_number
               current-parameters: true
               kill-phase-on: NEVER
  
             - name: '{fuel-release}.{plugin-name}.{plugin-version}.contrail_cinder_ceph_multirole.juniper'
               predefined-parameters: |
+              property-file: build_number
                  CONTRAIL_DISTRIBUTION=juniper
               current-parameters: true
               kill-phase-on: NEVER
  
             - name: '{fuel-release}.{plugin-name}.{plugin-version}.contrail_plugin_add_delete_controller_node.juniper'
+              property-file: build_number
               predefined-parameters: |
                  CONTRAIL_DISTRIBUTION=juniper
               current-parameters: true
               kill-phase-on: NEVER
  
             - name: '{fuel-release}.{plugin-name}.{plugin-version}.contrail_plugin_add_delete_compute_node.juniper'
+              property-file: build_number
               predefined-parameters: |
                  CONTRAIL_DISTRIBUTION=juniper
               current-parameters: true
               kill-phase-on: NEVER
 
             - name: '{fuel-release}.{plugin-name}.{plugin-version}.contrail_add_control.juniper'
+              property-file: build_number
               predefined-parameters: |
                  CONTRAIL_DISTRIBUTION=juniper
               current-parameters: true
               kill-phase-on: NEVER
 
             - name: '{fuel-release}.{plugin-name}.{plugin-version}.contrail_ha_with_shutdown_contrail_node.juniper'
+              property-file: build_number
               predefined-parameters: |
                  CONTRAIL_DISTRIBUTION=juniper
               current-parameters: true
