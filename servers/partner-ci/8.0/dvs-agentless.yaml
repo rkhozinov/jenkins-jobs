@@ -40,6 +40,8 @@
     email-to: 'rkhozinov@mirantis.com otsvigun@mirantis.com'
     released-plugin-path: '/storage/dvs/released/2.0/fuel-plugin-vmware-dvs-2.0-2.0.0-1.noarch.rpm'
 
+    scm_submodule_disabled: false
+
     testrail_project: "VMware DVS plugin"
     testrail_milestone: "2.0.0"
     testrail_suite: "[8.0][PCE] VMware DVS plugin v${{PLUGIN_VERSION}}"
@@ -69,9 +71,13 @@
 
     jobs:
       - '{build-name}'
-      - '{flake8-name}'
-      - '{radon-name}'
-      - '{shellcheck-name}'
+
+      - '{flake8-name}':
+          scm_submodule_disabled: true
+      - '{radon-name}':
+          scm_submodule_disabled: true
+      - '{shellcheck-name}':
+          scm_submodule_disabled: true
 
       - '{nightly-name}'
 
@@ -116,8 +122,10 @@
           multijob_build_pkg: false
           testrail_suite: "[8.0][PCE] VMware DVS plugin v${{PLUGIN_VERSION}} Regression"
           testrail_suite_desc: "Suite description"
-          testrail_plan: "$TREP_TESTRAIL_SUITE ${{DATE}}"
+          testrail_plan: "$TREP_TESTRAIL_SUITE #${{DATE}}"
           testrail_plan_desc: "Test plan description"
+          testrail_run: "$TREP_TESTRAIL_SUITE"
+          testrail_run_desc: "Test run description"
 
 
       - '{fuel-release}.{plugin-name}.regression.test':
@@ -154,23 +162,6 @@
             disable: false
             tracking: true
             recursive: true
-          wipe-workspace: false
-
-# common git settings to get sources
-- common-scm: &checkers-scm
-    name: 'checkers-scm'
-    scm:
-      - git:
-          url: 'https://review.openstack.org/openstack/{gerrit-repo}'
-          refspec: $GERRIT_REFSPEC
-          branches:
-            - $GERRIT_BRANCH
-          choosing-strategy: gerrit
-          skip-tag: true
-          submodule:
-            disable: true
-            tracking: false
-            recursive: false
           wipe-workspace: false
 
 # list of gerrit events to trigger build job
@@ -396,6 +387,9 @@
           default: '{default-pkg-job-name}'
           description: 'The name of job for copying of plugin pkg artefacts'
       - string:
+          name: PKG_JOB_BUILD_NUMBER
+          description: "The number of a build"
+      - string:
           name: ISO_JOB_NAME
           default: '{default-iso-job-name}'
           description: 'The name of job for copying of stable iso build name'
@@ -532,6 +526,9 @@
           default: '{build-name}'
           description: 'The name of job for copying of plugin pkg artefacts'
       - string:
+          name: PKG_JOB_BUILD_NUMBER
+          description: "The number of a build"
+      - string:
           name: ISO_JOB_NAME
           default: '{canary-name}'
           description: 'The name of job for copying of stable iso build name'
@@ -567,14 +564,28 @@
     builders:
       - conditional-step:
           condition-kind: shell
-          condition-command: "[ ! -z ${{PKG_JOB_NAME}} ]"
+          condition-command: |
+            [ ! -z ${{PKG_JOB_NAME}}       ] && \
+            [ -z ${{PKG_JOB_BUILD_NUMBER}} ] &&\
+            [ -z ${{DVS_PLUGIN_PATH}}      ]
           steps:
             - copyartifact:
-                project: "${{PKG_JOB_NAME}}"
+                project: ${{PKG_JOB_NAME}}
                 which-build: last-successful
       - conditional-step:
           condition-kind: shell
-          condition-command: "[ ! -z ${{ISO_JOB_NAME}} ]"
+          condition-command: |
+            [ ! -z ${{PKG_JOB_NAME}}         ] && \
+            [ ! -z ${{PKG_JOB_BUILD_NUMBER}} ] &&\
+            [ -z ${{DVS_PLUGIN_PATH}}        ]
+          steps:
+            - copyartifact:
+                project: ${{PKG_JOB_NAME}}
+                which-build: specific-build
+                build-number: ${{PKG_JOB_BUILD_NUMBER}}
+      - conditional-step:
+          condition-kind: shell
+          condition-command: "[ ! -z ${{ISO_JOB_NAME}} ] && [ -z ${{ISO_FILE}} ]"
           steps:
             - copyartifact:
                 project: "${{ISO_JOB_NAME}}"
@@ -768,7 +779,7 @@
     node: 'runner'
     concurrent: true
     disabled: false
-    <<: *checkers-scm
+    <<: *common-scm
     <<: *runner-wrappers
     triggers:
       - gerrit:
@@ -807,7 +818,7 @@
     node: 'runner'
     concurrent: true
     disabled: false
-    <<: *checkers-scm
+    <<: *common-scm
     <<: *runner-wrappers
     triggers:
       - gerrit:
@@ -850,7 +861,7 @@
     node: 'runner'
     concurrent: true
     disabled: false
-    <<: *checkers-scm
+    <<: *common-scm
     <<: *runner-wrappers
     triggers:
       - gerrit:
@@ -917,9 +928,9 @@
           weight: 1
     builders:
       - shell:
-          !include-raw-escape: 'builders/build-plugin-dvs.sh'
+          !include-raw-escape: builders/build-plugin-dvs.sh
       - shell:
-          !include-raw-escape: 'builders/rpm-check.sh'
+          !include-raw-escape: builders/rpm-check.sh
     publishers:
       - postbuildscript:
           script-only-if-succeeded: False
@@ -1073,7 +1084,7 @@
       - postbuildscript:
           script-only-if-succeeded: False
           builders:
-             - shell: env > bvt.properties
+            - shell: env > bvt.properties
       - archive:
           artifacts: '*properties'
           allow-empty: false
@@ -1118,7 +1129,7 @@
           projects:
             - name: '{fuel-release}.{plugin-name}.regression.test'
               predefined-parameters: |
-                TEST_GROUP=dvs_vcenter_bvt
+                TEST_GROUP=dvs_regression
                 DVS_PLUGIN_PATH={released-plugin-path}
                 PLUGIN_VERSION={plugin-version}
                 PKG_JOB_BUILD_NUMBER=released
@@ -1222,43 +1233,62 @@
                   current-parameters: false
                   git-revision: false
                   block: true
+      - copyartifact:
+          project: "${{PKG_JOB_NAME}}"
+          which-build: last-successful
+      - shell: |
+         #!/bin/bash
+         [ ! -f build.properties ] && (echo "build.properties doesn't exist"; exit 1)
+         echo "PKG_JOB_BUILD_NUMBER=$(grep "BUILD_NUMBER" < build.properties | cut -d= -f2)" > build_number
       - multijob:
           name: 'System tests for dvs{fuel-release}.{plugin-version} vcenter5'
           condition: COMPLETED
           projects:
             - name: '{fuel-release}.{plugin-name}.dvs_vcenter_systest_setup'
+              property-file: build_number
               current-parameters: true
               kill-phase-on: NEVER
             - name: '{fuel-release}.{plugin-name}.dvs_vcenter_networks'
+              property-file: build_number
               current-parameters: true
               kill-phase-on: NEVER
             - name: '{fuel-release}.{plugin-name}.dvs_vcenter_ping_public'
+              property-file: build_number
               current-parameters: true
               kill-phase-on: NEVER
             - name: '{fuel-release}.{plugin-name}.dvs_instances_one_group'
+              property-file: build_number
               current-parameters: true
               kill-phase-on: NEVER
             - name: '{fuel-release}.{plugin-name}.dvs_vcenter_security'
+              property-file: build_number
               current-parameters: true
               kill-phase-on: NEVER
             - name: '{fuel-release}.{plugin-name}.dvs_vcenter_tenants_isolation'
+              property-file: build_number
               current-parameters: true
               kill-phase-on: NEVER
             - name: '{fuel-release}.{plugin-name}.dvs_vcenter_same_ip'
+              property-file: build_number
               current-parameters: true
               kill-phase-on: NEVER
             - name: '{fuel-release}.{plugin-name}.dvs_vcenter_uninstall'
+              property-file: build_number
               current-parameters: true
               kill-phase-on: NEVER
             - name: '{fuel-release}.{plugin-name}.dvs_vcenter_bind_port'
+              property-file: build_number
               current-parameters: true
               kill-phase-on: NEVER
             - name: '{fuel-release}.{plugin-name}.dvs_vcenter_reset_controller'
+              property-file: build_number
               current-parameters: true
               kill-phase-on: NEVER
             - name: '{fuel-release}.{plugin-name}.dvs_vcenter_net_template'
+              property-file: build_number
               current-parameters: true
               kill-phase-on: NEVER
             - name: '{fuel-release}.{plugin-name}.dvs_vcenter_shutdown_controller'
+              property-file: build_number
               current-parameters: true
               kill-phase-on: NEVER
