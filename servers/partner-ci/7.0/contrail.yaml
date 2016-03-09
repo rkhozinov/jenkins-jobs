@@ -1074,7 +1074,7 @@
       - postbuildscript:
           script-only-if-succeeded: False
           builders:
-            - shell: env > nightly.properties
+            - shell: env > nightly.properties; rm -f .*rpm.*
       - archive:
           artifacts: '*properties'
           allow-empty: false
