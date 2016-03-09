@@ -7,16 +7,15 @@
     default-pkg-job-name: '8.0.dvs-agentless.build'
     default-iso-job-name: '8.0.dvs-agentless.canary'
 
+    regression-name: '{fuel-release}.{plugin-name}.regression'
     nightly-name: '{fuel-release}.{plugin-name}.nightly'
     custom-name: '{fuel-release}.{plugin-name}.custom'
 
     nightly-timer: 'H 22 * * *'
-    regression-timer: 'H 18 * * *'
-
+    regression_timer: 'H 18 * * *'
     reporter-name: '{fuel-release}.{plugin-name}.reporter'
-
-    nightly_disabled: false
-
+    nightly_disabled: true
+    regression_disabled: false
     use_snapshots: false
     force_erase: true
     recreate_venv: false
@@ -24,15 +23,27 @@
     update_master: true
     debug: true
     publish_results: true
-
+    multijob_build_pkg: true
+    testjob_build_pkg: false
     runner-timeout: 600
-    test-timeout: 500
-
-    iso-file: ''
+    test-timeout: 300
+    iso-file: 'fuel-8.0-570.iso'
     gerrit-repo: 'fuel-qa'
     gerrit-branch: 'stable/8.0'
     email-to: 'rkhozinov@mirantis.com ibumarskov@mirantis.com'
-    released-plugin-path: ''
+    released-plugin-path: '/storage/dvs/released/2.0/fuel-plugin-vmware-dvs-2.0-2.0.0-1.noarch.rpm'
+
+
+    testrail_project: "Mirantis OpenStack"
+    testrail_milestone: "{fuel-release}"
+    testrail_suite: "[8.0][PCE] vCenter"
+    testrail_suite_desc: "Suite description"
+    testrail_plan: "$TREP_TESTRAIL_MILESTONE iso #${{ISO_VERSION}}"
+    testrail_plan_desc: "Test plan description"
+    testrail_run: "$TREP_TESTRAIL_SUITE"
+    testrail_run_desc: "Test run description"
+    testrail_item_case: "$TEST_GROUP"
+    trep_debug_level: "DEBUG"
 
     testgroup:
       - vcenter_add_cindervmware
@@ -67,40 +78,46 @@
           testgroup_value_type: choices
           testgroup_value: '{obj:testgroup}'
 
-      - '{reporter-name}':
-          testrail_suite_name: "[8.0][PCE] vCenter"
-          testrail_suite_desc: "Suite description"
-          testrail_plan_prefix: "$TREP_TESTRAIL_MILESTONE iso #"
-          testrail_plan_name: "$PLAN_PREFIX$ISO_VERSION"
-          testrail_plan_desc: "Test plan description"
-          testrail_run_name: "$TREP_TESTRAIL_SUITE"
-          testrail_run_desc: "Test run description"
-          testrail_item_case: "$TEST_GROUP"
-          debug_level: "DEBUG"
+      - '{reporter-name}'
 
       - '{fuel-release}.{plugin-name}.{testgroup}':
           testgroup_parameter_type: string
           testgroup_value_type: default
           testgroup_value: '{testgroup}'
 
-## common git settings to get sources
+      - '{regression-name}':
+          default-pkg-job-name: ''
+          default-iso-job-name: ''
+          build_package: false
+          testrail_suite: "[8.0][PCE] vCenter Regression"
+          testrail_suite_desc: "Suite description"
+          testrail_plan: "$TREP_TESTRAIL_SUITE $(date +'#%B-%d')"
+          testrail_plan_desc: "Test plan description"
+
+      - '{fuel-release}.{plugin-name}.regression.test':
+          testjob_build_pkg: false
+          testgroup_parameter_type: string
+          testgroup_value_type: default
+          testgroup_value: '{testgroup}'
+
+# common git settings to get sources
 - common-scm: &common-scm
     name: 'common-scm'
     scm:
       - git:
-          name: ''
           url: 'https://review.openstack.org/openstack/{gerrit-repo}'
           refspec: $GERRIT_REFSPEC
           branches:
             - $GERRIT_BRANCH
           choosing-strategy: gerrit
+          skip-tag: true
           submodule:
             disable: false
             tracking: true
             recursive: true
           wipe-workspace: false
 
-## list of gerrit events to trigger build job
+# list of gerrit events to trigger build job
 - build-gerrit-events: &build-gerrit-events
     name: 'build-gerrit-events'
     trigger-on:
@@ -110,8 +127,8 @@
           exclude-trivial-rebase: true
           exclude-no-code-change: true
 
-## configuration of gerrit event for the smoke multijob
-## smoke multijob should run on patchset, draft events
+# configuration of gerrit event for the smoke multijob
+# smoke multijob should run on patchset, draft events
 - smoke-gerrit-events: &smoke-gerrit-events
     name: 'smoke-gerrit-events'
     trigger-on:
@@ -120,14 +137,14 @@
           exclude-trivial-rebase: true
           exclude-no-code-change: true
 
-## configuration of gerrit event for the bvt multijob
-## bvt multijob should run only on merge event
+# configuration of gerrit event for the bvt multijob
+# bvt multijob should run only on merge event
 - bvt-gerrit-events: &bvt-gerrit-events
     name: 'bvt-gerrit-events'
     trigger-on:
       - change-merged-event
 
-## the main part of gerrit section as yaml anchor
+# the main part of gerrit section as yaml anchor
 - generic-gerrit-projects: &generic-gerrit-projects
     name: 'generic-gerrit-projects'
     projects:
@@ -153,21 +170,21 @@
       unstable: true
       notbuilt: true
 
-## properties for smoke, bvt and nightly multijobs
+# properties for smoke, bvt and nightly multijobs
 - runner-properties: &runner-properties
     name: 'runner-properties'
     properties:
       - heavy-job:
           weight: 1
 
-## properties for smoke, bvt and nightly multijobs
+# properties for smoke, bvt and nightly multijobs
 - runner-wrappers: &runner-wrappers
     name: 'runner-wrappers'
     wrappers:
       - ansicolor:
           colormap: xterm
 
-## properties for smoke, bvt and nightly multijobs
+# properties for smoke, bvt and nightly multijobs
 - test-wrappers: &test-wrappers
     name: 'test-wrappers'
     wrappers:
@@ -182,7 +199,7 @@
           write-description: "Timeout is exceeded"
           timeout: '{test-timeout}'
 
-## properties for test jobs
+# properties for test jobs
 - test-properties: &test-properties
     name: 'test-properties'
     properties:
@@ -195,10 +212,11 @@
             - vcenter
             - dvs
             - nsx
+            - nsxv
             - contrail
           option: category
 
-## properties for test jobs
+# properties for test jobs
 - custom-builders: &custom-builders
     name: 'custom-builders'
     builders:
@@ -223,7 +241,7 @@
       - shell:
           !include-raw-escape: builders/vcenter.test.sh
 
-## parameters for smoke, bvt and nightly multijobs
+# parameters for smoke, bvt and nightly multijobs
 - runner-parameters: &runner-parameters
     name: 'runner-parameters'
     parameters:
@@ -232,13 +250,13 @@
           default: '{obj:publish_results}'
           description: 'Reports results to testrail'
       - bool:
-          name: MJ_BUILD_PKG
-          default: '{obj:build_package}'
-          description: "Triggers build $PKG_JOB_NAME before run of tests"
-      - bool:
           name: DEBUG
           default: '{debug}'
           description: "Set -x (xtrace) for jobs' bash scripts"
+      - bool:
+          name: MJ_BUILD_PKG
+          default: '{obj:build_package}'
+          description: "Triggers build of pkg of $PKG_JOB_NAME before run of tests"
       - bool:
           name: DISABLE_SSL
           default: '{disable_ssl}'
@@ -295,8 +313,24 @@
           name: ENV_PREFIX
           default: '{fuel-release}.{plugin-name}'
           description: 'The name of devops env. Needed to properly work of existing mode of devops'
+      - string:
+          name: TREP_TESTRAIL_SUITE
+          default: "{testrail_suite}"
+          description: "The test suite name, ex.[8.0][PCE] vCenter Smoke/BVT"
+      - string:
+          name: TREP_TESTRAIL_SUITE_DESCRIPTION
+          default: "{testrail_suite_desc}"
+          description: "Testrail suite description"
+      - string:
+          name: TREP_TESTRAIL_PLAN
+          default: "{testrail_plan}"
+          description: "Testrail testplan name"
+      - string:
+          name: TREP_TESTRAIL_PLAN_DESCRIPTION
+          default: "{testrail_plan_desc}"
+          description: "Testrail testplan description"
 
-## parameters for jobs created per test-group and custom test job
+# parameters for jobs created per test-group and custom test job
 - test-parameters: &test-parameters
     name: 'test-parameters'
     parameters:
@@ -311,7 +345,7 @@
       - bool:
           name: BUILD_PKG
           default: 'false'
-          description: "Triggers build of package from $PKG_JOB_NAME (only for custom)"
+          description: "Triggers build of pkg from $PKG_JOB_NAME (only for custom)"
       - bool:
           name: DEBUG
           default: '{debug}'
@@ -407,28 +441,51 @@
           name: ISO_JOB_NAME
           default: '{default-iso-job-name}'
           description: 'The name of job for copying of stable iso build name'
-
+      - string:
+          name: TREP_TESTRAIL_SUITE
+          default: "{testrail_suite}"
+          description: "The test suite name, ex.[8.0][PCE] vCenter Smoke/BVT"
+      - string:
+          name: TREP_TESTRAIL_SUITE_DESCRIPTION
+          default: "{testrail_suite_desc}"
+          description: "Testrail suite description"
+      - string:
+          name: TREP_TESTRAIL_PLAN
+          default: "{testrail_plan}"
+          description: "Testrail testplan name"
+      - string:
+          name: TREP_TESTRAIL_PLAN_DESCRIPTION
+          default: "{testrail_plan_desc}"
+          description: "Testrail testplan description"
 
 - defaults:
     name: global
     disabled: false
     logrotate:
-      daysToKeep: 7
-      numToKeep: 50
-      artifactDaysToKeep: 7
-      artifactNumToKeep: 50
+      daysToKeep: 30
+      numToKeep: 100
+      artifactDaysToKeep: 30
+      artifactNumToKeep: 100
     <<: *test-properties
     <<: *test-parameters
     <<: *common-scm
     <<: *test-wrappers
     builders:
-      - copyartifact:
-          project: "${{PKG_JOB_NAME}}"
-          which-build: last-successful
-      - copyartifact:
-          project: "${{ISO_JOB_NAME}}"
-          filter: "iso_file"
-          which-build: last-successful
+      - conditional-step:
+          condition-kind: boolean-expression
+          condition-expression: ${{PKG_JOB_NAME}}
+          steps:
+            - copyartifact:
+                project: "${{PKG_JOB_NAME}}"
+                which-build: last-successful
+      - conditional-step:
+          condition-kind: boolean-expression
+          condition-expression: ${{ISO_JOB_NAME}}
+          steps:
+            - copyartifact:
+                project: "${{ISO_JOB_NAME}}"
+                filter: "iso_file"
+                which-build: last-successful
       - shell:
           !include-raw-escape: builders/common.prepare.sh
       - shell:
@@ -437,8 +494,7 @@
       - postbuildscript:
           script-only-if-succeeded: False
           builders:
-            - shell: env > properties
-            - shell: rm -f .*rpm.*
+            - shell: env > properties; rm -f .*rpm.*
       - archive:
           artifacts: '*properties'
           allow-empty: true
@@ -504,27 +560,23 @@
           description: ""
       - string:
           name: TREP_TESTRAIL_PROJECT
-          default: "Mirantis OpenStack"
+          default: "{testrail_project}"
           description: "Project name"
       - string:
           name: TREP_TESTRAIL_MILESTONE
-          default: "{fuel-release}"
+          default: "{testrail_milestone}"
           description: "Testrail milestone (fuel release version is commonly used )"
       - string:
           name: TREP_TESTRAIL_SUITE
-          default: "{testrail_suite_name}"
+          default: "{testrail_suite}"
           description: "The test suite name, ex.[8.0][PCE] vCenter Smoke/BVT"
       - string:
           name: TREP_TESTRAIL_SUITE_DESCRIPTION
           default: "{testrail_suite_desc}"
           description: "Testrail suite description"
       - string:
-          name: PLAN_PREFIX
-          default: "{testrail_plan_prefix}"
-          description: "Variable that's used for fill $TREP_TESTRAIL_PLAN"
-      - string:
           name: TREP_TESTRAIL_PLAN
-          default: "{testrail_plan_name}"
+          default: "{testrail_plan}"
           description: "Testrail testplan name"
       - string:
           name: TREP_TESTRAIL_PLAN_DESCRIPTION
@@ -532,7 +584,7 @@
           description: "Testrail testplan description"
       - string:
           name: TREP_TESTRAIL_RUN
-          default: "{testrail_run_name}"
+          default: "{testrail_run}"
           description: "Testrail test run name"
       - string:
           name: TREP_TESTRAIL_RUN_DESCRIPTION
@@ -552,7 +604,7 @@
           description: "Tests to exclude from results"
       - string:
           name: TREP_LOG_LEVEL
-          default: "{debug_level}"
+          default: "{trep_debug_level}"
           description: "Log level of reporter"
       - string:
           name: TREP_LOG_FILE
@@ -560,7 +612,7 @@
           description: "Log filename for reporter tool"
       - string:
           name: TREP_TEST_RESULTS_SOURCE
-          default: "xunit_items"
+          default: "xunit"
           description: "Reporter tool's additional config"
       - string:
           name: TREP_TEST_RESULTS_XUNIT_FILENAME
@@ -568,7 +620,7 @@
           description: "File with tests results"
       - string:
           name: TREP_TEST_RESULTS_XUNIT_ITEMS_FILENAME
-          default: "nosetests.xml"
+          default: "${{TREP_TEST_RESULTS_XUNIT_FILENAME}}"
           description: "File with tests results"
       - string:
           name: TREP_TEST_RESULTS_XUNIT_ITEMS_CASE_NAME
@@ -580,6 +632,7 @@
           branches:
             - 'origin/master'
           #choosing-strategy: default
+          skip-tag: true
           clean:
             before: false
           wipe-workspace: false
@@ -592,8 +645,7 @@
           build-number: ${{TEST_JOB_BUILD_NUMBER}}
           stable: true
       - shell:
-          !include-raw-escape './builders/reporter.sh'
-
+          !include-raw-escape: './builders/reporter.sh'
     publishers:
       - postbuildscript:
           script-only-if-succeeded: false
@@ -601,6 +653,9 @@
             - shell: env > properties
       - archive:
           artifacts: 'properties'
+          allow-empty: true
+      - archive:
+          artifacts: ${{TREP_LOG_FILE}}
           allow-empty: true
       - email:
           recipients: '{email-to}'
@@ -610,6 +665,12 @@
 - job-template:
     name: '{fuel-release}.{plugin-name}.{testgroup}'
     description: 'The test "{testgroup}" for {fuel-release}.{plugin-name}'
+    concurrent: true
+
+# jobs for regression tests
+- job-template:
+    name: '{fuel-release}.{plugin-name}.regression.test'
+    description: 'The regression test for {fuel-release}.{plugin-name}.{plugin-version}'
     concurrent: true
 
 - job-template:
@@ -623,6 +684,45 @@
     description: 'The custom test for {fuel-release}.{plugin-name}.{plugin-version}'
     concurrent: true
     <<: *custom-builders
+
+- job-template:
+    name: '{regression-name}'
+    description: 'The regression test for {fuel-release}.{plugin-name}.{plugin-version}'
+    disabled: '{obj:regression_disabled}'
+    concurrent: true
+    project-type: multijob
+    node: runner
+    <<: *runner-parameters
+    <<: *runner-wrappers
+    properties:
+      - heavy-job:
+          weight: 1
+    scm: []
+    triggers:
+      - timed: '{regression_timer}'
+    publishers:
+      - postbuildscript:
+          script-only-if-succeeded: False
+          builders:
+            - shell: env > regression.properties
+      - archive:
+          artifacts: '*.properties'
+          allow-empty: true
+      - email:
+          recipients: '{email-to}'
+    builders:
+      - multijob:
+          name: '1st phase - regression test'
+          condition: COMPLETED
+          projects:
+            - name: '{fuel-release}.{plugin-name}.regression.test'
+              predefined-parameters: |
+                TEST_GROUP=vcenter_dvs_bvt
+                DVS_PLUGIN_PATH={released-plugin-path}
+                PLUGIN_VERSION={plugin-version}
+                PKG_JOB_BUILD_NUMBER=released
+              current-parameters: true
+              kill-phase-on: NEVER
 
 - job-template:
     name: '{nightly-name}'
@@ -641,8 +741,7 @@
       - postbuildscript:
           script-only-if-succeeded: false
           builders:
-            - shell: env > nightly.properties
-            - shell: rm -f .*rpm.*
+            - shell: env > properties; rm -f .*rpm.*
       - archive:
           artifacts: '*properties'
           allow-empty: false
@@ -665,7 +764,7 @@
                 git-revision: false
                 block: true
       - multijob:
-          name: 'System tests for dvs{fuel-release}.{plugin-version} vcenter5'
+          name: 'System tests for {fuel-release}.{plugin-version} vcenter5'
           condition: COMPLETED
           projects:
            - name: '{fuel-release}.{plugin-name}.vcenter_add_cindervmware'
