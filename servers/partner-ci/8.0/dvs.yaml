@@ -54,6 +54,9 @@
       - dvs_vcenter_reset_controller
       - dvs_vcenter_net_template
       - dvs_vcenter_shutdown_controller
+      - dvs_different_networks
+      - dvs_install
+      - dvs_uninstall
 
     jobs:
       - '{build-name}'
@@ -1209,5 +1212,14 @@
               current-parameters: true
               kill-phase-on: NEVER
             - name: '{fuel-release}.{plugin-name}.dvs_vcenter_shutdown_controller'
+              current-parameters: true
+              kill-phase-on: NEVER
+            - name: '{fuel-release}.{plugin-name}.dvs_different_networks'
+              current-parameters: true
+              kill-phase-on: NEVER
+            - name: '{fuel-release}.{plugin-name}.dvs_install'
+              current-parameters: true
+              kill-phase-on: NEVER
+            - name: '{fuel-release}.{plugin-name}.dvs_uninstall'
               current-parameters: true
               kill-phase-on: NEVER
