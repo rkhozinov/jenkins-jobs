@@ -24,7 +24,7 @@ fi
 
 if [ -z "${PKG_JOB_BUILD_NUMBER}" ]; then
     if [ -f build.properties ]; then
-        export PKG_JOB_BUILD_NUMBER=$(grep "BUILD_NUMBER" < build.properties)
+        export PKG_JOB_BUILD_NUMBER=$(grep "BUILD_NUMBER" < build.properties | cut -d= -f2 )
     else
         echo "build.properties file is not available so the results couldn't be publihsed"
         echo "$PKG_JOB_BUILD_NUMBER is empty, but it's needed for reporter. Exit."
@@ -36,7 +36,7 @@ fi
 [ -f nosetest.xml ] && rm -f nosetests.xml
 rm -rf logs/*
 
-export FUEL_RELEASE=$(cut -d '-' -f2-2 <<< ${ISO_FILE} | tr -d '.')
+export FUEL_RELEASE=$(cut -d- -f2-2 <<< ${ISO_FILE} | tr -d '.')
 export ISO_PATH="${ISO_STORAGE}/${ISO_FILE}"
 export ISO_VERSION=$(echo "${ISO_FILE}" | cut -d'-' -f3-3 | tr -d '.iso' )
 export ENV_NAME="${ENV_PREFIX}.${ISO_VERSION}"
@@ -70,7 +70,7 @@ TEST_JOB_NAME=$JOB_NAME
 TEST_JOB_BUILD_NUMBER=$BUILD_NUMBER
 PKG_JOB_BUILD_NUMBER=$PKG_JOB_BUILD_NUMBER
 PLUGIN_VERSION=$PLUGIN_VERSION
-TREP_TESTRAIL_SUITE=$TREP_TESTRAIL_SUITE
+TREP_TESTRAIL_SUITE=${TREP_TESTRAIL_SUITE}
 TREP_TESTRAIL_SUITE_DESCRIPTION=$TREP_TESTRAIL_SUITE_DESCRIPTION
 TREP_TESTRAIL_PLAN=$TREP_TESTRAIL_PLAN
 TREP_TESTRAIL_PLAN_DESCRIPTION=$TREP_TESTRAIL_PLAN_DESCRIPTION

@@ -53,6 +53,10 @@
     testrail_item_case: "$TEST_GROUP"
     trep_debug_level: "DEBUG"
 
+    testgroup_parameter_type: string
+    testgroup_value_type: default
+    testgroup_value: '{testgroup}'
+
     testgroup:
       - dvs_vcenter_systest_setup
       - dvs_vcenter_networks
@@ -81,10 +85,7 @@
 
       - '{nightly-name}'
 
-      - '{custom-name}.qa':
-          testgroup_parameter_type: string
-          testgroup_value_type: default
-          testgroup_value: '{testgroup}'
+      - '{custom-name}.qa'
 
       - '{custom-name}.dev':
           testgroup_parameter_type: choice
@@ -93,59 +94,39 @@
 
       - '{reporter-name}'
 
-      - '{fuel-release}.{plugin-name}.{testgroup}':
-          testgroup_parameter_type: string
-          testgroup_value_type: default
-          testgroup_value: '{testgroup}'
+      - '{fuel-release}.{plugin-name}.{testgroup}'
 
       - '{smoke-name}':
           multijob_build_pkg: false
 
       - '{fuel-release}.{plugin-name}.smoke.test':
           testjob_build_pkg: false
-          testgroup_parameter_type: string
-          testgroup_value_type: default
-          testgroup_value: '{testgroup}'
 
       - '{bvt-name}':
           multijob_build_pkg: false
 
       - '{fuel-release}.{plugin-name}.bvt.test':
           testjob_build_pkg: false
-          testgroup_parameter_type: string
-          testgroup_value_type: default
-          testgroup_value: '{testgroup}'
 
       - '{regression-name}':
-          default-pkg-job-name: ''
-          default-iso-job-name: ''
-          multijob_build_pkg: false
           testrail_suite: "[8.0][PCE] VMware DVS plugin v${{PLUGIN_VERSION}} Regression"
           testrail_suite_desc: "Suite description"
           testrail_plan: "$TREP_TESTRAIL_SUITE #${{DATE}}"
           testrail_plan_desc: "Test plan description"
           testrail_run: "$TREP_TESTRAIL_SUITE"
           testrail_run_desc: "Test run description"
+          default-pkg-job-name: ''
+          default-iso-job-name: ''
+          multijob_build_pkg: false
 
-
-      - '{fuel-release}.{plugin-name}.regression.test':
-          testjob_build_pkg: false
-          testgroup_parameter_type: string
-          testgroup_value_type: default
-          testgroup_value: '{testgroup}'
+      - '{fuel-release}.{plugin-name}.regression.test'
 
       - '{canary-name}':
           default-iso-job-name: '{download-iso-name}'
 
-      - '{fuel-release}.{plugin-name}.canary.skinny':
-          testgroup_parameter_type: string
-          testgroup_value_type: default
-          testgroup_value: '{testgroup}'
+      - '{fuel-release}.{plugin-name}.canary.skinny'
 
-      - '{fuel-release}.{plugin-name}.canary.fat':
-          testgroup_parameter_type: string
-          testgroup_value_type: default
-          testgroup_value: '{testgroup}'
+      - '{fuel-release}.{plugin-name}.canary.fat'
 
 # common git settings to get sources
 - common-scm: &common-scm
@@ -371,10 +352,6 @@
           default: '{iso-file}'
           description: 'ISO file name that is on the tpi-s1 in /storage/downloads'
       - string:
-          name: PLUGIN_VERSION
-          default: ''
-          description: 'plugin version from metadata'
-      - string:
           name: GERRIT_REFSPEC
           default: 'refs/heads/{gerrit-branch}'
           description: 'Refspecs for commits in fuel-qa gerrit separated with spaces'
@@ -474,17 +451,17 @@
           name: ISO_FILE
           default: '{iso-file}'
           description: 'ISO file name that is on the tpi-s1 in /storage/downloads'
-      - string:
-          name: PLUGIN_VERSION
-          default: ''
-          description: 'plugin version from metadata'
+#      - string:
+#          name: PLUGIN_VERSION
+#          default: ''
+#          description: 'plugin version from metadata'
       - string:
           name: ISO_STORAGE
           default: '/storage/downloads'
           description: 'Storage for iso files'
-      - string:
-          name: ISO_VERSION
-          description: 'Contrainer for storing an iso build number to output it as job name'
+#      - string:
+#          name: ISO_VERSION
+#          description: 'Contrainer for storing an iso build number to output it as job name'
       - string:
           name: OPENSTACK_RELEASE
           default: 'Ubuntu'
@@ -565,9 +542,9 @@
       - conditional-step:
           condition-kind: shell
           condition-command: |
-            [ ! -z ${{PKG_JOB_NAME}}       ] && \
-            [ -z ${{PKG_JOB_BUILD_NUMBER}} ] &&\
-            [ -z ${{DVS_PLUGIN_PATH}}      ]
+            [ ! -z ${{PKG_JOB_NAME}}         ] && \
+            [ -z ${{PKG_JOB_BUILD_NUMBER}}   ] && \
+            [ -z ${{DVS_PLUGIN_PATH}}        ]
           steps:
             - copyartifact:
                 project: ${{PKG_JOB_NAME}}
@@ -576,7 +553,7 @@
           condition-kind: shell
           condition-command: |
             [ ! -z ${{PKG_JOB_NAME}}         ] && \
-            [ ! -z ${{PKG_JOB_BUILD_NUMBER}} ] &&\
+            [ ! -z ${{PKG_JOB_BUILD_NUMBER}} ] && \
             [ -z ${{DVS_PLUGIN_PATH}}        ]
           steps:
             - copyartifact:
@@ -585,7 +562,9 @@
                 build-number: ${{PKG_JOB_BUILD_NUMBER}}
       - conditional-step:
           condition-kind: shell
-          condition-command: "[ ! -z ${{ISO_JOB_NAME}} ] && [ -z ${{ISO_FILE}} ]"
+          condition-command: |
+            [ ! -z ${{ISO_JOB_NAME}} ] && \
+            [ -z ${{ISO_FILE}}       ]
           steps:
             - copyartifact:
                 project: "${{ISO_JOB_NAME}}"
@@ -766,7 +745,7 @@
           builders:
             - shell: env > properties
       - archive:
-          artifacts: 'properties'
+          artifacts: '*properties'
           allow-empty: true
       - archive:
           artifacts: ${{TREP_LOG_FILE}}
