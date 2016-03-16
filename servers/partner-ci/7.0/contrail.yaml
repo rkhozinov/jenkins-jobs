@@ -59,7 +59,7 @@
       - contrail_add_config
       - contrail_delete_control
       - contrail_delete_config
-      - contrail_add_del_db
+      - contrail_add_db
       - contrail_net_template
 
     jobs:
@@ -1249,7 +1249,7 @@
                  CONTRAIL_DISTRIBUTION=juniper
               current-parameters: true
               kill-phase-on: NEVER
-            - name: '{fuel-release}.{plugin-name}.{plugin-version}.contrail_add_del_db.juniper'
+            - name: '{fuel-release}.{plugin-name}.{plugin-version}.contrail_add_db.juniper'
               property-file: build_number
               predefined-parameters: |
                  CONTRAIL_DISTRIBUTION=juniper
