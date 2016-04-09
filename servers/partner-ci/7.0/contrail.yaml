@@ -36,6 +36,8 @@
     email-to: 'rkhozinov@mirantis.com okosse@mirantis.com ivovk@mirantis.com'
     released-plugin-path: '/storage/contrail/released/contrail-3.0.noarch.rpm'
 
+    scm_submodule_disabled: false
+
     testgroup:
       - contrail_bvt
       - contrail_smoke
@@ -63,16 +65,19 @@
       - contrail_net_template
 
     jobs:
-      - '{build-name}'
+      - '{build-name}':
+          scm_submodule_disabled: true
       - '{nightly-name}'
 
       - '{custom-name}.qa':
+          scm_submodule_disabled: false
           testgroup_parameter_type: string
           testgroup_value_type: default
           testgroup_value: '{testgroup}'
           publish_results: false
 
       - '{custom-name}.dev':
+          scm_submodule_disabled: false
           testgroup_parameter_type: choice
           testgroup_value_type: choices
           testgroup_value: '{obj:testgroup}'
@@ -91,6 +96,7 @@
           trep_debug_level: "DEBUG"
 
       - '{fuel-release}.{plugin-name}.{plugin-version}.{testgroup}.juniper':
+          scm_submodule_disabled: false
           testgroup_parameter_type: string
           testgroup_value_type: default
           testgroup_value: '{testgroup}'
@@ -98,6 +104,7 @@
       - '{smoke-name}'
 
       - '{fuel-release}.{plugin-name}.{plugin-version}.smoke.test.juniper':
+          scm_submodule_disabled: false
           testjob_build_pkg: false
           testgroup_parameter_type: string
           testgroup_value_type: default
@@ -106,6 +113,7 @@
       - '{bvt-name}'
 
       - '{fuel-release}.{plugin-name}.{plugin-version}.bvt.test.juniper':
+          scm_submodule_disabled: false
           testjob_build_pkg: false
           testgroup_parameter_type: string
           testgroup_value_type: default
@@ -114,6 +122,7 @@
       - '{regression-name}'
 
       - '{fuel-release}.{plugin-name}.{plugin-version}.regression.test.juniper':
+          scm_submodule_disabled: false
           testgroup_parameter_type: string
           testgroup_value_type: default
           testgroup_value: '{testgroup}'
@@ -130,7 +139,7 @@
           choosing-strategy: gerrit
           skip-tag: true
           submodule:
-            disable: false
+            disable: '{obj:scm_submodule_disabled}'
             tracking: true
             recursive: true
           wipe-workspace: true
@@ -242,17 +251,20 @@
     name: 'custom-builders'
     builders:
       - conditional-step:
-          condition-kind: boolean-expression
-          condition-expression: ${{BUILD_PKG}}
+          condition-kind: shell
+          condition-command: "[ ! -z ${{PKG_JOB_NAME}} ] && [ -z ${{PKG_JOB_BUILD_NUMBER}} ]"
           steps:
-            - trigger-builds:
-                - project: "${{PKG_JOB_NAME}}"
-                  current-parameters: false
-                  git-revision: false
-                  block: true
-      - copyartifact:
-          project: "${{PKG_JOB_NAME}}"
-          which-build: last-successful
+            - copyartifact:
+                project: ${{PKG_JOB_NAME}}
+                which-build: last-successful
+      - conditional-step:
+          condition-kind: shell
+          condition-command: "[ ! -z ${{PKG_JOB_NAME}} ] && [ ! -z ${{PKG_JOB_BUILD_NUMBER}} ]"
+          steps:
+            - copyartifact:
+                project: ${{PKG_JOB_NAME}}
+                which-build: specific-build
+                build-number: ${{PKG_JOB_BUILD_NUMBER}}
       - shell:
           !include-raw-escape: builders/common.prepare.sh
       - shell:
@@ -601,7 +613,7 @@
             condition-expression: "${{PUBLISH_RESULTS}}"
             action:
               - trigger-parameterized-builds:
-                  - project: '{fuel-release}.{plugin-name}.reporter'
+                  - project: '{fuel-release}.{plugin-name}.{plugin-version}.reporter'
                     property-file: reporter.properties
                     fail-on-missing: true
 

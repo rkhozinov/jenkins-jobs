@@ -37,9 +37,11 @@ echo virtual-env: $VENV_PATH
 ## the fuel-qa branch is determined by a fuel-iso name.
 
 case "${FUEL_RELEASE}" in
-  *80* ) export REQS_BRANCH="stable/8.0" ;;
-  *70* ) export REQS_BRANCH="stable/7.0" ;;
-  *61* ) export REQS_BRANCH="stable/6.1" ;;
+  *10* ) export REQS_BRANCH="stable/newton" ;;
+  *90* ) export REQS_BRANCH="stable/mitaka" ;;
+  *80* ) export REQS_BRANCH="stable/8.0"    ;;
+  *70* ) export REQS_BRANCH="stable/7.0"    ;;
+  *61* ) export REQS_BRANCH="stable/6.1"    ;;
    *   ) export REQS_BRANCH="master"
 esac
 
@@ -50,59 +52,46 @@ REQS_PATH="https://raw.githubusercontent.com/openstack/fuel-qa/${REQS_BRANCH}/fu
 ## We have limited disk resources, so before run of system tests a lab
 ## may have many deployed and runned envs, those may cause errors during test
 
-function delete_envs {
-   [ -z $VIRTUAL_ENV ] && (echo "VIRTUAL_ENV is empty"; exit 1)
-   dos.py sync
-   env_list=$(dos.py list | tail -n +3)
-   if [[ ! -z "${env_list}" ]]; then
-     for env in $env_list; do dos.py erase $env; done
-   fi
+function dospy {
+  env_list=$1
+  action=$2
+
+  if [[ ! -z "${env_list}" ]] && [[ ! -z "${action}" ]]; then
+    for env in $env_list; do dos.py $action $env; done
+  fi
 }
 
-## We have limited cpu resources, because we use two hypervisors with heavy VMs, so
-## we should poweroff all unused envs, if there're exist.
+## Gets dospy environments
+## with prefix the function returns all env except envs like prefix
 
-function destroy_envs {
-   [ -z $VIRTUAL_ENV ] && (echo "VIRTUAL_ENV is empty"; exit 1)
-   dos.py sync
-   env_list=$(dos.py list | tail -n +3)
-   if [[ ! -z "${env_list}" ]]; then
-     for env in $env_list; do dos.py destroy $env; done
-   fi
-}
-
-## Delete all systest envs except the env with the same version of a fuel-build
-## if it exists. This behaviour is needed to use restoring from snapshots.
-
-function delete_systest_envs {
-   [ -z $VIRTUAL_ENV ] && (echo "VIRTUAL_ENV is empty"; exit 1)
-   dos.py sync
-
-   for env in $(dos.py list | grep $ENV_PREFIX); do
-       [[ $env == *"$ENV_NAME"* ]] && continue || dos.py erase $env
-   done
+function dospy_list {
+  prefix=$1
+  dos.py sync
+  [ -z $prefix ] && \
+    echo $(dos.py list | tail -n +3) || \
+    echo $(dos.py list | tail -n +3  | grep -v $prefix)
 }
 
 ## Recreate all an virtual env
 function recreate_venv {
-   [ -d $VENV_PATH ] && rm -rf ${VENV_PATH} || echo "The directory ${VENV_PATH} doesn't exist"
-   virtualenv --clear "${VENV_PATH}"
+  [ -d $VENV_PATH ] && rm -rf ${VENV_PATH} || echo "The directory ${VENV_PATH} doesn't exist"
+  virtualenv --clear "${VENV_PATH}"
 }
 
 function get_venv_requirements {
-    rm -f requirements.txt*
-    wget $REQS_PATH
-    export REQS_PATH="$(pwd)/requirements.txt"
+  rm -f requirements.txt*
+  wget $REQS_PATH
+  export REQS_PATH="$(pwd)/requirements.txt"
 
-    if [[ "${REQS_BRANCH}" == "stable/8.0" ]]; then
-      # bug: https://bugs.launchpad.net/fuel/+bug/1528193
-      sed -i 's/python-neutronclient.*/python-neutronclient==3.1.0/' $REQS_PATH
-    fi
-    ## change version for some package
-    #if [[ "${REQS_BRANCH}" != "master" ]]; then
-    #  # bug: https://bugs.launchpad.net/fuel/+bug/1528193
-    #  sed -i 's/python-novaclient>=2.15.0/python-novaclient==2.35.0/' $REQS_PATH
-    #fi
+  if [[ "${REQS_BRANCH}" == "stable/8.0" ]]; then
+    # bug: https://bugs.launchpad.net/fuel/+bug/1528193
+    sed -i 's/python-neutronclient.*/python-neutronclient==3.1.0/' $REQS_PATH
+  fi
+  ## change version for some package
+  #if [[ "${REQS_BRANCH}" != "master" ]]; then
+  #  # bug: https://bugs.launchpad.net/fuel/+bug/1528193
+  #  sed -i 's/python-novaclient>=2.15.0/python-novaclient==2.35.0/' $REQS_PATH
+  #fi
 }
 
 function prepare_venv {
@@ -134,20 +123,23 @@ function fix_logger {
 
 get_venv_requirements
 
-[ -d $VENV_PATH ] && prepare_venv || (echo "$VENV_PATH doesn't exist $VENV_PATH will be recreated"; recreate_venv )
+[ -d $VENV_PATH ] && prepare_venv || { echo "$VENV_PATH doesn't exist $VENV_PATH will be recreated"; recreate_venv; } 
 
 fix_logger
 
 source "$VENV_PATH/bin/activate"
 
+[ -z $VIRTUAL_ENV ] && { echo "VIRTUAL_ENV is empty"; exit 1; }
+
 if [[ "${FORCE_ERASE}" -eq "true" ]]; then
-  delete_envs
+  dospy $(dospy_list) erase
 else
   # determine free space before run the cleaner
   free_space=$(df -h | grep '/$' | awk '{print $4}' | tr -d G)
 
-  (( $free_space < $REQUIRED_FREE_SPACE )) &&  delete_systest_envs || echo free-space: $free_space
+  (( $free_space < $REQUIRED_FREE_SPACE )) && dospy $(dospy_list $ENV_NAME) erase  || echo "free-space: $free_space"
 
   # poweroff all envs
-  destroy_envs
+  dospy $(dospy_list) destroy
+
 fi
