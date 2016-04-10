@@ -1,4 +1,81 @@
 ---
+- publisher:
+    name: runner-publisher
+    publishers:
+      - postbuildscript:
+          script-only-if-succeeded: False
+          builders:
+            - shell: env > {properties_name}
+      - archive:
+          artifacts: '*properties'
+          allow-empty: true
+      - archive:
+          artifacts: 'iso_file'
+          allow-empty: true
+      - archive:
+          artifacts: 'build.plugin_version'
+          allow-empty: true
+      - email:
+          recipients: '{email-to}'
+
+- builder:
+    name: runner-conditions
+    builders:
+      - conditional-step:
+          condition-kind: shell
+          condition-command: |
+            #!/bin/bash -xe
+            if [[ ${MJ_BUILD_PKG}=="true" ]]; then
+              if [ -z ${PKG_JOB_BUILD_NUMBER} ]; then
+                echo "Plugin will be built"
+              else
+                echo "Plugin won't be built"
+                exit 1
+              fi
+            fi
+          steps:
+            - trigger-builds:
+                - project: ${PKG_JOB_NAME}
+                  current-parameters: false
+                  git-revision: false
+                  block: true
+      - conditional-step:
+          condition-kind: shell
+          condition-command: >
+            [ -z  ${PKG_JOB_BUILD_NUMBER} ]
+          steps:
+            - copyartifact:
+                project: ${PKG_JOB_NAME}
+                filter: "build.properties"
+                which-build: last-successful
+      - conditional-step:
+          condition-kind: shell
+          condition-command: >
+            [ ! -z ${PKG_JOB_BUILD_NUMBER} ]
+          steps:
+            - copyartifact:
+                project: ${PKG_JOB_NAME}
+                filter: "build.properties"
+                which-build: specific-build
+                build-number: ${PKG_JOB_BUILD_NUMBER}
+      - conditional-step:
+          condition-kind: file-exists
+          condition-filename: "build.properties"
+          steps:
+            - shell: |
+                #!/bin/bash
+                build_number=$(grep "BUILD_NUMBER" < build.properties | cut -d= -f2)
+                echo "PKG_JOB_BUILD_NUMBER=$build_number" > build_number
+      - conditional-step:
+          condition-kind: shell
+          condition-command: >
+            [ -z ${ISO_FILE} ]
+          steps:
+            - copyartifact:
+                project: ${ISO_JOB_NAME}
+                filter: "iso_file"
+                which-build: last-successful
+
 - project:
     name: 'predefined_parameters'
     fuel-release: '8.0'
@@ -18,7 +95,7 @@
     nightly-name: '{fuel-release}.{plugin-name}.nightly'
     custom-name: '{fuel-release}.{plugin-name}.custom'
 
-    nightly-timer: 'H 22 * * *'
+    nightly_timer: 'H 22 * * *'
     regression_timer: 'H 18 * * *'
     reporter-name: '{fuel-release}.{plugin-name}.reporter'
     nightly_disabled: true
@@ -32,15 +109,14 @@
     publish_results: true
     multijob_build_pkg: true
     testjob_build_pkg: false
-    runner-timeout: 600
-    test-timeout: 300
+    runner_timeout: 600
+    test_timeout: 300
     iso-file: 'fuel-8.0-570.iso'
     gerrit-repo: 'fuel-plugin-vmware-dvs'
     gerrit-branch: 'stable/8.0-agentless'
     email-to: 'rkhozinov@mirantis.com otsvigun@mirantis.com'
     released-plugin-path: '/storage/dvs/released/2.0/fuel-plugin-vmware-dvs-2.0-2.0.0-1.noarch.rpm'
-
-    scm_submodule_disabled: false
+    scm_submodule_disabled: true
 
     testrail_project: "VMware DVS plugin"
     testrail_suite: "[8.0][PCE] VMware DVS plugin v${{PLUGIN_VERSION}}"
@@ -74,22 +150,20 @@
       - dvs_vcenter_shutdown_controller
 
     jobs:
-      - '{build-name}':
-          scm_submodule_disabled: true
+      - '{build-name}'
+      - '{flake8-name}'
+      - '{radon-name}'
+      - '{shellcheck-name}'
 
-      - '{flake8-name}':
-          scm_submodule_disabled: true
-      - '{radon-name}':
-          scm_submodule_disabled: true
-      - '{shellcheck-name}':
-          scm_submodule_disabled: true
-
-      - '{nightly-name}'
+      - '{nightly-name}':
+          multijob_build_pkg: true
 
       - '{custom-name}.qa':
           publish_results: false
+          scm_submodule_disabled: false
 
       - '{custom-name}.dev':
+          scm_submodule_disabled: false
           publish_results: false
           testgroup_parameter_type: choice
           testgroup_value_type: choices
@@ -97,21 +171,20 @@
 
       - '{reporter-name}'
 
-      - '{fuel-release}.{plugin-name}.{testgroup}'
+      - '{fuel-release}.{plugin-name}.{testgroup}':
+          scm_submodule_disabled: false
 
       - '{smoke-name}':
-          publish_results: true
           multijob_build_pkg: false
 
       - '{fuel-release}.{plugin-name}.smoke.test':
-          testjob_build_pkg: false
+          scm_submodule_disabled: false
 
       - '{bvt-name}':
-          publish_results: true
           multijob_build_pkg: true
 
       - '{fuel-release}.{plugin-name}.bvt.test':
-          testjob_build_pkg: false
+          scm_submodule_disabled: false
 
       - '{regression-name}':
           testrail_suite: "[8.0][PCE] VMware DVS plugin v2.0.0 Regression"
@@ -124,14 +197,17 @@
           default-iso-job-name: ''
           multijob_build_pkg: false
 
-      - '{fuel-release}.{plugin-name}.regression.test'
+      - '{fuel-release}.{plugin-name}.regression.test':
+          scm_submodule_disabled: false
 
       - '{canary-name}':
           default-iso-job-name: '{download-iso-name}'
 
-      - '{fuel-release}.{plugin-name}.canary.skinny'
+      - '{fuel-release}.{plugin-name}.canary.skinny':
+          scm_submodule_disabled: false
 
-      - '{fuel-release}.{plugin-name}.canary.fat'
+      - '{fuel-release}.{plugin-name}.canary.fat':
+          scm_submodule_disabled: false
 
 # common git settings to get sources
 - common-scm: &common-scm
@@ -259,7 +335,7 @@
           fail: true
           type: no-activity
           write-description: "Timeout is exceeded"
-          timeout: '{test-timeout}'
+          timeout: '{test_timeout}'
 
 # properties for test jobs
 - test-properties: &test-properties
@@ -277,31 +353,6 @@
             - nsxv
             - contrail
           option: category
-
-# properties for test jobs
-- custom-builders: &custom-builders
-    name: 'custom-builders'
-    builders:
-      - conditional-step:
-          condition-kind: boolean-expression
-          condition-expression: ${{BUILD_PKG}}
-          steps:
-            - trigger-builds:
-                - project: "${{PKG_JOB_NAME}}"
-                  current-parameters: false
-                  git-revision: false
-                  block: true
-      - copyartifact:
-          project: "${{PKG_JOB_NAME}}"
-          which-build: last-successful
-      - copyartifact:
-          project: "${{ISO_JOB_NAME}}"
-          filter: "iso_file"
-          which-build: last-successful
-      - shell:
-          !include-raw-escape: builders/common.prepare.sh
-      - shell:
-          !include-raw-escape: builders/dvs.test.sh
 
 # parameters for smoke, bvt and nightly multijobs
 - runner-parameters: &runner-parameters
@@ -369,7 +420,7 @@
           description: 'The name of job for copying of plugin pkg artefacts'
       - string:
           name: PKG_JOB_BUILD_NUMBER
-          description: "The number of a build"
+          description: 'The name of job for copying of plugin pkg artefacts'
       - string:
           name: ISO_JOB_NAME
           default: '{default-iso-job-name}'
@@ -501,7 +552,7 @@
           description: 'The name of job for copying of plugin pkg artefacts'
       - string:
           name: PKG_JOB_BUILD_NUMBER
-          description: "The number of a build"
+          description: 'The name of job for copying of plugin pkg artefacts'
       - string:
           name: ISO_JOB_NAME
           default: '{canary-name}'
@@ -572,32 +623,9 @@
       - shell:
           !include-raw-escape: builders/dvs.test.sh
     publishers:
-      - postbuildscript:
-          script-only-if-succeeded: False
-          builders:
-            - shell: env > properties; rm -f .*rpm.*
-      - archive:
-          artifacts: '*properties'
-          allow-empty: true
-          fingerprint: true
-      - archive:
-          artifacts: 'build.plugin_version'
-          allow-empty: true
-          fingerprint: true
-      - archive:
-          artifacts: 'iso_file'
-          allow-empty: true
-          fingerprint: true
-      - archive:
-          artifacts: 'nosetests.xml'
-          allow-empty: true
-          fingerprint: true
-      - archive:
-          artifacts: 'logs/*'
-          allow-empty: true
-          fingerprint: true
-      - email:
-          recipients: '{email-to}'
+      - runner-publisher:
+          properties_name: properties
+          email-to: '{email-to}'
       - conditional-publisher:
           - condition-kind: file-exists
             condition-filename: 'nosetests.xml'
@@ -625,13 +653,17 @@
     description: 'Reporter for {fuel-release}.{plugin-name}.{plugin-version}'
     concurrent: true
     node: runner
+    wrappers:
+      - inject-passwords:
+          global: true
+          mask-password-params: true
     parameters:
       - string:
           name: ISO_VERSION
-          description: "ISO number"
+          description: "ISO number for form the test plan string"
       - string:
           name: PLUGIN_VERSION
-          description: "Plugin version number"
+          description: "Plugin version from the test plan string"
       - string:
           name: TEST_JOB_NAME
           description: "The name of a test for getting test results"
@@ -641,14 +673,14 @@
           default: ''
       - string:
           name: TEST_JOB_BUILD_NUMBER
-          description: "The number of a build"
+          description: "The number of a test build"
       - string:
           name: PKG_JOB_BUILD_NUMBER
-          description: "The number of a build"
+          description: "The number of a pkg build"
       - string:
           name: TREP_TESTRAIL_URL
           default: "https://mirantis.testrail.com"
-          description: ""
+          description: "Mirantis testrail url"
       - string:
           name: TREP_TESTRAIL_PROJECT
           default: "{testrail_project}"
@@ -735,20 +767,11 @@
           build-number: ${{TEST_JOB_BUILD_NUMBER}}
           stable: true
       - shell:
-          !include-raw-escape: 'builders/reporter.sh'
+          !include-raw-escape: builders/reporter.sh
     publishers:
-      - postbuildscript:
-          script-only-if-succeeded: false
-          builders:
-            - shell: env > properties
-      - archive:
-          artifacts: '*properties'
-          allow-empty: true
-      - archive:
-          artifacts: ${{TREP_LOG_FILE}}
-          allow-empty: true
-      - email:
-          recipients: '{email-to}'
+      - runner-publisher:
+          properties_name: reporter.properties
+          email-to: '{email-to}'
 
 - job-template:
     name: '{flake8-name}'
@@ -875,32 +898,25 @@
     node: 'runner'
     concurrent: true
     disabled: false
-    description: |
-      '<a href=https://github.com/openstack/{gerrit-repo}>
-      Build {plugin-name} plugin from fuel-plugins project</a>'
-    scm:
-      - git:
-          url: 'https://review.openstack.org/openstack/{gerrit-repo}'
-          refspec: $GERRIT_REFSPEC
-          branches:
-            - $GERRIT_BRANCH
-          choosing-strategy: gerrit
-          skip-tag: true
-          wipe-workspace: false
+    <<: *common-scm
+    <<: *runner-wrappers
     triggers:
       - gerrit:
+          <<: *build-gerrit-events
           <<: *generic-gerrit-projects
     parameters:
       - string:
           name: GERRIT_BRANCH
           default: 'origin/{gerrit-branch}'
-          description: 'The branch for fuel-qa gerrit'
       - string:
           name: GERRIT_REFSPEC
           default: 'refs/heads/{gerrit-branch}'
     properties:
       - heavy-job:
           weight: 1
+    wrappers:
+      - ansicolor:
+          colormap: xterm
     builders:
       - shell: |
           rm -rf *.rpm
@@ -970,13 +986,11 @@
     name: '{custom-name}.qa'
     description: 'The custom test for {fuel-release}.{plugin-name}.{plugin-version}'
     concurrent: true
-    <<: *custom-builders
 
 - job-template:
     name: '{custom-name}.dev'
     description: 'The custom test for {fuel-release}.{plugin-name}.{plugin-version}'
     concurrent: true
-    <<: *custom-builders
 
 - job-template:
     name: '{smoke-name}'
@@ -994,48 +1008,7 @@
           <<: *smoke-gerrit-events
           <<: *generic-gerrit-projects
     builders:
-      - conditional-step:
-          condition-kind: shell
-          condition-command: '[ "${{MJ_BUILD_PKG}}"=="true" ]] && [ ! -z ${{PKG_JOB_BUILD_NUMBER}} ] && [ -z ${{PKG_JOB_BUILD_NUMBER}} ]'
-          steps:
-            - trigger-builds:
-                - project: "${{PKG_JOB_NAME}}"
-                  current-parameters: false
-                  git-revision: false
-                  block: true
-      - conditional-step:
-          condition-kind: shell
-          condition-command: |
-            [  -z ${{PKG_JOB_BUILD_NUMBER}}    ]
-          steps:
-            - copyartifact:
-                project: "${{PKG_JOB_NAME}}"
-                filter: "build.properties"
-                which-build: last-successful
-      - conditional-step:
-          condition-kind: shell
-          condition-command: |
-            [ ! -z ${{PKG_JOB_BUILD_NUMBER}}   ]
-          steps:
-            - copyartifact:
-                project: "${{PKG_JOB_NAME}}"
-                filter: "build.properties"
-                which-build: specific-build
-                build-number: ${{PKG_JOB_BUILD_NUMBER}}
-      - shell: |
-         #!/bin/bash
-         [ ! -f build.properties ] && (echo "build.properties doesn't exist"; exit 1)
-         echo "PKG_JOB_BUILD_NUMBER=$(grep "BUILD_NUMBER" < build.properties | cut -d= -f2)" > build_number
-      - conditional-step:
-          condition-kind: shell
-          condition-command: |
-            [ ! -z ${{ISO_JOB_NAME}} ] && \
-            [   -z ${{ISO_FILE}}     ]
-          steps:
-            - copyartifact:
-                project: "${{ISO_JOB_NAME}}"
-                filter: "iso_file"
-                which-build: last-successful
+      - runner-conditions
       - multijob:
           name: 'The smoke test for {fuel-release}.{plugin-name}.{plugin-version}'
           condition: COMPLETED
@@ -1047,21 +1020,9 @@
                 TEST_GROUP=dvs_vcenter_smoke
               kill-phase-on: NEVER
     publishers:
-      - postbuildscript:
-          script-only-if-succeeded: False
-          builders:
-            - shell: env > properties
-      - archive:
-          artifacts: '*properties'
-          allow-empty: true
-      - archive:
-          artifacts: 'iso_file'
-          allow-empty: true
-      - archive:
-          artifacts: 'build.plugin_version'
-          allow-empty: true
-      - email:
-          recipients: '{email-to}'
+      - runner-publisher:
+          properties_name: smoke.properties
+          email-to: '{email-to}'
 
 - job-template:
     name: '{bvt-name}'
@@ -1079,48 +1040,7 @@
           <<: *bvt-gerrit-events
           <<: *generic-gerrit-projects
     builders:
-      - conditional-step:
-          condition-kind: shell
-          condition-command: '[ "${{MJ_BUILD_PKG}}"=="true" ]] && [ ! -z ${{PKG_JOB_BUILD_NUMBER}} ] && [ -z ${{PKG_JOB_BUILD_NUMBER}} ]'
-          steps:
-            - trigger-builds:
-                - project: "${{PKG_JOB_NAME}}"
-                  current-parameters: false
-                  git-revision: false
-                  block: true
-      - conditional-step:
-          condition-kind: shell
-          condition-command: |
-            [  -z ${{PKG_JOB_BUILD_NUMBER}}    ]
-          steps:
-            - copyartifact:
-                project: "${{PKG_JOB_NAME}}"
-                filter: "build.properties"
-                which-build: last-successful
-      - conditional-step:
-          condition-kind: shell
-          condition-command: |
-            [ ! -z ${{PKG_JOB_BUILD_NUMBER}}   ]
-          steps:
-            - copyartifact:
-                project: "${{PKG_JOB_NAME}}"
-                filter: "build.properties"
-                which-build: specific-build
-                build-number: ${{PKG_JOB_BUILD_NUMBER}}
-      - shell: |
-         #!/bin/bash
-         [ ! -f build.properties ] && (echo "build.properties doesn't exist"; exit 1)
-         echo "PKG_JOB_BUILD_NUMBER=$(grep "BUILD_NUMBER" < build.properties | cut -d= -f2)" > build_number
-      - conditional-step:
-          condition-kind: shell
-          condition-command: |
-            [ ! -z ${{ISO_JOB_NAME}} ] && \
-            [   -z ${{ISO_FILE}}     ]
-          steps:
-            - copyartifact:
-                project: "${{ISO_JOB_NAME}}"
-                filter: "iso_file"
-                which-build: last-successful
+      - runner-conditions
       - multijob:
           name: 'The BVT test for {fuel-release}.{plugin-name}.{plugin-version}'
           condition: COMPLETED
@@ -1132,21 +1052,9 @@
                  TEST_GROUP=dvs_vcenter_bvt
               kill-phase-on: NEVER
     publishers:
-      - postbuildscript:
-          script-only-if-succeeded: False
-          builders:
-            - shell: env > bvt.properties
-      - archive:
-          artifacts: '*properties'
-          allow-empty: true
-      - archive:
-          artifacts: 'iso_file'
-          allow-empty: true
-      - archive:
-          artifacts: 'build.plugin_version'
-          allow-empty: true
-      - email:
-          recipients: '{email-to}'
+      - runner-publisher:
+          properties_name: bvt.properties
+          email-to: '{email-to}'
 
 - job-template:
     name: '{regression-name}'
@@ -1157,22 +1065,14 @@
     node: runner
     <<: *runner-parameters
     <<: *runner-wrappers
-    properties:
-      - heavy-job:
-          weight: 1
+    <<: *runner-properties
     scm: []
     triggers:
       - timed: '{regression_timer}'
     publishers:
-      - postbuildscript:
-          script-only-if-succeeded: False
-          builders:
-            - shell: env > regression.properties
-      - archive:
-          artifacts: '*.properties'
-          allow-empty: true
-      - email:
-          recipients: '{email-to}'
+      - runner-publisher:
+          properties_name: regression.properties
+          email-to: '{email-to}'
     builders:
       - multijob:
           name: '1st phase - regression test'
@@ -1200,51 +1100,25 @@
     scm: []
     triggers:
       - reverse:
-          jobs: "${{ISO_JOB_NAME}}"
+          jobs: ${{ISO_JOB_NAME}}
           result: 'success'
     builders:
-      - conditional-step:
-          condition-kind: boolean-expression
-          condition-expression: ${{MJ_BUILD_PKG}}
-          steps:
-            - trigger-builds:
-                - project: "${{PKG_JOB_NAME}}"
-                  current-parameters: false
-                  git-revision: false
-                  block: true
-      - copyartifact:
-          project: "${{PKG_JOB_NAME}}"
-          which-build: last-successful
-      - copyartifact:
-          project: "${{ISO_JOB_NAME}}"
-          filter: "iso_file"
-          which-build: last-successful
+      - runner-conditions
       - multijob:
           name: 'Smoke tests for dvs.vcenter5'
           condition: SUCCESSFUL
           projects:
             - name: '{fuel-release}.{plugin-name}.canary.skinny'
+              property-file: build_number
               predefined-parameters: |
                  TEST_GROUP=dvs_vcenter_smoke
               current-parameters: true
               kill-phase-on: NEVER
 
     publishers:
-      - postbuildscript:
-          script-only-if-succeeded: False
-          builders:
-            - shell: env > canary.properties
-      - archive:
-          artifacts: '*properties'
-          allow-empty: false
-      - archive:
-          artifacts: 'iso_file'
-          allow-empty: false
-      - archive:
-          artifacts: 'build.plugin_version'
-          allow-empty: false
-      - email:
-          recipients: '{email-to}'
+      - runner-publisher:
+          properties_name: canary.properties
+          email-to: '{email-to}'
 
 - job-template:
     name: '{nightly-name}'
@@ -1253,94 +1127,13 @@
     node: runner
     <<: *runner-parameters
     <<: *runner-wrappers
-    properties:
-      - heavy-job:
-          weight: 1
+    <<: *runner-properties
     scm: []
     triggers:
-      - timed: '{nightly-timer}'
+      - timed: '{nightly_timer}'
     publishers:
-      - postbuildscript:
-          script-only-if-succeeded: false
-          builders:
-            - shell: env > properties; rm -f .*rpm.*
-      - archive:
-          artifacts: '*properties'
-          allow-empty: false
-      - archive:
-          artifacts: 'iso_file'
-          allow-empty: true
-      - archive:
-          artifacts: 'build.plugin_version'
-          allow-empty: true
-      - email:
-          recipients: '{email-to}'
+      - runner-publisher:
+          properties_name: nightly.properties
+          email-to: '{email-to}'
     builders:
-      - conditional-step:
-          condition-kind: boolean-expression
-          condition-expression: ${{MJ_BUILD_PKG}}
-          steps:
-            - trigger-builds:
-                - project: "${{PKG_JOB_NAME}}"
-                  current-parameters: false
-                  git-revision: false
-                  block: true
-      - copyartifact:
-          project: "${{PKG_JOB_NAME}}"
-          which-build: last-successful
-      - shell: |
-         #!/bin/bash
-         [ ! -f build.properties ] && (echo "build.properties doesn't exist"; exit 1)
-         echo "PKG_JOB_BUILD_NUMBER=$(grep "BUILD_NUMBER" < build.properties | cut -d= -f2)" > build_number
-      - multijob:
-          name: 'System tests for dvs{fuel-release}.{plugin-version} vcenter5'
-          condition: COMPLETED
-          projects:
-            - name: '{fuel-release}.{plugin-name}.dvs_vcenter_systest_setup'
-              property-file: build_number
-              current-parameters: true
-              kill-phase-on: NEVER
-            - name: '{fuel-release}.{plugin-name}.dvs_vcenter_networks'
-              property-file: build_number
-              current-parameters: true
-              kill-phase-on: NEVER
-            - name: '{fuel-release}.{plugin-name}.dvs_vcenter_ping_public'
-              property-file: build_number
-              current-parameters: true
-              kill-phase-on: NEVER
-            - name: '{fuel-release}.{plugin-name}.dvs_instances_one_group'
-              property-file: build_number
-              current-parameters: true
-              kill-phase-on: NEVER
-            - name: '{fuel-release}.{plugin-name}.dvs_vcenter_security'
-              property-file: build_number
-              current-parameters: true
-              kill-phase-on: NEVER
-            - name: '{fuel-release}.{plugin-name}.dvs_vcenter_tenants_isolation'
-              property-file: build_number
-              current-parameters: true
-              kill-phase-on: NEVER
-            - name: '{fuel-release}.{plugin-name}.dvs_vcenter_same_ip'
-              property-file: build_number
-              current-parameters: true
-              kill-phase-on: NEVER
-            - name: '{fuel-release}.{plugin-name}.dvs_vcenter_uninstall'
-              property-file: build_number
-              current-parameters: true
-              kill-phase-on: NEVER
-            - name: '{fuel-release}.{plugin-name}.dvs_vcenter_bind_port'
-              property-file: build_number
-              current-parameters: true
-              kill-phase-on: NEVER
-            - name: '{fuel-release}.{plugin-name}.dvs_vcenter_reset_controller'
-              property-file: build_number
-              current-parameters: true
-              kill-phase-on: NEVER
-            - name: '{fuel-release}.{plugin-name}.dvs_vcenter_net_template'
-              property-file: build_number
-              current-parameters: true
-              kill-phase-on: NEVER
-            - name: '{fuel-release}.{plugin-name}.dvs_vcenter_shutdown_controller'
-              property-file: build_number
-              current-parameters: true
-              kill-phase-on: NEVER
+      !include: dvs-agentless-nightly.yaml.inc

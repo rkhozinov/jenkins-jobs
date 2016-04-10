@@ -51,15 +51,3 @@
         property-file: build_number
         current-parameters: true
         kill-phase-on: NEVER
-      - name: '{fuel-release}.{plugin-name}.dvs_different_networks'
-        property-file: build_number
-        current-parameters: true
-        kill-phase-on: NEVER
-      - name: '{fuel-release}.{plugin-name}.dvs_install'
-        property-file: build_number
-        current-parameters: true
-        kill-phase-on: NEVER
-      - name: '{fuel-release}.{plugin-name}.dvs_uninstall'
-        property-file: build_number
-        current-parameters: true
-        kill-phase-on: NEVER
