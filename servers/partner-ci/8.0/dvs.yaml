@@ -5,7 +5,7 @@
       - postbuildscript:
           script-only-if-succeeded: False
           builders:
-            - shell: env > {properties_name} 
+            - shell: env > {properties_name}
       - archive:
           artifacts: '*properties'
           allow-empty: true
@@ -20,11 +20,11 @@
 
 - builder:
     name: runner-conditions
-    builders:  
+    builders:
       - conditional-step:
           condition-kind: shell
           condition-command: |
-            #!/bin/bash -xe 
+            #!/bin/bash -xe
             if [[ ${MJ_BUILD_PKG}=="true" ]]; then
               if [ -z ${PKG_JOB_BUILD_NUMBER} ]; then
                 echo "Plugin will be built"
@@ -59,7 +59,7 @@
                 which-build: specific-build
                 build-number: ${PKG_JOB_BUILD_NUMBER}
       - conditional-step:
-          condition-kind: file-exists 
+          condition-kind: file-exists
           condition-filename: "build.properties"
           steps:
             - shell: |
@@ -75,13 +75,14 @@
                 project: ${ISO_JOB_NAME}
                 filter: "iso_file"
                 which-build: last-successful
+
 - project:
     name: 'predefined_parameters'
     fuel-release: '8.0'
     plugin-version: '2.1'
     plugin-name: 'dvs'
-    default-pkg-job-name: '8.0.dvs.build'
-    default-iso-job-name: '8.0.dvs.canary'
+    default-pkg-job-name: '{fuel-release}.{plugin-name}.build'
+    default-iso-job-name: '{fuel-release}.{plugin-name}.canary'
     build-name: '{fuel-release}.{plugin-name}.build'
     flake8-name: '{fuel-release}.{plugin-name}.flake8'
     radon-name: '{fuel-release}.{plugin-name}.radon'
@@ -93,18 +94,19 @@
     download-iso-name: 'download_iso'
     nightly-name: '{fuel-release}.{plugin-name}.nightly'
     custom-name: '{fuel-release}.{plugin-name}.custom'
-    reporter-name: '{fuel-release}.{plugin-name}.reporter'
+
     nightly_timer: 'H 22 * * *'
     regression_timer: 'H 18 * * *'
+    reporter-name: '{fuel-release}.{plugin-name}.reporter'
     nightly_disabled: false
-    regression_disabled: false
+    regression_disabled: true
     use_snapshots: false
     force_erase: true
     recreate_venv: false
     disable_ssl: true
     update_master: true
     debug: true
-    publish_results: false
+    publish_results: true
     multijob_build_pkg: true
     testjob_build_pkg: false
     runner_timeout: 600
@@ -115,6 +117,17 @@
     email-to: 'rkhozinov@mirantis.com otsvigun@mirantis.com'
     released-plugin-path: '/storage/dvs/released/dvs-2.0.0.noarch.rpm'
     scm_submodule_disabled: true
+
+    testrail_project: "VMware DVS plugin"
+    testrail_suite: "[8.0][PCE] VMware DVS plugin v${{PLUGIN_VERSION}}"
+    testrail_suite_desc: "Suite description"
+    testrail_milestone: "2.1.0"
+    testrail_plan: "$TREP_TESTRAIL_SUITE build#${{PKG_JOB_BUILD_NUMBER}} iso#${{ISO_VERSION}}"
+    testrail_plan_desc: "Test plan description"
+    testrail_run: "$TREP_TESTRAIL_SUITE"
+    testrail_run_desc: "Test run description"
+    testrail_item_case: "$TEST_GROUP"
+    trep_debug_level: "DEBUG"
 
     testgroup_parameter_type: string
     testgroup_value_type: default
@@ -149,26 +162,17 @@
           multijob_build_pkg: true
 
       - '{custom-name}.qa':
+          publish_results: false
           scm_submodule_disabled: false
 
       - '{custom-name}.dev':
           scm_submodule_disabled: false
+          publish_results: false
           testgroup_parameter_type: choice
           testgroup_value_type: choices
           testgroup_value: '{obj:testgroup}'
 
-      - '{reporter-name}':
-          testrail_project: "VMware DVS plugin"
-          testrail_suite: "[8.0][PCE] VMware DVS plugin v${{PLUGIN_VERSION}}"
-          testrail_suite_desc: "Suite description"
-          testrail_milestone: "2.1.0"
-          testrail_plan_prefix: ""
-          testrail_plan: "$TREP_TESTRAIL_SUITE iso #${{ISO_VERSION}} build#${{PKG_JOB_BUILD_NUMBER}}"
-          testrail_plan_desc: "Test plan description"
-          testrail_run: "$TREP_TESTRAIL_SUITE"
-          testrail_run_desc: "Test run description"
-          testrail_item_case: "$TEST_GROUP"
-          debug_level: "DEBUG"
+      - '{reporter-name}'
 
       - '{fuel-release}.{plugin-name}.{testgroup}':
           scm_submodule_disabled: false
@@ -185,7 +189,16 @@
       - '{fuel-release}.{plugin-name}.bvt.test':
           scm_submodule_disabled: false
 
-      - '{regression-name}'
+      - '{regression-name}':
+          testrail_suite: "[8.0][PCE] VMware DVS plugin v2.1.0 Regression"
+          testrail_suite_desc: "Suite description"
+          testrail_plan: "$TREP_TESTRAIL_SUITE #${{DATE}}"
+          testrail_plan_desc: "Test plan description"
+          testrail_run: "$TREP_TESTRAIL_SUITE"
+          testrail_run_desc: "Test run description"
+          default-pkg-job-name: ''
+          default-iso-job-name: ''
+          multijob_build_pkg: false
 
       - '{fuel-release}.{plugin-name}.regression.test':
           scm_submodule_disabled: false
@@ -374,7 +387,7 @@
           description: "Recreate virtual environemnt before tests"
       - string:
           name: WORKSTATION_SNAPSHOT
-          default: 'vcenterha'
+          default: 'doubledvs'
           description: 'Snapshot name for vcenter lab'
       - string:
           name: WORKSTATION_NODES
@@ -390,7 +403,7 @@
           description: "List of vCenter's clusters"
       - string:
           name: DVS_SWITCHES
-          default: 'dvSwitch1,dvSwitch2'
+          default: 'Cluster1,Cluster2'
           description: "List of vCenter's clusters"
       - bool:
           name: USE_SNAPSHOTS
@@ -400,10 +413,6 @@
           name: ISO_FILE
           default: '{iso-file}'
           description: 'ISO file name that is on the tpi-s1 in /storage/downloads'
-      - string:
-          name: PLUGIN_VERSION
-          default: ''
-          description: 'plugin version from metadata'
       - string:
           name: GERRIT_REFSPEC
           default: 'refs/heads/{gerrit-branch}'
@@ -418,7 +427,6 @@
           description: 'The name of job for copying of plugin pkg artefacts'
       - string:
           name: PKG_JOB_BUILD_NUMBER
-          default: ''
           description: 'The name of job for copying of plugin pkg artefacts'
       - string:
           name: ISO_JOB_NAME
@@ -428,6 +436,22 @@
           name: ENV_PREFIX
           default: '{fuel-release}.{plugin-name}'
           description: 'The name of devops env. Needed to properly work of existing mode of devops'
+      - string:
+          name: TREP_TESTRAIL_SUITE
+          default: "{testrail_suite}"
+          description: "The test suite name, ex.[8.0][PCE] vCenter Smoke/BVT"
+      - string:
+          name: TREP_TESTRAIL_SUITE_DESCRIPTION
+          default: "{testrail_suite_desc}"
+          description: "Testrail suite description"
+      - string:
+          name: TREP_TESTRAIL_PLAN
+          default: "{testrail_plan}"
+          description: "Testrail testplan name"
+      - string:
+          name: TREP_TESTRAIL_PLAN_DESCRIPTION
+          default: "{testrail_plan_desc}"
+          description: "Testrail testplan description"
 
 # parameters for jobs created per test-group and custom test job
 - test-parameters: &test-parameters
@@ -471,7 +495,7 @@
           description: "test-group name"
       - string:
           name: WORKSTATION_SNAPSHOT
-          default: 'vcenterha'
+          default: 'doubledvs'
           description: 'Snapshot name for vcenter lab'
       - string:
           name: WORKSTATION_NODES
@@ -487,23 +511,16 @@
           description: "List of vCenter's clusters"
       - string:
           name: DVS_SWITCHES
-          default: 'dvSwitch1,dvSwitch2'
+          default: 'Cluster1,Cluster2'
           description: "List of vCenter's clusters"
       - string:
           name: ISO_FILE
           default: '{iso-file}'
           description: 'ISO file name that is on the tpi-s1 in /storage/downloads'
       - string:
-          name: PLUGIN_VERSION
-          default: ''
-          description: 'plugin version from metadata'
-      - string:
           name: ISO_STORAGE
           default: '/storage/downloads'
           description: 'Storage for iso files'
-      - string:
-          name: ISO_VERSION
-          description: 'Contrainer for storing an iso build number to output it as job name'
       - string:
           name: OPENSTACK_RELEASE
           default: 'Ubuntu'
@@ -546,12 +563,27 @@
           description: 'The name of job for copying of plugin pkg artefacts'
       - string:
           name: PKG_JOB_BUILD_NUMBER
-          default: ''
           description: 'The name of job for copying of plugin pkg artefacts'
       - string:
           name: ISO_JOB_NAME
           default: '{canary-name}'
           description: 'The name of job for copying of stable iso build name'
+      - string:
+          name: TREP_TESTRAIL_SUITE
+          default: "{testrail_suite}"
+          description: "The test suite name, ex.[8.0][PCE] vCenter Smoke/BVT"
+      - string:
+          name: TREP_TESTRAIL_SUITE_DESCRIPTION
+          default: "{testrail_suite_desc}"
+          description: "Testrail suite description"
+      - string:
+          name: TREP_TESTRAIL_PLAN
+          default: "{testrail_plan}"
+          description: "Testrail testplan name"
+      - string:
+          name: TREP_TESTRAIL_PLAN_DESCRIPTION
+          default: "{testrail_plan_desc}"
+          description: "Testrail testplan description"
 
 - defaults:
     name: global
@@ -601,10 +633,9 @@
           !include-raw-escape: builders/common.prepare.sh
       - shell:
           !include-raw-escape: builders/dvs.test.sh
-
     publishers:
       - runner-publisher:
-          properties_name: properties 
+          properties_name: properties
           email-to: '{email-to}'
       - conditional-publisher:
           - condition-kind: file-exists
@@ -633,6 +664,10 @@
     description: 'Reporter for {fuel-release}.{plugin-name}.{plugin-version}'
     concurrent: true
     node: runner
+    wrappers:
+      - inject-passwords:
+          global: true
+          mask-password-params: true
     parameters:
       - string:
           name: ISO_VERSION
@@ -643,6 +678,10 @@
       - string:
           name: TEST_JOB_NAME
           description: "The name of a test for getting test results"
+      - string:
+          name: DATE
+          description: "The date of a test run"
+          default: ''
       - string:
           name: TEST_JOB_BUILD_NUMBER
           description: "The number of a test build"
@@ -699,7 +738,7 @@
           description: "Tests to exclude from results"
       - string:
           name: TREP_LOG_LEVEL
-          default: "{debug_level}"
+          default: "{trep_debug_level}"
           description: "Log level of reporter"
       - string:
           name: TREP_LOG_FILE
@@ -707,7 +746,7 @@
           description: "Log filename for reporter tool"
       - string:
           name: TREP_TEST_RESULTS_SOURCE
-          default: "xunit_items"
+          default: "xunit"
           description: "Reporter tool's additional config"
       - string:
           name: TREP_TEST_RESULTS_XUNIT_FILENAME
@@ -715,7 +754,7 @@
           description: "File with tests results"
       - string:
           name: TREP_TEST_RESULTS_XUNIT_ITEMS_FILENAME
-          default: "nosetests.xml"
+          default: "${{TREP_TEST_RESULTS_XUNIT_FILENAME}}"
           description: "File with tests results"
       - string:
           name: TREP_TEST_RESULTS_XUNIT_ITEMS_CASE_NAME
@@ -727,6 +766,7 @@
           branches:
             - 'origin/master'
           # choosing-strategy: default
+          skip-tag: true
           clean:
             before: false
           wipe-workspace: false
@@ -738,10 +778,10 @@
           build-number: ${{TEST_JOB_BUILD_NUMBER}}
           stable: true
       - shell:
-          !include-raw-escape: './builders/reporter.sh'
+          !include-raw-escape: builders/reporter.sh
     publishers:
       - runner-publisher:
-          properties_name: reporter.properties 
+          properties_name: reporter.properties
           email-to: '{email-to}'
 
 - job-template:
@@ -869,15 +909,8 @@
     node: 'runner'
     concurrent: true
     disabled: false
-    scm:
-      - git:
-          url: 'https://review.openstack.org/openstack/{gerrit-repo}'
-          refspec: $GERRIT_REFSPEC
-          branches:
-            - $GERRIT_BRANCH
-          choosing-strategy: gerrit
-          skip-tag: true
-          wipe-workspace: false
+    <<: *common-scm
+    <<: *runner-wrappers
     triggers:
       - gerrit:
           <<: *build-gerrit-events
@@ -886,18 +919,24 @@
       - string:
           name: GERRIT_BRANCH
           default: 'origin/{gerrit-branch}'
-          description: 'The branch for fuel-qa gerrit'
       - string:
           name: GERRIT_REFSPEC
           default: 'refs/heads/{gerrit-branch}'
     properties:
       - heavy-job:
           weight: 1
+    wrappers:
+      - ansicolor:
+          colormap: xterm
     builders:
+      - shell: |
+          rm -rf *.rpm
+          rm -rf build.properties
+          rm -rf build.plugin_version
       - shell:
-          !include-raw-escape: './builders/build-plugin-dvs.sh'
+          !include-raw-escape: builders/build-plugin-dvs.sh
       - shell:
-          !include-raw-escape: './builders/rpm-check.sh'
+          !include-raw-escape: builders/rpm-check.sh
     publishers:
       - postbuildscript:
           script-only-if-succeeded: False
@@ -993,7 +1032,7 @@
               kill-phase-on: NEVER
     publishers:
       - runner-publisher:
-          properties_name: smoke.properties 
+          properties_name: smoke.properties
           email-to: '{email-to}'
 
 - job-template:
@@ -1025,7 +1064,7 @@
               kill-phase-on: NEVER
     publishers:
       - runner-publisher:
-          properties_name: bvt.properties 
+          properties_name: bvt.properties
           email-to: '{email-to}'
 
 - job-template:
@@ -1037,15 +1076,13 @@
     node: runner
     <<: *runner-parameters
     <<: *runner-wrappers
-    properties:
-      - heavy-job:
-          weight: 1
+    <<: *runner-properties
     scm: []
     triggers:
       - timed: '{regression_timer}'
     publishers:
       - runner-publisher:
-          properties_name: regression.properties 
+          properties_name: regression.properties
           email-to: '{email-to}'
     builders:
       - multijob:
@@ -1091,9 +1128,9 @@
 
     publishers:
       - runner-publisher:
-          properties_name: canary.properties 
+          properties_name: canary.properties
           email-to: '{email-to}'
-         
+
 - job-template:
     name: '{nightly-name}'
     project-type: multijob
@@ -1101,15 +1138,13 @@
     node: runner
     <<: *runner-parameters
     <<: *runner-wrappers
-    properties:
-      - heavy-job:
-          weight: 1
+    <<: *runner-properties
     scm: []
     triggers:
       - timed: '{nightly_timer}'
     publishers:
       - runner-publisher:
-          properties_name: nightly.properties 
+          properties_name: nightly.properties
           email-to: '{email-to}'
     builders:
       !include: dvs-nightly.yaml.inc
