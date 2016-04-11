@@ -1,11 +1,33 @@
 ---
+- parameter:
+    name: dvs-common-parameters
+    parameters:
+      - string:
+          name: WORKSTATION_SNAPSHOT
+          default: 'doubledvs'
+          description: 'Snapshot name for vcenter lab'
+      - string:
+          name: WORKSTATION_NODES
+          default: 'esxi1 esxi2 esxi3 vcenter trusty'
+          description: "List of workstation's nodes"
+      - string:
+          name: VCENTER_IP
+          default: '172.16.0.254'
+          description: "IP address of the vCenter server"
+      - string:
+          name: VCENTER_CLUSTERS
+          default: 'Cluster1,Cluster2'
+          description: "List of vCenter's clusters"
+      - string:
+          name: DVS_SWITCHES
+          default: 'Cluster1,Cluster2'
+          description: "List of vCenter's clusters"
+
 - project:
     name: 'predefined_parameters'
     fuel-release: '8.0'
     plugin-version: '2.1'
     plugin-name: 'dvs'
-    default-pkg-job-name: '{fuel-release}.{plugin-name}.build'
-    default-iso-job-name: '{fuel-release}.{plugin-name}.canary'
     build-name: '{fuel-release}.{plugin-name}.build'
     flake8-name: '{fuel-release}.{plugin-name}.flake8'
     radon-name: '{fuel-release}.{plugin-name}.radon'
@@ -18,6 +40,12 @@
     nightly-name: '{fuel-release}.{plugin-name}.nightly'
     custom-name: '{fuel-release}.{plugin-name}.custom'
 
+    admin_node_memory: '8192'
+    slave_node_memory: '8192'
+    admin_node_cpu: '4'
+    slave_node_cpu: '4'
+    pkg_job_name: '{fuel-release}.{plugin-name}.build'
+    iso_job_name: '{fuel-release}.{plugin-name}.canary'
     nightly_timer: 'H 22 * * *'
     regression_timer: 'H 18 * * *'
     reporter-name: '{fuel-release}.{plugin-name}.reporter'
@@ -34,7 +62,7 @@
     testjob_build_pkg: false
     runner_timeout: 600
     test-timeout: 300
-    iso-file: 'fuel-8.0-570.iso'
+    iso_file: 'fuel-8.0-570.iso'
     gerrit-repo: 'fuel-plugin-vmware-dvs'
     gerrit-branch: 'stable/8.0-agentful'
     email-to: 'rkhozinov@mirantis.com otsvigun@mirantis.com'
@@ -137,102 +165,35 @@
       - '{fuel-release}.{plugin-name}.canary.fat':
           scm_submodule_disabled: false
 
-
 # parameters for smoke, bvt and nightly multijobs
 - runner-parameters: &runner-parameters
     name: 'runner-parameters'
     parameters:
       - bool:
-          name: PUBLISH_RESULTS
-          default: '{obj:publish_results}'
-          description: 'Reports results to testrail'
-      - bool:
-          name: DEBUG
-          default: '{debug}'
-          description: "Set -x (xtrace) for jobs' bash scripts"
-      - bool:
           name: MJ_BUILD_PKG
           default: '{multijob_build_pkg}'
           description: "Triggers build of pkg of $PKG_JOB_NAME before run of tests"
-      - bool:
-          name: DISABLE_SSL
-          default: '{disable_ssl}'
-          description: "Disable ssh for openstack horizon"
-      - bool:
-          name: FORCE_ERASE
-          default: '{force_erase}'
-          description: "Erase all envs before test"
-      - bool:
-          name: RECREATE_VENV
-          default: '{recreate_venv}'
-          description: "Recreate virtual environemnt before tests"
-      - string:
-          name: WORKSTATION_SNAPSHOT
-          default: 'doubledvs'
-          description: 'Snapshot name for vcenter lab'
-      - string:
-          name: WORKSTATION_NODES
-          default: 'esxi1 esxi2 esxi3 vcenter trusty'
-          description: "List of workstation's nodes"
-      - string:
-          name: VCENTER_IP
-          default: '172.16.0.254'
-          description: "IP address of the vCenter server"
-      - string:
-          name: VCENTER_CLUSTERS
-          default: 'Cluster1,Cluster2'
-          description: "List of vCenter's clusters"
-      - string:
-          name: DVS_SWITCHES
-          default: 'Cluster1,Cluster2'
-          description: "List of vCenter's clusters"
-      - bool:
-          name: USE_SNAPSHOTS
-          default: '{use_snapshots}'
-          descrition: 'Will be used existing environment'
-      - string:
-          name: ISO_FILE
-          default: '{iso-file}'
-          description: 'ISO file name that is on the tpi-s1 in /storage/downloads'
-      - string:
-          name: GERRIT_REFSPEC
-          default: 'refs/heads/{gerrit-branch}'
-          description: 'Refspecs for commits in fuel-qa gerrit separated with spaces'
-      - string:
-          name: GERRIT_BRANCH
-          default: 'origin/{gerrit-branch}'
-          description: 'The branch for fuel-qa gerrit'
-      - string:
-          name: PKG_JOB_NAME
-          default: '{default-pkg-job-name}'
-          description: 'The name of job for copying of plugin pkg artefacts'
-      - string:
-          name: PKG_JOB_BUILD_NUMBER
-          description: 'The name of job for copying of plugin pkg artefacts'
-      - string:
-          name: ISO_JOB_NAME
-          default: '{default-iso-job-name}'
-          description: 'The name of job for copying of stable iso build name'
-      - string:
-          name: ENV_PREFIX
-          default: '{fuel-release}.{plugin-name}'
-          description: 'The name of devops env. Needed to properly work of existing mode of devops'
-      - string:
-          name: TREP_TESTRAIL_SUITE
-          default: "{testrail_suite}"
-          description: "The test suite name, ex.[8.0][PCE] vCenter Smoke/BVT"
-      - string:
-          name: TREP_TESTRAIL_SUITE_DESCRIPTION
-          default: "{testrail_suite_desc}"
-          description: "Testrail suite description"
-      - string:
-          name: TREP_TESTRAIL_PLAN
-          default: "{testrail_plan}"
-          description: "Testrail testplan name"
-      - string:
-          name: TREP_TESTRAIL_PLAN_DESCRIPTION
-          default: "{testrail_plan_desc}"
-          description: "Testrail testplan description"
+      - common-parameters:
+          publish_results:      '{obj:publish_results}'
+          debug:                '{debug}'
+          disable_ssl:          '{disable_ssl}'
+          force_erase:          '{force_erase}'
+          recreate_venv:        '{recreate_venv}'
+          use_snapshots:        '{use_snapshots}'
+          iso_file:             '{iso_file}'
+          gerrit-branch:        '{gerrit-branch}'
+          env_prefix:           '{fuel-release}.{plugin-name}'
+          pkg_job_name:         '{pkg_job_name}'
+          iso_job_name:         '{iso_job_name}'
+          admin_node_memory:    '{admin_node_memory}'
+          slave_node_memory:    '{slave_node_memory}'
+          admin_node_cpu:       '{admin_node_cpu}'
+          slave_node_cpu:       '{slave_node_cpu}'
+          testrail_suite:       '{testrail_suite}'
+          testrail_suite_desc:  '{testrail_suite_desc}'
+          testrail_plan:        '{testrail_plan}'
+          testrail_plan_desc:   '{testrail_plan_desc}'
+      - dvs-common-parameters
 
 # parameters for jobs created per test-group and custom test job
 - test-parameters: &test-parameters
@@ -243,132 +204,39 @@
           default: 'dvs'
           description: "The node on which to run the job"
       - bool:
-          name: PUBLISH_RESULTS
-          default: '{obj:publish_results}'
-          description: 'Reports results to testrail'
-      - bool:
           name: BUILD_PKG
           default: '{testjob_build_pkg}'
           description: "Triggers build of pkg from $PKG_JOB_NAME (only for custom)"
-      - bool:
-          name: DEBUG
-          default: '{debug}'
-          description: "Set -x (xtrace) for jobs' bash scripts"
-      - bool:
-          name: DISABLE_SSL
-          default: '{disable_ssl}'
-          description: "Disable ssh for openstack horizon"
-      - bool:
-          name: FORCE_ERASE
-          default: '{force_erase}'
-          description: "Erase all envs before test"
-      - bool:
-          name: RECREATE_VENV
-          default: '{recreate_venv}'
-          description: "Recreate virtual environemnt before tests"
-      - bool:
-          name: USE_SNAPSHOTS
-          default: '{use_snapshots}'
-          descrition: 'Will be used existing environment'
       - '{testgroup_parameter_type}':
           name: TEST_GROUP
           '{testgroup_value_type}': '{obj:testgroup_value}'
           description: "test-group name"
-      - string:
-          name: WORKSTATION_SNAPSHOT
-          default: 'doubledvs'
-          description: 'Snapshot name for vcenter lab'
-      - string:
-          name: WORKSTATION_NODES
-          default: 'esxi1 esxi2 esxi3 vcenter trusty'
-          description: "List of workstation's nodes"
-      - string:
-          name: VCENTER_IP
-          default: '172.16.0.254'
-          description: "IP address of the vCenter server"
-      - string:
-          name: VCENTER_CLUSTERS
-          default: 'Cluster1,Cluster2'
-          description: "List of vCenter's clusters"
-      - string:
-          name: DVS_SWITCHES
-          default: 'Cluster1,Cluster2'
-          description: "List of vCenter's clusters"
-      - string:
-          name: ISO_FILE
-          default: '{iso-file}'
-          description: 'ISO file name that is on the tpi-s1 in /storage/downloads'
-      - string:
-          name: ISO_STORAGE
-          default: '/storage/downloads'
-          description: 'Storage for iso files'
-      - string:
-          name: OPENSTACK_RELEASE
-          default: 'Ubuntu'
-          description: 'Openstack release (CentOS, Ubuntu)'
-      - string:
-          name: GERRIT_REFSPEC
-          default: 'refs/heads/{gerrit-branch}'
-          description: 'Refspecs for commits in fuel-qa gerrit separated with spaces'
-      - string:
-          name: GERRIT_BRANCH
-          default: 'origin/{gerrit-branch}'
-          description: 'The branch for fuel-qa gerrit'
-      - string:
-          name: NODES_COUNT
-          default: '10'
-          description: 'Amount of nodes in the test lab'
-      - string:
-          name: ADMIN_NODE_MEMORY
-          default: '8192'
-          description: 'Amount of vitrual RAM for admin node'
-      - string:
-          name: SLAVE_NODE_MEMORY
-          default: '8192'
-          description: 'Amount of vitrual RAM per slave node'
-      - string:
-          name: ADMIN_NODE_CPU
-          default: '4'
-          description: 'Amount of vitrual CPUs for admin node'
-      - string:
-          name: SLAVE_NODE_CPU
-          default: '4'
-          description: 'Amount of vitrual CPUs per slave node'
-      - string:
-          name: ENV_PREFIX
-          default: '{fuel-release}.{plugin-name}'
-          description: 'The name of devops env. Needed to properly work of existing mode of devops'
-      - string:
-          name: PKG_JOB_NAME
-          default: '{build-name}'
-          description: 'The name of job for copying of plugin pkg artefacts'
-      - string:
-          name: PKG_JOB_BUILD_NUMBER
-          description: 'The name of job for copying of plugin pkg artefacts'
-      - string:
-          name: ISO_JOB_NAME
-          default: '{canary-name}'
-          description: 'The name of job for copying of stable iso build name'
-      - string:
-          name: TREP_TESTRAIL_SUITE
-          default: "{testrail_suite}"
-          description: "The test suite name, ex.[8.0][PCE] vCenter Smoke/BVT"
-      - string:
-          name: TREP_TESTRAIL_SUITE_DESCRIPTION
-          default: "{testrail_suite_desc}"
-          description: "Testrail suite description"
-      - string:
-          name: TREP_TESTRAIL_PLAN
-          default: "{testrail_plan}"
-          description: "Testrail testplan name"
-      - string:
-          name: TREP_TESTRAIL_PLAN_DESCRIPTION
-          default: "{testrail_plan_desc}"
-          description: "Testrail testplan description"
+      - common-parameters:
+          publish_results: '{obj:publish_results}'
+          debug:           '{debug}'
+          disable_ssl:     '{disable_ssl}'
+          force_erase:     '{force_erase}'
+          recreate_venv:   '{recreate_venv}'
+          use_snapshots:   '{use_snapshots}'
+          iso_file:        '{iso_file}'
+          gerrit-branch:   '{gerrit-branch}'
+          env_prefix:      '{fuel-release}.{plugin-name}'
+          pkg_job_name:    '{pkg_job_name}'
+          iso_job_name:    '{iso_job_name}'
+          admin_node_memory:    '{admin_node_memory}'
+          slave_node_memory:    '{slave_node_memory}'
+          admin_node_cpu:       '{admin_node_cpu}'
+          slave_node_cpu:       '{slave_node_cpu}'
+          testrail_suite:       '{testrail_suite}'
+          testrail_suite_desc:  '{testrail_suite_desc}'
+          testrail_plan:        '{testrail_plan}'
+          testrail_plan_desc:   '{testrail_plan_desc}'
+      - dvs-common-parameters
 
 - defaults:
     name: global
     disabled: false
+    node: dvs
     logrotate:
       daysToKeep: 30
       numToKeep: 100
@@ -379,7 +247,7 @@
       - common-scm:
           scm_submodule_disabled: '{obj:scm_submodule_disabled}'
           gerrit-repo: '{gerrit-repo}'
-    wrapper:
+    wrappers:
       - test-wrapper:
           test-timeout: '{test-timeout}'
     properties:    
@@ -920,7 +788,7 @@
       - runner-property:
           build-name: '{build-name}'
     wrappers:
-      - runner-wrapper 
+      - runner-wrapper
     publishers:
       - runner-publisher:
           properties_name: canary.properties
@@ -951,7 +819,7 @@
       - runner-property:
           build-name: '{build-name}'
     wrappers:
-      - runner-wrapper 
+      - runner-wrapper
     publishers:
       - runner-publisher:
           properties_name: nightly.properties
