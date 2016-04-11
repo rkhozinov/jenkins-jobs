@@ -1,0 +1,199 @@
+- publisher:
+    name: runner-publisher
+    publishers:
+      - postbuildscript:
+          script-only-if-succeeded: False
+          builders:
+            - shell: env > {properties_name}
+      - archive:
+          artifacts: '*properties'
+          allow-empty: true
+      - archive:
+          artifacts: 'iso_file'
+          allow-empty: true
+      - archive:
+          artifacts: 'build.plugin_version'
+          allow-empty: true
+      - email:
+          recipients: '{email-to}'
+
+- builder:
+    name: runner-condition
+    builders:
+      - conditional-step:
+          condition-kind: shell
+          condition-command: |
+            #!/bin/bash -xe
+            if [[ ${MJ_BUILD_PKG}=="true" ]]; then
+              if [ -z ${PKG_JOB_BUILD_NUMBER} ]; then
+                echo "Plugin will be built"
+              else
+                echo "Plugin won't be built"
+                exit 1
+              fi
+            fi
+          steps:
+            - trigger-builds:
+                - project: ${PKG_JOB_NAME}
+                  current-parameters: false
+                  git-revision: false
+                  block: true
+      - conditional-step:
+          condition-kind: shell
+          condition-command: >
+            [ -z  ${PKG_JOB_BUILD_NUMBER} ]
+          steps:
+            - copyartifact:
+                project: ${PKG_JOB_NAME}
+                filter: "build.properties"
+                which-build: last-successful
+      - conditional-step:
+          condition-kind: shell
+          condition-command: >
+            [ ! -z ${PKG_JOB_BUILD_NUMBER} ]
+          steps:
+            - copyartifact:
+                project: ${PKG_JOB_NAME}
+                filter: "build.properties"
+                which-build: specific-build
+                build-number: ${PKG_JOB_BUILD_NUMBER}
+      - conditional-step:
+          condition-kind: file-exists
+          condition-filename: "build.properties"
+          steps:
+            - shell: |
+                #!/bin/bash
+                build_number=$(grep "BUILD_NUMBER" < build.properties | cut -d= -f2)
+                echo "PKG_JOB_BUILD_NUMBER=$build_number" > build_number
+      - conditional-step:
+          condition-kind: shell
+          condition-command: >
+            [ -z ${ISO_FILE} ]
+          steps:
+            - copyartifact:
+                project: ${ISO_JOB_NAME}
+                filter: "iso_file"
+                which-build: last-successful
+
+# common git settings to get sources
+- scm:
+    name: common-scm
+    scm:
+      - git:
+          url: 'https://review.openstack.org/openstack/{gerrit-repo}'
+          refspec: $GERRIT_REFSPEC
+          branches:
+            - $GERRIT_BRANCH
+          choosing-strategy: gerrit
+          skip-tag: true
+          submodule:
+            disable: '{obj:scm_submodule_disabled}'
+            tracking: true
+            recursive: true
+          wipe-workspace: false
+
+- trigger:
+    name: generic-gerrit-trigger
+    triggers:
+      - gerrit:
+         trigger-on: '{obj:trigger_on}'
+         projects:
+           - project-compare-type: 'PLAIN'
+             project-pattern: 'openstack/{gerrit-repo}'
+             branches:
+               - branch-compare-type: 'ANT'
+                 branch-pattern: '{gerrit-branch}'
+             forbidden-file-paths:
+               - compare-type: 'ANT'
+                 pattern: 'docs/**'
+               - compare-type: 'ANT'
+                 pattern: 'specs/**'
+         silent: false
+         override-votes: true
+         server-name: 'review.openstack.org'
+         custom-url: '* $JOB_NAME $BUILD_URL'
+         escape-quotes: true
+         readable-message: true
+         skip-vote:
+           successfull: false
+           failed: false
+           unstable: true
+           notbuilt: true
+
+# build and smoke should trigger on patchset event               
+- trigger:
+    name: draft-patchset-gerrit-trigger
+    triggers:
+      - generic-gerrit-trigger:
+          gerrit-repo: '{gerrit-repo}'
+          gerrit-branch: '{gerrit-branch}'
+          trigger_on:
+            - draft-published-event
+            - patchset-created-event:
+                exclude-trivial-rebase: true
+                exclude-no-code-change: true
+
+# bvt should trigger on merge event     
+- trigger:
+    name: merge-gerrit-trigger
+    triggers:
+      - generic-gerrit-trigger:
+          gerrit-repo: '{gerrit-repo}'
+          gerrit-branch: '{gerrit-branch}'
+          trigger_on:
+            - change-merged-event
+
+
+# properties for smoke, bvt and nightly multijobs
+- wrapper:
+    name: runner-wrapper
+    wrappers:
+      - ansicolor:
+          colormap: xterm
+
+# properties for smoke, bvt and nightly multijobs
+- wrapper:
+    name: test-wrapper
+    wrappers:
+      - ansicolor:
+          colormap: xterm
+      - inject-passwords:
+          global: true
+          mask-password-params: true
+      - timeout:
+          fail: true
+          type: no-activity
+          write-description: "Timeout is exceeded"
+          timeout: '{test-timeout}'
+
+- property:
+    name: runner-property
+    properties:
+      - heavy-job:
+          weight: 1
+      - build-blocker:
+          use-build-blocker: true
+          blocking-jobs:
+            - '{build-name}'
+          block-level: 'GLOBAL'
+          queue-scanning: 'BUILDABLE'
+
+# properties for test jobs
+- property:
+    name: test-property
+    properties:
+      - heavy-job:
+          weight: 1
+      - throttle:
+          max-per-node: 0
+          max-total: 0
+          categories:
+            - vcenter
+            - dvs
+            - nsx
+            - nsxv
+            - contrail
+            - lma
+            - elasticsearch
+            - influxdb
+          option: category

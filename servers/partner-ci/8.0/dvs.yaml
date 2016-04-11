@@ -1,81 +1,4 @@
 ---
-- publisher:
-    name: runner-publisher
-    publishers:
-      - postbuildscript:
-          script-only-if-succeeded: False
-          builders:
-            - shell: env > {properties_name}
-      - archive:
-          artifacts: '*properties'
-          allow-empty: true
-      - archive:
-          artifacts: 'iso_file'
-          allow-empty: true
-      - archive:
-          artifacts: 'build.plugin_version'
-          allow-empty: true
-      - email:
-          recipients: '{email-to}'
-
-- builder:
-    name: runner-conditions
-    builders:
-      - conditional-step:
-          condition-kind: shell
-          condition-command: |
-            #!/bin/bash -xe
-            if [[ ${MJ_BUILD_PKG}=="true" ]]; then
-              if [ -z ${PKG_JOB_BUILD_NUMBER} ]; then
-                echo "Plugin will be built"
-              else
-                echo "Plugin won't be built"
-                exit 1
-              fi
-            fi
-          steps:
-            - trigger-builds:
-                - project: ${PKG_JOB_NAME}
-                  current-parameters: false
-                  git-revision: false
-                  block: true
-      - conditional-step:
-          condition-kind: shell
-          condition-command: >
-            [ -z  ${PKG_JOB_BUILD_NUMBER} ]
-          steps:
-            - copyartifact:
-                project: ${PKG_JOB_NAME}
-                filter: "build.properties"
-                which-build: last-successful
-      - conditional-step:
-          condition-kind: shell
-          condition-command: >
-            [ ! -z ${PKG_JOB_BUILD_NUMBER} ]
-          steps:
-            - copyartifact:
-                project: ${PKG_JOB_NAME}
-                filter: "build.properties"
-                which-build: specific-build
-                build-number: ${PKG_JOB_BUILD_NUMBER}
-      - conditional-step:
-          condition-kind: file-exists
-          condition-filename: "build.properties"
-          steps:
-            - shell: |
-                #!/bin/bash
-                build_number=$(grep "BUILD_NUMBER" < build.properties | cut -d= -f2)
-                echo "PKG_JOB_BUILD_NUMBER=$build_number" > build_number
-      - conditional-step:
-          condition-kind: shell
-          condition-command: >
-            [ -z ${ISO_FILE} ]
-          steps:
-            - copyartifact:
-                project: ${ISO_JOB_NAME}
-                filter: "iso_file"
-                which-build: last-successful
-
 - project:
     name: 'predefined_parameters'
     fuel-release: '8.0'
@@ -110,7 +33,7 @@
     multijob_build_pkg: true
     testjob_build_pkg: false
     runner_timeout: 600
-    test_timeout: 300
+    test-timeout: 300
     iso-file: 'fuel-8.0-570.iso'
     gerrit-repo: 'fuel-plugin-vmware-dvs'
     gerrit-branch: 'stable/8.0-agentful'
@@ -151,6 +74,8 @@
       - dvs_different_networks
       - dvs_install
       - dvs_uninstall
+      - dvs_remote_sg_simple
+      - dvs_remote_ip_prefix
 
     jobs:
       - '{build-name}'
@@ -212,150 +137,6 @@
       - '{fuel-release}.{plugin-name}.canary.fat':
           scm_submodule_disabled: false
 
-# common git settings to get sources
-- common-scm: &common-scm
-    name: 'common-scm'
-    scm:
-      - git:
-          url: 'https://review.openstack.org/openstack/{gerrit-repo}'
-          refspec: $GERRIT_REFSPEC
-          branches:
-            - $GERRIT_BRANCH
-          choosing-strategy: gerrit
-          skip-tag: true
-          submodule:
-            disable: '{obj:scm_submodule_disabled}'
-            tracking: true
-            recursive: true
-          wipe-workspace: false
-
-# list of gerrit events to trigger build job
-- build-gerrit-events: &build-gerrit-events
-    name: 'build-gerrit-events'
-    trigger-on:
-      - draft-published-event
-      - patchset-created-event:
-          exclude-trivial-rebase: true
-          exclude-no-code-change: true
-
-# configuration of gerrit event for the smoke multijob
-# smoke multijob should run on patchset, draft events
-- smoke-gerrit-events: &smoke-gerrit-events
-    name: 'smoke-gerrit-events'
-    trigger-on:
-      - draft-published-event
-      - patchset-created-event:
-          exclude-trivial-rebase: true
-          exclude-no-code-change: true
-
-# configuration of gerrit event for the bvt multijob
-# bvt multijob should run only on merge event
-- bvt-gerrit-events: &bvt-gerrit-events
-    name: 'bvt-gerrit-events'
-    trigger-on:
-      - change-merged-event
-
-# the main part of gerrit section as yaml anchor
-- generic-gerrit-projects: &generic-gerrit-projects
-    name: 'generic-gerrit-projects'
-    projects:
-      - project-compare-type: 'PLAIN'
-        project-pattern: 'openstack/{gerrit-repo}'
-        branches:
-          - branch-compare-type: 'ANT'
-            branch-pattern: '{gerrit-branch}'
-        forbidden-file-paths:
-          - compare-type: 'ANT'
-            pattern: 'docs/**'
-          - compare-type: 'ANT'
-            pattern: 'specs/**'
-    silent: false
-    override-votes: true
-    server-name: 'review.openstack.org'
-    custom-url: '* $JOB_NAME $BUILD_URL'
-    escape-quotes: true
-    readable-message: true
-    skip-vote:
-      successfull: false
-      failed: false
-      unstable: true
-      notbuilt: true
-
-# the main part of gerrit section as yaml anchor
-- generic-gerrit-projects: &test-gerrit-projects
-    name: 'test-gerrit-projects'
-    projects:
-      - project-compare-type: 'PLAIN'
-        project-pattern: 'openstack/{gerrit-repo}'
-        branches:
-          - branch-compare-type: 'ANT'
-            branch-pattern: '{gerrit-branch}'
-        file-paths:
-          - compare-type: 'ANT'
-            pattern: 'plugin_test/**'
-    silent: false
-    override-votes: true
-    server-name: 'review.openstack.org'
-    custom-url: '* $JOB_NAME $BUILD_URL'
-    escape-quotes: true
-    readable-message: true
-    skip-vote:
-      successfull: false
-      failed: false
-      unstable: true
-      notbuilt: true
-
-# properties for smoke, bvt and nightly multijobs
-- runner-properties: &runner-properties
-    name: 'runner-properties'
-    properties:
-      - heavy-job:
-          weight: 1
-      - build-blocker:
-          use-build-blocker: true
-          blocking-jobs:
-            - '{build-name}'
-          block-level: 'GLOBAL'
-          queue-scanning: 'BUILDABLE'
-
-# properties for smoke, bvt and nightly multijobs
-- runner-wrappers: &runner-wrappers
-    name: 'runner-wrappers'
-    wrappers:
-      - ansicolor:
-          colormap: xterm
-
-# properties for smoke, bvt and nightly multijobs
-- test-wrappers: &test-wrappers
-    name: 'test-wrappers'
-    wrappers:
-      - ansicolor:
-          colormap: xterm
-      - inject-passwords:
-          global: true
-          mask-password-params: true
-      - timeout:
-          fail: true
-          type: no-activity
-          write-description: "Timeout is exceeded"
-          timeout: '{test_timeout}'
-
-# properties for test jobs
-- test-properties: &test-properties
-    name: 'test-properties'
-    properties:
-      - heavy-job:
-          weight: 1
-      - throttle:
-          max-per-node: 0
-          max-total: 0
-          categories:
-            - vcenter
-            - dvs
-            - nsx
-            - nsxv
-            - contrail
-          option: category
 
 # parameters for smoke, bvt and nightly multijobs
 - runner-parameters: &runner-parameters
@@ -593,10 +374,16 @@
       numToKeep: 100
       artifactDaysToKeep: 30
       artifactNumToKeep: 100
-    <<: *test-properties
     <<: *test-parameters
-    <<: *common-scm
-    <<: *test-wrappers
+    scm:
+      - common-scm:
+          scm_submodule_disabled: '{obj:scm_submodule_disabled}'
+          gerrit-repo: '{gerrit-repo}'
+    wrapper:
+      - test-wrapper:
+          test-timeout: '{test-timeout}'
+    properties:    
+      - test-property
     builders:
       - conditional-step:
           condition-kind: shell
@@ -789,12 +576,16 @@
     node: 'runner'
     concurrent: true
     disabled: false
-    <<: *common-scm
-    <<: *runner-wrappers
+    wrapper:
+      - runner-wrapper
     triggers:
-      - gerrit:
-          <<: *build-gerrit-events
-          <<: *test-gerrit-projects
+      - draft-patchset-gerrit-trigger:
+          gerrit-repo: '{gerrit-repo}'
+          gerrit-branch: '{gerrit-branch}'
+    scm:
+      - common-scm:
+          scm_submodule_disabled: '{obj:scm_submodule_disabled}'
+          gerrit-repo: '{gerrit-repo}'
     parameters:
       - string:
           name: GERRIT_BRANCH
@@ -828,12 +619,6 @@
     node: 'runner'
     concurrent: true
     disabled: false
-    <<: *common-scm
-    <<: *runner-wrappers
-    triggers:
-      - gerrit:
-          <<: *build-gerrit-events
-          <<: *test-gerrit-projects
     parameters:
       - string:
           name: GERRIT_BRANCH
@@ -845,11 +630,21 @@
       - string:
           name: RADON_ARGS
           default: '--total-average -nb --ignore fuel-qa'
-          description: "radon will out average complexity and files with B and worse rank"
+          description: "average complexity and files with B and worse rank"
       - string:
           name: XENON_ARGS
           default: '--ignore fuel-qa --max-absolute A --max-modules A --max-average A'
           description: "Default args for checking average code complexity"
+    triggers:
+      - draft-patchset-gerrit-trigger:
+          gerrit-repo: '{gerrit-repo}'
+          gerrit-branch: '{gerrit-branch}'
+    scm:
+      - common-scm:
+          scm_submodule_disabled: '{obj:scm_submodule_disabled}'
+          gerrit-repo: '{gerrit-repo}'
+    wrapper:
+      - runner-wrapper
     properties:
       - heavy-job:
           weight: 1
@@ -871,12 +666,16 @@
     node: 'runner'
     concurrent: true
     disabled: false
-    <<: *common-scm
-    <<: *runner-wrappers
     triggers:
-      - gerrit:
-          <<: *build-gerrit-events
-          <<: *generic-gerrit-projects
+      - draft-patchset-gerrit-trigger:
+          gerrit-repo: '{gerrit-repo}'
+          gerrit-branch: '{gerrit-branch}'
+    scm:
+      - common-scm:
+          scm_submodule_disabled: '{obj:scm_submodule_disabled}'
+          gerrit-repo: '{gerrit-repo}'
+    wrapper:
+      - runner-wrapper
     parameters:
       - string:
           name: GERRIT_BRANCH
@@ -903,18 +702,21 @@
           fingerprint: true
           allow-empty: true
 
-# job for building plugin pkg
 - job-template:
     name: '{build-name}'
     node: 'runner'
     concurrent: true
     disabled: false
-    <<: *common-scm
-    <<: *runner-wrappers
     triggers:
-      - gerrit:
-          <<: *build-gerrit-events
-          <<: *generic-gerrit-projects
+      - draft-patchset-gerrit-trigger:
+          gerrit-repo: '{gerrit-repo}'
+          gerrit-branch: '{gerrit-branch}'
+    scm:
+      - common-scm:
+          scm_submodule_disabled: '{obj:scm_submodule_disabled}'
+          gerrit-repo: '{gerrit-repo}'
+    wrapper:
+      - runner-wrapper
     parameters:
       - string:
           name: GERRIT_BRANCH
@@ -958,31 +760,26 @@
       - email:
           recipients: '{email-to}'
 
-# jobs for system tests
 - job-template:
     name: '{fuel-release}.{plugin-name}.{testgroup}'
     description: 'The test "{testgroup}" for {fuel-release}.{plugin-name}.{plugin-version}'
     concurrent: true
 
-# jobs for bvt tests
 - job-template:
     name: '{fuel-release}.{plugin-name}.bvt.test'
     description: 'The test for {fuel-release}.{plugin-name}.{plugin-version}'
     concurrent: true
 
-# jobs for smoke tests
 - job-template:
     name: '{fuel-release}.{plugin-name}.smoke.test'
     description: 'The test for {fuel-release}.{plugin-name}.{plugin-version}'
     concurrent: true
 
-# jobs for regression tests
 - job-template:
     name: '{fuel-release}.{plugin-name}.regression.test'
     description: 'The regression test for {fuel-release}.{plugin-name}.{plugin-version}'
     concurrent: true
 
-# jobs for test a new iso
 - job-template:
     name: '{fuel-release}.{plugin-name}.canary.skinny'
     description: 'The dvs_vcenter_smoke test  for {fuel-release}.{plugin-name}.{plugin-version}'
@@ -1011,15 +808,18 @@
     project-type: multijob
     node: runner
     <<: *runner-parameters
-    <<: *runner-properties
-    <<: *runner-wrappers
-    scm: []
     triggers:
-      - gerrit:
-          <<: *smoke-gerrit-events
-          <<: *generic-gerrit-projects
+      - draft-patchset-gerrit-trigger:
+          gerrit-repo: '{gerrit-repo}'
+          gerrit-branch: '{gerrit-branch}'
+    properties:
+      - runner-property:
+          build-name: '{build-name}'
+    wrappers:
+      - runner-wrapper 
+    scm: []
     builders:
-      - runner-conditions
+      - runner-condition
       - multijob:
           name: 'The smoke test for {fuel-release}.{plugin-name}.{plugin-version}'
           condition: COMPLETED
@@ -1043,15 +843,18 @@
     project-type: multijob
     node: runner
     <<: *runner-parameters
-    <<: *runner-properties
-    <<: *runner-wrappers
     scm: []
     triggers:
-      - gerrit:
-          <<: *bvt-gerrit-events
-          <<: *generic-gerrit-projects
+      - merge-gerrit-trigger:
+          gerrit-repo: '{gerrit-repo}'
+          gerrit-branch: '{gerrit-branch}'
+    properties:
+      - runner-property:
+          build-name: '{build-name}'
+    wrappers:
+      - runner-wrapper 
     builders:
-      - runner-conditions
+      - runner-condition
       - multijob:
           name: 'The BVT test for {fuel-release}.{plugin-name}.{plugin-version}'
           condition: COMPLETED
@@ -1075,11 +878,14 @@
     project-type: multijob
     node: runner
     <<: *runner-parameters
-    <<: *runner-wrappers
-    <<: *runner-properties
     scm: []
     triggers:
       - timed: '{regression_timer}'
+    properties:
+      - runner-property:
+          build-name: '{build-name}'
+    wrappers:
+      - runner-wrapper 
     publishers:
       - runner-publisher:
           properties_name: regression.properties
@@ -1105,16 +911,22 @@
     concurrent: true
     project-type: multijob
     node: runner
-    <<: *runner-parameters
-    <<: *runner-properties
-    <<: *runner-wrappers
     scm: []
     triggers:
       - reverse:
           jobs: ${{ISO_JOB_NAME}}
           result: 'success'
+    properties:
+      - runner-property:
+          build-name: '{build-name}'
+    wrappers:
+      - runner-wrapper 
+    publishers:
+      - runner-publisher:
+          properties_name: canary.properties
+          email-to: '{email-to}'
     builders:
-      - runner-conditions
+      - runner-condition
       - multijob:
           name: 'Smoke tests for dvs.vcenter5'
           condition: SUCCESSFUL
@@ -1126,22 +938,20 @@
               current-parameters: true
               kill-phase-on: NEVER
 
-    publishers:
-      - runner-publisher:
-          properties_name: canary.properties
-          email-to: '{email-to}'
-
 - job-template:
     name: '{nightly-name}'
     project-type: multijob
     disabled: '{obj:nightly_disabled}'
     node: runner
     <<: *runner-parameters
-    <<: *runner-wrappers
-    <<: *runner-properties
     scm: []
     triggers:
       - timed: '{nightly_timer}'
+    properties:
+      - runner-property:
+          build-name: '{build-name}'
+    wrappers:
+      - runner-wrapper 
     publishers:
       - runner-publisher:
           properties_name: nightly.properties

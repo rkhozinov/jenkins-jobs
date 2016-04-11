@@ -1,4 +1,4 @@
-- runner-conditions
+- runner-condition
 - multijob:
     name: 'System tests for dvs{fuel-release}.{plugin-version} vcenter5'
     condition: COMPLETED
@@ -60,6 +60,14 @@
         current-parameters: true
         kill-phase-on: NEVER
       - name: '{fuel-release}.{plugin-name}.dvs_uninstall'
+        property-file: build_number
+        current-parameters: true
+        kill-phase-on: NEVER
+      - name: '{fuel-release}.{plugin-name}.dvs_remote_sg_simple'
+        property-file: build_number
+        current-parameters: true
+        kill-phase-on: NEVER
+      - name: '{fuel-release}.{plugin-name}.dvs_remote_ip_prefix'
         property-file: build_number
         current-parameters: true
         kill-phase-on: NEVER
