@@ -130,7 +130,7 @@
                 echo "Plugin won't be built"
                 exit 1
               fi
-            esle
+            else
               echo "Plugin won't be built"
               exit 1
             fi
