@@ -3,6 +3,9 @@
 # activate bash xtrace for script
 [[ "${DEBUG}" == "true" ]] && set -x || set +x
 
+[ -z "$(ls -A ./plugin_test/fuel-qa)" ] && { echo "fuel-qa is not exists or empty"; exit 1; }
+
+
 ISO_FILE_ARTIFACT='iso_file'
 # if user entered custom iso we should use it
 if [ -z $ISO_FILE  ]; then
