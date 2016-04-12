@@ -174,7 +174,7 @@
           default: '{multijob_build_pkg}'
           description: "Triggers build of pkg of $PKG_JOB_NAME before run of tests"
       - common-parameters:
-          publish_results:      '{obj:publish_results}'
+          publish_results:      '{publish_results}'
           debug:                '{debug}'
           disable_ssl:          '{disable_ssl}'
           force_erase:          '{force_erase}'
@@ -209,10 +209,10 @@
           description: "Triggers build of pkg from $PKG_JOB_NAME (only for custom)"
       - '{testgroup_parameter_type}':
           name: TEST_GROUP
-          '{testgroup_value_type}': '{obj:testgroup_value}'
+          '{testgroup_value_type}': '{testgroup_value}'
           description: "test-group name"
       - common-parameters:
-          publish_results: '{obj:publish_results}'
+          publish_results: '{publish_results}'
           debug:           '{debug}'
           disable_ssl:     '{disable_ssl}'
           force_erase:     '{force_erase}'
@@ -245,12 +245,12 @@
     <<: *test-parameters
     scm:
       - common-scm:
-          scm_submodule_disabled: '{obj:scm_submodule_disabled}'
+          scm_submodule_disabled: '{scm_submodule_disabled}'
           gerrit-repo: '{gerrit-repo}'
     wrappers:
       - test-wrapper:
           test-timeout: '{test-timeout}'
-    properties:    
+    properties:
       - test-property
     builders:
       - conditional-step:
@@ -312,7 +312,6 @@
                   - project: '{fuel-release}.{plugin-name}.reporter'
                     property-file: reporter.properties
                     fail-on-missing: true
-
 - job-template:
     name: '{reporter-name}'
     disabled: false
@@ -452,7 +451,7 @@
           gerrit-branch: '{gerrit-branch}'
     scm:
       - common-scm:
-          scm_submodule_disabled: '{obj:scm_submodule_disabled}'
+          scm_submodule_disabled: '{scm_submodule_disabled}'
           gerrit-repo: '{gerrit-repo}'
     parameters:
       - string:
@@ -509,7 +508,7 @@
           gerrit-branch: '{gerrit-branch}'
     scm:
       - common-scm:
-          scm_submodule_disabled: '{obj:scm_submodule_disabled}'
+          scm_submodule_disabled: '{scm_submodule_disabled}'
           gerrit-repo: '{gerrit-repo}'
     wrapper:
       - runner-wrapper
@@ -540,7 +539,7 @@
           gerrit-branch: '{gerrit-branch}'
     scm:
       - common-scm:
-          scm_submodule_disabled: '{obj:scm_submodule_disabled}'
+          scm_submodule_disabled: '{scm_submodule_disabled}'
           gerrit-repo: '{gerrit-repo}'
     wrapper:
       - runner-wrapper
@@ -581,7 +580,7 @@
           gerrit-branch: '{gerrit-branch}'
     scm:
       - common-scm:
-          scm_submodule_disabled: '{obj:scm_submodule_disabled}'
+          scm_submodule_disabled: '{scm_submodule_disabled}'
           gerrit-repo: '{gerrit-repo}'
     wrapper:
       - runner-wrapper
@@ -753,7 +752,7 @@
       - runner-property:
           build-name: '{build-name}'
     wrappers:
-      - runner-wrapper 
+      - runner-wrapper
     publishers:
       - runner-publisher:
           properties_name: regression.properties
