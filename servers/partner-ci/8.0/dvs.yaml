@@ -39,6 +39,7 @@
     download-iso-name: 'download_iso'
     nightly-name: '{fuel-release}.{plugin-name}.nightly'
     custom-name: '{fuel-release}.{plugin-name}.custom'
+    reporter-name: '{fuel-release}.{plugin-name}.reporter'
 
     admin_node_memory: '8192'
     slave_node_memory: '8192'
@@ -48,7 +49,6 @@
     iso_job_name: '{fuel-release}.{plugin-name}.canary'
     nightly_timer: 'H 22 * * *'
     regression_timer: 'H 18 * * *'
-    reporter-name: '{fuel-release}.{plugin-name}.reporter'
     nightly_disabled: false
     regression_disabled: true
     use_snapshots: false
@@ -61,12 +61,12 @@
     multijob_build_pkg: true
     testjob_build_pkg: false
     runner_timeout: 600
-    test-timeout: 300
+    test_timeout: 300
     iso_file: 'fuel-8.0-570.iso'
-    gerrit-repo: 'fuel-plugin-vmware-dvs'
-    gerrit-branch: 'stable/8.0-agentful'
-    email-to: 'rkhozinov@mirantis.com otsvigun@mirantis.com'
-    released-plugin-path: '/storage/dvs/released/dvs-2.0.0.noarch.rpm'
+    gerrit_repo: 'fuel-plugin-vmware-dvs'
+    gerrit_branch: 'stable/8.0-agentful'
+    email_to: 'rkhozinov@mirantis.com otsvigun@mirantis.com'
+    released_plugin_path: '/storage/dvs/released/dvs-2.0.0.noarch.rpm'
     scm_submodule_disabled: true
 
     testrail_project: "VMware DVS plugin"
@@ -149,8 +149,8 @@
           testrail_plan_desc: "Test plan description"
           testrail_run: "$TREP_TESTRAIL_SUITE"
           testrail_run_desc: "Test run description"
-          default-pkg-job-name: ''
-          default-iso-job-name: ''
+          pkg_job_name: ''
+          iso_job_name: ''
           multijob_build_pkg: false
 
       - '{fuel-release}.{plugin-name}.regression.test':
@@ -181,7 +181,7 @@
           recreate_venv:        '{recreate_venv}'
           use_snapshots:        '{use_snapshots}'
           iso_file:             '{iso_file}'
-          gerrit-branch:        '{gerrit-branch}'
+          gerrit_branch:        '{gerrit_branch}'
           env_prefix:           '{fuel-release}.{plugin-name}'
           pkg_job_name:         '{pkg_job_name}'
           iso_job_name:         '{iso_job_name}'
@@ -219,7 +219,7 @@
           recreate_venv:   '{recreate_venv}'
           use_snapshots:   '{use_snapshots}'
           iso_file:        '{iso_file}'
-          gerrit-branch:   '{gerrit-branch}'
+          gerrit_branch:   '{gerrit_branch}'
           env_prefix:      '{fuel-release}.{plugin-name}'
           pkg_job_name:    '{pkg_job_name}'
           iso_job_name:    '{iso_job_name}'
@@ -246,10 +246,10 @@
     scm:
       - common-scm:
           scm_submodule_disabled: '{scm_submodule_disabled}'
-          gerrit-repo: '{gerrit-repo}'
+          gerrit_repo: '{gerrit_repo}'
     wrappers:
       - test-wrapper:
-          test-timeout: '{test-timeout}'
+          test_timeout: '{test_timeout}'
     properties:
       - test-property
     builders:
@@ -291,7 +291,7 @@
     publishers:
       - runner-publisher:
           properties_name: properties
-          email-to: '{email-to}'
+          email_to: '{email_to}'
       - conditional-publisher:
           - condition-kind: file-exists
             condition-filename: 'nosetests.xml'
@@ -312,6 +312,7 @@
                   - project: '{fuel-release}.{plugin-name}.reporter'
                     property-file: reporter.properties
                     fail-on-missing: true
+
 - job-template:
     name: '{reporter-name}'
     disabled: false
@@ -436,7 +437,7 @@
     publishers:
       - runner-publisher:
           properties_name: reporter.properties
-          email-to: '{email-to}'
+          email_to: '{email_to}'
 
 - job-template:
     name: '{flake8-name}'
@@ -447,20 +448,20 @@
       - runner-wrapper
     triggers:
       - draft-patchset-gerrit-trigger:
-          gerrit-repo: '{gerrit-repo}'
-          gerrit-branch: '{gerrit-branch}'
+          gerrit_repo: '{gerrit_repo}'
+          gerrit_branch: '{gerrit_branch}'
     scm:
       - common-scm:
           scm_submodule_disabled: '{scm_submodule_disabled}'
-          gerrit-repo: '{gerrit-repo}'
+          gerrit_repo: '{gerrit_repo}'
     parameters:
       - string:
           name: GERRIT_BRANCH
-          default: 'origin/{gerrit-branch}'
+          default: 'origin/{gerrit_branch}'
           description: 'The branch for fuel-qa gerrit'
       - string:
           name: GERRIT_REFSPEC
-          default: 'refs/heads/{gerrit-branch}'
+          default: 'refs/heads/{gerrit_branch}'
       - string:
           name: ARGS
           default: >
@@ -489,11 +490,11 @@
     parameters:
       - string:
           name: GERRIT_BRANCH
-          default: 'origin/{gerrit-branch}'
+          default: 'origin/{gerrit_branch}'
           description: 'The branch for fuel-qa gerrit'
       - string:
           name: GERRIT_REFSPEC
-          default: 'refs/heads/{gerrit-branch}'
+          default: 'refs/heads/{gerrit_branch}'
       - string:
           name: RADON_ARGS
           default: '--total-average -nb --ignore fuel-qa'
@@ -504,12 +505,12 @@
           description: "Default args for checking average code complexity"
     triggers:
       - draft-patchset-gerrit-trigger:
-          gerrit-repo: '{gerrit-repo}'
-          gerrit-branch: '{gerrit-branch}'
+          gerrit_repo: '{gerrit_repo}'
+          gerrit_branch: '{gerrit_branch}'
     scm:
       - common-scm:
           scm_submodule_disabled: '{scm_submodule_disabled}'
-          gerrit-repo: '{gerrit-repo}'
+          gerrit_repo: '{gerrit_repo}'
     wrapper:
       - runner-wrapper
     properties:
@@ -535,22 +536,22 @@
     disabled: false
     triggers:
       - draft-patchset-gerrit-trigger:
-          gerrit-repo: '{gerrit-repo}'
-          gerrit-branch: '{gerrit-branch}'
+          gerrit_repo: '{gerrit_repo}'
+          gerrit_branch: '{gerrit_branch}'
     scm:
       - common-scm:
           scm_submodule_disabled: '{scm_submodule_disabled}'
-          gerrit-repo: '{gerrit-repo}'
+          gerrit_repo: '{gerrit_repo}'
     wrapper:
       - runner-wrapper
     parameters:
       - string:
           name: GERRIT_BRANCH
-          default: 'origin/{gerrit-branch}'
+          default: 'origin/{gerrit_branch}'
           description: 'The branch for fuel-qa gerrit'
       - string:
           name: GERRIT_REFSPEC
-          default: 'refs/heads/{gerrit-branch}'
+          default: 'refs/heads/{gerrit_branch}'
       - string:
           name: ARGS
           default: '-e SC2086,SC2046'
@@ -576,21 +577,21 @@
     disabled: false
     triggers:
       - draft-patchset-gerrit-trigger:
-          gerrit-repo: '{gerrit-repo}'
-          gerrit-branch: '{gerrit-branch}'
+          gerrit_repo: '{gerrit_repo}'
+          gerrit_branch: '{gerrit_branch}'
     scm:
       - common-scm:
           scm_submodule_disabled: '{scm_submodule_disabled}'
-          gerrit-repo: '{gerrit-repo}'
+          gerrit_repo: '{gerrit_repo}'
     wrapper:
       - runner-wrapper
     parameters:
       - string:
           name: GERRIT_BRANCH
-          default: 'origin/{gerrit-branch}'
+          default: 'origin/{gerrit_branch}'
       - string:
           name: GERRIT_REFSPEC
-          default: 'refs/heads/{gerrit-branch}'
+          default: 'refs/heads/{gerrit_branch}'
     properties:
       - heavy-job:
           weight: 1
@@ -625,7 +626,7 @@
           artifacts: 'build.plugin_version'
           allow-empty: false
       - email:
-          recipients: '{email-to}'
+          recipients: '{email_to}'
 
 - job-template:
     name: '{fuel-release}.{plugin-name}.{testgroup}'
@@ -677,13 +678,13 @@
     <<: *runner-parameters
     triggers:
       - draft-patchset-gerrit-trigger:
-          gerrit-repo: '{gerrit-repo}'
-          gerrit-branch: '{gerrit-branch}'
+          gerrit_repo: '{gerrit_repo}'
+          gerrit_branch: '{gerrit_branch}'
     properties:
       - runner-property:
           build-name: '{build-name}'
     wrappers:
-      - runner-wrapper 
+      - runner-wrapper
     scm: []
     builders:
       - runner-condition
@@ -700,7 +701,7 @@
     publishers:
       - runner-publisher:
           properties_name: smoke.properties
-          email-to: '{email-to}'
+          email_to: '{email_to}'
 
 - job-template:
     name: '{bvt-name}'
@@ -713,13 +714,13 @@
     scm: []
     triggers:
       - merge-gerrit-trigger:
-          gerrit-repo: '{gerrit-repo}'
-          gerrit-branch: '{gerrit-branch}'
+          gerrit_repo: '{gerrit_repo}'
+          gerrit_branch: '{gerrit_branch}'
     properties:
       - runner-property:
           build-name: '{build-name}'
     wrappers:
-      - runner-wrapper 
+      - runner-wrapper
     builders:
       - runner-condition
       - multijob:
@@ -735,7 +736,7 @@
     publishers:
       - runner-publisher:
           properties_name: bvt.properties
-          email-to: '{email-to}'
+          email_to: '{email_to}'
 
 - job-template:
     name: '{regression-name}'
@@ -756,7 +757,7 @@
     publishers:
       - runner-publisher:
           properties_name: regression.properties
-          email-to: '{email-to}'
+          email_to: '{email_to}'
     builders:
       - multijob:
           name: '1st phase - regression test'
@@ -765,7 +766,7 @@
             - name: '{fuel-release}.{plugin-name}.regression.test'
               predefined-parameters: |
                 TEST_GROUP=dvs_regression
-                DVS_PLUGIN_PATH={released-plugin-path}
+                DVS_PLUGIN_PATH={released_plugin_path}
                 PLUGIN_VERSION={plugin-version}
                 PKG_JOB_BUILD_NUMBER=released
               current-parameters: true
@@ -791,7 +792,7 @@
     publishers:
       - runner-publisher:
           properties_name: canary.properties
-          email-to: '{email-to}'
+          email_to: '{email_to}'
     builders:
       - runner-condition
       - multijob:
@@ -822,6 +823,6 @@
     publishers:
       - runner-publisher:
           properties_name: nightly.properties
-          email-to: '{email-to}'
+          email_to: '{email_to}'
     builders:
       !include: dvs-nightly.yaml.inc
