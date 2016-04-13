@@ -35,11 +35,11 @@
           description: 'Storage for iso files'
       - string:
           name: GERRIT_REFSPEC
-          default: 'refs/heads/{gerrit-branch}'
+          default: 'refs/heads/{gerrit_branch}'
           description: 'Refspecs for commits in fuel-qa gerrit separated with spaces'
       - string:
           name: GERRIT_BRANCH
-          default: 'origin/{gerrit-branch}'
+          default: 'origin/{gerrit_branch}'
           description: 'The branch for fuel-qa gerrit'
       - string:
           name: PKG_JOB_NAME
@@ -114,7 +114,7 @@
           artifacts: 'build.plugin_version'
           allow-empty: true
       - email:
-          recipients: '{email-to}'
+          recipients: '{email_to}'
 
 - builder:
     name: runner-condition
@@ -182,7 +182,7 @@
     name: common-scm
     scm:
       - git:
-          url: 'https://review.openstack.org/openstack/{gerrit-repo}'
+          url: 'https://review.openstack.org/openstack/{gerrit_repo}'
           refspec: $GERRIT_REFSPEC
           branches:
             - $GERRIT_BRANCH
@@ -201,10 +201,10 @@
          trigger-on: '{obj:trigger_on}'
          projects:
            - project-compare-type: 'PLAIN'
-             project-pattern: 'openstack/{gerrit-repo}'
+             project-pattern: 'openstack/{gerrit_repo}'
              branches:
                - branch-compare-type: 'ANT'
-                 branch-pattern: '{gerrit-branch}'
+                 branch-pattern: '{gerrit_branch}'
              forbidden-file-paths:
                - compare-type: 'ANT'
                  pattern: 'docs/**'
@@ -227,8 +227,8 @@
     name: draft-patchset-gerrit-trigger
     triggers:
       - generic-gerrit-trigger:
-          gerrit-repo: '{gerrit-repo}'
-          gerrit-branch: '{gerrit-branch}'
+          gerrit_repo: '{gerrit_repo}'
+          gerrit_branch: '{gerrit_branch}'
           trigger_on:
             - draft-published-event
             - patchset-created-event:
@@ -240,8 +240,8 @@
     name: merge-gerrit-trigger
     triggers:
       - generic-gerrit-trigger:
-          gerrit-repo: '{gerrit-repo}'
-          gerrit-branch: '{gerrit-branch}'
+          gerrit_repo: '{gerrit_repo}'
+          gerrit_branch: '{gerrit_branch}'
           trigger_on:
             - change-merged-event
 
@@ -266,7 +266,7 @@
           fail: true
           type: no-activity
           write-description: "Timeout is exceeded"
-          timeout: '{test-timeout}'
+          timeout: '{test_timeout}'
 
 - property:
     name: runner-property
