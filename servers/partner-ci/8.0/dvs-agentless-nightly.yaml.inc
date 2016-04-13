@@ -1,4 +1,4 @@
-- runner-conditions
+- runner-condition
 - multijob:
     name: 'System tests for dvs{fuel-release}.{plugin-version} vcenter5'
     condition: COMPLETED
