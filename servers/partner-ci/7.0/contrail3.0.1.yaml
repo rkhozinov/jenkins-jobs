@@ -66,7 +66,7 @@
 - project:
     name: 'predefined_parameters'
     fuel-release: '7.0'
-    plugin-version: '3.0'
+    plugin-version: '3.0.1'
     plugin-name: 'contrail'
     build-name: '{fuel-release}.{plugin-name}.{plugin-version}.build'
     flake8-name: '{fuel-release}.{plugin-name}.{plugin-version}.flake8'
@@ -87,7 +87,7 @@
     iso_job_name: ''
     nightly_timer: 'H 22 * * *'
     regression_timer: 'H 18 * * *'
-    nightly_disabled: true
+    nightly_disabled: false
     regression_disabled: true
     use_snapshots: false
     force_erase: true
@@ -104,7 +104,7 @@
     test_timeout: 300
     iso_file: 'fuel-7.0-301-2015-09-22_20-01-53.iso'
     gerrit_repo: 'fuel-plugin-contrail'
-    gerrit_branch: 'stable/3.0'
+    gerrit_branch: 'stable/3.0.1'
     email_to: 'rkhozinov@mirantis.com okosse@mirantis.com ivovk@mirantis.com'
     released_plugin_path: '/storage/contrail/released/contrail-3.0.noarch.rpm'
     scm_submodule_disabled: true
@@ -112,7 +112,7 @@
     testrail_project: "Contrail plugin"
     testrail_suite: "Contrail Plugin v3.x.x"
     testrail_suite_desc: "Suite description"
-    testrail_milestone: "Fuel Contrail Plugin v3.0.0"
+    testrail_milestone: "Fuel Contrail Plugin v3.0.1"
     testrail_plan: "$TREP_TESTRAIL_SUITE iso #${{ISO_VERSION}} pkg#${{JUNIPER_PKG_VERSION}} build#${{PKG_JOB_BUILD_NUMBER}}"
     testrail_plan_desc: "Test plan description"
     testrail_run: "$TREP_TESTRAIL_SUITE"
@@ -160,50 +160,37 @@
           multijob_build_pkg: true
 
       - '{custom-name}.qa':
-          scm_submodule_disabled: false
-          testgroup_parameter_type: string
-          testgroup_value_type: default
-          testgroup_value: '{testgroup}'
           publish_results: false
+          scm_submodule_disabled: false
 
       - '{custom-name}.dev':
           scm_submodule_disabled: false
+          publish_results: false
           testgroup_parameter_type: choice
           testgroup_value_type: choices
           testgroup_value: '{obj:testgroup}'
-          publish_results: false
 
       - '{reporter-name}'
 
       - '{fuel-release}.{plugin-name}.{plugin-version}.{testgroup}.juniper':
           scm_submodule_disabled: false
-          testgroup_parameter_type: string
-          testgroup_value_type: default
-          testgroup_value: '{testgroup}'
 
-      - '{smoke-name}'
+      - '{smoke-name}':
+          multijob_build_pkg: false
 
       - '{fuel-release}.{plugin-name}.{plugin-version}.smoke.test.juniper':
           scm_submodule_disabled: false
-          testjob_build_pkg: false
-          testgroup_parameter_type: string
-          testgroup_value_type: default
-          testgroup_value: '{testgroup}'
 
       - '{bvt-name}':
           multijob_build_pkg: true
 
       - '{fuel-release}.{plugin-name}.{plugin-version}.bvt.test.juniper':
           scm_submodule_disabled: false
-          testjob_build_pkg: false
-          testgroup_parameter_type: string
-          testgroup_value_type: default
-          testgroup_value: '{testgroup}'
 
       - '{regression-name}':
           testrail_suite: "Contrail Plugin v3.x.x"
           testrail_suite_desc: "Suite description"
-          testrail_milestone: "Fuel Contrail Plugin v3.0.0"
+          testrail_milestone: "Fuel Contrail Plugin v3.0.1"
           testrail_plan: "$TREP_TESTRAIL_SUITE iso #${{ISO_VERSION}} pkg#${{JUNIPER_PKG_VERSION}} build#${{PKG_JOB_BUILD_NUMBER}}"
           testrail_plan_desc: "Test plan description"
           testrail_run: "$TREP_TESTRAIL_SUITE"
@@ -214,129 +201,7 @@
 
       - '{fuel-release}.{plugin-name}.{plugin-version}.regression.test.juniper':
           scm_submodule_disabled: false
-          testgroup_parameter_type: string
-          testgroup_value_type: default
-          testgroup_value: '{testgroup}'
 
-# common git settings to get sources
-- common-scm: &common-scm
-    name: 'common-scm'
-    scm:
-      - git:
-          url: 'https://review.openstack.org/openstack/{gerrit-repo}'
-          refspec: $GERRIT_REFSPEC
-          branches:
-            - $GERRIT_BRANCH
-          choosing-strategy: gerrit
-          skip-tag: true
-          submodule:
-            disable: '{obj:scm_submodule_disabled}'
-            tracking: true
-            recursive: true
-          wipe-workspace: true
-
-# list of gerrit events to trigger build job
-- build-gerrit-events: &build-gerrit-events
-    name: 'build-gerrit-events'
-    trigger-on:
-      - draft-published-event
-      - patchset-created-event:
-          exclude-trivial-rebase: true
-          exclude-no-code-change: true
-
-# configuration of gerrit event for the smoke multijob
-# smoke multijob should run on patchset, draft events
-- smoke-gerrit-events: &smoke-gerrit-events
-    name: 'smoke-gerrit-events'
-    trigger-on:
-      - draft-published-event
-      - patchset-created-event:
-          exclude-trivial-rebase: true
-          exclude-no-code-change: true
-
-# configuration of gerrit event for the bvt multijob
-# bvt multijob should run only on merge event
-- bvt-gerrit-events: &bvt-gerrit-events
-    name: 'bvt-gerrit-events'
-    trigger-on:
-      - change-merged-event
-
-# the main part of gerrit section as yaml anchor
-- generic-gerrit-projects: &generic-gerrit-projects
-    name: 'generic-gerrit-projects'
-    projects:
-      - project-compare-type: 'PLAIN'
-        project-pattern: 'openstack/{gerrit-repo}'
-        branches:
-          - branch-compare-type: 'ANT'
-            branch-pattern: '{gerrit-branch}'
-        forbidden-file-paths:
-          - compare-type: 'ANT'
-            pattern: 'docs/**'
-          - compare-type: 'ANT'
-            pattern: 'specs/**'
-    silent: false
-    override-votes: true
-    server-name: 'review.openstack.org'
-    custom-url: '* $JOB_NAME $BUILD_URL'
-    escape-quotes: true
-    readable-message: true
-    skip-vote:
-      successfull: false
-      failed: false
-      unstable: true
-      notbuilt: true
-
-# properties for smoke, bvt and nightly multijobs
-- runner-properties: &runner-properties
-    name: 'runner-properties'
-    properties:
-      - heavy-job:
-          weight: 1
-      - build-blocker:
-          use-build-blocker: true
-          blocking-jobs:
-            - '{build-name}'
-          block-level: 'GLOBAL'
-          queue-scanning: 'BUILDABLE'
-
-# properties for smoke, bvt and nightly multijobs
-- runner-wrappers: &runner-wrappers
-    name: 'runner-wrappers'
-    wrappers:
-      - ansicolor:
-          colormap: xterm
-
-# properties for smoke, bvt and nightly multijobs
-- test-wrappers: &test-wrappers
-    name: 'test-wrappers'
-    wrappers:
-      - ansicolor:
-          colormap: xterm
-      - timeout:
-          fail: true
-          type: no-activity
-          write-description: "Timeout is exceeded"
-          timeout: '{test_timeout}'
-
-# properties for test jobs
-- test-properties: &test-properties
-    name: 'test-properties'
-    properties:
-      - heavy-job:
-          weight: 1
-      - throttle:
-          max-per-node: 0
-          max-total: 0
-          categories:
-            - vcenter
-            - dvs
-            - nsx
-            - nsxv
-            - contrail
-          option: category
-
-# parameters for smoke, bvt and nightly multijobs
 - runner-parameters: &runner-parameters
     name: 'runner-parameters'
     parameters:
@@ -504,7 +369,7 @@
     parameters:
       - string:
           name: ISO_VERSION
-          description: "ISO number"
+          description: "ISO number for form the test plan string"
       - string:
           name: PLUGIN_VERSION
           description: "Plugin version from the test plan string"
@@ -520,14 +385,14 @@
           default: ''
       - string:
           name: TEST_JOB_BUILD_NUMBER
-          description: "The number of a build"
+          description: "The number of a test build"
       - string:
           name: PKG_JOB_BUILD_NUMBER
-          description: "The number of a build"
+          description: "The number of a pkg build"
       - string:
           name: TREP_TESTRAIL_URL
           default: "https://mirantis.testrail.com"
-          description: ""
+          description: "Mirantis testrail url"
       - string:
           name: TREP_TESTRAIL_PROJECT
           default: "{testrail_project}"
@@ -614,7 +479,7 @@
           build-number: ${{TEST_JOB_BUILD_NUMBER}}
           stable: true
       - shell:
-          !include-raw-escape: 'builders/reporter.sh'
+          !include-raw-escape: builders/reporter.sh
     publishers:
       - runner-publisher:
           properties_name: reporter.properties
@@ -885,6 +750,7 @@
           projects:
             - name: '{fuel-release}.{plugin-name}.{plugin-version}.smoke.test.juniper'
               current-parameters: true
+              property-file: build_number
               predefined-parameters: |
                 TEST_GROUP=contrail_smoke
                 CONTRAIL_DISTRIBUTION=juniper
@@ -920,6 +786,7 @@
           projects:
             - name: '{fuel-release}.{plugin-name}.{plugin-version}.bvt.test.juniper'
               current-parameters: true
+              property-file: build_number
               predefined-parameters: |
                 TEST_GROUP=contrail_bvt
                 CONTRAIL_DISTRIBUTION=juniper
@@ -967,7 +834,7 @@
 - job-template:
     name: '{nightly-name}'
     project-type: multijob
-    disabled: false
+    disabled: '{obj:nightly_disabled}'
     node: runner
     <<: *runner-parameters
     scm: []
@@ -983,177 +850,4 @@
           properties_name: nightly.properties
           email_to: '{email_to}'
     builders:
-      - conditional-step:
-          condition-kind: boolean-expression
-          condition-expression: ${{MJ_BUILD_PKG}}
-          steps:
-            - trigger-builds:
-                - project: "${{PKG_JOB_NAME}}"
-                  current-parameters: false
-                  git-revision: false
-                  block: true
-      - copyartifact:
-          project: "${{PKG_JOB_NAME}}"
-          which-build: last-successful
-      - shell: |
-          #!/bin/bash
-          [ ! -f build.properties ] && (echo "build.properties doesn't exist"; exit 1)
-          echo "PKG_JOB_BUILD_NUMBER=$(grep "BUILD_NUMBER" < build.properties | cut -d= -f2)" > build_number
-      - multijob:
-          name: >
-            'Smoke/bvt tests to check before running of nighlty tests.
-             The nightly tests scope will be runned only if smoke/bvt will have successful state'
-          condition: SUCCESSFUL
-          projects:
-            - name: '{fuel-release}.{plugin-name}.{plugin-version}.contrail_smoke.juniper'
-              property-file: build_number
-              predefined-parameters: |
-                 CONTRAIL_DISTRIBUTION=juniper
-              current-parameters: true
-              kill-phase-on: FAILURE
-            - name: '{fuel-release}.{plugin-name}.{plugin-version}.contrail_bvt.juniper'
-              property-file: build_number
-              predefined-parameters: |
-                 CONTRAIL_DISTRIBUTION=juniper
-              current-parameters: true
-              kill-phase-on: FAILURE
-      - multijob:
-          name: >
-            'Nightly tests for {fuel-release}.{plugin-name}.{plugin-version}'
-          condition: COMPLETED
-          projects:
-            - name: '{fuel-release}.{plugin-name}.{plugin-version}.contrail_ha.juniper'
-              property-file: build_number
-              predefined-parameters: |
-                 CONTRAIL_DISTRIBUTION=juniper
-              current-parameters: true
-              kill-phase-on: NEVER
-            - name: '{fuel-release}.{plugin-name}.{plugin-version}.contrail_ha_baseos.juniper'
-              property-file: build_number
-              predefined-parameters: |
-                 CONTRAIL_DISTRIBUTION=juniper
-              current-parameters: true
-              kill-phase-on: NEVER
-            - name: '{fuel-release}.{plugin-name}.{plugin-version}.contrail_ceilometer.juniper'
-              property-file: build_number
-              predefined-parameters: |
-                 CONTRAIL_DISTRIBUTION=juniper
-              current-parameters: true
-              kill-phase-on: NEVER
-            - name: '{fuel-release}.{plugin-name}.{plugin-version}.contrail_vlan.juniper'
-              property-file: build_number
-              predefined-parameters: |
-                 CONTRAIL_DISTRIBUTION=juniper
-              current-parameters: true
-              kill-phase-on: NEVER
-            - name: '{fuel-release}.{plugin-name}.{plugin-version}.contrail_jumbo.juniper'
-              property-file: build_number
-              predefined-parameters: |
-                 CONTRAIL_DISTRIBUTION=juniper
-              current-parameters: true
-              kill-phase-on: NEVER
-
-              property-file: build_number
-            - name: '{fuel-release}.{plugin-name}.{plugin-version}.contrail_bonding.juniper'
-              predefined-parameters: |
-                 CONTRAIL_DISTRIBUTION=juniper
-              current-parameters: true
-              kill-phase-on: NEVER
-              property-file: build_number
-
-            - name: '{fuel-release}.{plugin-name}.{plugin-version}.contrail_ceph_multirole.juniper'
-              predefined-parameters: |
-                 CONTRAIL_DISTRIBUTION=juniper
-              current-parameters: true
-              property-file: build_number
-              kill-phase-on: NEVER
-
-            - name: '{fuel-release}.{plugin-name}.{plugin-version}.contrail_cinder_multirole.juniper'
-              predefined-parameters: |
-                 CONTRAIL_DISTRIBUTION=juniper
-              property-file: build_number
-              current-parameters: true
-              kill-phase-on: NEVER
-
-            - name: '{fuel-release}.{plugin-name}.{plugin-version}.contrail_cinder_ceph_multirole.juniper'
-              predefined-parameters: |
-              property-file: build_number
-                 CONTRAIL_DISTRIBUTION=juniper
-              current-parameters: true
-              kill-phase-on: NEVER
-
-            - name: '{fuel-release}.{plugin-name}.{plugin-version}.contrail_plugin_add_delete_controller_node.juniper'
-              property-file: build_number
-              predefined-parameters: |
-                 CONTRAIL_DISTRIBUTION=juniper
-              current-parameters: true
-              kill-phase-on: NEVER
-
-            - name: '{fuel-release}.{plugin-name}.{plugin-version}.contrail_plugin_add_delete_compute_node.juniper'
-              property-file: build_number
-              predefined-parameters: |
-                 CONTRAIL_DISTRIBUTION=juniper
-              current-parameters: true
-              kill-phase-on: NEVER
-
-            - name: '{fuel-release}.{plugin-name}.{plugin-version}.contrail_add_control.juniper'
-              property-file: build_number
-              predefined-parameters: |
-                 CONTRAIL_DISTRIBUTION=juniper
-              current-parameters: true
-              kill-phase-on: NEVER
-
-            - name: '{fuel-release}.{plugin-name}.{plugin-version}.contrail_ha_with_shutdown_contrail_node.juniper'
-              property-file: build_number
-              predefined-parameters: |
-                 CONTRAIL_DISTRIBUTION=juniper
-              current-parameters: true
-              kill-phase-on: NEVER
-            - name: '{fuel-release}.{plugin-name}.{plugin-version}.cannot_deploy_only_contrail_db.juniper'
-              property-file: build_number
-              predefined-parameters: |
-                 CONTRAIL_DISTRIBUTION=juniper
-              current-parameters: true
-              kill-phase-on: NEVER
-            - name: '{fuel-release}.{plugin-name}.{plugin-version}.cannot_deploy_only_contrail_config.juniper'
-              property-file: build_number
-              predefined-parameters: |
-                 CONTRAIL_DISTRIBUTION=juniper
-              current-parameters: true
-              kill-phase-on: NEVER
-            - name: '{fuel-release}.{plugin-name}.{plugin-version}.cannot_deploy_only_contrail_control.juniper'
-              property-file: build_number
-              predefined-parameters: |
-                 CONTRAIL_DISTRIBUTION=juniper
-              current-parameters: true
-              kill-phase-on: NEVER
-            - name: '{fuel-release}.{plugin-name}.{plugin-version}.contrail_add_config.juniper'
-              property-file: build_number
-              predefined-parameters: |
-                 CONTRAIL_DISTRIBUTION=juniper
-              current-parameters: true
-              kill-phase-on: NEVER
-            - name: '{fuel-release}.{plugin-name}.{plugin-version}.contrail_delete_control.juniper'
-              property-file: build_number
-              predefined-parameters: |
-                 CONTRAIL_DISTRIBUTION=juniper
-              current-parameters: true
-              kill-phase-on: NEVER
-            - name: '{fuel-release}.{plugin-name}.{plugin-version}.contrail_delete_config.juniper'
-              property-file: build_number
-              predefined-parameters: |
-                 CONTRAIL_DISTRIBUTION=juniper
-              current-parameters: true
-              kill-phase-on: NEVER
-            - name: '{fuel-release}.{plugin-name}.{plugin-version}.contrail_add_db.juniper'
-              property-file: build_number
-              predefined-parameters: |
-                 CONTRAIL_DISTRIBUTION=juniper
-              current-parameters: true
-              kill-phase-on: NEVER
-            - name: '{fuel-release}.{plugin-name}.{plugin-version}.contrail_net_template.juniper'
-              property-file: build_number
-              predefined-parameters: |
-                 CONTRAIL_DISTRIBUTION=juniper
-              current-parameters: true
-              kill-phase-on: NEVER
+      !include: contrail-nightly.yaml.inc
