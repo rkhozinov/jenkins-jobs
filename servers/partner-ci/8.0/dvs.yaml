@@ -1,6 +1,6 @@
 ---
 - parameter:
-    name: dvs-common-parameters
+    name: plugin-specific-parameters
     parameters:
       - string:
           name: WORKSTATION_SNAPSHOT
@@ -104,6 +104,12 @@
       - dvs_uninstall
       - dvs_remote_sg_simple
       - dvs_remote_ip_prefix
+      - dvs_connect_default_net
+      - dvs_connect_nodefault_net
+      - dvs_ping_without_fip
+      - dvs_reboot_vcenter_1
+      - dvs_reboot_vcenter_2
+      - dvs_volume
 
     jobs:
       - '{build-name}'
@@ -157,7 +163,7 @@
           scm_submodule_disabled: false
 
       - '{canary-name}':
-          default-iso-job-name: '{download-iso-name}'
+          iso_job_name: '{download-iso-name}'
 
       - '{fuel-release}.{plugin-name}.canary.skinny':
           scm_submodule_disabled: false
@@ -193,7 +199,7 @@
           testrail_suite_desc:  '{testrail_suite_desc}'
           testrail_plan:        '{testrail_plan}'
           testrail_plan_desc:   '{testrail_plan_desc}'
-      - dvs-common-parameters
+      - plugin-specific-parameters
 
 # parameters for jobs created per test-group and custom test job
 - test-parameters: &test-parameters
@@ -231,7 +237,7 @@
           testrail_suite_desc:  '{testrail_suite_desc}'
           testrail_plan:        '{testrail_plan}'
           testrail_plan_desc:   '{testrail_plan_desc}'
-      - dvs-common-parameters
+      - plugin-specific-parameters
 
 - defaults:
     name: global
@@ -775,14 +781,15 @@
 - job-template:
     name: '{canary-name}'
     description: 'The Smoke test for {fuel-release}.{plugin-name}.{plugin-version}'
-    disabled: false
+    disabled: true
     concurrent: true
     project-type: multijob
     node: runner
     scm: []
+    <<: *runner-parameters
     triggers:
       - reverse:
-          jobs: ${{ISO_JOB_NAME}}
+          jobs: '{download-iso-name}'
           result: 'success'
     properties:
       - runner-property:
