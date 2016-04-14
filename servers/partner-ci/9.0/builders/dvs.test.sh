@@ -40,14 +40,11 @@ export FUEL_RELEASE=$(cut -d- -f2-2 <<< ${ISO_FILE} | tr -d '.')
 export ISO_PATH="${ISO_STORAGE}/${ISO_FILE}"
 export ISO_VERSION=$(echo "${ISO_FILE}" | cut -d'-' -f3-3 | tr -d '.iso' )
 export ENV_NAME="${ENV_PREFIX}.${ISO_VERSION}"
-export VENV_PATH="${HOME}/${FUEL_RELEASE}-venv"
+[[ $FUEL_RELEASE!='90' ]] && export VENV_PATH="${HOME}/${FUEL_RELEASE}-venv" ||  export VENV_PATH="${HOME}/mitaka-venv"
 
 [ -z "${DVS_PLUGIN_PATH}" ] && export DVS_PLUGIN_PATH=$(ls -t ${WORKSPACE}/fuel-plugin-vmware-dvs*.rpm | head -n 1)
-
-[ -z "${DVS_PLUGIN_PATH}" ] && ( echo "DVS_PLUGIN_PATH is empty"; exit 1 ) 
-
+[ -z "${DVS_PLUGIN_PATH}" ] && ( echo "DVS_PLUGIN_PATH is empty"; exit 1 )
 [ -z "${PLUGIN_PATH}"     ] && export PLUGIN_PATH=$DVS_PLUGIN_PATH
-
 
 systest_parameters=''
 [[ $USE_SNAPSHOTS == "true"  ]] && systest_parameters+=' -k' || echo "new env will be created"
