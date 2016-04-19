@@ -1,0 +1,8 @@
+
+* vcenter_check_cindervmware_srv (-t 'system_test.vcenter.check_cinder_srv(vcenter_vmware_roles)'
+
+- name: '{fuel-release}.{plugin-name}.vcenter_delete_cindervmware'
+  current-parameters: true
+  predefined-parameters: |
+    TEST_GROUP_PREFIX=system_test.vcenter.scale_vcenter_dvs
+  kill-phase-on: NEVER

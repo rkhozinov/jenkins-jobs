@@ -40,7 +40,9 @@
     nightly-name: '{fuel-release}.{plugin-name}.nightly'
     custom-name: '{fuel-release}.{plugin-name}.custom'
     reporter-name: '{fuel-release}.{plugin-name}.reporter'
-
+    smoke-test-name: 'dvs_vcenter_smoke'
+    bvt-test-name: 'dvs_vcenter_bvt'
+    canary-test-name: 'dvs_vcenter_smoke'
     admin_node_memory: '8192'
     slave_node_memory: '8192'
     admin_node_cpu: '4'
@@ -69,6 +71,8 @@
     released_plugin_path: '/storage/dvs/released/dvs-2.0.0.noarch.rpm'
     scm_submodule_disabled: true
 
+    build_script: 'builders/build-plugin-dvs.sh'
+    build_check:  'builders/rpm-check.sh'
     testrail_project: "VMware DVS plugin"
     testrail_suite: "[9.0][PCE] VMware DVS plugin v3.0.0"
     testrail_suite_desc: "Suite description"
@@ -113,6 +117,7 @@
 
     jobs:
       - '{build-name}'
+
       - '{flake8-name}'
       - '{radon-name}'
       - '{shellcheck-name}'
@@ -298,27 +303,49 @@
       - runner-publisher:
           properties_name: properties
           email_to: '{email_to}'
-      - conditional-publisher:
-          - condition-kind: file-exists
-            condition-filename: 'nosetests.xml'
-            action:
-              - xunit:
-                  types:
-                    - junit:
-                        pattern: 'nosetests.xml'
-                        skip-if-no-test-files: true
-              - junit:
-                  results: 'nosetests.xml'
-                  health-scale-factor: 1.0
-      - conditional-publisher:
-          - condition-kind: boolean-expression
-            condition-expression: "${{PUBLISH_RESULTS}}"
-            action:
-              - trigger-parameterized-builds:
-                  - project: '{fuel-release}.{plugin-name}.reporter'
-                    property-file: reporter.properties
-                    fail-on-missing: true
+      - test-publisher:
+          reporter_name: '{reporter-name}'
 
+- job-template:
+    name: '{build-name}'
+    node: 'runner'
+    concurrent: true
+    disabled: false
+    triggers:
+      - draft-patchset-gerrit-trigger:
+          gerrit_repo: '{gerrit_repo}'
+          gerrit_branch: '{gerrit_branch}'
+    scm:
+      - common-scm:
+          scm_submodule_disabled: '{scm_submodule_disabled}'
+          gerrit_repo: '{gerrit_repo}'
+    wrapper:
+      - runner-wrapper
+    parameters:
+      - string:
+          name: GERRIT_BRANCH
+          default: 'origin/{gerrit_branch}'
+      - string:
+          name: GERRIT_REFSPEC
+          default: 'refs/heads/{gerrit_branch}'
+    properties:
+      - heavy-job:
+          weight: 1
+    wrappers:
+      - ansicolor:
+          colormap: xterm
+    builders:
+      - shell: |
+          rm -rf *.rpm
+          rm -rf build.properties
+          rm -rf build.plugin_version
+      - shell:
+          !include-raw-escape: builders/build-plugin-dvs.sh
+      - shell:
+          !include-raw-escape: builders/rpm-check.sh
+    publishers:
+      - build-publisher:
+          email_to: '{email_to}'
 - job-template:
     name: '{reporter-name}'
     disabled: false
@@ -441,198 +468,12 @@
       - shell:
           !include-raw-escape: builders/reporter.sh
     publishers:
+      - archive:
+          artifacts: 'nosetests.xml'
+          allow-empty: true
       - runner-publisher:
           properties_name: reporter.properties
           email_to: '{email_to}'
-
-- job-template:
-    name: '{flake8-name}'
-    node: 'runner'
-    concurrent: true
-    disabled: false
-    wrapper:
-      - runner-wrapper
-    triggers:
-      - draft-patchset-gerrit-trigger:
-          gerrit_repo: '{gerrit_repo}'
-          gerrit_branch: '{gerrit_branch}'
-    scm:
-      - common-scm:
-          scm_submodule_disabled: '{scm_submodule_disabled}'
-          gerrit_repo: '{gerrit_repo}'
-    parameters:
-      - string:
-          name: GERRIT_BRANCH
-          default: 'origin/{gerrit_branch}'
-          description: 'The branch for fuel-qa gerrit'
-      - string:
-          name: GERRIT_REFSPEC
-          default: 'refs/heads/{gerrit_branch}'
-      - string:
-          name: ARGS
-          default: >
-             --doctest --exclude .git,fuel-qa,__init__.py
-             --ignore=H302,H802 --show-source --statistics
-          description: "Default args from fuel-qa gate job"
-    properties:
-      - heavy-job:
-          weight: 1
-    builders:
-      - shell: |
-          #!/bin/bash -xe
-          set -o pipefail
-          flake8 ${{ARGS}} ./ | tee -i flake8.log
-    publishers:
-      - archive:
-          artifacts: '*.log'
-          fingerprint: true
-          allow-empty: true
-
-- job-template:
-    name: '{radon-name}'
-    node: 'runner'
-    concurrent: true
-    disabled: false
-    parameters:
-      - string:
-          name: GERRIT_BRANCH
-          default: 'origin/{gerrit_branch}'
-          description: 'The branch for fuel-qa gerrit'
-      - string:
-          name: GERRIT_REFSPEC
-          default: 'refs/heads/{gerrit_branch}'
-      - string:
-          name: RADON_ARGS
-          default: '--total-average -nb --ignore fuel-qa'
-          description: "average complexity and files with B and worse rank"
-      - string:
-          name: XENON_ARGS
-          default: '--ignore fuel-qa --max-absolute A --max-modules A --max-average A'
-          description: "Default args for checking average code complexity"
-    triggers:
-      - draft-patchset-gerrit-trigger:
-          gerrit_repo: '{gerrit_repo}'
-          gerrit_branch: '{gerrit_branch}'
-    scm:
-      - common-scm:
-          scm_submodule_disabled: '{scm_submodule_disabled}'
-          gerrit_repo: '{gerrit_repo}'
-    wrapper:
-      - runner-wrapper
-    properties:
-      - heavy-job:
-          weight: 1
-    builders:
-      - shell: |
-          #!/bin/bash -xe
-          radon cc ./ ${{RADON_ARGS}} | tee -i radon_cc.log
-          radon mi ./ -nb --ignore fuel-qa | tee -i radon_mi.log
-          set -o pipefail
-          xenon ${{XENON_ARGS}} ./ | tee -i xenon.log
-    publishers:
-      - archive:
-          artifacts: '*.log'
-          fingerprint: true
-          allow-empty: true
-
-- job-template:
-    name: '{shellcheck-name}'
-    node: 'runner'
-    concurrent: true
-    disabled: false
-    triggers:
-      - draft-patchset-gerrit-trigger:
-          gerrit_repo: '{gerrit_repo}'
-          gerrit_branch: '{gerrit_branch}'
-    scm:
-      - common-scm:
-          scm_submodule_disabled: '{scm_submodule_disabled}'
-          gerrit_repo: '{gerrit_repo}'
-    wrapper:
-      - runner-wrapper
-    parameters:
-      - string:
-          name: GERRIT_BRANCH
-          default: 'origin/{gerrit_branch}'
-          description: 'The branch for fuel-qa gerrit'
-      - string:
-          name: GERRIT_REFSPEC
-          default: 'refs/heads/{gerrit_branch}'
-      - string:
-          name: ARGS
-          default: '-e SC2086,SC2046'
-          description: 'shellcheck argurments'
-    properties:
-      - heavy-job:
-          weight: 1
-    builders:
-      - shell: |
-          #!/bin/bash -xe
-          set -o pipefail
-          shellcheck ${{ARGS}} $(find . -name '*.sh') | tee -i shellcheck.log
-    publishers:
-      - archive:
-          artifacts: '*.log'
-          fingerprint: true
-          allow-empty: true
-
-- job-template:
-    name: '{build-name}'
-    node: 'runner'
-    concurrent: true
-    disabled: false
-    triggers:
-      - draft-patchset-gerrit-trigger:
-          gerrit_repo: '{gerrit_repo}'
-          gerrit_branch: '{gerrit_branch}'
-    scm:
-      - common-scm:
-          scm_submodule_disabled: '{scm_submodule_disabled}'
-          gerrit_repo: '{gerrit_repo}'
-    wrapper:
-      - runner-wrapper
-    parameters:
-      - string:
-          name: GERRIT_BRANCH
-          default: 'origin/{gerrit_branch}'
-      - string:
-          name: GERRIT_REFSPEC
-          default: 'refs/heads/{gerrit_branch}'
-    properties:
-      - heavy-job:
-          weight: 1
-    wrappers:
-      - ansicolor:
-          colormap: xterm
-    builders:
-      - shell: |
-          rm -rf *.rpm
-          rm -rf build.properties
-          rm -rf build.plugin_version
-      - shell:
-          !include-raw-escape: builders/build-plugin-dvs.sh
-      - shell:
-          !include-raw-escape: builders/rpm-check.sh
-    publishers:
-      - postbuildscript:
-          script-only-if-succeeded: False
-          builders:
-            - shell: |
-                #!/bin/bash
-                plugin_version=$(grep '^version' metadata.yaml | cut -d ' ' -f2)
-                echo PLUGIN_VERSION=${{plugin_version}} | tr -d "'"> build.plugin_version
-                env > build.properties
-      - archive:
-          artifacts: '*.rpm'
-          allow-empty: false
-      - archive:
-          artifacts: 'build.properties'
-          allow-empty: false
-      - archive:
-          artifacts: 'build.plugin_version'
-          allow-empty: false
-      - email:
-          recipients: '{email_to}'
 
 - job-template:
     name: '{fuel-release}.{plugin-name}.{testgroup}'
@@ -675,76 +516,6 @@
     concurrent: true
 
 - job-template:
-    name: '{smoke-name}'
-    disabled: false
-    description: 'The Smoke test for {fuel-release}.{plugin-name}.{plugin-version}'
-    concurrent: true
-    project-type: multijob
-    node: runner
-    <<: *runner-parameters
-    triggers:
-      - draft-patchset-gerrit-trigger:
-          gerrit_repo: '{gerrit_repo}'
-          gerrit_branch: '{gerrit_branch}'
-    properties:
-      - runner-property:
-          build-name: '{build-name}'
-    wrappers:
-      - runner-wrapper
-    scm: []
-    builders:
-      - runner-condition
-      - multijob:
-          name: 'The smoke test for {fuel-release}.{plugin-name}.{plugin-version}'
-          condition: COMPLETED
-          projects:
-            - name: '{fuel-release}.{plugin-name}.smoke.test'
-              current-parameters: true
-              property-file: build_number
-              predefined-parameters: |
-                TEST_GROUP=dvs_vcenter_smoke
-              kill-phase-on: NEVER
-    publishers:
-      - runner-publisher:
-          properties_name: smoke.properties
-          email_to: '{email_to}'
-
-- job-template:
-    name: '{bvt-name}'
-    description: 'The BVT test for {fuel-release}.{plugin-name}.{plugin-version}'
-    disabled: false
-    concurrent: true
-    project-type: multijob
-    node: runner
-    <<: *runner-parameters
-    scm: []
-    triggers:
-      - merge-gerrit-trigger:
-          gerrit_repo: '{gerrit_repo}'
-          gerrit_branch: '{gerrit_branch}'
-    properties:
-      - runner-property:
-          build-name: '{build-name}'
-    wrappers:
-      - runner-wrapper
-    builders:
-      - runner-condition
-      - multijob:
-          name: 'The BVT test for {fuel-release}.{plugin-name}.{plugin-version}'
-          condition: COMPLETED
-          projects:
-            - name: '{fuel-release}.{plugin-name}.bvt.test'
-              current-parameters: true
-              property-file: build_number
-              predefined-parameters: |
-                 TEST_GROUP=dvs_vcenter_bvt
-              kill-phase-on: NEVER
-    publishers:
-      - runner-publisher:
-          properties_name: bvt.properties
-          email_to: '{email_to}'
-
-- job-template:
     name: '{regression-name}'
     description: 'The regression test for {fuel-release}.{plugin-name}.{plugin-version}'
     disabled: '{obj:regression_disabled}'
@@ -779,6 +550,75 @@
               kill-phase-on: NEVER
 
 - job-template:
+    name: '{smoke-name}'
+    disabled: false
+    description: 'The Smoke test for {fuel-release}.{plugin-name}.{plugin-version}'
+    concurrent: true
+    project-type: multijob
+    node: runner
+    <<: *runner-parameters
+    triggers:
+      - draft-patchset-gerrit-trigger:
+          gerrit_repo: '{gerrit_repo}'
+          gerrit_branch: '{gerrit_branch}'
+    properties:
+      - runner-property:
+          build-name: '{build-name}'
+    wrappers:
+      - runner-wrapper
+    scm: []
+    builders:
+      - runner-condition
+      - multijob:
+          name: 'The smoke test for {fuel-release}.{plugin-name}.{plugin-version}'
+          condition: COMPLETED
+          projects:
+            - name: '{fuel-release}.{plugin-name}.smoke.test'
+              current-parameters: true
+              property-file: build_number
+              predefined-parameters: |
+                TEST_GROUP='{smoke-test-name}'
+              kill-phase-on: NEVER
+    publishers:
+      - runner-publisher:
+          properties_name: smoke.properties
+          email_to: '{email_to}'
+
+- job-template:
+    name: '{bvt-name}'
+    description: 'The BVT test for {fuel-release}.{plugin-name}.{plugin-version}'
+    disabled: false
+    concurrent: true
+    project-type: multijob
+    node: runner
+    <<: *runner-parameters
+    scm: []
+    triggers:
+      - merge-gerrit-trigger:
+          gerrit_repo: '{gerrit_repo}'
+          gerrit_branch: '{gerrit_branch}'
+    properties:
+      - runner-property:
+          build-name: '{build-name}'
+    wrappers:
+      - runner-wrapper
+    builders:
+      - runner-condition
+      - multijob:
+          name: 'The BVT test for {fuel-release}.{plugin-name}.{plugin-version}'
+          condition: COMPLETED
+          projects:
+            - name: '{fuel-release}.{plugin-name}.bvt.test'
+              current-parameters: true
+              property-file: build_number
+              predefined-parameters: |
+                 TEST_GROUP='{bvt-test-name}'
+              kill-phase-on: NEVER
+    publishers:
+      - runner-publisher:
+          properties_name: bvt.properties
+          email_to: '{email_to}'
+- job-template:
     name: '{canary-name}'
     description: 'The Smoke test for {fuel-release}.{plugin-name}.{plugin-version}'
     disabled: false
@@ -803,13 +643,13 @@
     builders:
       - runner-condition
       - multijob:
-          name: 'Smoke tests for dvs.vcenter5'
+          name: 'Canary tests for {plugin-name}'
           condition: SUCCESSFUL
           projects:
             - name: '{fuel-release}.{plugin-name}.canary.skinny'
               property-file: build_number
               predefined-parameters: |
-                 TEST_GROUP=dvs_vcenter_smoke
+                 TEST_GROUP='{canary-test-name}'
               current-parameters: true
               kill-phase-on: NEVER
 

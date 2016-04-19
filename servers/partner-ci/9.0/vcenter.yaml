@@ -275,6 +275,9 @@
               - junit:
                   results: 'nosetests.xml'
                   health-scale-factor: 1.0
+              - archive:
+                  artifacts: 'nosetests.xml'
+                  allow-empty: false
       - conditional-publisher:
           - condition-kind: boolean-expression
             condition-expression: "${{PUBLISH_RESULTS}}"
