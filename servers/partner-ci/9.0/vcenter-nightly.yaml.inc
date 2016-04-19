@@ -12,7 +12,8 @@
      - name: '{fuel-release}.{plugin-name}.vcenter_delete_controller'
        current-parameters: true
        predefined-parameters: |
-         TEST_GROUP_PREFIX=system_test.vcenter.scale_vcenter_dvs
+         TEST_GROUP_PREFIX=system_test.vcenter.scale_vcenter_dvs_skipsrvcheck
+         TEST_GROUP_CONFIG=vcenter_delete_controller
        kill-phase-on: NEVER
 
      - name: '{fuel-release}.{plugin-name}.vcenter_ceilometer_and_computevmware'

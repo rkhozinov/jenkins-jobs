@@ -116,6 +116,54 @@
       - email:
           recipients: '{email_to}'
 
+- publisher:
+    name: build-publisher
+    publishers:
+      - postbuildscript:
+          script-only-if-succeeded: False
+          builders:
+            - shell: |
+                #!/bin/bash
+                plugin_version=$(grep '^version' metadata.yaml | cut -d ' ' -f2)
+                echo PLUGIN_VERSION=${{plugin_version}} | tr -d "'"> build.plugin_version
+                env > build.properties
+      - archive:
+          artifacts: '*.rpm'
+          allow-empty: false
+      - archive:
+          artifacts: 'build.properties'
+          allow-empty: false
+      - archive:
+          artifacts: 'build.plugin_version'
+          allow-empty: false
+      - email:
+          recipients: '{email_to}'
+- publisher:
+    name: test-publisher
+    publishers:
+      - conditional-publisher:
+          - condition-kind: file-exists
+            condition-filename: 'nosetests.xml'
+            action:
+              - xunit:
+                  types:
+                    - junit:
+                        pattern: 'nosetests.xml'
+                        skip-if-no-test-files: true
+              - junit:
+                  results: 'nosetests.xml'
+                  health-scale-factor: 1.0
+              - archive:
+                  artifacts: 'nosetests.xml'
+                  allow-empty: false
+      - conditional-publisher:
+          - condition-kind: boolean-expression
+            condition-expression: "${{PUBLISH_RESULTS}}"
+            action:
+              - trigger-parameterized-builds:
+                  - project: '{reporter_name}'
+                    property-file: reporter.properties
+                    fail-on-missing: true
 - builder:
     name: runner-condition
     builders:
@@ -299,3 +347,134 @@
             - elasticsearch
             - influxdb
           option: category
+
+- publisher:
+    name: checker-publisher
+    publishers:
+      - archive:
+          artifacts: '*.log'
+          fingerprint: true
+          allow-empty: true
+
+- job-template:
+    name: '{radon-name}'
+    node: 'runner'
+    concurrent: true
+    disabled: false
+    parameters:
+      - string:
+          name: GERRIT_BRANCH
+          default: 'origin/{gerrit_branch}'
+          description: 'The branch for fuel-qa gerrit'
+      - string:
+          name: GERRIT_REFSPEC
+          default: 'refs/heads/{gerrit_branch}'
+      - string:
+          name: RADON_ARGS
+          default: '--total-average -nb --ignore fuel-qa'
+          description: "average complexity and files with B and worse rank"
+      - string:
+          name: XENON_ARGS
+          default: '--ignore fuel-qa --max-absolute A --max-modules A --max-average A'
+          description: "Default args for checking average code complexity"
+    triggers:
+      - draft-patchset-gerrit-trigger:
+          gerrit_repo: '{gerrit_repo}'
+          gerrit_branch: '{gerrit_branch}'
+    scm:
+      - common-scm:
+          scm_submodule_disabled: '{scm_submodule_disabled}'
+          gerrit_repo: '{gerrit_repo}'
+    wrapper:
+      - runner-wrapper
+    properties:
+      - heavy-job:
+          weight: 1
+    builders:
+      - shell: |
+          #!/bin/bash -xe
+          radon cc ./ ${{RADON_ARGS}} | tee -i radon_cc.log
+          radon mi ./ -nb --ignore fuel-qa | tee -i radon_mi.log
+          set -o pipefail
+          xenon ${{XENON_ARGS}} ./ | tee -i xenon.log
+    publishers:
+      - checker-publisher
+
+- job-template:
+    name: '{shellcheck-name}'
+    node: 'runner'
+    concurrent: true
+    disabled: false
+    triggers:
+      - draft-patchset-gerrit-trigger:
+          gerrit_repo: '{gerrit_repo}'
+          gerrit_branch: '{gerrit_branch}'
+    scm:
+      - common-scm:
+          scm_submodule_disabled: '{scm_submodule_disabled}'
+          gerrit_repo: '{gerrit_repo}'
+    wrapper:
+      - runner-wrapper
+    parameters:
+      - string:
+          name: GERRIT_BRANCH
+          default: 'origin/{gerrit_branch}'
+          description: 'The branch for fuel-qa gerrit'
+      - string:
+          name: GERRIT_REFSPEC
+          default: 'refs/heads/{gerrit_branch}'
+      - string:
+          name: ARGS
+          default: '-e SC2086,SC2046'
+          description: 'shellcheck argurments'
+    properties:
+      - heavy-job:
+          weight: 1
+    builders:
+      - shell: |
+          #!/bin/bash -xe
+          set -o pipefail
+          shellcheck ${{ARGS}} $(find . -name '*.sh') | tee -i shellcheck.log
+    publishers:
+      - checker-publisher
+
+- job-template:
+    name: '{flake8-name}'
+    node: 'runner'
+    concurrent: true
+    disabled: false
+    wrapper:
+      - runner-wrapper
+    triggers:
+      - draft-patchset-gerrit-trigger:
+          gerrit_repo: '{gerrit_repo}'
+          gerrit_branch: '{gerrit_branch}'
+    scm:
+      - common-scm:
+          scm_submodule_disabled: '{scm_submodule_disabled}'
+          gerrit_repo: '{gerrit_repo}'
+    parameters:
+      - string:
+          name: GERRIT_BRANCH
+          default: 'origin/{gerrit_branch}'
+          description: 'The branch for fuel-qa gerrit'
+      - string:
+          name: GERRIT_REFSPEC
+          default: 'refs/heads/{gerrit_branch}'
+      - string:
+          name: ARGS
+          default: >
+             --doctest --exclude .git,fuel-qa,__init__.py
+             --ignore=H302,H802 --show-source --statistics
+          description: "Default args from fuel-qa gate job"
+    properties:
+      - heavy-job:
+          weight: 1
+    builders:
+      - shell: |
+          #!/bin/bash -xe
+          set -o pipefail
+          flake8 ${{ARGS}} ./ | tee -i flake8.log
+    publishers:
+      - checker-publisher
+
