@@ -2,6 +2,7 @@
 set -e
 
 git log  --pretty=oneline | head
+git clean -ffd
 
 path="./deployment_scripts/puppet/manifests ./deployment_scripts/puppet/modules/vmware_dvs"
 
