@@ -83,3 +83,11 @@
        current-parameters: true
        kill-phase-on: NEVER
        property-file: build_number
+     - name: '{fuel-release}.{plugin-name}.nsxv_metadata_mgt_disabled'
+       current-parameters: true
+       kill-phase-on: NEVER
+       property-file: build_number
+     - name: '{fuel-release}.{plugin-name}.nsxv_create_and_delete_secgroups'
+       current-parameters: true
+       kill-phase-on: NEVER
+       property-file: build_number

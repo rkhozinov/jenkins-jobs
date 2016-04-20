@@ -82,7 +82,7 @@ source "${VENV_PATH}/bin/activate"
 /btsync/tpi_systest_mod.sh -d ${OPENSTACK_RELEASE} \
                            -n "${NODES_COUNT}" \
                            -i ${ISO_PATH} \
-                           -t "${TEST_GROUP_PREFIX}(${TEST_GROUP})" \
+                           -t "${TEST_GROUP_PREFIX}(${TEST_GROUP_CONFIG})" \
                            $systest_parameters
 
 #./plugin_test/utils/jenkins/system_tests.sh -t test ${systest_parameters} -i ${ISO_PATH} -j ${JOB_NAME} -o --group=${TEST_GROUP}

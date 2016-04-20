@@ -23,6 +23,10 @@
           default: 'system_test.vcenter.deploy_vcenter_dvs_run_ostf'
           description: 'Snapshot name for vsphere lab'
       - string:
+          name: TEST_GROUP_CONFIG
+          default: '${{TESTGROUP}}'
+          description: 'Snapshot name for vsphere lab'
+      - string:
           name: DVS_SWITCHES
           default: 'Cluster1,Cluster2'
           description: "List of vCenter's clusters"
@@ -102,6 +106,14 @@
       - vcenter_multiroles_cindervmdk_and_cinder
       - vcenter_delete_controller
       - vcenter_delete_cindervmware
+      - vcenter_delete_computevmware
+      - vcenter_add_computevmware
+      - vcenter_multiroles_computevmware_cindervmvare
+      - vcenter_custom_hostname
+      - vcenter_check_nova_conf
+      - vcenter_check_nova_services
+      - vcenter_check_cindervmware_srv
+      - vcenter_check_gw
     jobs:
       - '{nightly-name}':
           multijob_build_pkg: true
@@ -180,7 +192,7 @@
           description: "Triggers build of pkg from $PKG_JOB_NAME (only for custom)"
       - '{testgroup_parameter_type}':
           name: TEST_GROUP
-          '{testgroup_value_type}': '{testgroup_value}'
+          '{testgroup_value_type}': '{obj:testgroup_value}'
           description: "test-group name"
       - common-parameters:
           publish_results: '{publish_results}'
@@ -263,155 +275,8 @@
       - runner-publisher:
           properties_name: properties
           email_to: '{email_to}'
-      - conditional-publisher:
-          - condition-kind: file-exists
-            condition-filename: 'nosetests.xml'
-            action:
-              - xunit:
-                  types:
-                    - junit:
-                        pattern: 'nosetests.xml'
-                        skip-if-no-test-files: true
-              - junit:
-                  results: 'nosetests.xml'
-                  health-scale-factor: 1.0
-              - archive:
-                  artifacts: 'nosetests.xml'
-                  allow-empty: false
-      - conditional-publisher:
-          - condition-kind: boolean-expression
-            condition-expression: "${{PUBLISH_RESULTS}}"
-            action:
-              - trigger-parameterized-builds:
-                  - project: '{fuel-release}.{plugin-name}.reporter'
-                    property-file: reporter.properties
-                    fail-on-missing: true
-
-- job-template:
-    name: '{reporter-name}'
-    disabled: false
-    description: 'Reporter for {fuel-release}.{plugin-name}.{plugin-version}'
-    concurrent: true
-    node: runner
-    wrappers:
-      - inject-passwords:
-          global: true
-          mask-password-params: true
-    parameters:
-      - string:
-          name: ISO_VERSION
-          description: "ISO number for form the test plan string"
-      - string:
-          name: PLUGIN_VERSION
-          description: "Plugin version from the test plan string"
-      - string:
-          name: TEST_JOB_NAME
-          description: "The name of a test for getting test results"
-      - string:
-          name: DATE
-          description: "The date of a test run"
-          default: ''
-      - string:
-          name: TEST_JOB_BUILD_NUMBER
-          description: "The number of a test build"
-      - string:
-          name: PKG_JOB_BUILD_NUMBER
-          description: "The number of a pkg build"
-      - string:
-          name: TREP_TESTRAIL_URL
-          default: "https://mirantis.testrail.com"
-          description: "Mirantis testrail url"
-      - string:
-          name: TREP_TESTRAIL_PROJECT
-          default: "{testrail_project}"
-          description: "Project name"
-      - string:
-          name: TREP_TESTRAIL_MILESTONE
-          default: "{testrail_milestone}"
-          description: "Testrail milestone (fuel release version is commonly used )"
-      - string:
-          name: TREP_TESTRAIL_SUITE
-          default: "{testrail_suite}"
-          description: "The test suite name, ex.[8.0][PCE] vCenter Smoke/BVT"
-      - string:
-          name: TREP_TESTRAIL_SUITE_DESCRIPTION
-          default: "{testrail_suite_desc}"
-          description: "Testrail suite description"
-      - string:
-          name: TREP_TESTRAIL_PLAN
-          default: "{testrail_plan}"
-          description: "Testrail testplan name"
-      - string:
-          name: TREP_TESTRAIL_PLAN_DESCRIPTION
-          default: "{testrail_plan_desc}"
-          description: "Testrail testplan description"
-      - string:
-          name: TREP_TESTRAIL_RUN
-          default: "{testrail_run}"
-          description: "Testrail test run name"
-      - string:
-          name: TREP_TESTRAIL_RUN_DESCRIPTION
-          default: "{testrail_run_desc}"
-          description: "Testrail test run description"
-      - string:
-          name: TREP_TESTRAIL_TEST_SECTION
-          default: "All"
-          description: "Section of test results"
-      - string:
-          name: TREP_TESTRAIL_TEST_INCLUDE
-          default: ""
-          description: "Tests to include to results"
-      - string:
-          name: TREP_TESTRAIL_TEST_EXCLUDE
-          default: ""
-          description: "Tests to exclude from results"
-      - string:
-          name: TREP_LOG_LEVEL
-          default: "{trep_debug_level}"
-          description: "Log level of reporter"
-      - string:
-          name: TREP_LOG_FILE
-          default: "testrail_reporter.log"
-          description: "Log filename for reporter tool"
-      - string:
-          name: TREP_TEST_RESULTS_SOURCE
-          default: "xunit"
-          description: "Reporter tool's additional config"
-      - string:
-          name: TREP_TEST_RESULTS_XUNIT_FILENAME
-          default: "nosetests.xml"
-          description: "File with tests results"
-      - string:
-          name: TREP_TEST_RESULTS_XUNIT_ITEMS_FILENAME
-          default: "${{TREP_TEST_RESULTS_XUNIT_FILENAME}}"
-          description: "File with tests results"
-      - string:
-          name: TREP_TEST_RESULTS_XUNIT_ITEMS_CASE_NAME
-          default: "{testrail_item_case}"
-          description: "Reporter tool's additional config"
-    scm:
-      - git:
-          url: 'https://github.com/ehles/trep.git'
-          branches:
-            - 'origin/master'
-          # choosing-strategy: default
-          skip-tag: true
-          clean:
-            before: false
-          wipe-workspace: false
-    builders:
-      - copyartifact:
-          project: ${{TEST_JOB_NAME}}
-          filter: ${{TREP_TEST_RESULTS_XUNIT_FILENAME}}
-          which-build: specific-build
-          build-number: ${{TEST_JOB_BUILD_NUMBER}}
-          stable: true
-      - shell:
-          !include-raw-escape: builders/reporter.sh
-    publishers:
-      - runner-publisher:
-          properties_name: reporter.properties
-          email_to: '{email_to}'
+      - test-publisher:
+          reporter_name: '{reporter-name}'
 
 - job-template:
     name: '{fuel-release}.{plugin-name}.{testgroup}'
@@ -466,7 +331,6 @@
                 PKG_JOB_BUILD_NUMBER=released
               current-parameters: true
               kill-phase-on: NEVER
-
 
 - job-template:
     name: '{nightly-name}'

@@ -12,7 +12,7 @@ export FUEL_RELEASE=$(cut -d- -f2-2 <<< $ISO_FILE | tr -d '.')
 export ENV_NAME="${ENV_PREFIX}.${ISO_VERSION}"
 export VENV_PATH="${HOME}/${FUEL_RELEASE}-venv"
 
-[[ -z ${CONTRAIL_PLUGIN_PATH} ]] && export CONTRAIL_PLUGIN_PATH=$(ls ${WORKSPACE}/contrail*.rpm) \
+[[ -z ${CONTRAIL_PLUGIN_PATH} ]] && export CONTRAIL_PLUGIN_PATH=$(ls -t ${WORKSPACE}/contrail*.rpm | head -n 1) \
                                  || echo CONTRAIL_PLUGIN_PATH=$CONTRAIL_PLUGIN_PATH
 
 

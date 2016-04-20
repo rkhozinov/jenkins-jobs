@@ -3,6 +3,11 @@ set -e
 
 git log  --pretty=oneline | head
 
+##################################
+# possible fix. added by @asetyaev
+git clean -ffd
+##################################
+
 path="./deployment_scripts/puppet/manifests ./deployment_scripts/puppet/modules/nsxv"
 
 find $path -name '*.erb' -print0 | xargs -0 -P1 -L1 -I '%' erb -P -x -T '-' % | ruby -c

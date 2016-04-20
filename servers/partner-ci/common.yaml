@@ -2,14 +2,6 @@
     name: common-parameters
     parameters:
       - bool:
-          name: UPDATE_MASTER
-          default: '{update_master}'
-          description: 'turns on update fuel master node to maintenance update'
-      - bool:
-          name: ENABLE_PROPOSED
-          default: '{enable_proposed}'
-          description: 'related to update_master. Turns on support additional repositories for maintenance update'
-      - bool:
           name: PUBLISH_RESULTS
           default: '{obj:publish_results}'
           description: 'Reports results to testrail'
@@ -20,43 +12,19 @@
       - bool:
           name: DISABLE_SSL
           default: '{disable_ssl}'
-          description: "Disable SSL/TLS for openstack horizon"
+          description: "Disable ssh for openstack horizon"
       - bool:
           name: FORCE_ERASE
           default: '{force_erase}'
           description: "Erase all envs before test"
       - bool:
-          name: FORCE_REUSE
-          default: '{force_reuse}'
-          description: "enable reuse-only mode for envs, disable force-erasing/snap-reverting"
-      - bool:
           name: RECREATE_VENV
           default: '{recreate_venv}'
           description: "Recreate virtual environemnt before tests"
       - bool:
-          name: WS_NOREVERT
-          default: '{ws_norevert}'
-          description: "disable reverting workstation snapshots"
-      - bool:
-          name: NFS_CLEAN
-          default: '{nfs_clean}'
-          description: "cleaning nfs-storages"
-      - bool:
-          name: SKIP_VOTE_FAILED
-          default: '{skip_vote_failed}'
-          description: "configure gerrit voting"
-      - string:
-          name: MIRROR_HOST
-          default: 'mirror.seed-cz1.fuel-infra.org'
-          description: 'mirror for package repositories. this mirror is optimized for CZ'
-      - string:
-          name: SNAPSHOTS_ID
-          default: '{snapshots_id}'
-          description: 'snapshots number or lastSuccessfulBuild'
-      - string:
-          name: SNAPSHOTS_URL
-          default: 'https://product-ci.infra.mirantis.net/job/9.x.snapshot/SNAPSHOTS_ID/artifact/snapshots.params'
-          description: 'url to product-ci job with snapshots artifacts'
+          name: USE_SNAPSHOTS
+          default: '{use_snapshots}'
+          descrition: 'Will be used existing environment'
       - string:
           name: ISO_FILE
           default: '{iso_file}'
@@ -80,10 +48,54 @@
       - string:
           name: PKG_JOB_BUILD_NUMBER
           description: 'The name of job for copying of plugin pkg artefacts'
-      - bool:
-          name: KVM_USE
-          default: '{obj:kvm_use}'
-          description: 'turns on kvm_mode for an openstack cluster'
+      - string:
+          name: ISO_JOB_NAME
+          default: '{iso_job_name}'
+          description: 'The name of job for copying of stable iso build name'
+      - string:
+          name: ENV_PREFIX
+          default: '{env_prefix}'
+          description: 'The name of devops env. Needed to properly work of existing mode of devops'
+      - string:
+          name: TREP_TESTRAIL_SUITE
+          default: '{testrail_suite}'
+          description: 'The test suite name, ex.[8.0][PCE] vCenter Smoke/BVT'
+      - string:
+          name: TREP_TESTRAIL_SUITE_DESCRIPTION
+          default: '{testrail_suite_desc}'
+          description: 'Testrail suite description'
+      - string:
+          name: TREP_TESTRAIL_PLAN
+          default: '{testrail_plan}'
+          description: 'Testrail testplan name'
+      - string:
+          name: TREP_TESTRAIL_PLAN_DESCRIPTION
+          default: '{testrail_plan_desc}'
+          description: 'Testrail testplan description'
+      - string:
+          name: OPENSTACK_RELEASE
+          default: 'Ubuntu'
+          description: 'Openstack release (CentOS, Ubuntu)'
+      - string:
+          name: NODES_COUNT
+          default: '10'
+          description: 'Amount of nodes in the test lab'
+      - string:
+          name: ADMIN_NODE_MEMORY
+          default: '{admin_node_memory}'
+          description: 'Amount of vitrual RAM for admin node'
+      - string:
+          name: SLAVE_NODE_MEMORY
+          default: '{slave_node_memory}'
+          description: 'Amount of vitrual RAM per slave node'
+      - string:
+          name: ADMIN_NODE_CPU
+          default: '{admin_node_cpu}'
+          description: 'Amount of vitrual CPUs for admin node'
+      - string:
+          name: SLAVE_NODE_CPU
+          default: '{slave_node_cpu}'
+          description: 'Amount of vitrual CPUs per slave node'
 
 - publisher:
     name: runner-publisher
@@ -93,7 +105,10 @@
           builders:
             - shell: env > {properties_name}
       - archive:
-          artifacts: '*.properties'
+          artifacts: '*properties'
+          allow-empty: true
+      - archive:
+          artifacts: 'iso_file'
           allow-empty: true
       - archive:
           artifacts: 'build.plugin_version'
@@ -109,19 +124,13 @@
           builders:
             - shell: env > {properties_name}
       - archive:
-          artifacts: '*.properties'
+          artifacts: '*properties'
           allow-empty: true
       - archive:
           artifacts: 'nosetests.xml'
           allow-empty: true
       - email:
           recipients: '{email_to}'
-      - description-setter:
-          regexp: '^\[TestRun URL\] (.*)'
-          regexp-for-failed: '"error":(.*) \1 "AssertionError":(.*) \2'
-          description: '<a href="\1">TestRail Report URL</a>'
-          description-for-failed: '\1'
-
 - publisher:
     name: build-publisher
     publishers:
@@ -131,50 +140,22 @@
             - shell: |
                 #!/bin/bash
                 plugin_version=$(grep '^version' metadata.yaml | cut -d ' ' -f2)
-                version=$(echo PLUGIN_VERSION=${{plugin_version}} | tr -d "'")
-                echo $version > build.plugin_version
+                echo PLUGIN_VERSION=${{plugin_version}} | tr -d "'"> build.plugin_version
                 env > build.properties
-                echo $version >> build.properties
       - archive:
           artifacts: '*.rpm'
           allow-empty: false
       - archive:
-          artifacts: '*.properties'
+          artifacts: 'build.properties'
           allow-empty: false
       - archive:
           artifacts: 'build.plugin_version'
           allow-empty: false
       - email:
           recipients: '{email_to}'
-      - description-setter:
-          regexp-for-failed: '"error":(.*) \1 "AssertionError":(.*) \2'
-          description-for-failed: '\1 \2'
-
-- publisher:
-    name: doc-publisher
-    publishers:
-      - description-setter:
-          regexp-for-failed: '^Exception:.*'
-      - email:
-          recipients: '{email_to}'
-
 - publisher:
     name: test-publisher
     publishers:
-      - description-setter:
-          regexp-for-failed: '^ERROR:.*'
-      - archive:
-          artifacts: 'logs/**'
-          allow-empty: true
-      - archive:
-          artifacts: '**.log'
-          allow-empty: true
-      - archive:
-          artifacts: '**.tar.xz'
-          allow-empty: true
-      - archive:
-          artifacts: '**.tar.gz'
-          allow-empty: true
       - conditional-publisher:
           - condition-kind: file-exists
             condition-filename: 'nosetests.xml'
@@ -190,17 +171,6 @@
               - archive:
                   artifacts: 'nosetests.xml'
                   allow-empty: false
-      - postbuildscript:
-          script-only-if-succeeded: False
-          script-only-if-failed: False
-          builders:
-              - shell: |
-                  rm -rf *.rpm
-                  sudo cp /var/log/libvirt/libvirtd.log ${{WORKSPACE}}/libvirtd_total.log
-                  sudo chown jenkins:jenkins ${{WORKSPACE}}/libvirtd_total.log
-      - description-setter:
-          regexp-for-failed: '"error":(.*) \1 "AssertionError":(.*) \2'
-          description-for-failed: '\1 \2'
       - conditional-publisher:
           - condition-kind: boolean-expression
             condition-expression: "${{PUBLISH_RESULTS}}"
@@ -209,13 +179,6 @@
                   - project: '{reporter_name}'
                     property-file: reporter.properties
                     fail-on-missing: true
-                    condition: FAILED_OR_BETTER
-      - conditional-publisher:
-          - condition-kind: boolean-expression
-            condition-expression: "${{DISCONNECT_ON_FAILURE}}"
-            action:
-              - shell: |
-                  python -c "import jenkins; jenkins.Jenkins('http://172.16.177.5:8080', username='rkhozinov', password='7d0afaf10fe8866eed8c2f43cac83fbf').disable_node('${{NODE_NAME}}')"
 - builder:
     name: runner-condition
     builders:
@@ -223,10 +186,12 @@
           condition-kind: shell
           condition-command: |
             #!/bin/bash -xe
-            if [ "${MJ_BUILD_PKG}" == "true" ]; then
-              if [ -z  ${PKG_JOB_BUILD_NUMBER} ]; then
+            if [[ ${MJ_BUILD_PKG}=="true" ]]; then
+              if [ -z ${PKG_JOB_BUILD_NUMBER} ]; then
                 echo "Plugin will be built"
-                exit 0
+              else
+                echo "Plugin won't be built"
+                exit 1
               fi
             else
               echo "Plugin won't be built"
@@ -241,7 +206,7 @@
       - conditional-step:
           condition-kind: shell
           condition-command: >
-            [ -z  ${PKG_JOB_BUILD_NUMBER} ] && [ "${MJ_BUILD_PKG}" == "true" ]
+            [ -z  ${PKG_JOB_BUILD_NUMBER} ]
           steps:
             - copyartifact:
                 project: ${PKG_JOB_NAME}
@@ -250,7 +215,7 @@
       - conditional-step:
           condition-kind: shell
           condition-command: >
-            [ ! -z ${PKG_JOB_BUILD_NUMBER} ] && [ "${MJ_BUILD_PKG}" == "true" ]
+            [ ! -z ${PKG_JOB_BUILD_NUMBER} ]
           steps:
             - copyartifact:
                 project: ${PKG_JOB_NAME}
@@ -263,19 +228,19 @@
           steps:
             - shell: |
                 #!/bin/bash
-                build_number=$(grep "^BUILD_NUMBER=" < build.properties | cut -d= -f2)
+                build_number=$(grep "BUILD_NUMBER" < build.properties | cut -d= -f2)
                 echo "PKG_JOB_BUILD_NUMBER=$build_number" > build_number
       - conditional-step:
           condition-kind: shell
-          condition-command: |
-            [[ "${UPDATE_MASTER}" == "true" ]] && [[ $SNAPSHOTS_ID != *"released"* ]]
+          condition-command: >
+            [ -z ${ISO_FILE} ]
           steps:
-            - shell: |
-                #!/bin/bash
-                SNAPSHOTS_ID=${SNAPSHOTS_ID:=lastSuccessfulBuild}
-                wget --no-check-certificate -O snapshots.params ${SNAPSHOTS_URL/SNAPSHOTS_ID/$SNAPSHOTS_ID}
-                snapshots_id=$(grep "^CUSTOM_VERSION=" < snapshots.params | cut -d= -f2 | cut -d'#' -f2)
-                echo "SNAPSHOTS_ID=${snapshots_id}" >> build_number
+            - copyartifact:
+                project: ${ISO_JOB_NAME}
+                filter: "iso_file"
+                which-build: last-successful
+
+# common git settings to get sources
 - scm:
     name: common-scm
     scm:
@@ -290,87 +255,7 @@
             disable: '{obj:scm_submodule_disabled}'
             tracking: true
             recursive: true
-          wipe-workspace: '{obj:scm_wipe_workspace}'
-
-
-- trigger:
-    name: test-gerrit-trigger
-    triggers:
-      - gerrit:
-         trigger-on: '{obj:trigger_on}'
-         projects:
-           - project-compare-type: 'PLAIN'
-             project-pattern: 'openstack/{gerrit_repo}'
-             branches:
-               - branch-compare-type: 'ANT'
-                 branch-pattern: '{gerrit_branch}'
-             file-paths:
-               - compare-type: 'ANT'
-                 pattern: 'plugin_test/**'
-             disable-strict-forbidden-file-verification: true
-         silent: false
-         override-votes: true
-         server-name: 'review.openstack.org'
-         custom-url: '* $JOB_NAME $BUILD_URL'
-         escape-quotes: true
-         readable-message: true
-         skip-vote:
-           successfull: '{skip_vote_successfull}'
-           failed: '{skip_vote_failed}'
-           unstable: true
-           notbuilt: true
-
-- trigger:
-    name: default-gerrit-trigger
-    triggers:
-      - gerrit:
-         trigger-on: '{obj:trigger_on}'
-         projects:
-           - project-compare-type: 'PLAIN'
-             project-pattern: 'openstack/{gerrit_repo}'
-             branches:
-               - branch-compare-type: 'ANT'
-                 branch-pattern: '{gerrit_branch}'
-         silent: false
-         override-votes: true
-         server-name: 'review.openstack.org'
-         custom-url: '* $JOB_NAME $BUILD_URL'
-         escape-quotes: true
-         readable-message: true
-         skip-vote:
-           successfull: '{skip_vote_successfull}'
-           failed: '{skip_vote_failed}'
-           unstable: true
-           notbuilt: true
-
-- trigger:
-    name: doc-gerrit-trigger
-    triggers:
-      - gerrit:
-         trigger-on: '{obj:trigger_on}'
-         projects:
-           - project-compare-type: 'PLAIN'
-             project-pattern: 'openstack/{gerrit_repo}'
-             branches:
-               - branch-compare-type: 'ANT'
-                 branch-pattern: '{gerrit_branch}'
-             file-paths:
-               - compare-type: 'ANT'
-                 pattern: 'doc/**'
-               - compare-type: 'ANT'
-                 pattern: 'docs/**'
-             disable-strict-forbidden-file-verification: true
-         silent: false
-         override-votes: true
-         server-name: 'review.openstack.org'
-         custom-url: '* $JOB_NAME $BUILD_URL'
-         escape-quotes: true
-         readable-message: true
-         skip-vote:
-           successfull: '{skip_vote_successfull}'
-           failed: '{skip_vote_failed}'
-           unstable: true
-           notbuilt: true
+          wipe-workspace: false
 
 - trigger:
     name: generic-gerrit-trigger
@@ -385,12 +270,9 @@
                  branch-pattern: '{gerrit_branch}'
              forbidden-file-paths:
                - compare-type: 'ANT'
-                 pattern: 'doc/**'
-               - compare-type: 'ANT'
                  pattern: 'docs/**'
                - compare-type: 'ANT'
                  pattern: 'specs/**'
-             disable-strict-forbidden-file-verification: true
          silent: false
          override-votes: true
          server-name: 'review.openstack.org'
@@ -398,130 +280,32 @@
          escape-quotes: true
          readable-message: true
          skip-vote:
-           successfull: '{skip_vote_successfull}'
-           failed: '{skip_vote_failed}'
+           successfull: false
+           failed: false
            unstable: true
            notbuilt: true
 
-# build and smoke should trigger on patchset event
+# build and smoke should trigger on patchset event               
 - trigger:
-    name: draft-test-gerrit-trigger
+    name: draft-patchset-gerrit-trigger
     triggers:
-      - test-gerrit-trigger:
+      - generic-gerrit-trigger:
           gerrit_repo: '{gerrit_repo}'
           gerrit_branch: '{gerrit_branch}'
-          skip_vote_successfull: '{skip_vote_successfull}'
-          skip_vote_failed: '{skip_vote_failed}'
           trigger_on:
             - draft-published-event
-            - comment-added-contains-event:
-                comment-contains-value: 'recheck'
             - patchset-created-event:
-                exclude-trivial-rebase: false
+                exclude-trivial-rebase: true
                 exclude-no-code-change: true
 
-# bvt should trigger on merge event
+# bvt should trigger on merge event     
 - trigger:
     name: merge-gerrit-trigger
     triggers:
       - generic-gerrit-trigger:
           gerrit_repo: '{gerrit_repo}'
           gerrit_branch: '{gerrit_branch}'
-          skip_vote_successfull: '{skip_vote_successfull}'
-          skip_vote_failed: '{skip_vote_failed}'
           trigger_on:
-            - comment-added-contains-event:
-                comment-contains-value: 'recheck'
-            - change-merged-event
-
-- trigger:
-    name: default-merge-trigger
-    triggers:
-      - default-gerrit-trigger:
-          gerrit_repo: '{gerrit_repo}'
-          gerrit_branch: '{gerrit_branch}'
-          skip_vote_successfull: '{skip_vote_successfull}'
-          skip_vote_failed: '{skip_vote_failed}'
-          trigger_on:
-            - comment-added-contains-event:
-                comment-contains-value: 'recheck'
-            - change-merged-event
-
-- trigger:
-    name: default-draft-trigger
-    triggers:
-      - default-gerrit-trigger:
-          gerrit_repo: '{gerrit_repo}'
-          gerrit_branch: '{gerrit_branch}'
-          skip_vote_successfull: '{skip_vote_successfull}'
-          skip_vote_failed: '{skip_vote_failed}'
-          trigger_on:
-            - draft-published-event
-            - comment-added-contains-event:
-                comment-contains-value: 'recheck'
-            - patchset-created-event:
-                exclude-trivial-rebase: false
-                exclude-no-code-change: true
-          projects:
-            - project-compare-type: 'PLAIN'
-              project-pattern: 'openstack/{gerrit_repo}'
-              branches:
-                - branch-compare-type: 'ANT'
-                  branch-pattern: '{gerrit_branch}'
-              forbidden-file-paths:
-                - compare-type: 'ANT'
-                  pattern: 'plugin_test/**'
-                - compare-type: 'ANT'
-                  pattern: 'doc/**'
-                - compare-type: 'ANT'
-                  pattern: 'spec/**'
-
-# smoke should trigger on draft event
-- trigger:
-    name: draft-gerrit-trigger
-    triggers:
-      - generic-gerrit-trigger:
-          gerrit_repo: '{gerrit_repo}'
-          gerrit_branch: '{gerrit_branch}'
-          skip_vote_successfull: '{skip_vote_successfull}'
-          skip_vote_failed: '{skip_vote_failed}'
-          trigger_on:
-            - draft-published-event
-            - comment-added-contains-event:
-                comment-contains-value: 'recheck'
-            - patchset-created-event:
-                exclude-trivial-rebase: false
-                exclude-no-code-change: true
-
-# doc checks should trigger on patchset event
-- trigger:
-    name: draft-doc-trigger
-    triggers:
-      - doc-gerrit-trigger:
-          gerrit_repo: '{gerrit_repo}'
-          gerrit_branch: '{gerrit_branch}'
-          skip_vote_successfull: '{skip_vote_successfull}'
-          skip_vote_failed: '{skip_vote_failed}'
-          trigger_on:
-            - draft-published-event
-            - comment-added-contains-event:
-                comment-contains-value: 'recheck'
-            - patchset-created-event:
-                exclude-trivial-rebase: false
-                exclude-no-code-change: true
-
-# doc checks and update should trigger on merge event
-- trigger:
-    name: merge-doc-trigger
-    triggers:
-      - doc-gerrit-trigger:
-          gerrit_repo: '{gerrit_repo}'
-          gerrit_branch: '{gerrit_branch}'
-          skip_vote_successfull: '{skip_vote_successfull}'
-          skip_vote_failed: '{skip_vote_failed}'
-          trigger_on:
-            - comment-added-contains-event:
-                comment-contains-value: 'recheck'
             - change-merged-event
 
 
@@ -540,7 +324,7 @@
           colormap: xterm
       - inject-passwords:
           global: true
-          mask-password-params: true
+          mask-password-params: false
       - timeout:
           fail: true
           type: no-activity
@@ -550,11 +334,6 @@
 - property:
     name: runner-property
     properties:
-      - build-discarder:
-          days-to-keep: 40
-          num-to-keep: 40
-          artifact-days-to-keep: 30
-          artifact-num-to-keep: 20
       - heavy-job:
           weight: 1
       - build-blocker:
@@ -568,11 +347,6 @@
 - property:
     name: test-property
     properties:
-      - build-discarder:
-          days-to-keep: 40
-          num-to-keep: 40
-          artifact-days-to-keep: 30
-          artifact-num-to-keep: 20
       - heavy-job:
           weight: 1
       - throttle:
@@ -584,10 +358,9 @@
             - dvs
             - nsxv
             - contrail
-            - contrail-baremetal
-            - gcs
-            - mistral
-            - manila
+            - lma
+            - elasticsearch
+            - influxdb
           option: category
 
 - publisher:
@@ -620,17 +393,13 @@
           default: '--ignore fuel-qa --max-absolute C --max-modules C --max-average C'
           description: "Default args for checking average code complexity"
     triggers:
-      - draft-test-gerrit-trigger:
+      - draft-patchset-gerrit-trigger:
           gerrit_repo: '{gerrit_repo}'
           gerrit_branch: '{gerrit_branch}'
-          skip_vote_successfull: '{skip_vote_successfull}'
-          skip_vote_failed: '{skip_vote_failed}'
     scm:
       - common-scm:
           scm_submodule_disabled: '{scm_submodule_disabled}'
-          scm_wipe_workspace: '{scm_wipe_workspace}'
           gerrit_repo: '{gerrit_repo}'
-
     wrappers: []
     properties:
       - heavy-job:
@@ -651,16 +420,12 @@
     concurrent: true
     disabled: false
     triggers:
-      - draft-gerrit-trigger:
+      - draft-patchset-gerrit-trigger:
           gerrit_repo: '{gerrit_repo}'
           gerrit_branch: '{gerrit_branch}'
-          skip_vote_successfull: '{skip_vote_successfull}'
-          skip_vote_failed: '{skip_vote_failed}'
-
     scm:
       - common-scm:
           scm_submodule_disabled: '{scm_submodule_disabled}'
-          scm_wipe_workspace: '{scm_wipe_workspace}'
           gerrit_repo: '{gerrit_repo}'
     wrappers: []
     parameters:
@@ -682,11 +447,7 @@
       - shell: |
           #!/bin/bash -xe
           set -o pipefail
-          if find . -name '*.sh' | grep sh; then
-            shellcheck ${{ARGS}} $(find . -name '*.sh' -not -path "*/fuel-qa/*" -not -path "*/deployment_scripts/puppet/modules/contrail/files/cassandra-env.sh") | tee -i shellcheck.log
-          else
-            echo 'there are no shell files'
-          fi
+          shellcheck ${{ARGS}} $(find . -name '*.sh') | tee -i shellcheck.log
     publishers:
       - checker-publisher
 
@@ -697,15 +458,12 @@
     disabled: false
     wrappers: []
     triggers:
-      - draft-test-gerrit-trigger:
+      - draft-patchset-gerrit-trigger:
           gerrit_repo: '{gerrit_repo}'
           gerrit_branch: '{gerrit_branch}'
-          skip_vote_successfull: '{skip_vote_successfull}'
-          skip_vote_failed: '{skip_vote_failed}'
     scm:
       - common-scm:
           scm_submodule_disabled: '{scm_submodule_disabled}'
-          scm_wipe_workspace: '{scm_wipe_workspace}'
           gerrit_repo: '{gerrit_repo}'
     parameters:
       - string:
@@ -718,8 +476,8 @@
       - string:
           name: ARGS
           default: >
-             --doctest --exclude .git,doc,specs,fuel-qa,__init__.py,./plugin_test/run_tests.py
-             --select=H903,H201,H101,H105,H106,H904,H301,H303,H304,H401,H403,H404,H405,H501,H702,H703,H231,H232,H233,H234,H235,H236,H237,H238,H202,H203,H102,H103,H104 --show-source --statistics
+             --doctest --exclude .git,fuel-qa,__init__.py
+             --ignore=H302,H802,D203 --show-source --statistics
           description: "Default args from fuel-qa gate job"
     properties:
       - heavy-job:
@@ -732,15 +490,14 @@
     publishers:
       - checker-publisher
 
+
+
 - job-template:
     name: '{reporter-name}'
     disabled: false
     description: 'The reporter for the {fuel-release}.{plugin-name}.{plugin-version}'
     concurrent: true
     node: runner
-    properties:
-      - heavy-job:
-          weight: 1
     wrappers:
       - inject-passwords:
           global: true
@@ -755,9 +512,6 @@
       - string:
           name: TEST_JOB_NAME
           description: "The name of a test for getting test results"
-      - string:
-          name: TEST_GROUP
-          description: "The name of a test group"
       - string:
           name: DATE
           description: "The date of a test run"
@@ -788,9 +542,6 @@
           name: TREP_TESTRAIL_SUITE
           default: "{testrail_suite}"
           description: "The test suite name, ex.[8.0][PCE] vCenter Smoke/BVT"
-      - string:
-          name: TREP_TESTRAIL_SUITE_CONFIGURATION
-          default: "${{TEST_JOB_NAME}}:${{JENKINS_URL}}job/${{TEST_JOB_NAME}}/${{TEST_JOB_BUILD_NUMBER}}/console"
       - string:
           name: TREP_TESTRAIL_SUITE_DESCRIPTION
           default: "{testrail_suite_desc}"
@@ -825,7 +576,7 @@
           description: "Tests to exclude from results"
       - string:
           name: TREP_LOG_LEVEL
-          default: "WARNING"
+          default: "{trep_debug_level}"
           description: "Log level of reporter"
       - string:
           name: TREP_LOG_FILE
@@ -833,7 +584,7 @@
           description: "Log filename for reporter tool"
       - string:
           name: TREP_TEST_RESULTS_SOURCE
-          default: "{trep_results_source}"
+          default: "xunit"
           description: "Reporter tool's additional config"
       - string:
           name: TREP_TEST_RESULTS_XUNIT_FILENAME
@@ -870,59 +621,3 @@
       - reporter-publisher:
           properties_name: reporter.properties
           email_to: '{email_to}'
-
-- parameter:
-    name: doc-parameters
-    parameters:
-      - bool:
-          name: CHECK_ONLY
-          default: '{doc_check_only}'
-          description: "check documentation format without commiting"
-      - string:
-          name: GERRIT_BRANCH
-          default: 'origin/{gerrit_branch}'
-      - string:
-          name: GERRIT_REFSPEC
-          default: 'refs/heads/{gerrit_branch}'
-      - bool:
-          name: DEBUG
-          default: '{build_debug}'
-      - bool:
-          name: MODERN_MODEL
-          default: '{doc_modern_model}'
-          description: "enable use modern-testing-model, default = classic-testing-model"
-- property:
-    name: doc-properties
-    properties:
-      - build-discarder:
-          days-to-keep: 40
-          num-to-keep: 40
-          artifact-days-to-keep: 30
-          artifact-num-to-keep: 20
-      - heavy-job:
-          weight: 1
-      - inject:
-          properties-content: |
-            TESTRAIL_URL=https://mirantis.testrail.com
-            TESTRAIL_PROJECT={testrail_project}
-            TESTRAIL_MILESTONE={testrail_milestone}
-            TESTRAIL_SUITE={testrail_suite}
-            TESTRAIL_CUSTOM_QA_TEAM={testrail_custom_qa_team}
-            TESTRAIL_CREATE_SECTION={testrail_create_section}
-
-- scm:
-    name: doc-scm
-    scm:
-      - common-scm:
-          scm_submodule_disabled: '{scm_submodule_disabled}'
-          scm_wipe_workspace: '{scm_wipe_workspace}'
-          gerrit_repo: '{gerrit_repo}'
-          skip_vote_successfull: '{skip_vote_successfull}'
-          skip_vote_failed: '{skip_vote_failed}'
-
-      - git:
-          wipe-workspace: 'false'
-          url: 'https://github.com/ehles/rst2tr'
-          branches:
-             - origin/master
-          basedir: utility-repo
