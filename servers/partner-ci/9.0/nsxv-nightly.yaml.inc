@@ -103,3 +103,7 @@
        current-parameters: true
        kill-phase-on: NEVER
        property-file: build_number
+     - name: '{fuel-release}.{plugin-name}.nsxv_multi_vnic'
+       current-parameters: true
+       kill-phase-on: NEVER
+       property-file: build_number
