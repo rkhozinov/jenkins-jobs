@@ -106,6 +106,7 @@
       - nsxv_specified_router_type
       - nsxv_metadata_mgt_disabled
       - nsxv_create_and_delete_secgroups
+      - nsxv_multi_vnic
 
     jobs:
       - '{build-name}'
