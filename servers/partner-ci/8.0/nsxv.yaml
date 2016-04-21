@@ -473,7 +473,7 @@
 - job-template:
     name: '{canary-name}'
     description: 'The Smoke test for {fuel-release}.{plugin-name}.{plugin-version}'
-    disabled: false
+    disabled: true
     concurrent: true
     project-type: multijob
     node: runner
