@@ -131,6 +131,7 @@
           allow-empty: true
       - email:
           recipients: '{email_to}'
+
 - publisher:
     name: build-publisher
     publishers:
@@ -153,9 +154,13 @@
           allow-empty: false
       - email:
           recipients: '{email_to}'
+
 - publisher:
     name: test-publisher
     publishers:
+      - archive:
+          artifacts: 'logs/*'
+          allow-empty: false
       - conditional-publisher:
           - condition-kind: file-exists
             condition-filename: 'nosetests.xml'
@@ -476,7 +481,7 @@
       - string:
           name: ARGS
           default: >
-             --doctest --exclude .git,fuel-qa,__init__.py
+             --doctest --exclude .git,doc,specs,fuel-qa,__init__.py,./plugin_test/run_tests.py
              --ignore=H302,H802,D203 --show-source --statistics
           description: "Default args from fuel-qa gate job"
     properties:
