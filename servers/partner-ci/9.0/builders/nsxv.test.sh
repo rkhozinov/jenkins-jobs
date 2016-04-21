@@ -41,23 +41,21 @@ export ENV_NAME="${ENV_PREFIX}.${ISO_VERSION}"
 export VENV_PATH="${HOME}/${FUEL_RELEASE}-venv"
 
 [[ -z ${NSXV_PLUGIN_PATH} ]] && export NSXV_PLUGIN_PATH=$(ls -t ${WORKSPACE}/nsxv*.rpm | head -n 1) || echo NSXV_PLUGIN_PATH=$NSXV_PLUGIN_PATH
-[[ -z "${PLUGIN_PATH}"     ]] && export PLUGIN_PATH=$DVS_PLUGIN_PATH
-
-source $VENV_PATH/bin/activate
+[[ -z "${PLUGIN_PATH}"     ]] && export PLUGIN_PATH=$NSXV_PLUGIN_PATH
 
 systest_parameters=''
 [[ $USE_SNAPSHOTS == "true"  ]] && systest_parameters+=' -k' || echo new env will be created
 [[ $ERASE_AFTER   == "true"  ]] && echo the env will be erased after test || systest_parameters+=' -K'
 
-echo test-group: $TEST_GROUP
-echo env-name: $ENV_NAME
-echo use-snapshots: $USE_SNAPSHOTS
-echo fuel-release: $FUEL_RELEASE
-echo venv-path: $VENV_PATH
-echo env-name: $ENV_NAME
-echo iso-path: $ISO_PATH   
-echo plugin-path: $NSXV_PLUGIN_PATH
-echo plugin checksum: $(md5sum -b $NSXV_PLUGIN_PATH)
+echo "test-group: ${TEST_GROUP}"
+echo "env-name: ${ENV_NAME}"
+echo "use-snapshots: ${USE_SNAPSHOTS}"
+echo "fuel-release: ${FUEL_RELEASE}"
+echo "venv-path: ${VENV_PATH}"
+echo "env-name: ${ENV_NAME}"
+echo "iso-path: ${ISO_PATH}"
+echo "plugin-path: ${NSXV_PLUGIN_PATH}"
+echo "plugin-checksum: $(md5sum -b ${NSXV_PLUGIN_PATH})"
 
 cat << REPORTER_PROPERTIES > reporter.properties
 ISO_VERSION=$ISO_VERSION
@@ -72,5 +70,7 @@ TREP_TESTRAIL_PLAN=$TREP_TESTRAIL_PLAN
 TREP_TESTRAIL_PLAN_DESCRIPTION=$TREP_TESTRAIL_PLAN_DESCRIPTION
 DATE=$(date +'%B-%d')
 REPORTER_PROPERTIES
+
+source "${VENV_PATH}/bin/activate"
 
 ./plugin_test/utils/jenkins/system_tests.sh -t test ${systest_parameters} -i ${ISO_PATH} -j ${JOB_NAME} -o --group=${TEST_GROUP} 2>&1
