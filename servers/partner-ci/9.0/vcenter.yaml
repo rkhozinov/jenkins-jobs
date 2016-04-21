@@ -24,7 +24,7 @@
           description: 'Snapshot name for vsphere lab'
       - string:
           name: TEST_GROUP_CONFIG
-          default: '${{TESTGROUP}}'
+          default: '${TEST_GROUP}'
           description: 'Snapshot name for vsphere lab'
       - string:
           name: DVS_SWITCHES
