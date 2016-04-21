@@ -21,31 +21,27 @@ if [ -z $PLUGIN_VERSION  ]; then
    [ -z $PLUGIN_VERSION  ] && (echo "PLUGIN_VERSION variable is empty"; exit 1) || export DVS_PLUGIN_VERSION=$PLUGIN_VERSION
 fi
 
-if [ $PUBLISH_RESULTS ]; then
-    if [ -z $PKG_JOB_BUILD_NUMBER ]; then
-        if [ -f build.properties ]; then
-            export PKG_JOB_BUILD_NUMBER=$(cat build.properties | grep BUILD_NUMBER)
-        else
-            echo "build.properties file is not available so the results couldn't be publihsed"
-            echo "$PKG_JOB_BUILD_NUMBER is empty, but it's needed for reporter. Exit."
-            exit 1
-        fi
-    fi
+
+if [ $PUBLISH_RESULTS -a -f build.properties ]; then
+    export PKG_JOB_BUILD_NUMBER=$(grep "BUILD_NUMBER" < build.properties | cut -d= -f2 )
+else
+    echo "build.properties file is not available so the results couldn't be publihsed"
+    exit 1
 fi
+
 
 #remove old logs and test data
 [ -f nosetest.xml ] && rm -f nosetests.xml
 rm -rf logs/*
 
-export FUEL_RELEASE=$(cut -d '-' -f2-2 <<< ${ISO_FILE} | tr -d '.')
+export FUEL_RELEASE=$(cut -d '-' -f2-2 <<< $ISO_FILE | tr -d '.')
 export ISO_PATH="${ISO_STORAGE}/${ISO_FILE}"
-export ISO_VERSION=$(echo "${ISO_FILE}" | cut -d'-' -f3-3 | tr -d '.iso' )
+export ISO_VERSION=$(echo $ISO_FILE | cut -d'-' -f3-3 | tr -d '.iso' )
 export ENV_NAME="${ENV_PREFIX}.${ISO_VERSION}"
 export VENV_PATH="${HOME}/${FUEL_RELEASE}-venv"
 
 [[ -z ${NSXV_PLUGIN_PATH} ]] && export NSXV_PLUGIN_PATH=$(ls -t ${WORKSPACE}/nsxv*.rpm | head -n 1) || echo NSXV_PLUGIN_PATH=$NSXV_PLUGIN_PATH
 [[ -z "${PLUGIN_PATH}"     ]] && export PLUGIN_PATH=$NSXV_PLUGIN_PATH
-
 
 systest_parameters=''
 [[ $USE_SNAPSHOTS == "true"  ]] && systest_parameters+=' -k' || echo new env will be created
@@ -68,10 +64,11 @@ TEST_JOB_NAME=$JOB_NAME
 TEST_JOB_BUILD_NUMBER=$BUILD_NUMBER
 PKG_JOB_BUILD_NUMBER=$PKG_JOB_BUILD_NUMBER
 PLUGIN_VERSION=$PLUGIN_VERSION
-TREP_TESTRAIL_SUITE=$TREP_TESTRAIL_SUITE
+TREP_TESTRAIL_SUITE=${TREP_TESTRAIL_SUITE}
 TREP_TESTRAIL_SUITE_DESCRIPTION=$TREP_TESTRAIL_SUITE_DESCRIPTION
 TREP_TESTRAIL_PLAN=$TREP_TESTRAIL_PLAN
 TREP_TESTRAIL_PLAN_DESCRIPTION=$TREP_TESTRAIL_PLAN_DESCRIPTION
+DATE=$(date +'%B-%d')
 REPORTER_PROPERTIES
 
 source "${VENV_PATH}/bin/activate"
