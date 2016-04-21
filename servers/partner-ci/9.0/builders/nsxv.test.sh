@@ -23,7 +23,7 @@ fi
 
 
 if [ $PUBLISH_RESULTS -a -f build.properties ]; then
-    export PKG_JOB_BUILD_NUMBER=$(cat build.properties | grep BUILD_NUMBER)
+    export PKG_JOB_BUILD_NUMBER=$(grep "BUILD_NUMBER" < build.properties | cut -d= -f2 )
 else
     echo "build.properties file is not available so the results couldn't be publihsed"
     exit 1
@@ -66,6 +66,11 @@ TEST_JOB_NAME=$JOB_NAME
 TEST_JOB_BUILD_NUMBER=$BUILD_NUMBER
 PKG_JOB_BUILD_NUMBER=$PKG_JOB_BUILD_NUMBER
 PLUGIN_VERSION=$PLUGIN_VERSION
+TREP_TESTRAIL_SUITE=${TREP_TESTRAIL_SUITE}
+TREP_TESTRAIL_SUITE_DESCRIPTION=$TREP_TESTRAIL_SUITE_DESCRIPTION
+TREP_TESTRAIL_PLAN=$TREP_TESTRAIL_PLAN
+TREP_TESTRAIL_PLAN_DESCRIPTION=$TREP_TESTRAIL_PLAN_DESCRIPTION
+DATE=$(date +'%B-%d')
 REPORTER_PROPERTIES
 
 ./plugin_test/utils/jenkins/system_tests.sh -t test ${systest_parameters} -i ${ISO_PATH} -j ${JOB_NAME} -o --group=${TEST_GROUP} 2>&1

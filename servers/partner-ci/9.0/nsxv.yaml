@@ -68,7 +68,7 @@
     scm_submodule_disabled: true
 
     testrail_project: "VMware NSX-v plugin"
-    testrail_suite: "[9.0][PCE] Vmware NSX-v plugin 3.0"
+    testrail_suite: "[9.0][PCE] VMware NSXv plugin v3.0.0"
     testrail_suite_desc: "Suite description"
     testrail_milestone: "3.0.0"
     testrail_plan: "[9.0][PCE] NSXv plugin 3.0.0 build#${{PKG_JOB_BUILD_NUMBER}} iso#${{ISO_VERSION}}"
@@ -90,6 +90,8 @@
       - nsxv_ceilometer
       - nsxv_ha_mode
       - nsxv_ceph
+      - nsxv_smoke
+      - nsxv_bvt
       - nsxv_ceph_no_vcenter
       - nsxv_floating_ip_to_public
       - nsxv_create_and_delete_vms
