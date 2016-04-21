@@ -2,11 +2,7 @@
 set -e
 
 git log  --pretty=oneline | head
-
-##################################
-# possible fix. added by @asetyaev
 git clean -ffd
-##################################
 
 path="./deployment_scripts/puppet/manifests ./deployment_scripts/puppet/modules/nsxv"
 
@@ -29,7 +25,3 @@ fpb --debug --build  ./
 
 pkg_name=$(ls -t *.rpm | head -n1)
 mv $pkg_name $(echo $pkg_name | head -n 1 | sed s/.noarch/-$BUILD_NUMBER.noarch/)
-
-
-
-
