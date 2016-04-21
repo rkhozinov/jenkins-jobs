@@ -67,7 +67,7 @@
     released_plugin_path: '/storage/nsxv/released/2.0/nsxv-2.0-2.0.0-1-415.noarch.rpm'
     scm_submodule_disabled: false
 
-    testrail_project: "VMWare NSX-v plugin"
+    testrail_project: "VMware NSX-v plugin"
     testrail_suite: "[8.0][PCE] NSXv plugin v2.0.0"
     testrail_suite_desc: "Suite description"
     testrail_milestone: "2.0.0"
@@ -140,8 +140,8 @@
           testrail_plan_desc: "Test plan description"
           testrail_run: "$TREP_TESTRAIL_SUITE"
           testrail_run_desc: "Test run description"
-          default-pkg-job-name: ''
-          default-iso-job-name: ''
+          pkg_job_name: ''
+          iso_job_name: ''
           multijob_build_pkg: false
 
       - '{fuel-release}.{plugin-name}.regression.test':
