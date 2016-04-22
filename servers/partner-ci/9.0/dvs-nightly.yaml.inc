@@ -95,3 +95,23 @@
         property-file: build_number
         current-parameters: true
         kill-phase-on: NEVER
+      - name: '{fuel-release}.{plugin-name}.dvs_update_network'
+        property-file: build_number
+        current-parameters: true
+        kill-phase-on: NEVER
+      - name: '{fuel-release}.{plugin-name}.dvs_port_security_group'
+        property-file: build_number
+        current-parameters: true
+        kill-phase-on: NEVER
+      - name: '{fuel-release}.{plugin-name}.dvs_attached_ports'
+        property-file: build_number
+        current-parameters: true
+        kill-phase-on: NEVER
+      - name: '{fuel-release}.{plugin-name}.dvs_instances_batch_mix_sg'
+        property-file: build_number
+        current-parameters: true
+        kill-phase-on: NEVER
+      - name: '{fuel-release}.{plugin-name}.dvs_vcenter_multiple_nics'
+        property-file: build_number
+        current-parameters: true
+        kill-phase-on: NEVER
