@@ -101,6 +101,11 @@
       - dvs_vcenter_reset_controller
       - dvs_vcenter_net_template
       - dvs_vcenter_shutdown_controller
+      - dvs_vcenter_multiple_nics
+      - dvs_update_network
+      - dvs_port_security_group
+      - dvs_attached_ports
+      - dvs_instances_batch_mix_sg
       - dvs_different_networks
       - dvs_install
       - dvs_uninstall
