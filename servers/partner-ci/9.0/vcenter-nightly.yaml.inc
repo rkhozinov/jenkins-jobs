@@ -14,7 +14,7 @@
        current-parameters: true
        predefined-parameters: |
          TEST_GROUP_PREFIX=system_test.vcenter.deploy_vcenter_dvs_run_ostf
-         TEST_GROUP_CONFIG=
+         TEST_GROUP_CONFIG=vcenter_dvs_smoke
        kill-phase-on: NEVER
 
 - multijob:
