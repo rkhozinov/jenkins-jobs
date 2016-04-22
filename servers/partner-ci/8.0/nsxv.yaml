@@ -68,7 +68,7 @@
     scm_submodule_disabled: false
 
     testrail_project: "VMware NSX-v plugin"
-    testrail_suite: "[8.0][PCE] NSXv plugin v2.0.0"
+    testrail_suite: "[8.0][PCE] VMware NSXv plugin v2.0.0"
     testrail_suite_desc: "Suite description"
     testrail_milestone: "2.0.0"
     testrail_plan: "[8.0][PCE] NSXv plugin v2.0.0 build#${{PKG_JOB_BUILD_NUMBER}} iso#${{ISO_VERSION}}"
