@@ -24,7 +24,7 @@
           description: 'Snapshot name for vsphere lab'
       - string:
           name: TEST_GROUP_CONFIG
-          default: '${{TESTGROUP}}'
+          default: '${TEST_GROUP}'
           description: 'Snapshot name for vsphere lab'
 
 - project:
@@ -60,7 +60,7 @@
     testjob_build_pkg: false
     runner_timeout: 600
     test_timeout: 300
-    iso_file: ''
+    iso_file: 'fuel-8.0-570.iso'
     gerrit_repo: 'fuel-qa'
     gerrit_branch: 'stable/8.0'
     email_to: 'rkhozinov@mirantis.com ibumarskov@mirantis.com'
