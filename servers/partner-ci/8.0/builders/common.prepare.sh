@@ -123,7 +123,7 @@ function fix_logger {
 
 get_venv_requirements
 
-[ -d $VENV_PATH ] && prepare_venv || { echo "$VENV_PATH doesn't exist $VENV_PATH will be recreated"; recreate_venv; } 
+[ -d $VENV_PATH ] && prepare_venv || { echo "$VENV_PATH doesn't exist $VENV_PATH will be recreated"; recreate_venv; }
 
 fix_logger
 

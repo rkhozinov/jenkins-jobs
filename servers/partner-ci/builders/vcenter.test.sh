@@ -3,9 +3,6 @@
 # activate bash xtrace for script
 [[ "${DEBUG}" == "true" ]] && set -x || set +x
 
-[ -z "$(ls -A ./plugin_test/fuel-qa)" ] && { echo "fuel-qa is not exists or empty"; exit 1; }
-
-
 ISO_FILE_ARTIFACT='iso_file'
 # if user entered custom iso we should use it
 if [ -z $ISO_FILE  ]; then
@@ -39,24 +36,24 @@ fi
 [ -f nosetest.xml ] && rm -f nosetests.xml
 rm -rf logs/*
 
-export FUEL_RELEASE=$(cut -d- -f2-2 <<< ${ISO_FILE} | tr -d '.')
+export FUEL_RELEASE=$(cut -d '-' -f2-2 <<< ${ISO_FILE} | tr -d '.')
 export ISO_PATH="${ISO_STORAGE}/${ISO_FILE}"
 export ISO_VERSION=$(echo "${ISO_FILE}" | cut -d'-' -f3-3 | tr -d '.iso' )
 export ENV_NAME="${ENV_PREFIX}.${ISO_VERSION}"
 export VENV_PATH="${HOME}/${FUEL_RELEASE}-venv"
 
 [ -z "${DVS_PLUGIN_PATH}" ] && export DVS_PLUGIN_PATH=$(ls -t ${WORKSPACE}/fuel-plugin-vmware-dvs*.rpm | head -n 1)
-
-[ -z "${DVS_PLUGIN_PATH}" ] && ( echo "DVS_PLUGIN_PATH is empty"; exit 1 ) 
-
+[ -z "${DVS_PLUGIN_PATH}" ] && ( echo "DVS_PLUGIN_PATH is empty"; exit 1 )
 [ -z "${PLUGIN_PATH}"     ] && export PLUGIN_PATH=$DVS_PLUGIN_PATH
 
-
 systest_parameters=''
-[[ $USE_SNAPSHOTS == "true"  ]] && systest_parameters+=' -k' || echo "new env will be created"
-[[ $ERASE_AFTER   == "true"  ]] && echo "the env will be erased after test" || systest_parameters+=' -K'
+[[ $USE_SNAPSHOTS  == 'true' ]] && systest_parameters+=' --existing' || echo snapshots for env is not be used
+[[ $SHUTDOWN_AFTER == 'true' ]] && systest_parameters+=' --destroy' || echo the env will not be removed after test
+#[[ $ERASE_AFTER    == 'true' ]] && systest_parameters+=' --erase' || echo the env will not be erased after test
 
-echo "test-group: ${TEST_GROUP}"
+[ -z $TEST_GROUP_PREFIX ] && { echo "testgroup prefix is empty"; exit 1; } || echo test-group-prefix: $TEST_GROUP_PREFIX
+
+echo test-group: $TEST_GROUP
 echo "env-name: ${ENV_NAME}"
 echo "use-snapshots: ${USE_SNAPSHOTS}"
 echo "fuel-release: ${FUEL_RELEASE}"
@@ -73,7 +70,7 @@ TEST_JOB_NAME=$JOB_NAME
 TEST_JOB_BUILD_NUMBER=$BUILD_NUMBER
 PKG_JOB_BUILD_NUMBER=$PKG_JOB_BUILD_NUMBER
 PLUGIN_VERSION=$PLUGIN_VERSION
-TREP_TESTRAIL_SUITE=${TREP_TESTRAIL_SUITE}
+TREP_TESTRAIL_SUITE=$TREP_TESTRAIL_SUITE
 TREP_TESTRAIL_SUITE_DESCRIPTION=$TREP_TESTRAIL_SUITE_DESCRIPTION
 TREP_TESTRAIL_PLAN=$TREP_TESTRAIL_PLAN
 TREP_TESTRAIL_PLAN_DESCRIPTION=$TREP_TESTRAIL_PLAN_DESCRIPTION
@@ -82,5 +79,8 @@ REPORTER_PROPERTIES
 
 source "${VENV_PATH}/bin/activate"
 
-./plugin_test/utils/jenkins/system_tests.sh -t test ${systest_parameters} -i ${ISO_PATH} -j ${JOB_NAME} -o --group=${TEST_GROUP} 2>&1
-
+/btsync/tpi_systest_mod.sh -d ${OPENSTACK_RELEASE} \
+                           -n "${NODES_COUNT}" \
+                           -i ${ISO_PATH} \
+                           -t "${TEST_GROUP_PREFIX}(${TEST_GROUP_CONFIG})" \
+                           $systest_parameters

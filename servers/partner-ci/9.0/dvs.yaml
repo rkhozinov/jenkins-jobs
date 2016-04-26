@@ -298,9 +298,9 @@
                 filter: "iso_file"
                 which-build: last-successful
       - shell:
-          !include-raw-escape: builders/common.prepare.sh
+          !include-raw-escape: ../builders/common.prepare.sh
       - shell:
-          !include-raw-escape: builders/dvs.test.sh
+          !include-raw-escape: ../builders/dvs.test.sh
     publishers:
       - runner-publisher:
           properties_name: properties
@@ -342,9 +342,9 @@
           rm -rf build.properties
           rm -rf build.plugin_version
       - shell:
-          !include-raw-escape: builders/build-plugin-dvs.sh
+          !include-raw-escape: ../builders/build-plugin-dvs.sh
       - shell:
-          !include-raw-escape: builders/rpm-check.sh
+          !include-raw-escape: ../builders/rpm-check.sh
     publishers:
       - build-publisher:
           email_to: '{email_to}'

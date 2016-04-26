@@ -372,9 +372,9 @@
           project: '{build-name}'
           which-build: last-successful
       - shell:
-          !include-raw-escape: builders/common.prepare.sh
+          !include-raw-escape: ../builders/common.prepare.sh
       - shell:
-          !include-raw-escape: builders/nsxv.test.sh
+          !include-raw-escape: ../builders/nsxv.test.sh
     publishers:
       - postbuildscript:
           script-only-if-succeeded: False

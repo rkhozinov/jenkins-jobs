@@ -288,9 +288,9 @@
                 filter: "iso_file"
                 which-build: last-successful
       - shell:
-          !include-raw-escape: builders/common.prepare.sh
+          !include-raw-escape: ../builders/common.prepare.sh
       - shell:
-          !include-raw-escape: builders/nsxv.test.sh
+          !include-raw-escape: ../builders/nsxv.test.sh
     publishers:
       - runner-publisher:
           properties_name: properties
@@ -332,9 +332,9 @@
           rm -rf build.properties
           rm -rf build.plugin_version
       - shell:
-          !include-raw-escape: builders/build-plugin-nsxv.sh
+          !include-raw-escape: ../builders/build-plugin-nsxv.sh
       - shell:
-          !include-raw-escape: builders/rpm-check.sh
+          !include-raw-escape: ../builders/rpm-check.sh
     publishers:
       - build-publisher:
           email_to: '{email_to}'
