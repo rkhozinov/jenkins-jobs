@@ -2,79 +2,119 @@
 - parameter:
     name: plugin-specific-parameters
     parameters:
+      - bool:
+          name: UPDATE_MASTER
+          default: '{update_master}'
+          description: 'turns on update fuel master node to maintenance update'
+      - bool:
+          name: BONDING
+          default: '{obj:bonding}'
+      - bool:
+          name: KVM_USE
+          default: '{obj:kvm_use}'
       - string:
-          name: WORKSTATION_SNAPSHOT
-          default: 'doubledvs'
-          description: 'Snapshot name for vcenter lab'
+          name: NODE_VOLUME_SIZE
+          default: '512'
       - string:
-          name: WORKSTATION_NODES
-          default: 'esxi1 esxi2 esxi3 vcenter trusty'
-          description: "List of workstation's nodes"
+          name: MIRROR
+          default: 'http://mirror.seed-cz1.fuel-infra.org'
+          description: |
+              'mirror for package repositories. this mirror is optimized for CZ'
       - string:
-          name: VCENTER_IP
-          default: '172.16.0.254'
-          description: "IP address of the vCenter server"
+          name: UPDATE_FUEL_MIRROR
+          default: >
+             ${{MIRROR}}/mos-repos/centos/mos7.0-centos6-fuel/security/x86_64/
+             ${{MIRROR}}/mos-repos/centos/mos7.0-centos6-fuel/updates/x86_64/
+          description: 'repositories to update fuel master node'
       - string:
-          name: VCENTER_CLUSTERS
-          default: 'Cluster1,Cluster2'
-          description: "List of vCenter's clusters"
+          name: MIRROR_UBUNTU
+          default: >
+             deb ${{MIRROR}}/pkgs/ubuntu/ trusty main universe multiverse |
+             deb ${{MIRROR}}/pkgs/ubuntu/ trusty-updates main universe multiverse
+          description: 'proposed repositories to update ubuntu cluster'
       - string:
-          name: DVS_SWITCHES
-          default: 'Cluster1,Cluster2'
-          description: "List of vCenter's clusters"
+          name: DEB_UPDATES
+          default: "mos-updates,deb ${{MIRROR}}/mos/ubuntu/dists/mos7.0-updates main restricted"
+          description: 'ubuntu-updates repositories for master ui'
+      - string:
+          name: DEB_SECURITY
+          default: "mos-security,deb ${{MIRROR}}/mos/ubuntu/dists/mos7.0-security main restricted"
+          description: 'ubuntu-security repositories for master ui'
+      - string:
+          name: CONTRAIL_DISTRIBUTION
+          default: ''
+      - string:
+          name: CONTRAIL_VERSION
+          default: '{plugin-version}'
+          description: >
+            'There is a version of juniper packages stored in common sotrage'
+      - string:
+          name: PLUGIN_VERSION
+          default: ${{CONTRAIL_VERSION}}
+          description: 'plugin version from metadata'
+      - string:
+          name: CONTRAIL_PLUGIN_PATH
+          description: 'The path to the contrail package on storage'
+      - string:
+          name: CONTRAIL_PLUGIN_PACK_UB_PATH
+          description: 'The path to the contrail package on storage'
+      - string:
+          name: VSRX_TEMPLATE_PATH
+          default: '/storage/contrail/vSRX1.template'
+          description: 'The path to the vsrx template'
 
 - project:
     name: 'predefined_parameters'
-    fuel-release: '8.0'
-    plugin-version: '2.1'
-    plugin-name: 'dvs'
-    build-name: '{fuel-release}.{plugin-name}.build'
-    flake8-name: '{fuel-release}.{plugin-name}.flake8'
-    radon-name: '{fuel-release}.{plugin-name}.radon'
-    shellcheck-name: '{fuel-release}.{plugin-name}.shellcheck'
-    smoke-name: '{fuel-release}.{plugin-name}.smoke'
-    bvt-name: '{fuel-release}.{plugin-name}.bvt'
-    regression-name: '{fuel-release}.{plugin-name}.regression'
-    canary-name: '{fuel-release}.{plugin-name}.canary'
-    download-iso-name: 'download_iso'
-    nightly-name: '{fuel-release}.{plugin-name}.nightly'
-    custom-name: '{fuel-release}.{plugin-name}.custom'
-    reporter-name: '{fuel-release}.{plugin-name}.reporter'
-    smoke-test-name: 'dvs_vcenter_smoke'
-    bvt-test-name: 'dvs_vcenter_bvt'
-    canary-test-name: 'dvs_vcenter_smoke'
-    admin_node_memory: '8192'
-    slave_node_memory: '8192'
+    fuel-release: '7.0'
+    plugin-version: '3.0.1'
+    plugin-name: 'contrail'
+    build-name: '{fuel-release}.{plugin-name}.{plugin-version}.build'
+    flake8-name: '{fuel-release}.{plugin-name}.{plugin-version}.flake8'
+    radon-name: '{fuel-release}.{plugin-name}.{plugin-version}.radon'
+    shellcheck-name: '{fuel-release}.{plugin-name}.{plugin-version}.shellcheck'
+    smoke-name: '{fuel-release}.{plugin-name}.{plugin-version}.smoke'
+    bvt-name: '{fuel-release}.{plugin-name}.{plugin-version}.bvt'
+    regression-name: '{fuel-release}.{plugin-name}.{plugin-version}.regression'
+    nightly-name: '{fuel-release}.{plugin-name}.{plugin-version}.nightly'
+    custom-name: '{fuel-release}.{plugin-name}.{plugin-version}.custom'
+    reporter-name: '{fuel-release}.{plugin-name}.{plugin-version}.reporter'
+    smoke-test-name: 'contrail_smoke'
+    bvt-test-name: 'contrail_bvt'
+    admin_node_memory: '4096'
+    slave_node_memory: '4096'
     admin_node_cpu: '4'
     slave_node_cpu: '4'
-    pkg_job_name: '{fuel-release}.{plugin-name}.build'
-    iso_job_name: '{fuel-release}.{plugin-name}.canary'
+    pkg_job_name: '{fuel-release}.{plugin-name}.{plugin-version}.build'
+    iso_job_name: ''
     nightly_timer: 'H 22 * * *'
     regression_timer: 'H 18 * * *'
-    nightly_disabled: true
-    regression_disabled: false
+    nightly_disabled: false
+    regression_disabled: true
     use_snapshots: false
     force_erase: true
     recreate_venv: false
     disable_ssl: true
+    bonding: false
+    kvm_use: false
+    update_master: true
     debug: true
     publish_results: true
     multijob_build_pkg: true
     testjob_build_pkg: false
     runner_timeout: 600
     test_timeout: 300
-    iso_file: 'fuel-8.0-570.iso'
-    gerrit_repo: 'fuel-plugin-vmware-dvs'
-    gerrit_branch: 'stable/8.0-agentful'
-    email_to: 'rkhozinov@mirantis.com otsvigun@mirantis.com'
-    released_plugin_path: '/storage/dvs/released/2.1/fuel-plugin-vmware-dvs-2.1-2.1.0-1-660.noarch.rpm'
+    iso_file: 'fuel-7.0-301-2015-09-22_20-01-53.iso'
+    gerrit_repo: 'fuel-plugin-contrail'
+    gerrit_branch: 'stable/3.0.1'
+    email_to: 'rkhozinov@mirantis.com okosse@mirantis.com ivovk@mirantis.com'
+    released_plugin_path: '/storage/contrail/released/contrail-3.0.noarch.rpm'
     scm_submodule_disabled: true
 
-    testrail_project: "VMware DVS plugin"
-    testrail_suite: "[8.0][PCE] VMware DVS plugin v2.1.0"
+    testrail_project: "Contrail plugin"
+    testrail_suite: "Contrail Plugin v3.x.x"
     testrail_suite_desc: "Suite description"
-    testrail_milestone: "2.1.0"
-    testrail_plan: "$TREP_TESTRAIL_SUITE build#${{PKG_JOB_BUILD_NUMBER}} iso#${{ISO_VERSION}}"
+    testrail_milestone: "Fuel Contrail Plugin v3.0.1"
+    testrail_plan: "$TREP_TESTRAIL_SUITE iso #${{ISO_VERSION}} pkg#${{JUNIPER_PKG_VERSION}} build#${{PKG_JOB_BUILD_NUMBER}}"
     testrail_plan_desc: "Test plan description"
     testrail_run: "$TREP_TESTRAIL_SUITE"
     testrail_run_desc: "Test run description"
@@ -86,31 +126,30 @@
     testgroup_value: '{testgroup}'
 
     testgroup:
-      - dvs_vcenter_systest_setup
-      - dvs_vcenter_networks
-      - dvs_vcenter_ping_public
-      - dvs_instances_one_group
-      - dvs_vcenter_security
-      - dvs_vcenter_tenants_isolation
-      - dvs_vcenter_same_ip
-      - dvs_vcenter_uninstall
-      - dvs_vcenter_bind_port
-      - dvs_vcenter_add_delete_controller
-      - dvs_vcenter_add_delete_nodes
-      - dvs_vcenter_reset_controller
-      - dvs_vcenter_net_template
-      - dvs_vcenter_shutdown_controller
-      - dvs_different_networks
-      - dvs_install
-      - dvs_uninstall
-      - dvs_remote_sg_simple
-      - dvs_remote_ip_prefix
-      - dvs_connect_default_net
-      - dvs_connect_nodefault_net
-      - dvs_ping_without_fip
-      - dvs_reboot_vcenter_1
-      - dvs_reboot_vcenter_2
-      - dvs_volume
+      - contrail_bvt
+      - contrail_smoke
+      - install_contrail
+      - contrail_ha
+      - contrail_ha_baseos
+      - contrail_ceilometer
+      - contrail_bonding
+      - contrail_vlan
+      - contrail_jumbo
+      - contrail_ceph_multirole
+      - contrail_cinder_multirole
+      - contrail_cinder_ceph_multirole
+      - contrail_plugin_add_delete_controller_node
+      - contrail_plugin_add_delete_compute_node
+      - contrail_add_control
+      - contrail_ha_with_shutdown_contrail_node
+      - cannot_deploy_only_contrail_db
+      - cannot_deploy_only_contrail_config
+      - cannot_deploy_only_contrail_control
+      - contrail_add_config
+      - contrail_delete_control
+      - contrail_delete_config
+      - contrail_add_db
+      - contrail_net_template
 
     jobs:
       - '{build-name}'
@@ -134,25 +173,26 @@
 
       - '{reporter-name}'
 
-      - '{fuel-release}.{plugin-name}.{testgroup}':
+      - '{fuel-release}.{plugin-name}.{plugin-version}.{testgroup}.juniper':
           scm_submodule_disabled: false
 
       - '{smoke-name}':
           multijob_build_pkg: false
 
-      - '{fuel-release}.{plugin-name}.smoke.test':
+      - '{fuel-release}.{plugin-name}.{plugin-version}.smoke.test.juniper':
           scm_submodule_disabled: false
 
       - '{bvt-name}':
           multijob_build_pkg: true
 
-      - '{fuel-release}.{plugin-name}.bvt.test':
+      - '{fuel-release}.{plugin-name}.{plugin-version}.bvt.test.juniper':
           scm_submodule_disabled: false
 
       - '{regression-name}':
-          testrail_suite: "[8.0][PCE] VMware DVS plugin v2.1.0 Regression"
+          testrail_suite: "Contrail Plugin v3.x.x"
           testrail_suite_desc: "Suite description"
-          testrail_plan: "$TREP_TESTRAIL_SUITE #${{DATE}}"
+          testrail_milestone: "Fuel Contrail Plugin v3.0.1"
+          testrail_plan: "$TREP_TESTRAIL_SUITE iso #${{ISO_VERSION}} pkg#${{JUNIPER_PKG_VERSION}} build#${{PKG_JOB_BUILD_NUMBER}}"
           testrail_plan_desc: "Test plan description"
           testrail_run: "$TREP_TESTRAIL_SUITE"
           testrail_run_desc: "Test run description"
@@ -160,19 +200,9 @@
           iso_job_name: ''
           multijob_build_pkg: false
 
-      - '{fuel-release}.{plugin-name}.regression.test':
+      - '{fuel-release}.{plugin-name}.{plugin-version}.regression.test.juniper':
           scm_submodule_disabled: false
 
-      - '{canary-name}':
-          iso_job_name: '{download-iso-name}'
-
-      - '{fuel-release}.{plugin-name}.canary.skinny':
-          scm_submodule_disabled: false
-
-      - '{fuel-release}.{plugin-name}.canary.fat':
-          scm_submodule_disabled: false
-
-# parameters for smoke, bvt and nightly multijobs
 - runner-parameters: &runner-parameters
     name: 'runner-parameters'
     parameters:
@@ -200,7 +230,11 @@
           testrail_suite_desc:  '{testrail_suite_desc}'
           testrail_plan:        '{testrail_plan}'
           testrail_plan_desc:   '{testrail_plan_desc}'
-      - plugin-specific-parameters
+      - plugin-specific-parameters:
+          bonding: '{bonding}'
+          kvm_use: '{kvm_use}'
+          update_master: '{update_master}'
+          plugin-version: '{plugin-version}'
 
 # parameters for jobs created per test-group and custom test job
 - test-parameters: &test-parameters
@@ -208,7 +242,7 @@
     parameters:
       - label:
           name: node
-          default: 'dvs'
+          default: 'contrail'
           description: "The node on which to run the job"
       - bool:
           name: BUILD_PKG
@@ -238,12 +272,16 @@
           testrail_suite_desc:  '{testrail_suite_desc}'
           testrail_plan:        '{testrail_plan}'
           testrail_plan_desc:   '{testrail_plan_desc}'
-      - plugin-specific-parameters
+      - plugin-specific-parameters:
+          bonding: '{bonding}'
+          kvm_use: '{kvm_use}'
+          update_master: '{update_master}'
+          plugin-version: '{plugin-version}'
 
 - defaults:
     name: global
     disabled: false
-    node: dvs
+    node: contrail
     logrotate:
       daysToKeep: 30
       numToKeep: 100
@@ -265,7 +303,7 @@
           condition-command: |
             [ ! -z ${{PKG_JOB_NAME}}         ] && \
             [   -z ${{PKG_JOB_BUILD_NUMBER}} ] && \
-            [   -z ${{DVS_PLUGIN_PATH}}      ]
+            [   -z ${{CONTRAIL_PLUGIN_PATH}} ]
           steps:
             - copyartifact:
                 project: ${{PKG_JOB_NAME}}
@@ -275,7 +313,7 @@
           condition-command: |
             [ ! -z ${{PKG_JOB_NAME}}         ] && \
             [ ! -z ${{PKG_JOB_BUILD_NUMBER}} ] && \
-            [   -z ${{DVS_PLUGIN_PATH}}      ]
+            [   -z ${{CONTRAIL_PLUGIN_PATH}} ]
           steps:
             - copyartifact:
                 project: ${{PKG_JOB_NAME}}
@@ -294,7 +332,7 @@
       - shell:
           !include-raw-escape: builders/common.prepare.sh
       - shell:
-          !include-raw-escape: builders/dvs.test.sh
+          !include-raw-escape: builders/contrail.test.sh
     publishers:
       - runner-publisher:
           properties_name: properties
@@ -336,40 +374,50 @@
           rm -rf build.properties
           rm -rf build.plugin_version
       - shell:
-          !include-raw-escape: builders/build-plugin-dvs.sh
+          !include-raw-escape: builders/build-plugin-contrail.sh
       - shell:
           !include-raw-escape: builders/rpm-check.sh
     publishers:
       - build-publisher:
           email_to: '{email_to}'
 - job-template:
-    name: '{fuel-release}.{plugin-name}.{testgroup}'
-    description: 'The test "{testgroup}" for {fuel-release}.{plugin-name}.{plugin-version}'
+    name: '{fuel-release}.{plugin-name}.{plugin-version}.{testgroup}.open'
+    description: 'The test "{testgroup}" for {fuel-release}.{plugin-name}.{plugin-version} open contrail'
     concurrent: true
 
 - job-template:
-    name: '{fuel-release}.{plugin-name}.bvt.test'
-    description: 'The test for {fuel-release}.{plugin-name}.{plugin-version}'
+    name: '{fuel-release}.{plugin-name}.{plugin-version}.{testgroup}.juniper'
+    description: 'The test "{testgroup}" for {fuel-release}.{plugin-name}.{plugin-version} juniper contrail'
     concurrent: true
 
 - job-template:
-    name: '{fuel-release}.{plugin-name}.smoke.test'
-    description: 'The test for {fuel-release}.{plugin-name}.{plugin-version}'
+    name: '{fuel-release}.{plugin-name}.{plugin-version}.bvt.test.open'
+    description: 'The test for {fuel-release}.{plugin-name}.{plugin-version} open contrail'
     concurrent: true
 
 - job-template:
-    name: '{fuel-release}.{plugin-name}.regression.test'
-    description: 'The regression test for {fuel-release}.{plugin-name}.{plugin-version}'
+    name: '{fuel-release}.{plugin-name}.{plugin-version}.bvt.test.juniper'
+    description: 'The test for {fuel-release}.{plugin-name}.{plugin-version} juniper contrail'
     concurrent: true
 
 - job-template:
-    name: '{fuel-release}.{plugin-name}.canary.skinny'
-    description: 'The canary skinny test for {fuel-release}.{plugin-name}.{plugin-version}'
+    name: '{fuel-release}.{plugin-name}.{plugin-version}.smoke.test.open'
+    description: 'The test for {fuel-release}.{plugin-name}.{plugin-version} open contrail'
     concurrent: true
 
 - job-template:
-    name: '{fuel-release}.{plugin-name}.canary.fat'
-    description: 'The canary fat test for {fuel-release}.{plugin-name}.{plugin-version}'
+    name: '{fuel-release}.{plugin-name}.{plugin-version}.smoke.test.juniper'
+    description: 'The test for {fuel-release}.{plugin-name}.{plugin-version} juniper contrail'
+    concurrent: true
+
+- job-template:
+    name: '{fuel-release}.{plugin-name}.{plugin-version}.regression.test.open'
+    description: 'The test for {fuel-release}.{plugin-name}.{plugin-version} open contrail'
+    concurrent: true
+
+- job-template:
+    name: '{fuel-release}.{plugin-name}.{plugin-version}.regression.test.juniper'
+    description: 'The test for {fuel-release}.{plugin-name}.{plugin-version} juniper contrail'
     concurrent: true
 
 - job-template:
@@ -407,10 +455,11 @@
           name: '1st phase - regression test'
           condition: COMPLETED
           projects:
-            - name: '{fuel-release}.{plugin-name}.regression.test'
+            - name: '{fuel-release}.{plugin-name}.{plugin-version}.regression.test.juniper'
               predefined-parameters: |
-                TEST_GROUP=dvs_regression
-                DVS_PLUGIN_PATH={released_plugin_path}
+                TEST_GROUP=contrail_bvt
+                CONTRAIL_DISTRIBUTION=juniper
+                CONTRAIL_PLUGIN_PATH={released_plugin_path}
                 PLUGIN_VERSION={plugin-version}
                 PKG_JOB_BUILD_NUMBER=released
               current-parameters: true
@@ -440,11 +489,12 @@
           name: 'The smoke test for {fuel-release}.{plugin-name}.{plugin-version}'
           condition: COMPLETED
           projects:
-            - name: '{fuel-release}.{plugin-name}.smoke.test'
+            - name: '{fuel-release}.{plugin-name}.{plugin-version}.smoke.test.juniper'
               current-parameters: true
               property-file: build_number
               predefined-parameters: |
                 TEST_GROUP={smoke-test-name}
+                CONTRAIL_DISTRIBUTION=juniper
               kill-phase-on: NEVER
     publishers:
       - runner-publisher:
@@ -475,51 +525,17 @@
           name: 'The BVT test for {fuel-release}.{plugin-name}.{plugin-version}'
           condition: COMPLETED
           projects:
-            - name: '{fuel-release}.{plugin-name}.bvt.test'
+            - name: '{fuel-release}.{plugin-name}.{plugin-version}.bvt.test.juniper'
               current-parameters: true
               property-file: build_number
               predefined-parameters: |
-                 TEST_GROUP={bvt-test-name}
+                TEST_GROUP={bvt-test-name}
+                CONTRAIL_DISTRIBUTION=juniper
               kill-phase-on: NEVER
     publishers:
       - runner-publisher:
           properties_name: bvt.properties
           email_to: '{email_to}'
-
-- job-template:
-    name: '{canary-name}'
-    description: 'The Smoke test for {fuel-release}.{plugin-name}.{plugin-version}'
-    disabled: true
-    concurrent: true
-    project-type: multijob
-    node: runner
-    scm: []
-    <<: *runner-parameters
-    triggers:
-      - reverse:
-          jobs: '{download-iso-name}'
-          result: 'success'
-    properties:
-      - runner-property:
-          build-name: '{build-name}'
-    wrappers:
-      - runner-wrapper
-    publishers:
-      - runner-publisher:
-          properties_name: canary.properties
-          email_to: '{email_to}'
-    builders:
-      - runner-condition
-      - multijob:
-          name: 'Canary tests for {plugin-name}'
-          condition: SUCCESSFUL
-          projects:
-            - name: '{fuel-release}.{plugin-name}.canary.skinny'
-              property-file: build_number
-              predefined-parameters: |
-                 TEST_GROUP={canary-test-name}
-              current-parameters: true
-              kill-phase-on: NEVER
 
 - job-template:
     name: '{nightly-name}'
@@ -540,4 +556,4 @@
           properties_name: nightly.properties
           email_to: '{email_to}'
     builders:
-      !include: dvs-nightly.yaml.inc
+      !include: contrail-nightly.yaml.inc
