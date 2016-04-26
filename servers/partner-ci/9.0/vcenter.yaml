@@ -71,7 +71,6 @@
     released_plugin_path: ''
     scm_submodule_disabled: true
 
-
     testrail_project: "Mirantis OpenStack"
     testrail_milestone: "{fuel-release}"
     testrail_suite: "[9.0][PCE] vCenter"
@@ -114,6 +113,15 @@
       - vcenter_check_nova_services
       - vcenter_check_cindervmware_srv
       - vcenter_check_gw
+      - vcenter_attach_empty_vol
+      - vcenter_bootable_vol
+      - vcenter_vmware_datastore_upload_img
+      - vcenter_cinder_upload_img
+      - vcenter_ceph_upload_img
+      - vcenter_vmxnet3
+      - vcenter_batch_instance_creation
+      - vcenter_disktypes
+      - vcenter_ha_kvm
     jobs:
       - '{nightly-name}':
           multijob_build_pkg: true
@@ -326,6 +334,7 @@
             - name: '{fuel-release}.{plugin-name}.regression.test'
               predefined-parameters: |
                 TEST_GROUP=vcenter_dvs_bvt
+                TEST_GROUP_CONFIG=vcenter_dvs_bvt
                 DVS_PLUGIN_PATH={released_plugin_path}
                 PLUGIN_VERSION={plugin-version}
                 PKG_JOB_BUILD_NUMBER=released
