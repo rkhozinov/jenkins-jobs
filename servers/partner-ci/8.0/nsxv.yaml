@@ -65,7 +65,7 @@
     gerrit_branch: '8.0'
     email_to: 'rkhozinov@mirantis.com'
     released_plugin_path: '/storage/nsxv/released/2.0/nsxv-2.0-2.0.0-1-415.noarch.rpm'
-    scm_submodule_disabled: false
+    scm_submodule_disabled: true
 
     testrail_project: "VMware NSX-v plugin"
     testrail_suite: "[8.0][PCE] VMware NSXv plugin v2.0.0"
@@ -328,47 +328,38 @@
           email_to: '{email_to}'
 - job-template:
     name: '{fuel-release}.{plugin-name}.{testgroup}'
-    description: 'The test "{testgroup}" for {fuel-release}.{plugin-name}.{plugin-version}'
     concurrent: true
 
 - job-template:
     name: '{fuel-release}.{plugin-name}.bvt.test'
-    description: 'The test for {fuel-release}.{plugin-name}.{plugin-version}'
     concurrent: true
 
 - job-template:
     name: '{fuel-release}.{plugin-name}.smoke.test'
-    description: 'The test for {fuel-release}.{plugin-name}.{plugin-version}'
     concurrent: true
 
 - job-template:
     name: '{fuel-release}.{plugin-name}.regression.test'
-    description: 'The regression test for {fuel-release}.{plugin-name}.{plugin-version}'
     concurrent: true
 
 - job-template:
     name: '{fuel-release}.{plugin-name}.canary.skinny'
-    description: 'The canary skinny test for {fuel-release}.{plugin-name}.{plugin-version}'
     concurrent: true
 
 - job-template:
     name: '{fuel-release}.{plugin-name}.canary.fat'
-    description: 'The canary fat test for {fuel-release}.{plugin-name}.{plugin-version}'
     concurrent: true
 
 - job-template:
     name: '{custom-name}.qa'
-    description: 'The custom test for {fuel-release}.{plugin-name}.{plugin-version}'
     concurrent: true
 
 - job-template:
     name: '{custom-name}.dev'
-    description: 'The custom test for {fuel-release}.{plugin-name}.{plugin-version}'
     concurrent: true
 
 - job-template:
     name: '{regression-name}'
-    description: 'The regression test for {fuel-release}.{plugin-name}.{plugin-version}'
     disabled: '{obj:regression_disabled}'
     concurrent: true
     project-type: multijob
