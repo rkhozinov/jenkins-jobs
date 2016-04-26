@@ -1,0 +1,68 @@
+- runner-condition
+- multijob:
+    name: >
+      'Smoke/bvt tests to check before running of nighlty tests.
+       The nightly tests scope will be runned only if smoke/bvt will have successful state'
+    condition: SUCCESSFUL
+    projects:
+    - name: '{fuel-release}.{plugin-name}.{plugin-version}.nsxv_smoke'
+      property-file: build_number
+      current-parameters: true
+      kill-phase-on: FAILURE
+    - name: '{fuel-release}.{plugin-name}.{plugin-version}.nsxv_bvt'
+      property-file: build_number
+      current-parameters: true
+      kill-phase-on: FAILURE
+- multijob:
+    name: 'Nightly tests for {fuel-release}.{plugin-name}.{plugin-version} vcenter5'
+    condition: COMPLETED
+    projects:
+    - name: '{fuel-release}.{plugin-name}.nsxv_vcenter_ha_mode'
+      current-parameters: true
+      property-file: build_number
+      kill-phase-on: NEVER
+
+    - name: '{fuel-release}.{plugin-name}.nsxv_vcenter_ceph'
+      current-parameters: true
+      property-file: build_number
+      kill-phase-on: NEVER
+
+    - name: '{fuel-release}.{plugin-name}.nsxv_vcenter_ceph_2'
+      current-parameters: true
+      property-file: build_number
+      kill-phase-on: NEVER
+
+    - name: '{fuel-release}.{plugin-name}.nsxv_add_delete_controller'
+      current-parameters: true
+      property-file: build_number
+      kill-phase-on: NEVER
+
+    - name: '{fuel-release}.{plugin-name}.nsxv_reset_controller'
+      current-parameters: true
+      property-file: build_number
+      kill-phase-on: NEVER
+
+    - name: '{fuel-release}.{plugin-name}.nsxv_shutdown_controller'
+      current-parameters: true
+      property-file: build_number
+      kill-phase-on: NEVER
+
+    - name: '{fuel-release}.{plugin-name}.nsxv_ceilometer'
+      current-parameters: true
+      property-file: build_number
+      kill-phase-on: NEVER
+
+    - name: '{fuel-release}.{plugin-name}.nsxv_ha_mode'
+      current-parameters: true
+      property-file: build_number
+      kill-phase-on: NEVER
+
+    - name: '{fuel-release}.{plugin-name}.nsxv_ceph'
+      current-parameters: true
+      property-file: build_number
+      kill-phase-on: NEVER
+
+    - name: '{fuel-release}.{plugin-name}.nsxv_ceph_no_vcenter'
+      current-parameters: true
+      property-file: build_number
+      kill-phase-on: NEVER
