@@ -382,9 +382,9 @@
           project: '{build-name}'
           which-build: last-successful
       - shell:
-          !include-raw-escape: builders/common.prepare.sh
+          !include-raw-escape: ../builders/common.prepare.sh
       - shell:
-          !include-raw-escape: builders/dvs.test.sh
+          !include-raw-escape: ../builders/dvs.test.sh
     publishers:
       - postbuildscript:
           script-only-if-succeeded: False

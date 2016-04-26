@@ -2,20 +2,13 @@
 set -e
 
 git log  --pretty=oneline | head
+git clean -ffd
 
-cmd1="find $PUPPETLINT_PATH -name '*.erb' -print0 "
-cmd2="find $PUPPETLINT_PATH -name '*.pp'  -print0 "
-cmd3="find $PUPPETLINT_PATH -name '*.pp'  -print0 "
+path="./deployment_scripts/puppet/manifests ./deployment_scripts/puppet/modules/vmware_dvs"
 
-if [ ! -z "${PUPPETLINT_IGNORE}" ]; then
-  cmd1="find $PUPPETLINT_PATH -name '*.erb' ! -name $PUPPETLINT_IGNORE -print0 "
-  cmd2="find $PUPPETLINT_PATH -name '*.pp'  ! -name $PUPPETLINT_IGNORE -print0 "
-  cmd3="find $PUPPETLINT_PATH -name '*.pp'  ! -name $PUPPETLINT_IGNORE -print0 "
-fi
-
-$cmd1 | xargs -0 -P1 -L1 -I '%' erb -P -x -T '-' % | ruby -c
-$cmd2 | xargs -0 -P1 -L1 puppet parser validate --verbose
-$cmd3 | xargs -0 -r -P1 -L1 puppet-lint \
+find $path -name '*.erb' -print0 | xargs -0 -P1 -L1 -I '%' erb -P -x -T '-' % | ruby -c
+find $path -name '*.pp' -print0 | xargs -0 -P1 -L1 puppet parser validate --verbose
+find $path -name '*.pp' -print0 | xargs -0 -r -P1 -L1 puppet-lint \
          --fail-on-warnings \
          --with-context \
          --with-filename \
@@ -27,12 +20,8 @@ $cmd3 | xargs -0 -r -P1 -L1 puppet-lint \
          --no-documentation-check \
          --no-arrow_alignment-check
 
-
 fpb --check  ./
-if [[ "${DEBUG}" == "true" ]]; then
-  fpb --debug --build  ./
-else
-  fpb --build  ./
-fi
+fpb --build  ./
+
 pkg_name=$(ls -t *.rpm | head -n1)
 mv $pkg_name $(echo $pkg_name | head -n 1 | sed s/.noarch/-$BUILD_NUMBER.noarch/)

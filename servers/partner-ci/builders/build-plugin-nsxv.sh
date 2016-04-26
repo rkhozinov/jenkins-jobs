@@ -2,12 +2,7 @@
 set -e
 
 git log  --pretty=oneline | head
-
-neutron_plugin_path="repositories/ubuntu"
-old_package=$(find $neutron_plugin_path -name 'python-vmware-nsx*.deb')
-[ -f $old_package ] && rm -f $old_package
-new_package=$(find ./ -name 'python-vmware-nsx*.deb')
-[ -f $new_package ] && mv $new_package $neutron_plugin_path || { echo "cannot find neutron plugin in ./"; exit 1; } 
+git clean -ffd
 
 path="./deployment_scripts/puppet/manifests ./deployment_scripts/puppet/modules/nsxv"
 
@@ -26,10 +21,7 @@ find $path -name '*.pp' -print0 | xargs -0 -r -P1 -L1 puppet-lint \
          --no-arrow_alignment-check
 
 fpb --check  ./
-if [[ "${DEBUG}" == "true" ]]; then
-  fpb --debug --build  ./
-else
-  fpb --build  ./
-fi
+fpb --debug --build  ./
+
 pkg_name=$(ls -t *.rpm | head -n1)
 mv $pkg_name $(echo $pkg_name | head -n 1 | sed s/.noarch/-$BUILD_NUMBER.noarch/)

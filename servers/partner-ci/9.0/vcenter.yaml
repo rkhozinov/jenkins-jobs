@@ -276,9 +276,9 @@
                 filter: "iso_file"
                 which-build: last-successful
       - shell:
-          !include-raw-escape: builders/common.prepare.sh
+          !include-raw-escape: ../builders/common.prepare.sh
       - shell:
-          !include-raw-escape: builders/vcenter.test.sh
+          !include-raw-escape: ../builders/vcenter.test.sh
     publishers:
       - runner-publisher:
           properties_name: properties
