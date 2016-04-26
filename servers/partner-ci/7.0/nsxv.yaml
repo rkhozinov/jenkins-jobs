@@ -1,35 +1,108 @@
+---
+- parameter:
+    name: plugin-specific-parameters
+    parameters:
+      - string:
+          name: WORKSTATION_SNAPSHOT
+          default: 'nsxv'
+          description: 'Snapshot name for vcenter lab'
+      - string:
+          name: WORKSTATION_NODES
+          default: 'esxi1 esxi2 esxi3 vcenter trusty'
+          description: "List of workstation's nodes"
+      - string:
+          name: VCENTER_IP
+          default: '172.16.0.254'
+          description: "IP address of the vCenter server"
+      - bool:
+          name: UPDATE_MASTER
+          default: '{update_master}'
+          description: 'turns on update fuel master node to maintenance update'
+      - string:
+          name: MIRROR
+          default: 'http://mirror.seed-cz1.fuel-infra.org'
+          description: |
+              'mirror for package repositories. this mirror is optimized for CZ'
+      - string:
+          name: UPDATE_FUEL_MIRROR
+          default: >
+             ${{MIRROR}}/mos-repos/centos/mos7.0-centos6-fuel/security/x86_64/
+             ${{MIRROR}}/mos-repos/centos/mos7.0-centos6-fuel/updates/x86_64/
+          description: 'repositories to update fuel master node'
+      - string:
+          name: MIRROR_UBUNTU
+          default: >
+             deb ${{MIRROR}}/pkgs/ubuntu/ trusty main universe multiverse |
+             deb ${{MIRROR}}/pkgs/ubuntu/ trusty-updates main universe multiverse
+          description: 'proposed repositories to update ubuntu cluster'
+      - string:
+          name: DEB_UPDATES
+          default: "mos-updates,deb ${{MIRROR}}/mos/ubuntu/dists/mos7.0-updates main restricted"
+          description: 'ubuntu-updates repositories for master ui'
+      - string:
+          name: DEB_SECURITY
+          default: "mos-security,deb ${{MIRROR}}/mos/ubuntu/dists/mos7.0-security main restricted"
+          description: 'ubuntu-security repositories for master ui'
 - project:
     name: 'predefined_parameters'
     fuel-release: '7.0'
-    plugin-version: '1.1.0'
+    plugin-version: '1.1'
     plugin-name: 'nsxv'
-
-    build-name: '{fuel-release}.{plugin-name}.build'
-    smoke-name: '{fuel-release}.{plugin-name}.smoke'
-    bvt-name: '{fuel-release}.{plugin-name}.bvt'
-    regression-name: '{fuel-release}.{plugin-name}.regression'
-    nightly-name: '{fuel-release}.{plugin-name}.nightly'
-    custom-name: '{fuel-release}.{plugin-name}.custom'
-
-    nightly-timer: 'H 22 * * *'
-    regression-timer: 'H 18 * * *'
-
-    nightly-disabled: false
-    use-snapshots: false
-    force-erase: true
-    recreate-venv: true
-    disable-ssl: false
-    update-master: true
-
+    build-name: '{fuel-release}.{plugin-name}.{plugin-version}.build'
+    flake8-name: '{fuel-release}.{plugin-name}.{plugin-version}.flake8'
+    radon-name: '{fuel-release}.{plugin-name}.{plugin-version}.radon'
+    shellcheck-name: '{fuel-release}.{plugin-name}.{plugin-version}.shellcheck'
+    smoke-name: '{fuel-release}.{plugin-name}.{plugin-version}.smoke'
+    bvt-name: '{fuel-release}.{plugin-name}.{plugin-version}.bvt'
+    regression-name: '{fuel-release}.{plugin-name}.{plugin-version}.regression'
+    nightly-name: '{fuel-release}.{plugin-name}.{plugin-version}.nightly'
+    custom-name: '{fuel-release}.{plugin-name}.{plugin-version}.custom'
+    reporter-name: '{fuel-release}.{plugin-name}.{plugin-version}.reporter'
+    smoke-test-name: 'nsxv_smoke'
+    bvt-test-name: 'nsxv_bvt'
+    canary-test-name: 'nsxv_smoke'
+    admin_node_memory: '8192'
+    slave_node_memory: '8192'
+    admin_node_cpu: '4'
+    slave_node_cpu: '4'
+    pkg_job_name: '{fuel-release}.{plugin-name}.{plugin-version}.build'
+    iso_job_name: ''
+    nightly_timer: 'H 22 * * *'
+    regression_timer: 'H 18 * * *'
+    nightly_disabled: true
+    regression_disabled: false
+    use_snapshots: false
+    force_erase: true
+    recreate_venv: false
+    disable_ssl: true
+    update_master: true
     debug: true
-    runner-timeout: 600
-    test-timeout: 500
+    publish_results: true
+    multijob_build_pkg: true
+    testjob_build_pkg: false
+    runner_timeout: 600
+    test_timeout: 300
+    iso_file: 'fuel-7.0-301-2015-09-22_20-01-53.iso'
+    gerrit_repo: 'fuel-plugin-nsxv'
+    gerrit_branch: '7.0'
+    email_to: 'rkhozinov@mirantis.com'
+    released_plugin_path: '/storage/nsxv/released/nsxv-1.1-1.1.0-1.noarch.rpm'
+    scm_submodule_disabled: true
 
-    iso-file: 'fuel-7.0-301-2015-09-22_20-01-53.iso'
-    gerrit-repo: 'fuel-plugin-nsxv'
-    gerrit-branch: '7.0'
-    email-to: 'rkhozinov@mirantis.com'
-    released-plugin-path: '/storage/nsxv/released/nsxv-1.1-1.1.0-1.noarch.rpm'
+    testrail_project: "Contrail plugin"
+    testrail_suite: "Contrail Plugin v3.x.x"
+    testrail_suite_desc: "Suite description"
+    testrail_milestone: "Fuel Contrail Plugin v3.0.0"
+    testrail_plan: "$TREP_TESTRAIL_SUITE iso #${{ISO_VERSION}} pkg#${{JUNIPER_PKG_VERSION}} build#${{PKG_JOB_BUILD_NUMBER}}"
+    testrail_plan_desc: "Test plan description"
+    testrail_run: "$TREP_TESTRAIL_SUITE"
+    testrail_run_desc: "Test run description"
+    testrail_item_case: "$TEST_GROUP"
+    trep_debug_level: "DEBUG"
+
+    testgroup_parameter_type: string
+    testgroup_value_type: default
+    testgroup_value: '{testgroup}'
 
     testgroup:
       - nsxv_add_delete_nodes
@@ -42,457 +115,279 @@
       - nsxv_ceph_no_vcenter
     jobs:
       - '{build-name}'
-      - '{nightly-name}'
-      - '{custom-name}'
 
-      - '{smoke-name}'
-      - '{fuel-release}.{plugin-name}.smoke.test'
+      - '{nightly-name}':
+          multijob_build_pkg: true
 
-      - '{bvt-name}'
-      - '{fuel-release}.{plugin-name}.bvt.test'
+      - '{custom-name}.qa':
+          publish_results: false
+          scm_submodule_disabled: false
 
-      - '{regression-name}'
-      - '{fuel-release}.{plugin-name}.regression.test'
+      - '{custom-name}.dev':
+          scm_submodule_disabled: false
+          publish_results: false
+          testgroup_parameter_type: choice
+          testgroup_value_type: choices
+          testgroup_value: '{obj:testgroup}'
 
-      - '{fuel-release}.{plugin-name}.{testgroup}'
+      - '{reporter-name}'
 
-## common git settings to get sources
-- common-scm: &common-scm
-    name: 'common-scm'
-    scm:
-      - git:
-          url: 'https://review.openstack.org/openstack/{gerrit-repo}'
-          refspec: $GERRIT_REFSPEC
-          branches:
-            - $GERRIT_BRANCH
-          choosing-strategy: gerrit
-          skip-tag: true
-          submodule:
-            disable: false
-            tracking: true
-            recursive: true
-          wipe-workspace: false
+      - '{fuel-release}.{plugin-name}.{plugin-version}.{testgroup}':
+          scm_submodule_disabled: false
 
-## list of gerrit events to trigger build job
-- build-gerrit-events: &build-gerrit-events
-    name: 'build-gerrit-events'
-    trigger-on:
-      - change-merged-event
-      - draft-published-event
-      - patchset-created-event:
-          exclude-trivial-rebase: true
-          exclude-no-code-change: true
+      - '{smoke-name}':
+          multijob_build_pkg: false
 
-## configuration of gerrit event for the smoke multijob
-## smoke multijob should run on patchset, draft events
-- smoke-gerrit-events: &smoke-gerrit-events
-    name: 'smoke-gerrit-events'
-    trigger-on:
-      - draft-published-event
-      - patchset-created-event:
-          exclude-trivial-rebase: true
-          exclude-no-code-change: true
+      - '{fuel-release}.{plugin-name}.{plugin-version}.smoke.test':
+          scm_submodule_disabled: false
 
-## configuration of gerrit event for the bvt multijob
-## bvt multijob should run only on merge event
-- bvt-gerrit-events: &bvt-gerrit-events
-    name: 'bvt-gerrit-events'
-    trigger-on:
-      - change-merged-event
+      - '{bvt-name}':
+          multijob_build_pkg: true
 
-## the main part of gerrit section as yaml anchor
-- generic-gerrit-projects: &generic-gerrit-projects
-    name: 'generic-gerrit-projects'
-    projects:
-      - project-compare-type: 'PLAIN'
-        project-pattern: 'openstack/{gerrit-repo}'
-        branches:
-          - branch-compare-type: 'ANT'
-            branch-pattern: '{gerrit-branch}'
-        forbidden-file-paths:
-          - compare-type: 'ANT'
-            pattern: 'docs/**'
-          - compare-type: 'ANT'
-            pattern: 'specs/**'
-    silent: false
-    override-votes: true
-    server-name: 'review.openstack.org'
-    custom-url: '* $JOB_NAME $BUILD_URL'
-    escape-quotes: true
-    readable-message: true
-    skip-vote:
-      successfull: false
-      failed: false
-      unstable: true
-      notbuilt: true
+      - '{fuel-release}.{plugin-name}.{plugin-version}.bvt.test':
+          scm_submodule_disabled: false
 
-## properties for smoke, bvt and nightly multijobs
-- runner-properties: &runner-properties
-    name: 'runner-properties'
-    properties:
-      - heavy-job:
-          weight: 1
-      - build-blocker:
-          use-build-blocker: true
-          blocking-jobs:
-            - '{build-name}'
-          block-level: 'GLOBAL'
-          queue-scanning: 'BUILDABLE'
+      - '{regression-name}':
+          testrail_suite: "[7.0][PCE] VMware NSXv plugin v1.1 Regression"
+          testrail_suite_desc: "Suite description"
+          testrail_plan: "$TREP_TESTRAIL_SUITE #${{DATE}}"
+          testrail_plan_desc: "Test plan description"
+          testrail_run: "$TREP_TESTRAIL_SUITE"
+          testrail_run_desc: "Test run description"
+          pkg_job_name: ''
+          iso_job_name: ''
+          multijob_build_pkg: false
 
-## properties for smoke, bvt and nightly multijobs
-- runner-wrappers: &runner-wrappers
-    name: 'runner-wrappers'
-    wrappers:
-      - ansicolor:
-          colormap: xterm
+      - '{fuel-release}.{plugin-name}.{plugin-version}.regression.test':
+          scm_submodule_disabled: false
 
-## properties for smoke, bvt and nightly multijobs
-- test-wrappers: &test-wrappers
-    name: 'test-wrappers'
-    wrappers:
-      - ansicolor:
-          colormap: xterm
-      - inject-passwords:
-          global: true
-          mask-password-params: true
-      - timeout:
-          fail: true
-          type: no-activity
-          write-description: "Timeout is exceeded"
-          timeout: '{test-timeout}'
-
-## properties for test jobs
-- test-properties: &test-properties
-    name: 'test-properties'
-    properties:
-      - heavy-job:
-          weight: 1
-      - throttle:
-          max-per-node: 0
-          max-total: 0
-          categories:
-            - vcenter
-            - dvs
-            - nsx
-            - nsxv
-            - contrail
-          option: category
-
-## parameters for smoke, bvt and nightly multijobs
 - runner-parameters: &runner-parameters
     name: 'runner-parameters'
     parameters:
       - bool:
-          name: DEBUG
-          default: '{debug}'
-          description: "Set -x (xtrace) for jobs' bash scripts"
-      - bool:
-          name: DISABLE_SSL
-          default: '{disable-ssl}'
-          description: "Disable ssh for openstack horizon"
-      - bool:
-          name: FORCE_ERASE
-          default: '{force-erase}'
-          description: "Erase all envs before test"
-      - bool:
-          name: RECREATE_VENV
-          default: '{recreate-venv}'
-          description: "Recreate virtual environemnt before tests"
-      - bool:
-          name: UPDATE_MASTER
-          default: '{update-master}'
-          description: 'turns on update fuel master node to maintenance update'
-      - string:
-          name: VCENTER_SNAPSHOT
-          default: 'nsxv'
-          description: 'Snapshot name for vcenter lab'
-      - bool:
-          name: USE_SNAPSHOTS
-          default: '{use-snapshots}'
-          descrition: 'Will be used existing environment'
-      - string:
-          name: MIRROR
-          default: 'http://mirror.seed-cz1.fuel-infra.org'
-          description: 'mirror for package repositories. this mirror is optimized for CZ'
-      - string:
-          name: UPDATE_FUEL_MIRROR
-          default: "${{MIRROR}}/mos-repos/centos/mos7.0-centos6-fuel/security/x86_64/ ${{MIRROR}}/mos-repos/centos/mos7.0-centos6-fuel/updates/x86_64/"
-          description: 'repositories to update fuel master node'
-      - string:
-          name: MIRROR_UBUNTU
-          default: 'deb ${{MIRROR}}/pkgs/ubuntu/ trusty main universe multiverse|deb ${{MIRROR}}/pkgs/ubuntu/ trusty-updates main universe multiverse'
-          description: 'proposed repositories to update ubuntu cluster'
-      - string:
-          name: DEB_UPDATES
-          default: "mos-updates,deb ${{MIRROR}}/mos/ubuntu/dists/mos7.0-updates main restricted"
-          description: 'ubuntu-updates repositories for master ui'
-      - string:
-          name: DEB_SECURITY
-          default: "mos-security,deb ${{MIRROR}}/mos/ubuntu/dists/mos7.0-security main restricted"
-          description: 'ubuntu-security repositories for master ui'
-      - string:
-          name: GERRIT_REFSPEC
-          default: 'refs/heads/{gerrit-branch}'
-          description: 'Refspecs for commits in fuel-qa gerrit separated with spaces'
-      - string:
-          name: GERRIT_BRANCH
-          default: 'origin/{gerrit-branch}'
-          description: 'The branch for fuel-qa gerrit'
-      - string:
-          name: ENV_PREFIX
-          default: '{fuel-release}.{plugin-name}'
-          description: 'The name of devops env. Needed to properly work of existing mode of devops'
+          name: MJ_BUILD_PKG
+          default: '{multijob_build_pkg}'
+          description: "Triggers build of pkg of $PKG_JOB_NAME before run of tests"
+      - common-parameters:
+          publish_results:      '{publish_results}'
+          debug:                '{debug}'
+          disable_ssl:          '{disable_ssl}'
+          force_erase:          '{force_erase}'
+          recreate_venv:        '{recreate_venv}'
+          use_snapshots:        '{use_snapshots}'
+          iso_file:             '{iso_file}'
+          gerrit_branch:        '{gerrit_branch}'
+          env_prefix:           '{fuel-release}.{plugin-name}'
+          pkg_job_name:         '{pkg_job_name}'
+          iso_job_name:         '{iso_job_name}'
+          admin_node_memory:    '{admin_node_memory}'
+          slave_node_memory:    '{slave_node_memory}'
+          admin_node_cpu:       '{admin_node_cpu}'
+          slave_node_cpu:       '{slave_node_cpu}'
+          testrail_suite:       '{testrail_suite}'
+          testrail_suite_desc:  '{testrail_suite_desc}'
+          testrail_plan:        '{testrail_plan}'
+          testrail_plan_desc:   '{testrail_plan_desc}'
+      - plugin-specific-parameters:
+          update_master: '{update_master}'
 
-## parameters for jobs created per test-group and custom test job
+# parameters for jobs created per test-group and custom test job
 - test-parameters: &test-parameters
     name: 'test-parameters'
     parameters:
-      - bool:
-          name: DEBUG
-          default: '{debug}'
-          description: "Set -x (xtrace) for jobs' bash scripts"
-      - bool:
-          name: DISABLE_SSL
-          default: '{disable-ssl}'
-          description: "Disable ssh for openstack horizon"
-      - bool:
-          name: FORCE_ERASE
-          default: '{force-erase}'
-          description: "Erase all envs before test"
-      - bool:
-          name: RECREATE_VENV
-          default: '{recreate-venv}'
-          description: "Recreate virtual environemnt before tests"
-      - string:
-          name: TEST_GROUP
-          default: '{testgroup}'
-      - string:
-          name: VCENTER_SNAPSHOT
+      - label:
+          name: node
           default: 'nsxv'
-          description: 'Snapshot name for vcenter lab'
+          description: "The node on which to run the job"
       - bool:
-          name: USE_SNAPSHOTS
-          default: '{use-snapshots}'
-          descrition: 'Will be used existing environment'
-      - bool:
-          name: UPDATE_MASTER
-          default: '{update-master}'
-          description: 'turns on update fuel master node to maintenance update'
-      - string:
-          name: ISO_FILE
-          default: '{iso-file}'
-          description: 'ISO file name that is on the tpi-s1 in /storage/downloads'
-      - string:
-          name: ISO_STORAGE
-          default: '/storage/downloads'
-          description: 'Storage for iso files'
-      - string:
-          name: ISO_VERSION
-          description: 'Contrainer for storing an iso build number to output it as job name'
-      - string:
-          name: MIRROR
-          default: 'http://mirror.seed-cz1.fuel-infra.org'
-          description: 'mirror for package repositories. this mirror is optimized for CZ'
-      - string:
-          name: UPDATE_FUEL_MIRROR
-          default: "${{MIRROR}}/mos-repos/centos/mos7.0-centos6-fuel/security/x86_64/ ${{MIRROR}}/mos-repos/centos/mos7.0-centos6-fuel/updates/x86_64/"
-          description: 'repositories to update fuel master node'
-      - string:
-          name: MIRROR_UBUNTU
-          default: 'deb ${{MIRROR}}/pkgs/ubuntu/ trusty main universe multiverse|deb ${{MIRROR}}/pkgs/ubuntu/ trusty-updates main universe multiverse'
-          description: 'proposed repositories to update ubuntu cluster'
-      - string:
-          name: DEB_UPDATES
-          default: "mos-updates,deb ${{MIRROR}}/mos/ubuntu/dists/mos7.0-updates main restricted"
-          description: 'ubuntu-updates repositories for master ui'
-      - string:
-          name: DEB_SECURITY
-          default: "mos-security,deb ${{MIRROR}}/mos/ubuntu/dists/mos7.0-security main restricted"
-          description: 'ubuntu-security repositories for master ui'
-      - string:
-          name: OPENSTACK_RELEASE
-          default: 'Ubuntu'
-          description: 'Openstack release (CentOS, Ubuntu)'
-      - string:
-          name: GERRIT_REFSPEC
-          default: 'refs/heads/{gerrit-branch}'
-          description: 'Refspecs for commits in fuel-qa gerrit separated with spaces'
-      - string:
-          name: GERRIT_BRANCH
-          default: 'origin/{gerrit-branch}'
-          description: 'The branch for fuel-qa gerrit'
-      - string:
-          name: NODES_COUNT
-          default: '10'
-          description: 'Amount of nodes in the test lab'
-      - string:
-          name: ADMIN_NODE_MEMORY
-          default: '4096'
-          description: 'Amount of vitrual RAM for admin node'
-      - string:
-          name: SLAVE_NODE_MEMORY
-          default: '4096'
-          description: 'Amount of vitrual RAM per slave node'
-      - string:
-          name: ADMIN_NODE_CPU
-          default: '4'
-          description: 'Amount of vitrual CPUs for admin node'
-      - string:
-          name: SLAVE_NODE_CPU
-          default: '4'
-          description: 'Amount of vitrual CPUs per slave node'
-      - string:
-          name: ENV_PREFIX
-          default: '{fuel-release}.{plugin-name}'
-          description: 'The name of devops env. Needed to properly work of existing mode of devops'
-      - string:
-          name: TESTRAIL_PLAN_NAME
-          default: ''
-          description: ''
-      - string:
-          name: TESTRAIL_CONFIGURATION
-          default: ''
-          description: ''
+          name: BUILD_PKG
+          default: '{testjob_build_pkg}'
+          description: "Triggers build of pkg from $PKG_JOB_NAME (only for custom)"
+      - '{testgroup_parameter_type}':
+          name: TEST_GROUP
+          '{testgroup_value_type}': '{obj:testgroup_value}'
+          description: "test-group name"
+      - common-parameters:
+          publish_results: '{publish_results}'
+          debug:           '{debug}'
+          disable_ssl:     '{disable_ssl}'
+          force_erase:     '{force_erase}'
+          recreate_venv:   '{recreate_venv}'
+          use_snapshots:   '{use_snapshots}'
+          iso_file:        '{iso_file}'
+          gerrit_branch:   '{gerrit_branch}'
+          env_prefix:      '{fuel-release}.{plugin-name}'
+          pkg_job_name:    '{pkg_job_name}'
+          iso_job_name:    '{iso_job_name}'
+          admin_node_memory:    '{admin_node_memory}'
+          slave_node_memory:    '{slave_node_memory}'
+          admin_node_cpu:       '{admin_node_cpu}'
+          slave_node_cpu:       '{slave_node_cpu}'
+          testrail_suite:       '{testrail_suite}'
+          testrail_suite_desc:  '{testrail_suite_desc}'
+          testrail_plan:        '{testrail_plan}'
+          testrail_plan_desc:   '{testrail_plan_desc}'
+      - plugin-specific-parameters:
+          update_master: '{update_master}'
 
 - defaults:
     name: global
     disabled: false
-    node: 'nsx'
+    node: nsxv
     logrotate:
-      daysToKeep: 7
-      numToKeep: 10
-      artifactDaysToKeep: 7
-      artifactNumToKeep: 10
-    <<: *test-properties
+      daysToKeep: 30
+      numToKeep: 100
+      artifactDaysToKeep: 30
+      artifactNumToKeep: 100
     <<: *test-parameters
-    <<: *common-scm
-    <<: *test-wrappers
+    scm:
+      - common-scm:
+          scm_submodule_disabled: '{scm_submodule_disabled}'
+          gerrit_repo: '{gerrit_repo}'
+    wrappers:
+      - test-wrapper:
+          test_timeout: '{test_timeout}'
+    properties:
+      - test-property
     builders:
-      - copyartifact:
-          project: '{build-name}'
-          which-build: last-successful
+      - conditional-step:
+          condition-kind: shell
+          condition-command: |
+            [ ! -z ${{PKG_JOB_NAME}}         ] && \
+            [   -z ${{PKG_JOB_BUILD_NUMBER}} ] && \
+            [   -z ${{NSXV_PLUGIN_PATH}}      ]
+          steps:
+            - copyartifact:
+                project: ${{PKG_JOB_NAME}}
+                which-build: last-successful
+      - conditional-step:
+          condition-kind: shell
+          condition-command: |
+            [ ! -z ${{PKG_JOB_NAME}}         ] && \
+            [ ! -z ${{PKG_JOB_BUILD_NUMBER}} ] && \
+            [   -z ${{NSXV_PLUGIN_PATH}}      ]
+          steps:
+            - copyartifact:
+                project: ${{PKG_JOB_NAME}}
+                which-build: specific-build
+                build-number: ${{PKG_JOB_BUILD_NUMBER}}
+      - conditional-step:
+          condition-kind: shell
+          condition-command: |
+            [ ! -z ${{ISO_JOB_NAME}} ] && \
+            [   -z ${{ISO_FILE}}     ]
+          steps:
+            - copyartifact:
+                project: "${{ISO_JOB_NAME}}"
+                filter: "iso_file"
+                which-build: last-successful
       - shell:
           !include-raw-escape: ../builders/common.prepare.sh
       - shell:
           !include-raw-escape: ../builders/nsxv.test.sh
     publishers:
-      - postbuildscript:
-          script-only-if-succeeded: False
-          builders:
-            - shell: env > properties
-              # need to delete packages, because we don't wipe workspace,
-              # but packages could be duplicated
-            - shell: rm -f .*rpm.*
-      - archive:
-          artifacts: 'build.properties'
-          allow-empty: false
-      - archive:
-          artifacts: 'properties'
-          allow-empty: false
-      - archive:
-          artifacts: 'nosetests.xml'
-          allow-empty: true
-          fingerprint: true
-      - archive:
-          artifacts: 'logs/*'
-          allow-empty: true
-          fingerprint: true
-      - xunit:
-          types:
-            - junit:
-                pattern: 'nosetest.xml'
-                skip-if-no-test-files: true
-      - junit:
-          results: nosetests.xml
-          health-scale-factor: 1.0
-      - email:
-          recipients: '{email-to}'
-# job for building plugin pkg
+      - runner-publisher:
+          properties_name: properties
+          email_to: '{email_to}'
+      - test-publisher:
+          reporter_name: '{reporter-name}'
+
 - job-template:
     name: '{build-name}'
     node: 'runner'
     concurrent: true
     disabled: false
-    description: |
-      '<a href=https://github.com/openstack/{gerrit-repo}>
-      Build {plugin-name} plugin from fuel-plugins project</a>'
-    scm:
-      - git:
-          url: 'https://review.openstack.org/openstack/{gerrit-repo}'
-          refspec: $GERRIT_REFSPEC
-          branches:
-            - $GERRIT_BRANCH
-          choosing-strategy: gerrit
-          skip-tag: true
-          wipe-workspace: false
     triggers:
-      - gerrit:
-          <<: *build-gerrit-events
-          <<: *generic-gerrit-projects
+      - draft-patchset-gerrit-trigger:
+          gerrit_repo: '{gerrit_repo}'
+          gerrit_branch: '{gerrit_branch}'
+    scm:
+      - common-scm:
+          scm_submodule_disabled: '{scm_submodule_disabled}'
+          gerrit_repo: '{gerrit_repo}'
+    wrapper:
+      - runner-wrapper
     parameters:
       - string:
           name: GERRIT_BRANCH
-          default: 'origin/{gerrit-branch}'
-          description: 'The branch for fuel-qa gerrit'
+          default: 'origin/{gerrit_branch}'
       - string:
           name: GERRIT_REFSPEC
-          default: 'refs/heads/{gerrit-branch}'
+          default: 'refs/heads/{gerrit_branch}'
     properties:
       - heavy-job:
           weight: 1
+    wrappers:
+      - ansicolor:
+          colormap: xterm
     builders:
+      - shell: |
+          rm -rf *.rpm
+          rm -rf build.properties
+          rm -rf build.plugin_version
       - shell:
-          !include-raw-escape: './builders/build-plugin-nsxv.sh'
+          !include-raw-escape: ../builders/build-plugin-nsxv.sh
       - shell:
-          !include-raw-escape: './builders/rpm-check.sh'
+          !include-raw-escape: ../builders/rpm-check.sh
     publishers:
-      - postbuildscript:
-          script-only-if-succeeded: False
-          builders:
-             - shell: |
-                 export PLUGIN_VERSION=$(grep "^version" metadata.yaml | cut -d ' ' -f2)
-                 echo "PLUGIN_VERSION=${{PLUGIN_VERSION}}" > build.plugin_version
-                 env > build.properties
-      - archive:
-          artifacts: '*.rpm'
-          allow-empty: false
-      - archive:
-          artifacts: 'build.properties'
-          allow-empty: false
-      - archive:
-          artifacts: 'build.plugin_version'
-          allow-empty: false
-      - email:
-          recipients: '{email-to}'
-
-## jobs for system test
+      - build-publisher:
+          email_to: '{email_to}'
 - job-template:
-    name: '{fuel-release}.{plugin-name}.{testgroup}'
-    description: 'The test "{testgroup}" for {fuel-release}.{plugin-name}.{plugin-version}'
-    concurrent: true
-
-## jobs for bvt tests
-- job-template:
-    name: '{fuel-release}.{plugin-name}.bvt.test'
-    description: 'The test for {fuel-release}.{plugin-name}.{plugin-version}'
-    concurrent: true
-
-## jobs for smoke tests
-- job-template:
-    name: '{fuel-release}.{plugin-name}.smoke.test'
-    description: 'The test for {fuel-release}.{plugin-name}.{plugin-version}'
-    concurrent: true
-
-# jobs for regression tests
-- job-template:
-    name: '{fuel-release}.{plugin-name}.regression.test'
-    description: 'The regression test for {fuel-release}.{plugin-name}.{plugin-version}'
+    name: '{fuel-release}.{plugin-name}.{plugin-version}.{testgroup}'
     concurrent: true
 
 - job-template:
-    name: '{custom-name}'
-    description: 'The custom test for {fuel-release}.{plugin-name}.{plugin-version}'
+    name: '{fuel-release}.{plugin-name}.{plugin-version}.bvt.test'
     concurrent: true
+
+- job-template:
+    name: '{fuel-release}.{plugin-name}.{plugin-version}.smoke.test'
+    concurrent: true
+
+- job-template:
+    name: '{fuel-release}.{plugin-name}.{plugin-version}.regression.test'
+    concurrent: true
+
+- job-template:
+    name: '{custom-name}.qa'
+    concurrent: true
+
+- job-template:
+    name: '{custom-name}.dev'
+    concurrent: true
+
+- job-template:
+    name: '{regression-name}'
+    disabled: '{obj:regression_disabled}'
+    concurrent: true
+    project-type: multijob
+    node: runner
+    <<: *runner-parameters
+    scm: []
+    triggers:
+      - timed: '{regression_timer}'
+    properties:
+      - runner-property:
+          build-name: '{build-name}'
+    wrappers:
+      - runner-wrapper
+    publishers:
+      - runner-publisher:
+          properties_name: regression.properties
+          email_to: '{email_to}'
+    builders:
+      - multijob:
+          name: '1st phase - regression test'
+          condition: COMPLETED
+          projects:
+            - name: '{fuel-release}.{plugin-name}.{plugin-version}.regression.test'
+              predefined-parameters: |
+                TEST_GROUP=nsxv_bvt
+                NSXV_PLUGIN_PATH={released_plugin_path}
+                PLUGIN_VERSION={plugin-version}
+                PKG_JOB_BUILD_NUMBER=released
+              current-parameters: true
+              kill-phase-on: NEVER
 
 - job-template:
     name: '{smoke-name}'
@@ -502,41 +397,32 @@
     project-type: multijob
     node: runner
     <<: *runner-parameters
-    <<: *runner-properties
-    <<: *runner-wrappers
-    scm:  []
     triggers:
-      - gerrit:
-          <<: *smoke-gerrit-events
-          <<: *generic-gerrit-projects
+      - draft-patchset-gerrit-trigger:
+          gerrit_repo: '{gerrit_repo}'
+          gerrit_branch: '{gerrit_branch}'
+    properties:
+      - runner-property:
+          build-name: '{build-name}'
+    wrappers:
+      - runner-wrapper
+    scm: []
     builders:
-      - copyartifact:
-          project: '{build-name}'
-          which-build: last-successful
-          stable: true
+      - runner-condition
       - multijob:
           name: 'The smoke test for {fuel-release}.{plugin-name}.{plugin-version}'
           condition: COMPLETED
           projects:
-           - name: '{fuel-release}.{plugin-name}.smoke.test'
-             current-parameters: true
-             predefined-parameters: |
-               TEST_GROUP=nsxv_smoke
-             kill-phase-on: NEVER
-
+            - name: '{fuel-release}.{plugin-name}.{plugin-version}.smoke.test'
+              current-parameters: true
+              property-file: build_number
+              predefined-parameters: |
+                TEST_GROUP={smoke-test-name}
+              kill-phase-on: NEVER
     publishers:
-      - postbuildscript:
-          script-only-if-succeeded: False
-          builders:
-            - shell: env > smoke.properties
-      - archive:
-          artifacts: 'build.properties'
-          allow-empty: false
-      - archive:
-          artifacts: 'smoke.properties'
-          allow-empty: false
-      - email:
-          recipients: '{email-to}'
+      - runner-publisher:
+          properties_name: smoke.properties
+          email_to: '{email_to}'
 
 - job-template:
     name: '{bvt-name}'
@@ -546,154 +432,50 @@
     project-type: multijob
     node: runner
     <<: *runner-parameters
-    <<: *runner-properties
-    <<: *runner-wrappers
-    scm:  []
+    scm: []
     triggers:
-      - gerrit:
-          <<: *bvt-gerrit-events
-          <<: *generic-gerrit-projects
+      - merge-gerrit-trigger:
+          gerrit_repo: '{gerrit_repo}'
+          gerrit_branch: '{gerrit_branch}'
+    properties:
+      - runner-property:
+          build-name: '{build-name}'
+    wrappers:
+      - runner-wrapper
     builders:
-      - copyartifact:
-          project: '{build-name}'
-          which-build: last-successful
-          stable: true
+      - runner-condition
       - multijob:
           name: 'The BVT test for {fuel-release}.{plugin-name}.{plugin-version}'
           condition: COMPLETED
           projects:
-           - name: '{fuel-release}.{plugin-name}.bvt.test'
-             current-parameters: true
-             predefined-parameters: |
-               TEST_GROUP=nsxv_add_delete_node
-             kill-phase-on: NEVER
-    publishers:
-      - postbuildscript:
-          script-only-if-succeeded: False
-          builders:
-             - shell: env > bvt.properties
-      - archive:
-          artifacts: '*.rpm'
-          allow-empty: false
-      - archive:
-          artifacts: 'build.properties'
-          allow-empty: false
-      - archive:
-          artifacts: 'bvt.properties'
-          allow-empty: false
-      - email:
-          recipients: '{email-to}'
-
-- job-template:
-    name: '{regression-name}'
-    description: 'The regression test for {fuel-release}.{plugin-name}.{plugin-version}'
-    disabled: false
-    concurrent: true
-    project-type: multijob
-    node: runner
-    <<: *runner-parameters
-    <<: *runner-wrappers
-    properties:
-      - heavy-job:
-          weight: 1
-    scm:  []
-    triggers:
-      - timed: '{regression-timer}'
-    publishers:
-      - postbuildscript:
-          script-only-if-succeeded: False
-          builders:
-             - shell: env > regression.properties
-      - archive:
-          artifacts: 'regression.properties'
-          allow-empty: false
-      - email:
-          recipients: '{email-to}'
-    builders:
-      - multijob:
-          name: 'regression test'
-          condition: SUCCESSFUL
-          projects:
-            - name: '{fuel-release}.{plugin-name}.regression.test'
-              predefined-parameters: |
-                TEST_GROUP=nsxv_add_delete_nodes
-                NSXV_PLUGIN_PATH={released-plugin-path}
+            - name: '{fuel-release}.{plugin-name}.{plugin-version}.bvt.test'
               current-parameters: true
+              property-file: build_number
+              predefined-parameters: |
+                 TEST_GROUP={bvt-test-name}
               kill-phase-on: NEVER
+    publishers:
+      - runner-publisher:
+          properties_name: bvt.properties
+          email_to: '{email_to}'
 
 - job-template:
     name: '{nightly-name}'
     project-type: multijob
+    disabled: '{obj:nightly_disabled}'
     node: runner
-    disabled: '{nightly-disabled}'
     <<: *runner-parameters
-    <<: *runner-wrappers
-    properties:
-      - heavy-job:
-          weight: 1
-    publishers:
-      - postbuildscript:
-          script-only-if-succeeded: False
-          builders:
-            - shell: env > nightly.properties
-      - archive:
-          artifacts: 'nightly.properties'
-          allow-empty: false
-      - archive:
-          artifacts: 'build.properties'
-          allow-empty: false
-      - email:
-          recipients: '{email-to}'
     scm: []
     triggers:
-      - timed: '{nightly-timer}'
-
+      - timed: '{nightly_timer}'
+    properties:
+      - runner-property:
+          build-name: '{build-name}'
+    wrappers:
+      - runner-wrapper
+    publishers:
+      - runner-publisher:
+          properties_name: nightly.properties
+          email_to: '{email_to}'
     builders:
-      # copy latest stable plugin package that has passed dvs bvt on the stable iso
-      - copyartifact:
-          project: '{bvt-name}'
-          which-build: last-successful
-          stable: true
-      - multijob:
-          name: 'System tests for nsxv {fuel-release}.{plugin-version} vcenter5'
-          condition: COMPLETED
-          projects:
-           - name: '{fuel-release}.{plugin-name}.nsxv_vcenter_ha_mode'
-             current-parameters: true
-             kill-phase-on: NEVER
-
-           - name: '{fuel-release}.{plugin-name}.nsxv_vcenter_ceph'
-             current-parameters: true
-             kill-phase-on: NEVER
-
-           - name: '{fuel-release}.{plugin-name}.nsxv_vcenter_ceph_2'
-             current-parameters: true
-             kill-phase-on: NEVER
-
-           - name: '{fuel-release}.{plugin-name}.nsxv_add_delete_controller'
-             current-parameters: true
-             kill-phase-on: NEVER
-
-           - name: '{fuel-release}.{plugin-name}.nsxv_reset_controller'
-             current-parameters: true
-             kill-phase-on: NEVER
-
-           - name: '{fuel-release}.{plugin-name}.nsxv_shutdown_controller'
-             current-parameters: true
-             kill-phase-on: NEVER
-
-           - name: '{fuel-release}.{plugin-name}.nsxv_ceilometer'
-             current-parameters: true
-             kill-phase-on: NEVER
-
-           - name: '{fuel-release}.{plugin-name}.nsxv_ha_mode'
-             current-parameters: true
-             kill-phase-on: NEVER
-
-           - name: '{fuel-release}.{plugin-name}.nsxv_ceph'
-             current-parameters: true
-             kill-phase-on: NEVER
-
-           - name: '{fuel-release}.{plugin-name}.nsxv_ceph_no_vcenter'
-             current-parameters: true
-             kill-phase-on: NEVER
+      !include: nsxv-nightly.yaml.inc
