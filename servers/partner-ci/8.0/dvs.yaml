@@ -57,7 +57,6 @@
     force_erase: true
     recreate_venv: false
     disable_ssl: true
-    update_master: true
     debug: true
     publish_results: true
     multijob_build_pkg: true
