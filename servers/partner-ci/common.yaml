@@ -482,7 +482,7 @@
           name: ARGS
           default: >
              --doctest --exclude .git,doc,specs,fuel-qa,__init__.py,./plugin_test/run_tests.py
-             --ignore=H302,H802,D203 --show-source --statistics
+             --ignore=H306,I201,I100,H306,H302,H802,D203 --show-source --statistics
           description: "Default args from fuel-qa gate job"
     properties:
       - heavy-job:
