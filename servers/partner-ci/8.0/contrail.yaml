@@ -2,10 +2,22 @@
 - parameter:
     name: plugin-specific-parameters
     parameters:
-      - bool:
-          name: UPDATE_MASTER
-          default: '{update_master}'
-          description: 'turns on update fuel master node to maintenance update'
+      - string:
+          name: WORKSTATION_SNAPSHOT
+          default: 'contrail'
+          description: 'Snapshot name for vcenter lab'
+      - string:
+          name: WORKSTATION_NODES
+          default: 'esxi1 esxi2 esxi3 vcenter trusty'
+          description: "List of workstation's nodes"
+      - string:
+          name: POOL_PUBLIC
+          default: '172.16.0.0/24:24'
+          description: 'Snapshot name for vsphere lab'
+      - string:
+          name: VCENTER_IP
+          default: '172.16.0.254'
+          description: "IP address of the vCenter server"
       - bool:
           name: BONDING
           default: '{obj:bonding}'
@@ -15,31 +27,6 @@
       - string:
           name: NODE_VOLUME_SIZE
           default: '512'
-      - string:
-          name: MIRROR
-          default: 'http://mirror.seed-cz1.fuel-infra.org'
-          description: |
-              'mirror for package repositories. this mirror is optimized for CZ'
-      - string:
-          name: UPDATE_FUEL_MIRROR
-          default: >
-             ${{MIRROR}}/mos-repos/centos/mos7.0-centos6-fuel/security/x86_64/
-             ${{MIRROR}}/mos-repos/centos/mos7.0-centos6-fuel/updates/x86_64/
-          description: 'repositories to update fuel master node'
-      - string:
-          name: MIRROR_UBUNTU
-          default: >
-             deb ${{MIRROR}}/pkgs/ubuntu/ trusty main universe multiverse |
-             deb ${{MIRROR}}/pkgs/ubuntu/ trusty-updates main universe multiverse
-          description: 'proposed repositories to update ubuntu cluster'
-      - string:
-          name: DEB_UPDATES
-          default: "mos-updates,deb ${{MIRROR}}/mos/ubuntu/dists/mos7.0-updates main restricted"
-          description: 'ubuntu-updates repositories for master ui'
-      - string:
-          name: DEB_SECURITY
-          default: "mos-security,deb ${{MIRROR}}/mos/ubuntu/dists/mos7.0-security main restricted"
-          description: 'ubuntu-security repositories for master ui'
       - string:
           name: CONTRAIL_DISTRIBUTION
           default: ''
@@ -65,8 +52,8 @@
 
 - project:
     name: 'predefined_parameters'
-    fuel-release: '7.0'
-    plugin-version: '3.0.1'
+    fuel-release: '8.0'
+    plugin-version: '4.0.0'
     plugin-name: 'contrail'
     build-name: '{fuel-release}.{plugin-name}.{plugin-version}.build'
     flake8-name: '{fuel-release}.{plugin-name}.{plugin-version}.flake8'
@@ -96,24 +83,23 @@
     disable_ssl: true
     bonding: false
     kvm_use: false
-    update_master: true
     debug: true
     publish_results: true
     multijob_build_pkg: true
     testjob_build_pkg: false
     runner_timeout: 600
     test_timeout: 300
-    iso_file: 'fuel-7.0-301-2015-09-22_20-01-53.iso'
+    iso_file: 'fuel-8.0-570.iso'
     gerrit_repo: 'fuel-plugin-contrail'
-    gerrit_branch: 'stable/3.0.1'
-    email_to: 'rkhozinov@mirantis.com okosse@mirantis.com ivovk@mirantis.com'
+    gerrit_branch: 'master'
+    email_to: 'rkhozinov@mirantis.com okosse@mirantis.com otsvigun@mirantis.com'
     released_plugin_path: '/storage/contrail/released/contrail-3.0.noarch.rpm'
     scm_submodule_disabled: true
 
     testrail_project: "Contrail plugin"
-    testrail_suite: "Contrail Plugin v3.x.x"
+    testrail_suite: "Contrail Plugin v4.x.x"
     testrail_suite_desc: "Suite description"
-    testrail_milestone: "Fuel Contrail Plugin v3.0.1"
+    testrail_milestone: "Fuel Contrail Plugin v4.0.0"
     testrail_plan: "$TREP_TESTRAIL_SUITE iso #${{ISO_VERSION}} pkg#${{JUNIPER_PKG_VERSION}} build#${{PKG_JOB_BUILD_NUMBER}}"
     testrail_plan_desc: "Test plan description"
     testrail_run: "$TREP_TESTRAIL_SUITE"
@@ -189,9 +175,9 @@
           scm_submodule_disabled: false
 
       - '{regression-name}':
-          testrail_suite: "Contrail Plugin v3.x.x"
+          testrail_suite: "Contrail Plugin v4.x.x"
           testrail_suite_desc: "Suite description"
-          testrail_milestone: "Fuel Contrail Plugin v3.0.1"
+          testrail_milestone: "Fuel Contrail Plugin v4.0.0"
           testrail_plan: "$TREP_TESTRAIL_SUITE iso #${{ISO_VERSION}} pkg#${{JUNIPER_PKG_VERSION}} build#${{PKG_JOB_BUILD_NUMBER}}"
           testrail_plan_desc: "Test plan description"
           testrail_run: "$TREP_TESTRAIL_SUITE"
@@ -233,7 +219,6 @@
       - plugin-specific-parameters:
           bonding: '{bonding}'
           kvm_use: '{kvm_use}'
-          update_master: '{update_master}'
           plugin-version: '{plugin-version}'
 
 # parameters for jobs created per test-group and custom test job
@@ -275,7 +260,6 @@
       - plugin-specific-parameters:
           bonding: '{bonding}'
           kvm_use: '{kvm_use}'
-          update_master: '{update_master}'
           plugin-version: '{plugin-version}'
 
 - defaults:
@@ -330,9 +314,9 @@
                 filter: "iso_file"
                 which-build: last-successful
       - shell:
-          !include-raw-escape: builders/common.prepare.sh
+          !include-raw-escape: ../builders/common.prepare.sh
       - shell:
-          !include-raw-escape: builders/contrail.test.sh
+          !include-raw-escape: ../builders/contrail.test.sh
     publishers:
       - runner-publisher:
           properties_name: properties
@@ -374,9 +358,9 @@
           rm -rf build.properties
           rm -rf build.plugin_version
       - shell:
-          !include-raw-escape: builders/build-plugin-contrail.sh
+          !include-raw-escape: ../builders/build-plugin-contrail.sh
       - shell:
-          !include-raw-escape: builders/rpm-check.sh
+          !include-raw-escape: ../builders/rpm-check.sh
     publishers:
       - build-publisher:
           email_to: '{email_to}'
