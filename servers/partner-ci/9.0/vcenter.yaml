@@ -142,19 +142,19 @@
       - '{fuel-release}.{plugin-name}.{testgroup}':
           scm_submodule_disabled: false
 
-#     - '{regression-name}':
-#         testrail_suite: "[8.0][PCE] VMware DVS plugin v2.1.0 Regression"
-#         testrail_suite_desc: "Suite description"
-#         testrail_plan: "$TREP_TESTRAIL_SUITE #${{DATE}}"
-#         testrail_plan_desc: "Test plan description"
-#         testrail_run: "$TREP_TESTRAIL_SUITE"
-#         testrail_run_desc: "Test run description"
-#         pkg_job_name: ''
-#         iso_job_name: ''
-#         multijob_build_pkg: false
+      - '{regression-name}':
+          pkg_job_name: ''
+          iso_job_name: ''
+          multijob_build_pkg: false
+          testrail_suite: "[9.0][PCE] vCenter Smoke/BVT"
+          testrail_suite_desc: "Suite description"
+          testrail_plan: "$TREP_TESTRAIL_SUITE #${{DATE}}"
+          testrail_plan_desc: "Test plan description"
+          testrail_run: "$TREP_TESTRAIL_SUITE"
+          testrail_run_desc: "Test run description"
 
-#     - '{fuel-release}.{plugin-name}.regression.test':
-#         scm_submodule_disabled: false
+      - '{fuel-release}.{plugin-name}.regression.test':
+          scm_submodule_disabled: false
 
 # parameters for smoke, bvt and nightly multijobs
 - runner-parameters: &runner-parameters
@@ -334,7 +334,7 @@
             - name: '{fuel-release}.{plugin-name}.regression.test'
               predefined-parameters: |
                 TEST_GROUP=vcenter_dvs_bvt
-                TEST_GROUP_CONFIG=vcenter_dvs_bvt
+                TEST_GROUP_CONFIG=${{TEST_GROUP}}
                 DVS_PLUGIN_PATH={released_plugin_path}
                 PLUGIN_VERSION={plugin-version}
                 PKG_JOB_BUILD_NUMBER=released
