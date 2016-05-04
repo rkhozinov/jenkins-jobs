@@ -111,7 +111,7 @@
     scm_submodule_disabled: true
 
     testrail_project: "Contrail plugin"
-    testrail_suite: "Contrail Plugin v3.x.x"
+    testrail_suite: "Fuel Plugin Contrail v3.0.1"
     testrail_suite_desc: "Suite description"
     testrail_milestone: "Fuel Contrail Plugin v3.0.1"
     testrail_plan: "$TREP_TESTRAIL_SUITE iso #${{ISO_VERSION}} pkg#${{JUNIPER_PKG_VERSION}} build#${{PKG_JOB_BUILD_NUMBER}}"
@@ -189,7 +189,7 @@
           scm_submodule_disabled: false
 
       - '{regression-name}':
-          testrail_suite: "Contrail Plugin v3.x.x"
+          testrail_suite: "Fuel Plugin Contrail v3.0.1"
           testrail_suite_desc: "Suite description"
           testrail_milestone: "Fuel Contrail Plugin v3.0.1"
           testrail_plan: "$TREP_TESTRAIL_SUITE iso #${{ISO_VERSION}} pkg#${{JUNIPER_PKG_VERSION}} build#${{PKG_JOB_BUILD_NUMBER}}"
