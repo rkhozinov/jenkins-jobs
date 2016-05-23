@@ -11,6 +11,7 @@
        current-parameters: true
        kill-phase-on: NEVER
        property-file: build_number
+
 - multijob:
     name: 'System tests for {plugin-name} {fuel-release}.{plugin-version} vcenter5'
     condition: COMPLETED
@@ -23,27 +24,11 @@
        current-parameters: true
        kill-phase-on: NEVER
        property-file: build_number
-     - name: '{fuel-release}.{plugin-name}.nsxv_reset_controller'
-       current-parameters: true
-       kill-phase-on: NEVER
-       property-file: build_number
-     - name: '{fuel-release}.{plugin-name}.nsxv_shutdown_controller'
-       current-parameters: true
-       kill-phase-on: NEVER
-       property-file: build_number
      - name: '{fuel-release}.{plugin-name}.nsxv_ceilometer'
        current-parameters: true
        kill-phase-on: NEVER
        property-file: build_number
      - name: '{fuel-release}.{plugin-name}.nsxv_ha_mode'
-       current-parameters: true
-       kill-phase-on: NEVER
-       property-file: build_number
-     - name: '{fuel-release}.{plugin-name}.nsxv_ceph'
-       current-parameters: true
-       kill-phase-on: NEVER
-       property-file: build_number
-     - name: '{fuel-release}.{plugin-name}.nsxv_ceph_no_vcenter'
        current-parameters: true
        kill-phase-on: NEVER
        property-file: build_number
@@ -104,6 +89,30 @@
        kill-phase-on: NEVER
        property-file: build_number
      - name: '{fuel-release}.{plugin-name}.nsxv_multi_vnic'
+       current-parameters: true
+       kill-phase-on: NEVER
+       property-file: build_number
+     - name: '{fuel-release}.{plugin-name}.nsxv_install'
+       current-parameters: true
+       kill-phase-on: NEVER
+       property-file: build_number
+     - name: '{fuel-release}.{plugin-name}.nsxv_uninstall'
+       current-parameters: true
+       kill-phase-on: NEVER
+       property-file: build_number
+     - name: '{fuel-release}.{plugin-name}.nsxv_uninstall_negative'
+       current-parameters: true
+       kill-phase-on: NEVER
+       property-file: build_number
+     - name: '{fuel-release}.{plugin-name}.nsxv_connectivity_diff_networks'
+       current-parameters: true
+       kill-phase-on: NEVER
+       property-file: build_number
+     - name: '{fuel-release}.{plugin-name}.nsxv_different_tenants'
+       current-parameters: true
+       kill-phase-on: NEVER
+       property-file: build_number
+     - name: '{fuel-release}.{plugin-name}.nsxv_same_ip_different_tenants'
        current-parameters: true
        kill-phase-on: NEVER
        property-file: build_number
