@@ -4,7 +4,7 @@
     parameters:
       - string:
           name: WORKSTATION_SNAPSHOT
-          default: 'nsxv_6.2'
+          default: 'nsxv_6.2.0'
           description: 'Snapshot name for vcenter lab'
       - string:
           name: WORKSTATION_NODES
@@ -38,7 +38,8 @@
     reporter-name: '{fuel-release}.{plugin-name}.reporter'
     smoke-test-name: 'nsxv_smoke'
     bvt-test-name: 'nsxv_bvt'
-    canary-test-name: 'nsxv_smoke'
+    canary-skinny-test-name: 'nsxv_smoke'
+    canary-fat-test-name: 'nsxv_bvt'
     admin_node_memory: '8192'
     slave_node_memory: '8192'
     admin_node_cpu: '4'
@@ -76,6 +77,7 @@
     testrail_run: "$TREP_TESTRAIL_SUITE"
     testrail_run_desc: "Test run description"
     testrail_item_case: "$TEST_GROUP"
+    trep_results_source: "xunit"
     trep_debug_level: "DEBUG"
 
     testgroup_parameter_type: string
@@ -85,14 +87,14 @@
     testgroup:
       - nsxv_add_delete_nodes
       - nsxv_add_delete_controller
-      - nsxv_reset_controller
-      - nsxv_shutdown_controller
+
+
       - nsxv_ceilometer
       - nsxv_ha_mode
-      - nsxv_ceph
+
       - nsxv_smoke
       - nsxv_bvt
-      - nsxv_ceph_no_vcenter
+
       - nsxv_floating_ip_to_public
       - nsxv_create_and_delete_vms
       - nsxv_smoke_add_compute
@@ -107,6 +109,13 @@
       - nsxv_metadata_mgt_disabled
       - nsxv_create_and_delete_secgroups
       - nsxv_multi_vnic
+
+      - nsxv_install
+      - nsxv_uninstall
+      - nsxv_uninstall_negative
+      - nsxv_connectivity_diff_networks
+      - nsxv_different_tenants
+      - nsxv_same_ip_different_tenants
 
     jobs:
       - '{build-name}'
@@ -134,12 +143,14 @@
           scm_submodule_disabled: false
 
       - '{smoke-name}':
+          publish_results: false
           multijob_build_pkg: false
 
       - '{fuel-release}.{plugin-name}.smoke.test':
           scm_submodule_disabled: false
 
       - '{bvt-name}':
+          publish_results: false
           multijob_build_pkg: true
 
       - '{fuel-release}.{plugin-name}.bvt.test':
@@ -161,6 +172,14 @@
 
       - '{canary-name}':
           iso_job_name: '{download-iso-name}'
+          testrail_suite: "[9.0][PCE] VMware NSXv plugin v3.0.0 Smoke/BVT"
+          testrail_suite_desc: "Suite description"
+          testrail_milestone: "3.0.0"
+          testrail_plan: "$TREP_TESTRAIL_SUITE build#${{PKG_JOB_BUILD_NUMBER}} iso#${{ISO_VERSION}}"
+          testrail_plan_desc: "Test plan description"
+          testrail_run: "$TREP_TESTRAIL_SUITE"
+          testrail_run_desc: "Test run description"
+          testrail_item_case: "$TEST_GROUP"
 
       - '{fuel-release}.{plugin-name}.canary.skinny':
           scm_submodule_disabled: false
@@ -513,7 +532,13 @@
             - name: '{fuel-release}.{plugin-name}.canary.skinny'
               property-file: build_number
               predefined-parameters: |
-                 TEST_GROUP={canary-test-name}
+                 TEST_GROUP={canary-skinny-test-name}
+              current-parameters: true
+              kill-phase-on: NEVER
+            - name: '{fuel-release}.{plugin-name}.canary.fat'
+              property-file: build_number
+              predefined-parameters: |
+                 TEST_GROUP={canary-fat-test-name}
               current-parameters: true
               kill-phase-on: NEVER
 
