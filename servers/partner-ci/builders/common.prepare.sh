@@ -53,8 +53,8 @@ REQS_PATH="https://raw.githubusercontent.com/openstack/fuel-qa/${REQS_BRANCH}/fu
 ## may have many deployed and runned envs, those may cause errors during test
 
 function dospy {
-  env_list=$1
-  action=$2
+  env_list=$2
+  action=$1
 
   if [[ ! -z "${env_list}" ]] && [[ ! -z "${action}" ]]; then
     for env in $env_list; do dos.py $action $env; done
@@ -86,6 +86,7 @@ function get_venv_requirements {
   if [[ "${REQS_BRANCH}" == "stable/8.0" ]]; then
     # bug: https://bugs.launchpad.net/fuel/+bug/1528193
     sed -i 's/python-neutronclient.*/python-neutronclient==3.1.0/' $REQS_PATH
+    echo oslo.i18n >> $REQS_PATH
   fi
   ## change version for some package
   #if [[ "${REQS_BRANCH}" != "master" ]]; then
@@ -112,10 +113,11 @@ function prepare_venv {
 function fix_logger {
    config_path="${HOME}/.devops/log.yaml"
    echo devops config path $config_path
-   sed -i '/disable_existing_loggers.*/d' $config_path
-   echo disable_existing_loggers: False >> $config_path
+   if [ -d $config_path]; then 
+     sed -i '/disable_existing_loggers.*/d' $config_path
+     echo disable_existing_loggers: False >> $config_path
+   fi
 }
-
 
 ####################################################################################
 
@@ -132,14 +134,23 @@ source "$VENV_PATH/bin/activate"
 [ -z $VIRTUAL_ENV ] && { echo "VIRTUAL_ENV is empty"; exit 1; }
 
 if [[ "${FORCE_ERASE}" -eq "true" ]]; then
-  dospy $(dospy_list) erase
+  for env in $(dospy_list $ENV_NAME); do 
+    dos.py erase $env 
+  done 
 else
+
   # determine free space before run the cleaner
   free_space=$(df -h | grep '/$' | awk '{print $4}' | tr -d G)
 
-  (( $free_space < $REQUIRED_FREE_SPACE )) && dospy $(dospy_list $ENV_NAME) erase  || echo "free-space: $free_space"
-
+  if (( $free_space < $REQUIRED_FREE_SPACE )); then 
+    for env in $(dospy_list $ENV_NAME); do 
+      dos.py erase $env 
+    done 
+  else
+    echo "free-space: $free_space"
+  fi
   # poweroff all envs
-  dospy $(dospy_list) destroy
-
+  for env in $(dospy_list $ENV_NAME); do 
+    dos.py destroy $env 
+  done 
 fi

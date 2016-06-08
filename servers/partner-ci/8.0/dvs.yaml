@@ -79,6 +79,7 @@
     testrail_run: "$TREP_TESTRAIL_SUITE"
     testrail_run_desc: "Test run description"
     testrail_item_case: "$TEST_GROUP"
+    trep_results_source: "xunit"
     trep_debug_level: "DEBUG"
 
     testgroup_parameter_type: string
@@ -138,12 +139,14 @@
           scm_submodule_disabled: false
 
       - '{smoke-name}':
+          publish_results: false
           multijob_build_pkg: false
 
       - '{fuel-release}.{plugin-name}.smoke.test':
           scm_submodule_disabled: false
 
       - '{bvt-name}':
+          publish_results: false
           multijob_build_pkg: true
 
       - '{fuel-release}.{plugin-name}.bvt.test':
@@ -421,6 +424,7 @@
     disabled: false
     description: 'The Smoke test for {fuel-release}.{plugin-name}.{plugin-version}'
     concurrent: true
+    quiet-period: 5
     project-type: multijob
     node: runner
     <<: *runner-parameters

@@ -12,7 +12,7 @@
       - bool:
           name: DISABLE_SSL
           default: '{disable_ssl}'
-          description: "Disable ssh for openstack horizon"
+          description: "Disable SSL/TLS for openstack horizon"
       - bool:
           name: FORCE_ERASE
           default: '{force_erase}'
@@ -60,6 +60,9 @@
           name: TREP_TESTRAIL_SUITE
           default: '{testrail_suite}'
           description: 'The test suite name, ex.[8.0][PCE] vCenter Smoke/BVT'
+#     - string:
+#         name: TREP_TESTRAIL_CONFIGURATION
+#         default: "{testrail_suite_conf}"
       - string:
           name: TREP_TESTRAIL_SUITE_DESCRIPTION
           default: '{testrail_suite_desc}'
@@ -176,6 +179,9 @@
               - archive:
                   artifacts: 'nosetests.xml'
                   allow-empty: false
+      - postbuildscript:
+          builders:
+              - shell: rm -rf *.rpm
       - conditional-publisher:
           - condition-kind: boolean-expression
             condition-expression: "${{PUBLISH_RESULTS}}"
@@ -184,6 +190,7 @@
                   - project: '{reporter_name}'
                     property-file: reporter.properties
                     fail-on-missing: true
+                    condition: FAILED_OR_BETTER
 - builder:
     name: runner-condition
     builders:
@@ -191,17 +198,15 @@
           condition-kind: shell
           condition-command: |
             #!/bin/bash -xe
-            if [[ ${MJ_BUILD_PKG}=="true" ]]; then
-              if [ -z ${PKG_JOB_BUILD_NUMBER} ]; then
+            if [ "${MJ_BUILD_PKG}" == "true" ]; then
+              if [ -z  ${PKG_JOB_BUILD_NUMBER} ]; then
                 echo "Plugin will be built"
-              else
-                echo "Plugin won't be built"
-                exit 1
+                exit 0
               fi
-            else
-              echo "Plugin won't be built"
-              exit 1
             fi
+
+            echo "Plugin won't be built"
+            exit 1
           steps:
             - trigger-builds:
                 - project: ${PKG_JOB_NAME}
@@ -244,7 +249,17 @@
                 project: ${ISO_JOB_NAME}
                 filter: "iso_file"
                 which-build: last-successful
-
+      - conditional-step:
+          condition-kind: file-exists
+          condition-filename: "iso_file"
+          steps:
+            - shell: |
+                #!/bin/bash
+                if [ ! -z $ISO_FILE ]; then
+                    echo "ISO_FILE=$ISO_FILE" >> build_number
+                else
+                    echo "$(<iso_file)" >> build_number
+                fi
 # common git settings to get sources
 - scm:
     name: common-scm
@@ -363,9 +378,6 @@
             - dvs
             - nsxv
             - contrail
-            - lma
-            - elasticsearch
-            - influxdb
           option: category
 
 - publisher:
@@ -482,7 +494,7 @@
           name: ARGS
           default: >
              --doctest --exclude .git,doc,specs,fuel-qa,__init__.py,./plugin_test/run_tests.py
-             --ignore=H306,I201,I100,H306,H302,H802,D203 --show-source --statistics
+             --ignore=H304,H306,I201,I100,H306,H302,H802,D203 --show-source --statistics
           description: "Default args from fuel-qa gate job"
     properties:
       - heavy-job:
@@ -494,8 +506,6 @@
           flake8 ${{ARGS}} ./ | tee -i flake8.log
     publishers:
       - checker-publisher
-
-
 
 - job-template:
     name: '{reporter-name}'
@@ -517,6 +527,9 @@
       - string:
           name: TEST_JOB_NAME
           description: "The name of a test for getting test results"
+      - string:
+          name: TEST_GROUP
+          description: "The name of a test group"
       - string:
           name: DATE
           description: "The date of a test run"
@@ -547,6 +560,9 @@
           name: TREP_TESTRAIL_SUITE
           default: "{testrail_suite}"
           description: "The test suite name, ex.[8.0][PCE] vCenter Smoke/BVT"
+      - string:
+          name: TREP_TESTRAIL_SUITE_CONFIGURATION
+          default: "${{TEST_JOB_NAME}}:${{JENKINS_URL}}job/${{TEST_JOB_NAME}}/${{TEST_JOB_BUILD_NUMBER}}/console"
       - string:
           name: TREP_TESTRAIL_SUITE_DESCRIPTION
           default: "{testrail_suite_desc}"
@@ -589,7 +605,7 @@
           description: "Log filename for reporter tool"
       - string:
           name: TREP_TEST_RESULTS_SOURCE
-          default: "xunit"
+          default: "{trep_results_source}"
           description: "Reporter tool's additional config"
       - string:
           name: TREP_TEST_RESULTS_XUNIT_FILENAME

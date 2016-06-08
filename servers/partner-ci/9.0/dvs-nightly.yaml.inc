@@ -1,12 +1,21 @@
 - runner-condition
 - multijob:
-    name: 'System tests for dvs{fuel-release}.{plugin-version} vcenter5'
-    condition: COMPLETED
+    name: 'Smoke/BVT test for dvs{fuel-release}.{plugin-version} vcenter5'
+    condition: SUCCESSFUL
     projects:
-      - name: '{fuel-release}.{plugin-name}.dvs_vcenter_systest_setup'
+      - name: '{fuel-release}.{plugin-name}.dvs_vcenter_smoke'
         property-file: build_number
         current-parameters: true
         kill-phase-on: NEVER
+      - name: '{fuel-release}.{plugin-name}.dvs_vcenter_bvt'
+        property-file: build_number
+        current-parameters: true
+        kill-phase-on: NEVER
+
+- multijob:
+    name: 'System tests for dvs{fuel-release}.{plugin-version} vcenter5'
+    condition: COMPLETED
+    projects:
       - name: '{fuel-release}.{plugin-name}.dvs_vcenter_networks'
         property-file: build_number
         current-parameters: true
@@ -31,10 +40,6 @@
         property-file: build_number
         current-parameters: true
         kill-phase-on: NEVER
-      - name: '{fuel-release}.{plugin-name}.dvs_vcenter_uninstall'
-        property-file: build_number
-        current-parameters: true
-        kill-phase-on: NEVER
       - name: '{fuel-release}.{plugin-name}.dvs_vcenter_bind_port'
         property-file: build_number
         current-parameters: true
@@ -52,14 +57,6 @@
         current-parameters: true
         kill-phase-on: NEVER
       - name: '{fuel-release}.{plugin-name}.dvs_different_networks'
-        property-file: build_number
-        current-parameters: true
-        kill-phase-on: NEVER
-      - name: '{fuel-release}.{plugin-name}.dvs_install'
-        property-file: build_number
-        current-parameters: true
-        kill-phase-on: NEVER
-      - name: '{fuel-release}.{plugin-name}.dvs_uninstall'
         property-file: build_number
         current-parameters: true
         kill-phase-on: NEVER
