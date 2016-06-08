@@ -21,12 +21,15 @@ if [ -z $PLUGIN_VERSION  ]; then
    [ -z $PLUGIN_VERSION  ] && (echo "PLUGIN_VERSION variable is empty"; exit 1) || export DVS_PLUGIN_VERSION=$PLUGIN_VERSION
 fi
 
-
-if [ $PUBLISH_RESULTS -a -f build.properties ]; then
-    export PKG_JOB_BUILD_NUMBER=$(grep "BUILD_NUMBER" < build.properties | cut -d= -f2 )
+if [ -z $NSXV_PLUGIN_PATH ]; then
+  if [ $PUBLISH_RESULTS -a -f build.properties ]; then
+      export PKG_JOB_BUILD_NUMBER=$(grep "BUILD_NUMBER" < build.properties | cut -d= -f2 )
+  else
+      echo "build.properties file is not available so the results couldn't be publihsed"
+      exit 1
+  fi
 else
-    echo "build.properties file is not available so the results couldn't be publihsed"
-    exit 1
+      export PKG_JOB_BUILD_NUMBER="released"
 fi
 
 
@@ -36,7 +39,8 @@ rm -rf logs/*
 
 export FUEL_RELEASE=$(cut -d '-' -f2-2 <<< $ISO_FILE | tr -d '.')
 export ISO_PATH="${ISO_STORAGE}/${ISO_FILE}"
-export ISO_VERSION=$(echo $ISO_FILE | cut -d'-' -f3-3 | tr -d '.iso' )
+[[ "$ISO_FILE" == *mos* ]] && export ISO_VERSION=$(echo "${ISO_FILE}" | cut -d'-' -f4-4 | tr -d '.iso' ) || \
+                              export ISO_VERSION=$(echo "${ISO_FILE}" | cut -d'-' -f3-3 | tr -d '.iso' )
 export ENV_NAME="${ENV_PREFIX}.${ISO_VERSION}"
 export VENV_PATH="${HOME}/${FUEL_RELEASE}-venv"
 
@@ -60,6 +64,7 @@ echo "plugin-checksum: $(md5sum -b ${NSXV_PLUGIN_PATH})"
 cat << REPORTER_PROPERTIES > reporter.properties
 ISO_VERSION=$ISO_VERSION
 ISO_FILE=$ISO_FILE
+TEST_GROUP=$TEST_GROUP
 TEST_JOB_NAME=$JOB_NAME
 TEST_JOB_BUILD_NUMBER=$BUILD_NUMBER
 PKG_JOB_BUILD_NUMBER=$PKG_JOB_BUILD_NUMBER

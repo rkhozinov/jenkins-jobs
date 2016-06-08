@@ -4,7 +4,11 @@
     parameters:
       - string:
           name: WORKSTATION_SNAPSHOT
-          default: 'nsxv_6.2'
+          default: 'nsxv_6.2.0'
+          description: 'Snapshot name for vcenter lab'
+      - string:
+          name: PLUGIN_VERSION
+          default: '{plugin-version}'
           description: 'Snapshot name for vcenter lab'
       - string:
           name: WORKSTATION_NODES
@@ -76,6 +80,7 @@
     testrail_run: "$TREP_TESTRAIL_SUITE"
     testrail_run_desc: "Test run description"
     testrail_item_case: "$TEST_GROUP"
+    trep_results_source: "xunit"
     trep_debug_level: "DEBUG"
 
     testgroup_parameter_type: string
@@ -184,7 +189,8 @@
           testrail_suite_desc:  '{testrail_suite_desc}'
           testrail_plan:        '{testrail_plan}'
           testrail_plan_desc:   '{testrail_plan_desc}'
-      - plugin-specific-parameters
+      - plugin-specific-parameters:
+          plugin-version: '{plugin-version}'
 
 # parameters for jobs created per test-group and custom test job
 - test-parameters: &test-parameters
@@ -222,7 +228,8 @@
           testrail_suite_desc:  '{testrail_suite_desc}'
           testrail_plan:        '{testrail_plan}'
           testrail_plan_desc:   '{testrail_plan_desc}'
-      - plugin-specific-parameters
+      - plugin-specific-parameters:
+          plugin-version: '{plugin-version}'
 
 - defaults:
     name: global
@@ -247,8 +254,8 @@
       - conditional-step:
           condition-kind: shell
           condition-command: |
-            [ ! -z ${{PKG_JOB_NAME}}         ] && \
-            [   -z ${{PKG_JOB_BUILD_NUMBER}} ] && \
+            [ ! -z ${{PKG_JOB_NAME}}          ] && \
+            [   -z ${{PKG_JOB_BUILD_NUMBER}}  ] && \
             [   -z ${{NSXV_PLUGIN_PATH}}      ]
           steps:
             - copyartifact:
@@ -257,8 +264,8 @@
       - conditional-step:
           condition-kind: shell
           condition-command: |
-            [ ! -z ${{PKG_JOB_NAME}}         ] && \
-            [ ! -z ${{PKG_JOB_BUILD_NUMBER}} ] && \
+            [ ! -z ${{PKG_JOB_NAME}}          ] && \
+            [ ! -z ${{PKG_JOB_BUILD_NUMBER}}  ] && \
             [   -z ${{NSXV_PLUGIN_PATH}}      ]
           steps:
             - copyartifact:
@@ -396,6 +403,7 @@
     disabled: false
     description: 'The Smoke test for {fuel-release}.{plugin-name}.{plugin-version}'
     concurrent: true
+    quiet-period: 10   
     project-type: multijob
     node: runner
     <<: *runner-parameters

@@ -76,6 +76,7 @@
     testrail_run: "$TREP_TESTRAIL_SUITE"
     testrail_run_desc: "Test run description"
     testrail_item_case: "$TEST_GROUP"
+    trep_results_source: "xunit_items"
     trep_debug_level: "DEBUG"
 
     testgroup_parameter_type: string

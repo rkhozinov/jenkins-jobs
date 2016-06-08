@@ -38,7 +38,8 @@ rm -rf logs/*
 
 export FUEL_RELEASE=$(cut -d '-' -f2-2 <<< ${ISO_FILE} | tr -d '.')
 export ISO_PATH="${ISO_STORAGE}/${ISO_FILE}"
-export ISO_VERSION=$(echo "${ISO_FILE}" | cut -d'-' -f3-3 | tr -d '.iso' )
+[[ "$ISO_FILE" == *mos* ]] && export ISO_VERSION=$(echo "${ISO_FILE}" | cut -d'-' -f4-4 | tr -d '.iso' ) || \
+                              export ISO_VERSION=$(echo "${ISO_FILE}" | cut -d'-' -f3-3 | tr -d '.iso' )
 export ENV_NAME="${ENV_PREFIX}.${ISO_VERSION}"
 export VENV_PATH="${HOME}/${FUEL_RELEASE}-venv"
 
@@ -53,7 +54,7 @@ systest_parameters=''
 
 [ -z $TEST_GROUP_PREFIX ] && { echo "testgroup prefix is empty"; exit 1; } || echo test-group-prefix: $TEST_GROUP_PREFIX
 
-echo test-group: $TEST_GROUP
+echo "test-group: ${TEST_GROUP}"
 echo "env-name: ${ENV_NAME}"
 echo "use-snapshots: ${USE_SNAPSHOTS}"
 echo "fuel-release: ${FUEL_RELEASE}"
@@ -66,6 +67,8 @@ echo "plugin-checksum: $(md5sum -b ${DVS_PLUGIN_PATH})"
 cat << REPORTER_PROPERTIES > reporter.properties
 ISO_VERSION=$ISO_VERSION
 ISO_FILE=$ISO_FILE
+TEST_GROUP=$TEST_GROUP
+TEST_GROUP_CONFIG=$TEST_GROUP_CONFIG
 TEST_JOB_NAME=$JOB_NAME
 TEST_JOB_BUILD_NUMBER=$BUILD_NUMBER
 PKG_JOB_BUILD_NUMBER=$PKG_JOB_BUILD_NUMBER

@@ -2,6 +2,20 @@
 - parameter:
     name: plugin-specific-parameters
     parameters:
+      - bool:
+          name: UPDATE_MASTER
+          default: '{update_master}'
+          description: 'turns on update fuel master node to maintenance update'
+      - string:
+          name: MIRROR
+          default: 'http://mirror.seed-cz1.fuel-infra.org'
+          description: 'cz mirror'
+      - string:
+          name: MIRROR_UBUNTU
+          default: >
+             deb ${{MIRROR}}/pkgs/ubuntu/ trusty main universe multiverse |
+             deb ${{MIRROR}}/pkgs/ubuntu/ trusty-updates main universe multiverse
+          description: 'proposed repositories to update ubuntu cluster'
       - string:
           name: WORKSTATION_SNAPSHOT
           default: 'doubledvs'
@@ -76,6 +90,7 @@
     testrail_run: "$TREP_TESTRAIL_SUITE"
     testrail_run_desc: "Test run description"
     testrail_item_case: "$TEST_GROUP"
+    trep_results_source: "xunit"
     trep_debug_level: "DEBUG"
 
     testgroup_parameter_type: string
@@ -124,12 +139,14 @@
           scm_submodule_disabled: false
 
       - '{smoke-name}':
+          publish_results: false
           multijob_build_pkg: false
 
       - '{fuel-release}.{plugin-name}.smoke.test':
           scm_submodule_disabled: false
 
       - '{bvt-name}':
+          publish_results: false
           multijob_build_pkg: true
 
       - '{fuel-release}.{plugin-name}.bvt.test':
@@ -186,7 +203,9 @@
           testrail_suite_desc:  '{testrail_suite_desc}'
           testrail_plan:        '{testrail_plan}'
           testrail_plan_desc:   '{testrail_plan_desc}'
-      - plugin-specific-parameters
+      - plugin-specific-parameters:
+          update_master:        '{update_master}'
+          
 
 # parameters for jobs created per test-group and custom test job
 - test-parameters: &test-parameters
@@ -205,17 +224,17 @@
           '{testgroup_value_type}': '{obj:testgroup_value}'
           description: "test-group name"
       - common-parameters:
-          publish_results: '{publish_results}'
-          debug:           '{debug}'
-          disable_ssl:     '{disable_ssl}'
-          force_erase:     '{force_erase}'
-          recreate_venv:   '{recreate_venv}'
-          use_snapshots:   '{use_snapshots}'
-          iso_file:        '{iso_file}'
-          gerrit_branch:   '{gerrit_branch}'
-          env_prefix:      '{fuel-release}.{plugin-name}'
-          pkg_job_name:    '{pkg_job_name}'
-          iso_job_name:    '{iso_job_name}'
+          publish_results:      '{publish_results}'
+          debug:                '{debug}'
+          disable_ssl:          '{disable_ssl}'
+          force_erase:          '{force_erase}'
+          recreate_venv:        '{recreate_venv}'
+          use_snapshots:        '{use_snapshots}'
+          iso_file:             '{iso_file}'
+          gerrit_branch:        '{gerrit_branch}'
+          env_prefix:           '{fuel-release}.{plugin-name}'
+          pkg_job_name:         '{pkg_job_name}'
+          iso_job_name:         '{iso_job_name}'
           admin_node_memory:    '{admin_node_memory}'
           slave_node_memory:    '{slave_node_memory}'
           admin_node_cpu:       '{admin_node_cpu}'
@@ -224,7 +243,8 @@
           testrail_suite_desc:  '{testrail_suite_desc}'
           testrail_plan:        '{testrail_plan}'
           testrail_plan_desc:   '{testrail_plan_desc}'
-      - plugin-specific-parameters
+      - plugin-specific-parameters:
+          update_master:        '{update_master}'
 
 - defaults:
     name: global
@@ -407,6 +427,7 @@
     disabled: false
     description: 'The Smoke test for {fuel-release}.{plugin-name}.{plugin-version}'
     concurrent: true
+    quiet-period: 5
     project-type: multijob
     node: runner
     <<: *runner-parameters

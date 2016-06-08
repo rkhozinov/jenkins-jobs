@@ -18,28 +18,13 @@
       - string:
           name: MIRROR
           default: 'http://mirror.seed-cz1.fuel-infra.org'
-          description: |
-              'mirror for package repositories. this mirror is optimized for CZ'
-      - string:
-          name: UPDATE_FUEL_MIRROR
-          default: >
-             ${{MIRROR}}/mos-repos/centos/mos7.0-centos6-fuel/security/x86_64/
-             ${{MIRROR}}/mos-repos/centos/mos7.0-centos6-fuel/updates/x86_64/
-          description: 'repositories to update fuel master node'
+          description: 'mirror for package repositories. this mirror is optimized for CZ'
       - string:
           name: MIRROR_UBUNTU
           default: >
              deb ${{MIRROR}}/pkgs/ubuntu/ trusty main universe multiverse |
              deb ${{MIRROR}}/pkgs/ubuntu/ trusty-updates main universe multiverse
           description: 'proposed repositories to update ubuntu cluster'
-      - string:
-          name: DEB_UPDATES
-          default: "mos-updates,deb ${{MIRROR}}/mos/ubuntu/dists/mos7.0-updates main restricted"
-          description: 'ubuntu-updates repositories for master ui'
-      - string:
-          name: DEB_SECURITY
-          default: "mos-security,deb ${{MIRROR}}/mos/ubuntu/dists/mos7.0-security main restricted"
-          description: 'ubuntu-security repositories for master ui'
       - string:
           name: CONTRAIL_DISTRIBUTION
           default: ''
@@ -48,6 +33,21 @@
           default: '{plugin-version}'
           description: >
             'There is a version of juniper packages stored in common sotrage'
+      - string:
+          name: POOL_ADMIN
+          default: '10.109.0.0/24:24'
+      - string:
+          name: POOL_PUBLIC
+          default: '10.109.1.0/24:24'
+      - string:
+          name: POOL_MANAGEMENT
+          default: '10.109.2.0/24:24'
+      - string:
+          name: POOL_PRIVATE
+          default: '10.109.3.0/24:24'
+      - string:
+          name: POOL_STORAGE
+          default: '10.109.4.0/24:24'
       - string:
           name: PLUGIN_VERSION
           default: ${{CONTRAIL_VERSION}}
@@ -106,12 +106,12 @@
     iso_file: 'fuel-7.0-301-2015-09-22_20-01-53.iso'
     gerrit_repo: 'fuel-plugin-contrail'
     gerrit_branch: 'stable/3.0'
-    email_to: 'rkhozinov@mirantis.com okosse@mirantis.com ivovk@mirantis.com'
+    email_to: 'rkhozinov@mirantis.com okosse@mirantis.com otsvigun@mirantis.com'
     released_plugin_path: '/storage/contrail/released/contrail-3.0.noarch.rpm'
     scm_submodule_disabled: true
 
     testrail_project: "Contrail plugin"
-    testrail_suite: "Contrail Plugin v3.0.0"
+    testrail_suite: "Contrail v3.0.0"
     testrail_suite_desc: "Suite description"
     testrail_milestone: "Fuel Contrail Plugin v3.0.0"
     testrail_plan: "$TREP_TESTRAIL_SUITE iso #${{ISO_VERSION}} pkg#${{JUNIPER_PKG_VERSION}} build#${{PKG_JOB_BUILD_NUMBER}}"
@@ -119,6 +119,7 @@
     testrail_run: "$TREP_TESTRAIL_SUITE"
     testrail_run_desc: "Test run description"
     testrail_item_case: "$TEST_GROUP"
+    trep_results_source: "xunit"
     trep_debug_level: "DEBUG"
 
     testgroup_parameter_type: string
@@ -178,18 +179,20 @@
 
       - '{smoke-name}':
           multijob_build_pkg: false
+          publish_results: false
 
       - '{fuel-release}.{plugin-name}.{plugin-version}.smoke.test.juniper':
           scm_submodule_disabled: false
 
       - '{bvt-name}':
           multijob_build_pkg: true
+          publish_results: false
 
       - '{fuel-release}.{plugin-name}.{plugin-version}.bvt.test.juniper':
           scm_submodule_disabled: false
 
       - '{regression-name}':
-          testrail_suite: "Contrail Plugin v3.0.0"
+          testrail_suite: "Contrail v3.0.0"
           testrail_suite_desc: "Suite description"
           testrail_milestone: "Fuel Contrail Plugin v3.0.0"
           testrail_plan: "$TREP_TESTRAIL_SUITE iso #${{ISO_VERSION}} pkg#${{JUNIPER_PKG_VERSION}} build#${{PKG_JOB_BUILD_NUMBER}}"
@@ -231,10 +234,10 @@
           testrail_plan:        '{testrail_plan}'
           testrail_plan_desc:   '{testrail_plan_desc}'
       - plugin-specific-parameters:
-          bonding: '{bonding}'
-          kvm_use: '{kvm_use}'
-          update_master: '{update_master}'
-          plugin-version: '{plugin-version}'
+          bonding:              '{bonding}'
+          kvm_use:              '{kvm_use}'
+          update_master:        '{update_master}'
+          plugin-version:       '{plugin-version}'
 
 # parameters for jobs created per test-group and custom test job
 - test-parameters: &test-parameters
@@ -253,17 +256,17 @@
           '{testgroup_value_type}': '{obj:testgroup_value}'
           description: "test-group name"
       - common-parameters:
-          publish_results: '{publish_results}'
-          debug:           '{debug}'
-          disable_ssl:     '{disable_ssl}'
-          force_erase:     '{force_erase}'
-          recreate_venv:   '{recreate_venv}'
-          use_snapshots:   '{use_snapshots}'
-          iso_file:        '{iso_file}'
-          gerrit_branch:   '{gerrit_branch}'
-          env_prefix:      '{fuel-release}.{plugin-name}'
-          pkg_job_name:    '{pkg_job_name}'
-          iso_job_name:    '{iso_job_name}'
+          publish_results:      '{publish_results}'
+          debug:                '{debug}'
+          disable_ssl:          '{disable_ssl}'
+          force_erase:          '{force_erase}'
+          recreate_venv:        '{recreate_venv}'
+          use_snapshots:        '{use_snapshots}'
+          iso_file:             '{iso_file}'
+          gerrit_branch:        '{gerrit_branch}'
+          env_prefix:           '{fuel-release}.{plugin-name}'
+          pkg_job_name:         '{pkg_job_name}'
+          iso_job_name:         '{iso_job_name}'
           admin_node_memory:    '{admin_node_memory}'
           slave_node_memory:    '{slave_node_memory}'
           admin_node_cpu:       '{admin_node_cpu}'
@@ -273,10 +276,10 @@
           testrail_plan:        '{testrail_plan}'
           testrail_plan_desc:   '{testrail_plan_desc}'
       - plugin-specific-parameters:
-          bonding: '{bonding}'
-          kvm_use: '{kvm_use}'
-          update_master: '{update_master}'
-          plugin-version: '{plugin-version}'
+          update_master:        '{update_master}'
+          bonding:              '{bonding}'
+          kvm_use:              '{kvm_use}'
+          plugin-version:       '{plugin-version}'
 
 - defaults:
     name: global

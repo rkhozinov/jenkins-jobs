@@ -1,3 +1,68 @@
+---
+- parameter:
+    name: plugin-specific-parameters
+    parameters:
+      - bool:
+          name: UPDATE_MASTER
+          default: '{update_master}'
+          description: 'turns on update fuel master node to maintenance update'
+      - bool:
+          name: BONDING
+          default: '{obj:bonding}'
+      - bool:
+          name: KVM_USE
+          default: '{obj:kvm_use}'
+      - string:
+          name: NODE_VOLUME_SIZE
+          default: '512'
+      - string:
+          name: MIRROR
+          default: 'http://mirror.seed-cz1.fuel-infra.org'
+          description: 'mirror for package repositories. this mirror is optimized for CZ'
+      - string:
+          name: MIRROR_UBUNTU
+          default: >
+             deb ${{MIRROR}}/pkgs/ubuntu/ trusty main universe multiverse |
+             deb ${{MIRROR}}/pkgs/ubuntu/ trusty-updates main universe multiverse
+          description: 'proposed repositories to update ubuntu cluster'
+      - string:
+          name: CONTRAIL_DISTRIBUTION
+          default: ''
+      - string:
+          name: CONTRAIL_VERSION
+          default: '{plugin-version}'
+          description: >
+            'There is a version of juniper packages stored in common sotrage'
+      - string:
+          name: POOL_ADMIN
+          default: '10.109.0.0/24:24'
+      - string:
+          name: POOL_PUBLIC
+          default: '10.109.1.0/24:24'
+      - string:
+          name: POOL_MANAGEMENT
+          default: '10.109.2.0/24:24'
+      - string:
+          name: POOL_PRIVATE
+          default: '10.109.3.0/24:24'
+      - string:
+          name: POOL_STORAGE
+          default: '10.109.4.0/24:24'
+      - string:
+          name: PLUGIN_VERSION
+          default: ${{CONTRAIL_VERSION}}
+          description: 'plugin version from metadata'
+      - string:
+          name: CONTRAIL_PLUGIN_PATH
+          description: 'The path to the contrail package on storage'
+      - string:
+          name: CONTRAIL_PLUGIN_PACK_UB_PATH
+          description: 'The path to the contrail package on storage'
+      - string:
+          name: VSRX_TEMPLATE_PATH
+          default: '/storage/contrail/vSRX1.template'
+          description: 'The path to the vsrx template'
+
 - project:
     name: 'predefined_parameters'
     fuel-release: 6.1
@@ -5,34 +70,63 @@
     plugin-name: 'contrail'
 
     build-name: '{fuel-release}.{plugin-name}.{plugin-version}.build'
+    flake8-name: '{fuel-release}.{plugin-name}.{plugin-version}.flake8'
+    radon-name: '{fuel-release}.{plugin-name}.{plugin-version}.radon'
+    shellcheck-name: '{fuel-release}.{plugin-name}.{plugin-version}.shellcheck'
     smoke-name: '{fuel-release}.{plugin-name}.{plugin-version}.smoke'
     bvt-name: '{fuel-release}.{plugin-name}.{plugin-version}.bvt'
     regression-name: '{fuel-release}.{plugin-name}.{plugin-version}.regression'
     nightly-name: '{fuel-release}.{plugin-name}.{plugin-version}.nightly'
     custom-name: '{fuel-release}.{plugin-name}.{plugin-version}.custom'
     reporter-name: '{fuel-release}.{plugin-name}.{plugin-version}.reporter'
-
-    nightly-timer: 'H 23 * * *'
-    regression-timer: 'H 18 * * *'
-    
-    nightly-disabled: true  
-
-    use-snapshots: false
-    force-erase: true
-    recreate-venv: false
-    disable-ssl: false
+    smoke-test-name: 'contrail_smoke'
+    bvt-test-name: 'contrail_bvt'
+    admin_node_memory: '4096'
+    slave_node_memory: '4096'
+    admin_node_cpu: '4'
+    slave_node_cpu: '4'
+    pkg_job_name: '{fuel-release}.{plugin-name}.{plugin-version}.build'
+    iso_job_name: ''
+    nightly_timer: 'H 22 * * *'
+    regression_timer: 'H 18 * * *'
+    nightly_disabled: true
+    regression_disabled: true
+    use_snapshots: false
+    force_erase: true
+    recreate_venv: false
+    disable_ssl: true
     bonding: false
-    update-master: true
+    kvm_use: false
+    update_master: true
     debug: true
-    runner-timeout: 600
-    test-timeout: 500
+    publish_results: true
+    multijob_build_pkg: true
+    testjob_build_pkg: false
+    runner_timeout: 600
+    test-timeout: 300
 
     iso-file: 'fuel-6.1-525-2015-06-19_13-02-31.iso'
     gerrit-repo: 'fuel-plugin-contrail'
     gerrit-branch: 'stable/2.1'
-    email-to: 'rkhozinov@mirantis.com'
-
+    email_to: 'rkhozinov@mirantis.com okosse@mirantis.com otsvigun@mirantis.com'
     released-plugin-path: '/storage/contrail/released/contrail-2.1-2.1.1-1.noarch.rpm'
+    scm_submodule_disabled: true
+
+    testrail_project: "Contrail plugin"
+    testrail_suite: "Contrail v3.0.0"
+    testrail_suite_desc: "Suite description"
+    testrail_milestone: "Fuel Contrail Plugin v3.0.0"
+    testrail_plan: "$TREP_TESTRAIL_SUITE iso #${{ISO_VERSION}} pkg#${{JUNIPER_PKG_VERSION}} build#${{PKG_JOB_BUILD_NUMBER}}"
+    testrail_plan_desc: "Test plan description"
+    testrail_run: "$TREP_TESTRAIL_SUITE"
+    testrail_run_desc: "Test run description"
+    testrail_item_case: "$TEST_GROUP"
+    trep_results_source: "xunit"
+    trep_debug_level: "DEBUG"
+
+    testgroup_parameter_type: string
+    testgroup_value_type: default
+    testgroup_value: '{testgroup}'
 
     testgroup:
       - deploy_contrail

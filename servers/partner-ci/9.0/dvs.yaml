@@ -42,7 +42,8 @@
     reporter-name: '{fuel-release}.{plugin-name}.reporter'
     smoke-test-name: 'dvs_vcenter_smoke'
     bvt-test-name: 'dvs_vcenter_bvt'
-    canary-test-name: 'dvs_vcenter_smoke'
+    canary-skinny-test-name: 'dvs_vcenter_smoke'
+    canary-fat-test-name: 'dvs_vcenter_bvt'
     admin_node_memory: '8192'
     slave_node_memory: '8192'
     admin_node_cpu: '4'
@@ -74,12 +75,14 @@
     testrail_project: "VMware DVS plugin"
     testrail_suite: "[9.0][PCE] VMware DVS plugin v3.0.0"
     testrail_suite_desc: "Suite description"
+#   testrail_suite_conf: "CI job: [${{JOB_NAME}}](${{JOB_URL}})"
     testrail_milestone: "3.0.0"
     testrail_plan: "$TREP_TESTRAIL_SUITE build#${{PKG_JOB_BUILD_NUMBER}} iso#${{ISO_VERSION}}"
     testrail_plan_desc: "Test plan description"
     testrail_run: "$TREP_TESTRAIL_SUITE"
     testrail_run_desc: "Test run description"
     testrail_item_case: "$TEST_GROUP"
+    trep_results_source: "xunit"
     trep_debug_level: "DEBUG"
 
     testgroup_parameter_type: string
@@ -117,7 +120,8 @@
       - dvs_reboot_vcenter_1
       - dvs_reboot_vcenter_2
       - dvs_volume
-
+      - dvs_vcenter_smoke
+      - dvs_vcenter_bvt
     jobs:
       - '{build-name}'
       - '{flake8-name}'
@@ -144,12 +148,14 @@
           scm_submodule_disabled: false
 
       - '{smoke-name}':
+          publish_results: false
           multijob_build_pkg: false
 
       - '{fuel-release}.{plugin-name}.smoke.test':
           scm_submodule_disabled: false
 
       - '{bvt-name}':
+          publish_results: false
           multijob_build_pkg: true
 
       - '{fuel-release}.{plugin-name}.bvt.test':
@@ -171,6 +177,11 @@
 
       - '{canary-name}':
           iso_job_name: '{download-iso-name}'
+          testrail_suite: "[9.0][PCE] VMware DVS plugin v3.0.0 Smoke/BVT"
+          testrail_milestone: "3.0.0"
+          testrail_plan: "$TREP_TESTRAIL_SUITE build#${{PKG_JOB_BUILD_NUMBER}} iso#${{ISO_VERSION}}"
+          testrail_run: "$TREP_TESTRAIL_SUITE"
+          testrail_item_case: "$TEST_GROUP"
 
       - '{fuel-release}.{plugin-name}.canary.skinny':
           scm_submodule_disabled: false
@@ -204,6 +215,7 @@
           slave_node_cpu:       '{slave_node_cpu}'
           testrail_suite:       '{testrail_suite}'
           testrail_suite_desc:  '{testrail_suite_desc}'
+#         testrail_suite_conf:  '{testrail_suite_conf}'
           testrail_plan:        '{testrail_plan}'
           testrail_plan_desc:   '{testrail_plan_desc}'
       - plugin-specific-parameters
@@ -242,6 +254,7 @@
           slave_node_cpu:       '{slave_node_cpu}'
           testrail_suite:       '{testrail_suite}'
           testrail_suite_desc:  '{testrail_suite_desc}'
+#         testrail_suite_conf:  '{testrail_suite_conf}'
           testrail_plan:        '{testrail_plan}'
           testrail_plan_desc:   '{testrail_plan_desc}'
       - plugin-specific-parameters
@@ -427,6 +440,7 @@
     disabled: false
     description: 'The Smoke test for {fuel-release}.{plugin-name}.{plugin-version}'
     concurrent: true
+    quiet-period: 5
     project-type: multijob
     node: runner
     <<: *runner-parameters
@@ -523,7 +537,13 @@
             - name: '{fuel-release}.{plugin-name}.canary.skinny'
               property-file: build_number
               predefined-parameters: |
-                 TEST_GROUP={canary-test-name}
+                 TEST_GROUP={canary-skinny-test-name}
+              current-parameters: true
+              kill-phase-on: NEVER
+            - name: '{fuel-release}.{plugin-name}.canary.fat'
+              property-file: build_number
+              predefined-parameters: |
+                 TEST_GROUP={canary-fat-test-name}
               current-parameters: true
               kill-phase-on: NEVER
 

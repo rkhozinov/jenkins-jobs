@@ -2,22 +2,10 @@
 - parameter:
     name: plugin-specific-parameters
     parameters:
-      - string:
-          name: WORKSTATION_SNAPSHOT
-          default: 'contrail'
-          description: 'Snapshot name for vcenter lab'
-      - string:
-          name: WORKSTATION_NODES
-          default: 'esxi1 esxi2 esxi3 vcenter trusty'
-          description: "List of workstation's nodes"
-      - string:
-          name: POOL_PUBLIC
-          default: ''
-          description: 'Snapshot name for vsphere lab'
-      - string:
-          name: VCENTER_IP
-          default: '172.16.0.254'
-          description: "IP address of the vCenter server"
+      - bool:
+          name: UPDATE_MASTER
+          default: '{update_master}'
+          description: 'turns on update fuel master node to maintenance update'
       - bool:
           name: BONDING
           default: '{obj:bonding}'
@@ -28,6 +16,16 @@
           name: NODE_VOLUME_SIZE
           default: '512'
       - string:
+          name: MIRROR
+          default: 'http://mirror.seed-cz1.fuel-infra.org'
+          description: 'mirror for package repositories. this mirror is optimized for CZ'
+      - string:
+          name: MIRROR_UBUNTU
+          default: >
+             deb ${{MIRROR}}/pkgs/ubuntu/ trusty main universe multiverse |
+             deb ${{MIRROR}}/pkgs/ubuntu/ trusty-updates main universe multiverse
+          description: 'proposed repositories to update ubuntu cluster'
+      - string:
           name: CONTRAIL_DISTRIBUTION
           default: ''
       - string:
@@ -35,6 +33,21 @@
           default: '{plugin-version}'
           description: >
             'There is a version of juniper packages stored in common sotrage'
+      - string:
+          name: POOL_ADMIN 
+          default: ''
+      - string:
+          name: POOL_PUBLIC
+          default: ''
+      - string:
+          name: POOL_MANAGEMENT
+          default: ''
+      - string:
+          name: POOL_PRIVATE
+          default: ''
+      - string:
+          name: POOL_STORAGE
+          default: ''
       - string:
           name: PLUGIN_VERSION
           default: ${{CONTRAIL_VERSION}}
@@ -80,9 +93,10 @@
     use_snapshots: false
     force_erase: true
     recreate_venv: false
-    disable_ssl: true
+    disable_ssl: false
     bonding: false
     kvm_use: false
+    update_master: true
     debug: true
     publish_results: true
     multijob_build_pkg: true
@@ -137,6 +151,11 @@
       - contrail_delete_config
       - contrail_add_db
       - contrail_net_template
+      - create_new_network_via_contrail 
+      - create_networks
+
+      - contrail_login_password
+      - contrail_vm_connection_in_different_tenants
 
     jobs:
       - '{build-name}'
@@ -165,12 +184,14 @@
 
       - '{smoke-name}':
           multijob_build_pkg: false
+          publish_results: false
 
       - '{fuel-release}.{plugin-name}.{plugin-version}.smoke.test.juniper':
           scm_submodule_disabled: false
 
       - '{bvt-name}':
           multijob_build_pkg: true
+          publish_results: false
 
       - '{fuel-release}.{plugin-name}.{plugin-version}.bvt.test.juniper':
           scm_submodule_disabled: false
@@ -218,9 +239,10 @@
           testrail_plan:        '{testrail_plan}'
           testrail_plan_desc:   '{testrail_plan_desc}'
       - plugin-specific-parameters:
-          bonding: '{bonding}'
-          kvm_use: '{kvm_use}'
-          plugin-version: '{plugin-version}'
+          bonding:              '{bonding}'
+          kvm_use:              '{kvm_use}'
+          update_master:        '{update_master}'
+          plugin-version:       '{plugin-version}'
 
 # parameters for jobs created per test-group and custom test job
 - test-parameters: &test-parameters
@@ -239,17 +261,17 @@
           '{testgroup_value_type}': '{obj:testgroup_value}'
           description: "test-group name"
       - common-parameters:
-          publish_results: '{publish_results}'
-          debug:           '{debug}'
-          disable_ssl:     '{disable_ssl}'
-          force_erase:     '{force_erase}'
-          recreate_venv:   '{recreate_venv}'
-          use_snapshots:   '{use_snapshots}'
-          iso_file:        '{iso_file}'
-          gerrit_branch:   '{gerrit_branch}'
-          env_prefix:      '{fuel-release}.{plugin-name}'
-          pkg_job_name:    '{pkg_job_name}'
-          iso_job_name:    '{iso_job_name}'
+          publish_results:      '{publish_results}'
+          debug:                '{debug}'
+          disable_ssl:          '{disable_ssl}'
+          force_erase:          '{force_erase}'
+          recreate_venv:        '{recreate_venv}'
+          use_snapshots:        '{use_snapshots}'
+          iso_file:             '{iso_file}'
+          gerrit_branch:        '{gerrit_branch}'
+          env_prefix:           '{fuel-release}.{plugin-name}'
+          pkg_job_name:         '{pkg_job_name}'
+          iso_job_name:         '{iso_job_name}'
           admin_node_memory:    '{admin_node_memory}'
           slave_node_memory:    '{slave_node_memory}'
           admin_node_cpu:       '{admin_node_cpu}'
@@ -259,9 +281,10 @@
           testrail_plan:        '{testrail_plan}'
           testrail_plan_desc:   '{testrail_plan_desc}'
       - plugin-specific-parameters:
-          bonding: '{bonding}'
-          kvm_use: '{kvm_use}'
-          plugin-version: '{plugin-version}'
+          update_master:        '{update_master}'
+          bonding:              '{bonding}'
+          kvm_use:              '{kvm_use}'
+          plugin-version:       '{plugin-version}'
 
 - defaults:
     name: global

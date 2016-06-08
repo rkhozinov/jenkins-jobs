@@ -48,8 +48,8 @@
     admin_node_cpu: '4'
     slave_node_cpu: '4'
     pkg_job_name: '{fuel-release}.dvs.build'
-    iso_job_name: '{fuel-release}.dvs.canary'
-    nightly_timer: 'H 22 * * *'
+    iso_job_name: 'download_iso'
+    nightly_timer: 'H 21 * * *'
     regression_timer: 'H 18 * * *'
     nightly_disabled: false
     regression_disabled: true
@@ -75,11 +75,12 @@
     testrail_milestone: "{fuel-release}"
     testrail_suite: "[9.0][PCE] vCenter"
     testrail_suite_desc: "Suite description"
-    testrail_plan: "$TREP_TESTRAIL_MILESTONE iso #${{ISO_VERSION}}"
+    testrail_plan: "$TREP_TESTRAIL_MILESTONE mos iso #${{ISO_VERSION}}"
     testrail_plan_desc: "Test plan description"
     testrail_run: "$TREP_TESTRAIL_SUITE"
     testrail_run_desc: "Test run description"
     testrail_item_case: "$TEST_GROUP"
+    trep_results_source: "xunit_items"
     trep_debug_level: "DEBUG"
 
     testgroup_parameter_type: string
@@ -122,6 +123,17 @@
       - vcenter_batch_instance_creation
       - vcenter_disktypes
       - vcenter_ha_kvm
+      - vcenter_disable_hosts
+       
+      - vcenter_shutdown_ctrl 
+      - vcenter_reboot_ctrl 
+      - vcenter_reset_ctrl  
+      - vcenter_shutdown_cindervmware 
+      - vcenter_reboot_cindervmware 
+      - vcenter_idatastore  
+      - vcenter_iname_glance_dc 
+      - vcenter_iname_glance_ds 
+
     jobs:
       - '{nightly-name}':
           multijob_build_pkg: true
@@ -156,7 +168,6 @@
       - '{fuel-release}.{plugin-name}.regression.test':
           scm_submodule_disabled: false
 
-# parameters for smoke, bvt and nightly multijobs
 - runner-parameters: &runner-parameters
     name: 'runner-parameters'
     parameters:

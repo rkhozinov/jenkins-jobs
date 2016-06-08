@@ -81,7 +81,7 @@
     nightly_timer: 'H 22 * * *'
     regression_timer: 'H 18 * * *'
     nightly_disabled: true
-    regression_disabled: true
+    regression_disabled: false
     use_snapshots: false
     force_erase: true
     recreate_venv: false
@@ -96,15 +96,12 @@
     runner_timeout: 600
     test_timeout: 300
 
-    iso_file: 'MirantisOpenStack-6.1.iso'
+    iso_file: 'fuel-6.1-525-2015-06-19_13-02-31.iso'
     gerrit_repo: 'fuel-plugin-contrail'
     gerrit_branch: 'stable/2.0'
     email_to: 'rkhozinov@mirantis.com okosse@mirantis.com otsvigun@mirantis.com'
     released_plugin_path: '/storage/contrail/released/contrail-2.0.0.noarch.rpm'
     scm_submodule_disabled: true
-    scm_wipe_workspace: false
-    skip_vote_successfull: false
-    skip_vote_failed: false
 
     testrail_project: "Contrail plugin"
     testrail_suite: "Contrail v2.x.x"
@@ -179,8 +176,6 @@
           testrail_suite_desc:  '{testrail_suite_desc}'
           testrail_plan:        '{testrail_plan}'
           testrail_plan_desc:   '{testrail_plan_desc}'
-          skip_vote_successfull: '{skip_vote_successfull}'
-          skip_vote_failed:     '{skip_vote_failed}'
       - plugin-specific-parameters:
           bonding:              '{bonding}'
           kvm_use:              '{kvm_use}'
@@ -223,8 +218,6 @@
           testrail_suite_desc:  '{testrail_suite_desc}'
           testrail_plan:        '{testrail_plan}'
           testrail_plan_desc:   '{testrail_plan_desc}'
-          skip_vote_successfull: '{skip_vote_successfull}'
-          skip_vote_failed:     '{skip_vote_failed}'
       - plugin-specific-parameters:
           update_master:        '{update_master}'
           bonding:              '{bonding}'
@@ -235,24 +228,21 @@
     name: global
     disabled: false
     node: contrail
+    logrotate:
+      daysToKeep: 30
+      numToKeep: 100
+      artifactDaysToKeep: 30
+      artifactNumToKeep: 100
     <<: *test-parameters
     scm:
       - common-scm:
           scm_submodule_disabled: '{scm_submodule_disabled}'
-          scm_wipe_workspace: '{scm_wipe_workspace}'      
           gerrit_repo: '{gerrit_repo}'
-          skip_vote_successfull: '{skip_vote_successfull}'
-          skip_vote_failed: '{skip_vote_failed}'
     wrappers:
       - test-wrapper:
           test_timeout: '{test_timeout}'
     properties:
       - test-property
-      - build-discarder:
-          days-to-keep: 30
-          num-to-keep: 100
-          artifact-days-to-keep: 30
-          artifact-num-to-keep: 100
     builders:
       - conditional-step:
           condition-kind: shell
@@ -305,15 +295,10 @@
       - draft-patchset-gerrit-trigger:
           gerrit_repo: '{gerrit_repo}'
           gerrit_branch: '{gerrit_branch}'
-          skip_vote_successfull: '{skip_vote_successfull}'
-          skip_vote_failed: '{skip_vote_failed}'
     scm:
       - common-scm:
           scm_submodule_disabled: '{scm_submodule_disabled}'
-          scm_wipe_workspace: '{scm_wipe_workspace}'
           gerrit_repo: '{gerrit_repo}'
-          skip_vote_successfull: '{skip_vote_successfull}'
-          skip_vote_failed: '{skip_vote_failed}'
     wrapper:
       - runner-wrapper
     parameters:
@@ -381,7 +366,7 @@
               predefined-parameters: |
                 TEST_GROUP=contrail_bvt
                 CONTRAIL_DISTRIBUTION=open
-                CONTRAIL_PLUGIN_PATH={released_plugin_path}
+                CONTRAIL_PLUGIN_PATH={released-plugin-path}
                 PLUGIN_VERSION={plugin-version}
                 PKG_JOB_BUILD_NUMBER=released
               current-parameters: true

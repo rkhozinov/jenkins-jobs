@@ -38,7 +38,9 @@ rm -rf logs/*
 
 export FUEL_RELEASE=$(cut -d- -f2-2 <<< ${ISO_FILE} | tr -d '.')
 export ISO_PATH="${ISO_STORAGE}/${ISO_FILE}"
-export ISO_VERSION=$(echo "${ISO_FILE}" | cut -d'-' -f3-3 | tr -d '.iso' )
+[[ "$ISO_FILE" == *mos* ]] && export ISO_VERSION=$(echo "${ISO_FILE}" | cut -d'-' -f4-4 | tr -d '.iso' ) || \
+                              export ISO_VERSION=$(echo "${ISO_FILE}" | cut -d'-' -f3-3 | tr -d '.iso' )
+
 export ENV_NAME="${ENV_PREFIX}.${ISO_VERSION}"
 [[ $FUEL_RELEASE!='90' ]] && export VENV_PATH="${HOME}/${FUEL_RELEASE}-venv" ||  export VENV_PATH="${HOME}/mitaka-venv"
 
@@ -63,6 +65,7 @@ echo "plugin-checksum: $(md5sum -b ${DVS_PLUGIN_PATH})"
 cat << REPORTER_PROPERTIES > reporter.properties
 ISO_VERSION=$ISO_VERSION
 ISO_FILE=$ISO_FILE
+TEST_GROUP=$TEST_GROUP
 TEST_JOB_NAME=$JOB_NAME
 TEST_JOB_BUILD_NUMBER=$BUILD_NUMBER
 PKG_JOB_BUILD_NUMBER=$PKG_JOB_BUILD_NUMBER
