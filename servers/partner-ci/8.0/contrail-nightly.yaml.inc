@@ -198,3 +198,28 @@
            CONTRAIL_DISTRIBUTION=juniper
         current-parameters: true
         kill-phase-on: NEVER
+
+      - name: '{fuel-release}.{plugin-name}.{plugin-version}.install_contrail.juniper'
+        property-file: build_number
+        predefined-parameters: |
+           CONTRAIL_DISTRIBUTION=juniper
+        current-parameters: true
+        kill-phase-on: NEVER
+      - name: '{fuel-release}.{plugin-name}.{plugin-version}.contrail_uninstall.juniper'
+        property-file: build_number
+        predefined-parameters: |
+           CONTRAIL_DISTRIBUTION=juniper
+        current-parameters: true
+        kill-phase-on: NEVER
+      - name: '{fuel-release}.{plugin-name}.{plugin-version}.contrail_no_default.juniper'
+        property-file: build_number
+        predefined-parameters: |
+           CONTRAIL_DISTRIBUTION=juniper
+        current-parameters: true
+        kill-phase-on: NEVER
+      - name: '{fuel-release}.{plugin-name}.{plugin-version}.contrail_ceilometer_metrics.juniper'
+        property-file: build_number
+        predefined-parameters: |
+           CONTRAIL_DISTRIBUTION=juniper
+        current-parameters: true
+        kill-phase-on: NEVER
