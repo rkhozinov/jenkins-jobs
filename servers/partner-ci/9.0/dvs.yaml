@@ -54,8 +54,8 @@
     regression_timer: 'H 18 * * *'
     nightly_disabled: false
     regression_disabled: true
-    use_snapshots: false
-    force_erase: true
+    use_snapshots: true
+    force_erase: false
     recreate_venv: false
     disable_ssl: true
     update_master: true
