@@ -129,7 +129,6 @@
     testgroup:
       - contrail_bvt
       - contrail_smoke
-      - install_contrail
       - contrail_ha
       - contrail_ha_baseos
       - contrail_ceilometer
@@ -156,6 +155,11 @@
 
       - contrail_login_password
       - contrail_vm_connection_in_different_tenants
+
+      - install_contrail
+      - contrail_uninstall
+      - contrail_no_default
+      - contrail_ceilometer_metrics
 
     jobs:
       - '{build-name}'
