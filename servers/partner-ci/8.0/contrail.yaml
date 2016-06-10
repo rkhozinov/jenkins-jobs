@@ -169,6 +169,12 @@
       - contrail_dpdk_add_dpdk
       - contrail_dpdk_delete_dpdk
 
+      - contrail_ha_dpdk
+      - contrail_dpdk_add_compute
+      - contrail_dpdk_delete_compute
+      - contrail_dpdk_add_dpdk
+      - contrail_dpdk_delete_dpdk
+
     jobs:
       - '{build-name}'
       - '{flake8-name}'
