@@ -112,7 +112,7 @@
         property-file: build_number
         current-parameters: true
         kill-phase-on: NEVER
-      - name: '{fuel-release}.{plugin-name}.dvs_vcenter_unistall'
+      - name: '{fuel-release}.{plugin-name}.dvs_vcenter_uninstall'
         property-file: build_number
         current-parameters: true
         kill-phase-on: NEVER
