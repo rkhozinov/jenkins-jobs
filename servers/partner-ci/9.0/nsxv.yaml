@@ -107,9 +107,10 @@
       - nsxv_kvm_deploy
       - nsxv_specified_router_type
       - nsxv_metadata_mgt_disabled
+      - nsxv_metadata_listen_public
+      - nsxv_metadata_listen_management
       - nsxv_create_and_delete_secgroups
       - nsxv_multi_vnic
-
       - nsxv_install
       - nsxv_uninstall
       - nsxv_uninstall_negative
