@@ -378,6 +378,7 @@
             - dvs
             - nsxv
             - contrail
+            - contrail-baremetal
           option: category
 
 - publisher:

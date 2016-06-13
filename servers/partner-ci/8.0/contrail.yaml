@@ -76,6 +76,7 @@
     bvt-name: '{fuel-release}.{plugin-name}.{plugin-version}.bvt'
     regression-name: '{fuel-release}.{plugin-name}.{plugin-version}.regression'
     nightly-name: '{fuel-release}.{plugin-name}.{plugin-version}.nightly'
+    baremetal-name: '{fuel-release}.{plugin-name}.{plugin-version}.baremetal'
     custom-name: '{fuel-release}.{plugin-name}.{plugin-version}.custom'
     reporter-name: '{fuel-release}.{plugin-name}.{plugin-version}.reporter'
     smoke-test-name: 'contrail_smoke'
@@ -89,6 +90,7 @@
     nightly_timer: 'H 22 * * *'
     regression_timer: 'H 18 * * *'
     nightly_disabled: false
+    baremetal_disabled: false
     regression_disabled: true
     use_snapshots: false
     force_erase: true
@@ -161,6 +163,12 @@
       - contrail_no_default
       - contrail_ceilometer_metrics
 
+      - contrail_ha_dpdk
+      - contrail_dpdk_add_compute
+      - contrail_dpdk_delete_compute
+      - contrail_dpdk_add_dpdk
+      - contrail_dpdk_delete_dpdk
+
     jobs:
       - '{build-name}'
       - '{flake8-name}'
@@ -168,6 +176,9 @@
       - '{shellcheck-name}'
 
       - '{nightly-name}':
+          multijob_build_pkg: true
+
+      - '{baremetal-name}':
           multijob_build_pkg: true
 
       - '{custom-name}.qa':
@@ -569,3 +580,24 @@
           email_to: '{email_to}'
     builders:
       !include: contrail-nightly.yaml.inc
+
+- job-template:
+    name: '{baremetal-name}'
+    project-type: multijob
+    disabled: '{obj:baremetal_disabled}'
+    node: runner
+    <<: *runner-parameters
+    scm: []
+#   triggers:
+#     - timed: '{nightly_timer}'
+    properties:
+      - runner-property:
+          build-name: '{build-name}'
+    wrappers:
+      - runner-wrapper
+    publishers:
+      - runner-publisher:
+          properties_name: baremetal.properties
+          email_to: '{email_to}'
+    builders:
+      !include: contrail-baremetal.yaml.inc
