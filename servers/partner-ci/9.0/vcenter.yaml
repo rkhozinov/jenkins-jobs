@@ -2,6 +2,10 @@
 - parameter:
     name: plugin-specific-parameters
     parameters:
+      - bool:
+          name: KVM_USE
+          default: '{obj:kvm_use}'
+          description: 'turns on kvm_mode for an openstack cluster'
       - string:
           name: WORKSTATION_SNAPSHOT
           default: 'doubledvs'
@@ -24,7 +28,7 @@
           description: 'Snapshot name for vsphere lab'
       - string:
           name: TEST_GROUP_CONFIG
-          default: '${TEST_GROUP}'
+          default: '${{TEST_GROUP}}'
           description: 'Snapshot name for vsphere lab'
       - string:
           name: DVS_SWITCHES
@@ -57,6 +61,7 @@
     force_erase: true
     recreate_venv: false
     disable_ssl: true
+    kvm_use: false
     update_master: true
     debug: true
     publish_results: true
@@ -70,7 +75,6 @@
     email_to: 'rkhozinov@mirantis.com ibumarskov@mirantis.com'
     released_plugin_path: ''
     scm_submodule_disabled: true
-
     testrail_project: "Mirantis OpenStack"
     testrail_milestone: "{fuel-release}"
     testrail_suite: "[9.0][PCE] vCenter"
@@ -195,7 +199,8 @@
           testrail_suite_desc:  '{testrail_suite_desc}'
           testrail_plan:        '{testrail_plan}'
           testrail_plan_desc:   '{testrail_plan_desc}'
-      - plugin-specific-parameters
+      - plugin-specific-parameters:
+          kvm_use:              '{kvm_use}'
 
 # parameters for jobs created per test-group and custom test job
 - test-parameters: &test-parameters
@@ -233,7 +238,8 @@
           testrail_suite_desc:  '{testrail_suite_desc}'
           testrail_plan:        '{testrail_plan}'
           testrail_plan_desc:   '{testrail_plan_desc}'
-      - plugin-specific-parameters
+      - plugin-specific-parameters:
+          kvm_use:              '{kvm_use}'
 
 - defaults:
     name: global
