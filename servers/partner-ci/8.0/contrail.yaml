@@ -9,9 +9,11 @@
       - bool:
           name: BONDING
           default: '{obj:bonding}'
+          description: 'turns on bonding'
       - bool:
           name: KVM_USE
           default: '{obj:kvm_use}'
+          description: 'turns on kvm_mode for an openstack cluster'
       - string:
           name: NODE_VOLUME_SIZE
           default: '512'
@@ -31,23 +33,17 @@
       - string:
           name: CONTRAIL_VERSION
           default: '{plugin-version}'
-          description: >
-            'There is a version of juniper packages stored in common sotrage'
+          description: 'There is a version of juniper packages stored in common sotrage'
       - string:
           name: POOL_ADMIN 
-          default: ''
       - string:
           name: POOL_PUBLIC
-          default: ''
       - string:
           name: POOL_MANAGEMENT
-          default: ''
       - string:
           name: POOL_PRIVATE
-          default: ''
       - string:
           name: POOL_STORAGE
-          default: ''
       - string:
           name: PLUGIN_VERSION
           default: ${{CONTRAIL_VERSION}}
