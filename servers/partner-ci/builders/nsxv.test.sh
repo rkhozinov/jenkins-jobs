@@ -39,8 +39,12 @@ rm -rf logs/*
 
 export FUEL_RELEASE=$(cut -d '-' -f2-2 <<< $ISO_FILE | tr -d '.')
 export ISO_PATH="${ISO_STORAGE}/${ISO_FILE}"
-[[ "$ISO_FILE" == *mos* ]] && export ISO_VERSION=$(echo "${ISO_FILE}" | cut -d'-' -f4-4 | tr -d '.iso' ) || \
-                              export ISO_VERSION=$(echo "${ISO_FILE}" | cut -d'-' -f3-3 | tr -d '.iso' )
+if [[ $ISO_FILE == *"mos"* ]] || [[ $ISO_FILE == *"kilo"* ]];then
+  export ISO_VERSION=$(echo $ISO_FILE | cut -d'-' -f4-4 | tr -d '.iso' )
+else
+  export ISO_VERSION=$(echo $ISO_FILE | cut -d'-' -f3-3 | tr -d '.iso' )
+fi
+    
 export ENV_NAME="${ENV_PREFIX}.${ISO_VERSION}"
 export VENV_PATH="${HOME}/${FUEL_RELEASE}-venv"
 
