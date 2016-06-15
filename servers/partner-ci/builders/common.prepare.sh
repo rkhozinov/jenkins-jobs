@@ -1,6 +1,17 @@
 #!/bin/bash -e
 
 git log  --pretty=oneline | head
+IS_NESTED=$(cat /sys/module/kvm_intel/parameters/nested)
+IS_IGNORE_MSRS=$(cat /sys/module/kvm/parameters/ignore_msrs)
+IS_EPT=$(cat /sys/module/kvm_intel/parameters/ept)
+echo 'nested option enable = '$IS_NESTED
+echo 'ignore msrs option enable = '$IS_IGNORE_MSRS
+echo 'ept option enable = '$IS_EPT
+if [[ $IS_NESTED == *"Y"* ]] && [[ $IS_IGNORE_MSRS == *"Y"* ]] && [[ $IS_EPT == *"Y"* ]]; then
+  echo 'nested kvm virtuallization succesfully enabled '
+else
+  echo 'nested kvm virtualization disabled or works incorrect, please check configuration'
+fi
 
 # activate bash xtrace for script
 [[ "${DEBUG}" == "true" ]] && set -x || set +x
