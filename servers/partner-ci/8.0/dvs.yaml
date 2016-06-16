@@ -51,7 +51,7 @@
     iso_job_name: '{fuel-release}.{plugin-name}.canary'
     nightly_timer: 'H 22 * * *'
     regression_timer: 'H 18 * * *'
-    nightly_disabled: true
+    nightly_disabled: false
     regression_disabled: false
     use_snapshots: false
     force_erase: true
