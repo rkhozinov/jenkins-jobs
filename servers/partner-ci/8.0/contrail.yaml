@@ -83,7 +83,7 @@
     slave_node_cpu: '4'
     pkg_job_name: '{fuel-release}.{plugin-name}.{plugin-version}.build'
     iso_job_name: ''
-    nightly_timer: 'H 22 * * *'
+    nightly_timer: 'H 21 * * *'
     regression_timer: 'H 18 * * *'
     nightly_disabled: false
     baremetal_disabled: false
