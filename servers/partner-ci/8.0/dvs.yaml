@@ -2,6 +2,10 @@
 - parameter:
     name: plugin-specific-parameters
     parameters:
+      - bool:
+          name: UPDATE_MASTER
+          default: '{update_master}'
+          description: 'turns on update fuel master node to maintenance update'
       - string:
           name: WORKSTATION_SNAPSHOT
           default: 'doubledvs'
@@ -57,6 +61,7 @@
     force_erase: true
     recreate_venv: false
     disable_ssl: true
+    update_master: true
     debug: true
     publish_results: true
     multijob_build_pkg: true
@@ -203,7 +208,8 @@
           testrail_suite_desc:  '{testrail_suite_desc}'
           testrail_plan:        '{testrail_plan}'
           testrail_plan_desc:   '{testrail_plan_desc}'
-      - plugin-specific-parameters
+      - plugin-specific-parameters:
+          update_master:        '{update_master}'
 
 # parameters for jobs created per test-group and custom test job
 - test-parameters: &test-parameters
@@ -241,7 +247,8 @@
           testrail_suite_desc:  '{testrail_suite_desc}'
           testrail_plan:        '{testrail_plan}'
           testrail_plan_desc:   '{testrail_plan_desc}'
-      - plugin-specific-parameters
+      - plugin-specific-parameters:
+          update_master:        '{update_master}'
 
 - defaults:
     name: global
