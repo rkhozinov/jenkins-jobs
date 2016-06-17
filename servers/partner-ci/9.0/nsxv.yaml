@@ -117,6 +117,7 @@
       - nsxv_connectivity_diff_networks
       - nsxv_different_tenants
       - nsxv_same_ip_different_tenants
+      - nsxv_disable_hosts
 
     jobs:
       - '{build-name}'
