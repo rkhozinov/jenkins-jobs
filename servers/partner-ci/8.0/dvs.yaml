@@ -539,8 +539,8 @@
     node: runner
     <<: *runner-parameters
     scm: []
-    triggers:
-      - timed: '{nightly_timer}'
+#   triggers:
+#     - timed: '{nightly_timer}'
     properties:
       - runner-property:
           build-name: '{build-name}'
