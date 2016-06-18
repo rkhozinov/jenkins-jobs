@@ -1,5 +1,5 @@
 #!/bin/bash -e
-
+#
 # activate bash xtrace for script
 [[ "${DEBUG}" == "true" ]] && set -x || set +x
 
