@@ -119,6 +119,8 @@
       - nsxv_same_ip_different_tenants
       - nsxv_disable_hosts
 
+      - nsxv_ha_edges
+
     jobs:
       - '{build-name}'
       - '{flake8-name}'

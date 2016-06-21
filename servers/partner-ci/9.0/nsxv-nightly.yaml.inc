@@ -128,3 +128,7 @@
        current-parameters: true
        kill-phase-on: NEVER
        property-file: build_number
+     - name: '{fuel-release}.{plugin-name}.nsxv_ha_edges'
+       current-parameters: true
+       kill-phase-on: NEVER
+       property-file: build_number
