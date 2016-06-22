@@ -343,6 +343,9 @@
       - string:
           name: GERRIT_REFSPEC
           default: 'refs/heads/{gerrit_branch}'
+      - bool:
+          name: DEBUG
+          default: true        
     properties:
       - heavy-job:
           weight: 1
