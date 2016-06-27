@@ -372,7 +372,7 @@
       - throttle:
           max-per-node: 0
           max-total: 0
-          enabled: true
+          enabled: false
           categories:
             - vcenter
             - dvs
