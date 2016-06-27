@@ -104,7 +104,7 @@
           categories:
             - vcenter
             - dvs
-            - nsx
+            - nsxv
           option: category
     scm:       
       - git:
@@ -186,7 +186,7 @@
           categories:
             - vcenter
             - dvs
-            - nsx
+            - nsxv
           option: category
     scm:       
       - git:
