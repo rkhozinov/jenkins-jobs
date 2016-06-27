@@ -179,7 +179,7 @@
           categories:
             - vcenter
             - dvs
-            - nsx
+            - nsxv
             - contrail
           option: category
 
