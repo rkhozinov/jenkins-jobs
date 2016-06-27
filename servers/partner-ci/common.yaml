@@ -372,7 +372,7 @@
       - throttle:
           max-per-node: 0
           max-total: 0
-          enabled: false
+          enabled: true
           categories:
             - vcenter
             - dvs
@@ -518,6 +518,9 @@
     description: 'The reporter for the {fuel-release}.{plugin-name}.{plugin-version}'
     concurrent: true
     node: runner
+    properties:
+      - heavy-job:
+          weight: 1
     wrappers:
       - inject-passwords:
           global: true
