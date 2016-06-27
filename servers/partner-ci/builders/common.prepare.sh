@@ -117,7 +117,7 @@ function prepare_venv {
     pip --version
     [ $? -ne 0 ] && easy_install -U pip
     if [[ "${DEBUG}" == "true" ]]; then
-        pip install -r "${REQS_PATH}" --upgrade > /dev/null 2>/dev/null
+        pip install -r "${REQS_PATH}" --upgrade
     else
         pip install -r "${REQS_PATH}" --upgrade > /dev/null 2>/dev/null
     fi
