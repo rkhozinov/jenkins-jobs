@@ -3,7 +3,12 @@
 # activate bash xtrace for script
 [[ "${DEBUG}" == "true" ]] && set -x || set +x
 
+
+[[ "${FORCE_VSRX_COPY}" == "true" ]] && rm -r $VSRX_TARGET_IMAGE_PATH 
+[ ! -f $VSRX_TARGET_PATH ] && cp $VSRX_ORGINAL_IMAGE_PATH $VSRX_TARGET_PATH;
+
 [ -z $CONTRAIL_VERSION ] && exit 1 || echo contrail version is $CONTRAIL_VERSION
+
 
 export ISO_PATH="${ISO_STORAGE}/${ISO_FILE}"
 if [[ $ISO_FILE == *"mos"* ]] || [[ $ISO_FILE == *"kilo"* ]];then
