@@ -25,6 +25,7 @@
     plugin-version: '3.0'
     plugin-name: 'nsxv'
     build-name: '{fuel-release}.{plugin-name}.build'
+    build-driver-name: '{fuel-release}.{plugin-name}.build.neutron.plugin'
     flake8-name: '{fuel-release}.{plugin-name}.flake8'
     radon-name: '{fuel-release}.{plugin-name}.radon'
     shellcheck-name: '{fuel-release}.{plugin-name}.shellcheck'
@@ -56,6 +57,7 @@
     disable_ssl: true
     update_master: true
     debug: true
+    build_debug: true
     publish_results: true
     multijob_build_pkg: true
     testjob_build_pkg: false
@@ -66,7 +68,8 @@
     gerrit_branch: 'master'
     email_to: 'rkhozinov@mirantis.com'
     released_plugin_path: '/storage/nsxv/released/nsxv-1.1-1.1.0-1.noarch.rpm'
-    scm_submodule_disabled: true
+    scm_submodule_disabled: false
+    scm_wipe_workspace: false
 
     testrail_project: "VMware NSX-v plugin"
     testrail_suite: "[9.0][PCE] VMware NSXv plugin v3.0.0"
@@ -87,7 +90,6 @@
     testgroup:
       - nsxv_add_delete_nodes
       - nsxv_add_delete_controller
-
 
       - nsxv_ceilometer
       - nsxv_ha_mode
@@ -122,7 +124,10 @@
       - nsxv_ha_edges
 
     jobs:
-      - '{build-name}'
+      - '{build-name}':
+          scm_submodule_disabled: true
+          scm_wipe_workspace: true
+        
       - '{flake8-name}'
       - '{radon-name}'
       - '{shellcheck-name}'
@@ -132,10 +137,8 @@
 
       - '{custom-name}.qa':
           publish_results: false
-          scm_submodule_disabled: false
 
       - '{custom-name}.dev':
-          scm_submodule_disabled: false
           publish_results: false
           testgroup_parameter_type: choice
           testgroup_value_type: choices
@@ -143,22 +146,20 @@
 
       - '{reporter-name}'
 
-      - '{fuel-release}.{plugin-name}.{testgroup}':
-          scm_submodule_disabled: false
+      - '{fuel-release}.{plugin-name}.{testgroup}'
 
       - '{smoke-name}':
           publish_results: false
           multijob_build_pkg: false
 
-      - '{fuel-release}.{plugin-name}.smoke.test':
-          scm_submodule_disabled: false
+      - '{fuel-release}.{plugin-name}.smoke.test'
+        #          scm_submodule_disabled: false
 
       - '{bvt-name}':
           publish_results: false
           multijob_build_pkg: true
 
-      - '{fuel-release}.{plugin-name}.bvt.test':
-          scm_submodule_disabled: false
+      - '{fuel-release}.{plugin-name}.bvt.test'
 
 #      - '{regression-name}':
 #          testrail_suite: "[8.0][PCE] VMware DVS plugin v2.1.0 Regression"
@@ -171,8 +172,7 @@
 #          iso_job_name: ''
 #          multijob_build_pkg: false
 
-      - '{fuel-release}.{plugin-name}.regression.test':
-          scm_submodule_disabled: false
+      - '{fuel-release}.{plugin-name}.regression.test'
 
       - '{canary-name}':
           iso_job_name: '{download-iso-name}'
@@ -185,11 +185,9 @@
           testrail_run_desc: "Test run description"
           testrail_item_case: "$TEST_GROUP"
 
-      - '{fuel-release}.{plugin-name}.canary.skinny':
-          scm_submodule_disabled: false
+      - '{fuel-release}.{plugin-name}.canary.skinny'
 
-      - '{fuel-release}.{plugin-name}.canary.fat':
-          scm_submodule_disabled: false
+      - '{fuel-release}.{plugin-name}.canary.fat'
 
 # parameters for smoke, bvt and nightly multijobs
 - runner-parameters: &runner-parameters
@@ -272,6 +270,7 @@
     scm:
       - common-scm:
           scm_submodule_disabled: '{scm_submodule_disabled}'
+          scm_wipe_workspace: '{scm_wipe_workspace}'
           gerrit_repo: '{gerrit_repo}'
     wrappers:
       - test-wrapper:
@@ -282,8 +281,8 @@
       - conditional-step:
           condition-kind: shell
           condition-command: |
-            [ ! -z ${{PKG_JOB_NAME}}         ] && \
-            [   -z ${{PKG_JOB_BUILD_NUMBER}} ] && \
+            [ ! -z ${{PKG_JOB_NAME}}          ] && \
+            [   -z ${{PKG_JOB_BUILD_NUMBER}}  ] && \
             [   -z ${{NSXV_PLUGIN_PATH}}      ]
           steps:
             - copyartifact:
@@ -292,8 +291,8 @@
       - conditional-step:
           condition-kind: shell
           condition-command: |
-            [ ! -z ${{PKG_JOB_NAME}}         ] && \
-            [ ! -z ${{PKG_JOB_BUILD_NUMBER}} ] && \
+            [ ! -z ${{PKG_JOB_NAME}}          ] && \
+            [ ! -z ${{PKG_JOB_BUILD_NUMBER}}  ] && \
             [   -z ${{NSXV_PLUGIN_PATH}}      ]
           steps:
             - copyartifact:
@@ -332,6 +331,7 @@
           gerrit_branch: '{gerrit_branch}'
     scm:
       - common-scm:
+          scm_wipe_workspace: '{scm_wipe_workspace}'
           scm_submodule_disabled: '{scm_submodule_disabled}'
           gerrit_repo: '{gerrit_repo}'
     wrapper:
@@ -343,6 +343,9 @@
       - string:
           name: GERRIT_REFSPEC
           default: 'refs/heads/{gerrit_branch}'
+      - bool:
+          name: DEBUG
+          default: '{build_debug}'
     properties:
       - heavy-job:
           weight: 1
@@ -350,10 +353,10 @@
       - ansicolor:
           colormap: xterm
     builders:
-      - shell: |
-          rm -rf *.rpm
-          rm -rf build.properties
-          rm -rf build.plugin_version
+      - copyartifact:
+          project: "{build-driver-name}"
+          filter: "*deb"
+          which-build: last-successful
       - shell:
           !include-raw-escape: ../builders/build-plugin-nsxv.sh
       - shell:
@@ -361,6 +364,7 @@
     publishers:
       - build-publisher:
           email_to: '{email_to}'
+
 - job-template:
     name: '{fuel-release}.{plugin-name}.{testgroup}'
     description: 'The test "{testgroup}" for {fuel-release}.{plugin-name}.{plugin-version}'

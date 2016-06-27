@@ -275,7 +275,7 @@
             disable: '{obj:scm_submodule_disabled}'
             tracking: true
             recursive: true
-          wipe-workspace: false
+          wipe-workspace: '{obj:scm_wipe_workspace}'
 
 - trigger:
     name: generic-gerrit-trigger
@@ -417,7 +417,9 @@
     scm:
       - common-scm:
           scm_submodule_disabled: '{scm_submodule_disabled}'
+          scm_wipe_workspace: '{scm_wipe_workspace}'
           gerrit_repo: '{gerrit_repo}'
+
     wrappers: []
     properties:
       - heavy-job:
@@ -444,6 +446,7 @@
     scm:
       - common-scm:
           scm_submodule_disabled: '{scm_submodule_disabled}'
+          scm_wipe_workspace: '{scm_wipe_workspace}'
           gerrit_repo: '{gerrit_repo}'
     wrappers: []
     parameters:
@@ -482,6 +485,7 @@
     scm:
       - common-scm:
           scm_submodule_disabled: '{scm_submodule_disabled}'
+          scm_wipe_workspace: '{scm_wipe_workspace}'
           gerrit_repo: '{gerrit_repo}'
     parameters:
       - string:
