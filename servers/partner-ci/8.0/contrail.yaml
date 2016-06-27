@@ -185,6 +185,12 @@
       - contrail_dpdk_add_dpdk
       - contrail_dpdk_delete_dpdk
 
+      - contrail_ha_multiple_nodegroups
+      - contrail_multiple_nodegroups_add_controller
+      - contrail_multiple_nodegroups_delete_controller
+      - contrail_multiple_nodegroups_delete_compute
+      - contrail_multiple_nodegroups_add_compute
+
     jobs:
       - '{build-name}':
           scm_submodule_disabled: true
