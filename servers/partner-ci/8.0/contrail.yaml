@@ -14,6 +14,10 @@
           name: KVM_USE
           default: '{obj:kvm_use}'
           description: 'turns on kvm_mode for an openstack cluster'
+      - bool:
+          name: FORCE_VSRX_COPY
+          default: '{obj:force_vsrx_copy}'
+          description: 'force copying of vsrx image'
       - string:
           name: NODE_VOLUME_SIZE
           default: '512'
@@ -55,8 +59,16 @@
           name: CONTRAIL_PLUGIN_PACK_UB_PATH
           description: 'The path to the contrail package on storage'
       - string:
+          name: VSRX_ORIGINAL_IMAGE_PATH
+          default: '{vsrx_original_image_path}'
+          description: 'The path to the vSRX.400.img image on storage'
+      - string:
+          name: VSRX_TARGET_IMAGE_PATH
+          default: '{vsrx_target_image_path}'
+          description: 'The path to the vsrx image on host'
+      - string:
           name: VSRX_TEMPLATE_PATH
-          default: '/storage/contrail/vSRX1.template'
+          default: '{vsrx_template_path}'
           description: 'The path to the vsrx template'
 
 - project:
@@ -90,12 +102,14 @@
     regression_disabled: true
     use_snapshots: false
     force_erase: true
+    force_vsrx_copy: false
     recreate_venv: false
     disable_ssl: false
     bonding: false
     kvm_use: false
     update_master: true
     debug: true
+    build_debug: true
     publish_results: true
     multijob_build_pkg: true
     testjob_build_pkg: false
@@ -103,10 +117,16 @@
     test_timeout: 300
     iso_file: 'fuel-8.0-570.iso'
     gerrit_repo: 'fuel-plugin-contrail'
-    gerrit_branch: 'master'
+    gerrit_branch: 'stable/4.0'
     email_to: 'rkhozinov@mirantis.com okosse@mirantis.com otsvigun@mirantis.com'
     released_plugin_path: '/storage/contrail/released/contrail-3.0.noarch.rpm'
     scm_submodule_disabled: true
+    scm_wipe_workspace: false 
+
+    vsrx_original_image_path: '/storage/contrail/vSRX.400.img'
+    vsrx_target_image_path: '/var/lib/libvirt/images/vSRX.400.img'
+    vsrx_template_path: '/storage/contrail/vSRX_400.template'
+    
 
     testrail_project: "Contrail plugin"
     testrail_suite: "[8.0][PCE] Fuel plugin contrail v4.0.0"
@@ -166,7 +186,10 @@
       - contrail_dpdk_delete_dpdk
 
     jobs:
-      - '{build-name}'
+      - '{build-name}':
+          scm_submodule_disabled: true
+          scm_wipe_workspace: false
+
       - '{flake8-name}'
       - '{radon-name}'
       - '{shellcheck-name}'
@@ -179,7 +202,6 @@
 
       - '{custom-name}.qa':
           publish_results: false
-          scm_submodule_disabled: false
 
       - '{custom-name}.dev':
           scm_submodule_disabled: false
@@ -190,22 +212,19 @@
 
       - '{reporter-name}'
 
-      - '{fuel-release}.{plugin-name}.{plugin-version}.{testgroup}.juniper':
-          scm_submodule_disabled: false
+      - '{fuel-release}.{plugin-name}.{plugin-version}.{testgroup}.juniper'
 
       - '{smoke-name}':
           multijob_build_pkg: false
           publish_results: false
 
-      - '{fuel-release}.{plugin-name}.{plugin-version}.smoke.test.juniper':
-          scm_submodule_disabled: false
+      - '{fuel-release}.{plugin-name}.{plugin-version}.smoke.test.juniper'
 
       - '{bvt-name}':
           multijob_build_pkg: true
           publish_results: false
 
-      - '{fuel-release}.{plugin-name}.{plugin-version}.bvt.test.juniper':
-          scm_submodule_disabled: false
+      - '{fuel-release}.{plugin-name}.{plugin-version}.bvt.test.juniper'
 
       - '{regression-name}':
           testrail_suite: "Contrail Plugin v4.x.x"
@@ -219,8 +238,7 @@
           iso_job_name: ''
           multijob_build_pkg: false
 
-      - '{fuel-release}.{plugin-name}.{plugin-version}.regression.test.juniper':
-          scm_submodule_disabled: false
+      - '{fuel-release}.{plugin-name}.{plugin-version}.regression.test.juniper'
 
 - runner-parameters: &runner-parameters
     name: 'runner-parameters'
@@ -254,6 +272,10 @@
           kvm_use:              '{kvm_use}'
           update_master:        '{update_master}'
           plugin-version:       '{plugin-version}'
+          force_vsrx_copy:      '{force_vsrx_copy}'
+          vsrx_original_image_path: '{vsrx_original_image_path}'
+          vsrx_target_image_path:   '{vsrx_target_image_path}'
+          vsrx_template_path:       '{vsrx_template_path}'
 
 # parameters for jobs created per test-group and custom test job
 - test-parameters: &test-parameters
@@ -296,6 +318,10 @@
           bonding:              '{bonding}'
           kvm_use:              '{kvm_use}'
           plugin-version:       '{plugin-version}'
+          force_vsrx_copy:      '{force_vsrx_copy}'
+          vsrx_original_image_path: '{vsrx_original_image_path}'
+          vsrx_target_image_path:   '{vsrx_target_image_path}'
+          vsrx_template_path:       '{vsrx_template_path}'
 
 - defaults:
     name: global
@@ -310,6 +336,7 @@
     scm:
       - common-scm:
           scm_submodule_disabled: '{scm_submodule_disabled}'
+          scm_wipe_workspace: '{scm_wipe_workspace}'
           gerrit_repo: '{gerrit_repo}'
     wrappers:
       - test-wrapper:
@@ -371,6 +398,7 @@
     scm:
       - common-scm:
           scm_submodule_disabled: '{scm_submodule_disabled}'
+          scm_wipe_workspace: '{scm_wipe_workspace}'
           gerrit_repo: '{gerrit_repo}'
     wrapper:
       - runner-wrapper
@@ -381,6 +409,9 @@
       - string:
           name: GERRIT_REFSPEC
           default: 'refs/heads/{gerrit_branch}'
+      - bool:
+          name: DEBUG
+          default: '{build_debug}'
     properties:
       - heavy-job:
           weight: 1

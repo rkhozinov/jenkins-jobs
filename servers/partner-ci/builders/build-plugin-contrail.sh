@@ -22,5 +22,11 @@ find $path -name '*.pp' -print0 | xargs -0 -r -P1 -L1 puppet-lint \
 fpb --check  ./
 fpb --build  ./
 
+if [[ "${DEBUG}" == "true" ]]; then
+  fpb --debug --build  ./
+else
+  fpb --build  ./
+fi
+
 pkg_name=$(ls -t *.rpm | head -n1)
 mv $pkg_name $(echo $pkg_name | head -n 1 | sed s/.noarch/-$BUILD_NUMBER.noarch/)
