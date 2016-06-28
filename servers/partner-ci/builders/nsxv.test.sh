@@ -1,5 +1,4 @@
 #!/bin/bash -e
-#
 # activate bash xtrace for script
 [[ "${DEBUG}" == "true" ]] && set -x || set +x
 
@@ -14,30 +13,29 @@ fi
 
 PLUGIN_VERSION_ARTIFACT='build.plugin_version'
 # if user entered custom iso we should use it
+
 if [ -z $PLUGIN_VERSION  ]; then
    # but if use doesn't want custom iso, we should get iso from artifacts
    [ -f $PLUGIN_VERSION_ARTIFACT ] && source $PLUGIN_VERSION_ARTIFACT || (echo "The PLUGIN_VERSION is empty"; exit 1)
-   # check variable again - it shouldn't be empty
-   [ -z $PLUGIN_VERSION  ] && (echo "PLUGIN_VERSION variable is empty"; exit 1) || export DVS_PLUGIN_VERSION=$PLUGIN_VERSION
 fi
 
-if [ -z $NSXV_PLUGIN_PATH ]; then
-  if [ $PUBLISH_RESULTS -a -f build.properties ]; then
-      export PKG_JOB_BUILD_NUMBER=$(grep "BUILD_NUMBER" < build.properties | cut -d= -f2 )
-  else
-      echo "build.properties file is not available so the results couldn't be publihsed"
-      exit 1
-  fi
-else
-      export PKG_JOB_BUILD_NUMBER="released"
-fi
+[ -z $PLUGIN_VERSION  ] && { echo "PLUGIN_VERSION variable is empty"; exit 1; } || export NSXV_PLUGIN_VERSION=$PLUGIN_VERSION
 
+if [ -z "${PKG_JOB_BUILD_NUMBER}" ]; then
+    if [ -f build.properties ]; then
+        export PKG_JOB_BUILD_NUMBER=$(grep "^BUILD_NUMBER" < build.properties | cut -d= -f2 )
+    else
+        echo "build.properties file is not available so the results couldn't be publihsed"
+        echo "$PKG_JOB_BUILD_NUMBER is empty, but it's needed for reporter. Exit."
+        exit 1
+    fi
+fi
 
 #remove old logs and test data
 [ -f nosetest.xml ] && rm -f nosetests.xml
 rm -rf logs/*
 
-export FUEL_RELEASE=$(cut -d '-' -f2-2 <<< $ISO_FILE | tr -d '.')
+export FUEL_RELEASE=$(cut -d- -f2-2 <<< ${ISO_FILE} | tr -d '.')
 export ISO_PATH="${ISO_STORAGE}/${ISO_FILE}"
 if [[ $ISO_FILE == *"mos"* ]] || [[ $ISO_FILE == *"kilo"* ]];then
   export ISO_VERSION=$(echo $ISO_FILE | cut -d'-' -f4-4 | tr -d '.iso' )
@@ -48,12 +46,13 @@ fi
 export ENV_NAME="${ENV_PREFIX}.${ISO_VERSION}"
 export VENV_PATH="${HOME}/${FUEL_RELEASE}-venv"
 
-[[ -z ${NSXV_PLUGIN_PATH} ]] && export NSXV_PLUGIN_PATH=$(ls -t ${WORKSPACE}/nsxv*.rpm | head -n 1) || echo NSXV_PLUGIN_PATH=$NSXV_PLUGIN_PATH
-[[ -z "${PLUGIN_PATH}"     ]] && export PLUGIN_PATH=$NSXV_PLUGIN_PATH
+[ -z "${NSXV_PLUGIN_PATH}"  ] && export NSXV_PLUGIN_PATH=$(ls -t ${WORKSPACE}/nsxv*.rpm | head -n 1)
+[ -z "${NSXV_PLUGIN_PATH}"  ] && { echo "NSXV_PLUGIN_PATH is empty"; exit 1; }
+[ -z "${PLUGIN_PATH}"       ] && export PLUGIN_PATH=$NSXV_PLUGIN_PATH
 
 systest_parameters=''
-[[ $USE_SNAPSHOTS == "true"  ]] && systest_parameters+=' -k' || echo new env will be created
-[[ $ERASE_AFTER   == "true"  ]] && echo the env will be erased after test || systest_parameters+=' -K'
+[[ $USE_SNAPSHOTS == "true"  ]] && systest_parameters+=' -k' || echo "new env will be created"
+[[ $ERASE_AFTER   == "true"  ]] && echo "the env will be erased after test" || systest_parameters+=' -K'
 
 echo "test-group: ${TEST_GROUP}"
 echo "env-name: ${ENV_NAME}"
