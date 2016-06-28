@@ -60,6 +60,7 @@
     disable_ssl: true
     update_master: true
     debug: true
+    build_debug: true
     publish_results: true
     multijob_build_pkg: true
     testjob_build_pkg: false
@@ -68,9 +69,10 @@
     iso_file: ''
     gerrit_repo: 'fuel-plugin-vmware-dvs'
     gerrit_branch: 'master'
-    email_to: 'rkhozinov@mirantis.com otsvigun@mirantis.com'
-    released_plugin_path: '/storage/dvs/released/dvs-2.0.0.noarch.rpm'
-    scm_submodule_disabled: true
+    email_to: 'rkhozinov@mirantis.com'
+    released_plugin_path: '/storage/nsxv/released/nsxv-1.1-1.1.0-1.noarch.rpm'
+    scm_submodule_disabled: false
+    scm_wipe_workspace: false
 
     testrail_project: "VMware DVS plugin"
     testrail_suite: "[9.0][PCE] VMware DVS plugin v3.0.0"
@@ -123,20 +125,23 @@
       - dvs_vcenter_smoke
       - dvs_vcenter_bvt
     jobs:
-      - '{build-name}'
-      - '{flake8-name}'
-      - '{radon-name}'
-      - '{shellcheck-name}'
+      - '{build-name}':
+          scm_submodule_disabled: true
+          scm_wipe_workspace: true
+      - '{flake8-name}':
+          scm_submodule_disabled: true
+      - '{radon-name}':
+          scm_submodule_disabled: true
+      - '{shellcheck-name}':
+          scm_submodule_disabled: true
 
       - '{nightly-name}':
           multijob_build_pkg: true
 
       - '{custom-name}.qa':
           publish_results: false
-          scm_submodule_disabled: false
 
       - '{custom-name}.dev':
-          scm_submodule_disabled: false
           publish_results: false
           testgroup_parameter_type: choice
           testgroup_value_type: choices
@@ -144,22 +149,19 @@
 
       - '{reporter-name}'
 
-      - '{fuel-release}.{plugin-name}.{testgroup}':
-          scm_submodule_disabled: false
+      - '{fuel-release}.{plugin-name}.{testgroup}'
 
       - '{smoke-name}':
           publish_results: false
           multijob_build_pkg: false
 
-      - '{fuel-release}.{plugin-name}.smoke.test':
-          scm_submodule_disabled: false
+      - '{fuel-release}.{plugin-name}.smoke.test'
 
       - '{bvt-name}':
           publish_results: false
           multijob_build_pkg: true
 
-      - '{fuel-release}.{plugin-name}.bvt.test':
-          scm_submodule_disabled: false
+      - '{fuel-release}.{plugin-name}.bvt.test'
 
 #      - '{regression-name}':
 #          testrail_suite: "[8.0][PCE] VMware DVS plugin v2.1.0 Regression"
@@ -172,8 +174,7 @@
 #          iso_job_name: ''
 #          multijob_build_pkg: false
 
-      - '{fuel-release}.{plugin-name}.regression.test':
-          scm_submodule_disabled: false
+      - '{fuel-release}.{plugin-name}.regression.test'
 
       - '{canary-name}':
           iso_job_name: '{download-iso-name}'
@@ -183,11 +184,9 @@
           testrail_run: "$TREP_TESTRAIL_SUITE"
           testrail_item_case: "$TEST_GROUP"
 
-      - '{fuel-release}.{plugin-name}.canary.skinny':
-          scm_submodule_disabled: false
+      - '{fuel-release}.{plugin-name}.canary.skinny'
 
-      - '{fuel-release}.{plugin-name}.canary.fat':
-          scm_submodule_disabled: false
+      - '{fuel-release}.{plugin-name}.canary.fat'
 
 # parameters for smoke, bvt and nightly multijobs
 - runner-parameters: &runner-parameters
@@ -272,6 +271,7 @@
     scm:
       - common-scm:
           scm_submodule_disabled: '{scm_submodule_disabled}'
+          scm_wipe_workspace: '{scm_wipe_workspace}'
           gerrit_repo: '{gerrit_repo}'
     wrappers:
       - test-wrapper:
@@ -332,6 +332,7 @@
           gerrit_branch: '{gerrit_branch}'
     scm:
       - common-scm:
+          scm_wipe_workspace: '{scm_wipe_workspace}'
           scm_submodule_disabled: '{scm_submodule_disabled}'
           gerrit_repo: '{gerrit_repo}'
     wrapper:
@@ -345,7 +346,7 @@
           default: 'refs/heads/{gerrit_branch}'
       - bool:
           name: DEBUG
-          default: true        
+          default: '{build_debug}'
     properties:
       - heavy-job:
           weight: 1
@@ -353,10 +354,6 @@
       - ansicolor:
           colormap: xterm
     builders:
-      - shell: |
-          rm -rf *.rpm
-          rm -rf build.properties
-          rm -rf build.plugin_version
       - shell:
           !include-raw-escape: ../builders/build-plugin-dvs.sh
       - shell:
@@ -364,6 +361,7 @@
     publishers:
       - build-publisher:
           email_to: '{email_to}'
+
 - job-template:
     name: '{fuel-release}.{plugin-name}.{testgroup}'
     description: 'The test "{testgroup}" for {fuel-release}.{plugin-name}.{plugin-version}'
