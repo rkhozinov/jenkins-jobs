@@ -127,10 +127,13 @@
       - '{build-name}':
           scm_submodule_disabled: true
           scm_wipe_workspace: true
-        
-      - '{flake8-name}'
-      - '{radon-name}'
-      - '{shellcheck-name}'
+
+      - '{flake8-name}':
+          scm_submodule_disabled: true
+      - '{radon-name}':
+          scm_submodule_disabled: true
+      - '{shellcheck-name}':
+          scm_submodule_disabled: true
 
       - '{nightly-name}':
           multijob_build_pkg: true
@@ -153,7 +156,6 @@
           multijob_build_pkg: false
 
       - '{fuel-release}.{plugin-name}.smoke.test'
-        #          scm_submodule_disabled: false
 
       - '{bvt-name}':
           publish_results: false
@@ -355,7 +357,7 @@
     builders:
       - copyartifact:
           project: "{build-driver-name}"
-          filter: "*deb"
+          filter: "*.deb"
           which-build: last-successful
       - shell:
           !include-raw-escape: ../builders/build-plugin-nsxv.sh
@@ -444,6 +446,7 @@
     disabled: false
     description: 'The Smoke test for {fuel-release}.{plugin-name}.{plugin-version}'
     concurrent: true
+    quiet-period: 5
     project-type: multijob
     node: runner
     <<: *runner-parameters
