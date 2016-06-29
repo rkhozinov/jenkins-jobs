@@ -238,7 +238,7 @@
           steps:
             - shell: |
                 #!/bin/bash
-                build_number=$(grep "BUILD_NUMBER" < build.properties | cut -d= -f2)
+                build_number=$(grep "^BUILD_NUMBER=" < build.properties | cut -d= -f2)
                 echo "PKG_JOB_BUILD_NUMBER=$build_number" > build_number
       - conditional-step:
           condition-kind: shell
