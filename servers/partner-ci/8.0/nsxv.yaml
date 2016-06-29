@@ -29,6 +29,7 @@
     plugin-version: '2.0.0'
     plugin-name: 'nsxv'
     build-name: '{fuel-release}.{plugin-name}.build'
+    build-driver-name: '{fuel-release}.{plugin-name}.build.neutron.plugin'
     flake8-name: '{fuel-release}.{plugin-name}.flake8'
     radon-name: '{fuel-release}.{plugin-name}.radon'
     shellcheck-name: '{fuel-release}.{plugin-name}.shellcheck'
@@ -69,8 +70,8 @@
     gerrit_branch: '8.0'
     email_to: 'rkhozinov@mirantis.com'
     released_plugin_path: '/storage/nsxv/released/2.0/nsxv-2.0-2.0.0-1-415.noarch.rpm'
-    scm_submodule_disabled: true
-
+    scm_submodule_disabled: false
+    scm_wipe_workspace: false
     testrail_project: "VMware NSX-v plugin"
     testrail_suite: "[8.0][PCE] VMware NSXv plugin v2.0.0"
     testrail_suite_desc: "Suite description"
@@ -102,11 +103,15 @@
       - nsxv_public_network_to_all_nodes
       - nsxv_specified_router_type
     jobs:
-      - '{build-name}'
-      - '{flake8-name}'
-      - '{radon-name}'
-      - '{shellcheck-name}'
-
+      - '{build-name}':
+          scm_submodule_disabled: true
+          scm_wipe_workspace: true
+      - '{flake8-name}':
+          scm_submodule_disabled: true
+      - '{radon-name}':
+          scm_submodule_disabled: true
+      - '{shellcheck-name}':
+          scm_submodule_disabled: true
       - '{nightly-name}':
           multijob_build_pkg: true
 
@@ -129,8 +134,7 @@
       - '{smoke-name}':
           multijob_build_pkg: false
 
-      - '{fuel-release}.{plugin-name}.smoke.test':
-          scm_submodule_disabled: false
+      - '{fuel-release}.{plugin-name}.smoke.test'
 
       - '{bvt-name}':
           multijob_build_pkg: true
@@ -244,6 +248,7 @@
     scm:
       - common-scm:
           scm_submodule_disabled: '{scm_submodule_disabled}'
+          scm_wipe_workspace: '{scm_wipe_workspace}'
           gerrit_repo: '{gerrit_repo}'
     wrappers:
       - test-wrapper:
@@ -305,6 +310,7 @@
     scm:
       - common-scm:
           scm_submodule_disabled: '{scm_submodule_disabled}'
+          scm_wipe_workspace: '{scm_wipe_workspace}'
           gerrit_repo: '{gerrit_repo}'
     wrapper:
       - runner-wrapper
@@ -322,6 +328,10 @@
       - ansicolor:
           colormap: xterm
     builders:
+      - copyartifact:
+          project: "{build-driver-name}"
+          filter: "*.deb"
+          which-build: last-successful
       - shell: |
           rm -rf *.rpm
           rm -rf build.properties
@@ -403,7 +413,7 @@
     disabled: false
     description: 'The Smoke test for {fuel-release}.{plugin-name}.{plugin-version}'
     concurrent: true
-    quiet-period: 10   
+    quiet-period: 5
     project-type: multijob
     node: runner
     <<: *runner-parameters
