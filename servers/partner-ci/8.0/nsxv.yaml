@@ -336,10 +336,6 @@
       - ansicolor:
           colormap: xterm
     builders:
-      - copyartifact:
-          project: "{build-driver-name}"
-          filter: "*.deb"
-          which-build: last-successful
       - shell:
           !include-raw-escape: ../builders/build-plugin-nsxv.sh
       - shell:
