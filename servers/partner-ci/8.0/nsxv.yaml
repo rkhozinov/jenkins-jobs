@@ -29,7 +29,6 @@
     plugin-version: '2.0.0'
     plugin-name: 'nsxv'
     build-name: '{fuel-release}.{plugin-name}.build'
-    build-driver-name: '{fuel-release}.{plugin-name}.build.neutron.plugin'
     flake8-name: '{fuel-release}.{plugin-name}.flake8'
     radon-name: '{fuel-release}.{plugin-name}.radon'
     shellcheck-name: '{fuel-release}.{plugin-name}.shellcheck'
@@ -43,7 +42,8 @@
     reporter-name: '{fuel-release}.{plugin-name}.reporter'
     smoke-test-name: 'nsxv_smoke'
     bvt-test-name: 'nsxv_bvt'
-    canary-test-name: 'nsxv_smoke'
+    canary-skinny-test-name: 'nsxv_smoke'
+    canary-fat-test-name: 'nsxv_bvt'
     admin_node_memory: '8192'
     slave_node_memory: '8192'
     admin_node_cpu: '4'
@@ -60,6 +60,7 @@
     disable_ssl: true
     update_master: true
     debug: true
+    build_debug: true
     publish_results: true
     multijob_build_pkg: true
     testjob_build_pkg: false
@@ -117,10 +118,8 @@
 
       - '{custom-name}.qa':
           publish_results: false
-          scm_submodule_disabled: false
 
       - '{custom-name}.dev':
-          scm_submodule_disabled: false
           publish_results: false
           testgroup_parameter_type: choice
           testgroup_value_type: choices
@@ -128,19 +127,19 @@
 
       - '{reporter-name}'
 
-      - '{fuel-release}.{plugin-name}.{testgroup}':
-          scm_submodule_disabled: false
+      - '{fuel-release}.{plugin-name}.{testgroup}'
 
       - '{smoke-name}':
+          publish_results: false
           multijob_build_pkg: false
 
       - '{fuel-release}.{plugin-name}.smoke.test'
 
       - '{bvt-name}':
+          publish_results: false
           multijob_build_pkg: true
 
-      - '{fuel-release}.{plugin-name}.bvt.test':
-          scm_submodule_disabled: false
+      - '{fuel-release}.{plugin-name}.bvt.test'
 
       - '{regression-name}':
           testrail_suite: "[8.0][PCE] VMware NSXv plugin v2.0.0 Regression"
@@ -153,17 +152,23 @@
           iso_job_name: ''
           multijob_build_pkg: false
 
-      - '{fuel-release}.{plugin-name}.regression.test':
-          scm_submodule_disabled: false
+
+      - '{fuel-release}.{plugin-name}.regression.test'
 
       - '{canary-name}':
           iso_job_name: '{download-iso-name}'
+          testrail_suite: "[9.0][PCE] VMware NSXv plugin v3.0.0 Smoke/BVT"
+          testrail_suite_desc: "Suite description"
+          testrail_milestone: "3.0.0"
+          testrail_plan: "$TREP_TESTRAIL_SUITE build#${{PKG_JOB_BUILD_NUMBER}} iso#${{ISO_VERSION}}"
+          testrail_plan_desc: "Test plan description"
+          testrail_run: "$TREP_TESTRAIL_SUITE"
+          testrail_run_desc: "Test run description"
+          testrail_item_case: "$TEST_GROUP"
 
-      - '{fuel-release}.{plugin-name}.canary.skinny':
-          scm_submodule_disabled: false
+      - '{fuel-release}.{plugin-name}.canary.skinny'
 
-      - '{fuel-release}.{plugin-name}.canary.fat':
-          scm_submodule_disabled: false
+      - '{fuel-release}.{plugin-name}.canary.fat'
 
 # parameters for smoke, bvt and nightly multijobs
 - runner-parameters: &runner-parameters
@@ -321,6 +326,9 @@
       - string:
           name: GERRIT_REFSPEC
           default: 'refs/heads/{gerrit_branch}'
+      - bool:
+          name: DEBUG
+          default: '{build_debug}'
     properties:
       - heavy-job:
           weight: 1
@@ -332,10 +340,6 @@
           project: "{build-driver-name}"
           filter: "*.deb"
           which-build: last-successful
-      - shell: |
-          rm -rf *.rpm
-          rm -rf build.properties
-          rm -rf build.plugin_version
       - shell:
           !include-raw-escape: ../builders/build-plugin-nsxv.sh
       - shell:
@@ -510,7 +514,13 @@
             - name: '{fuel-release}.{plugin-name}.canary.skinny'
               property-file: build_number
               predefined-parameters: |
-                 TEST_GROUP={canary-test-name}
+                 TEST_GROUP={canary-skinny-test-name}
+              current-parameters: true
+              kill-phase-on: NEVER
+            - name: '{fuel-release}.{plugin-name}.canary.fat'
+              property-file: build_number
+              predefined-parameters: |
+                 TEST_GROUP={canary-fat-test-name}
               current-parameters: true
               kill-phase-on: NEVER
 
