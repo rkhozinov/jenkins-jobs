@@ -337,7 +337,7 @@
           colormap: xterm
     builders:
       - shell:
-          !include-raw-escape: ../builders/build-plugin-nsxv.sh
+          !include-raw-escape: ../builders/build-plugin-nsxv-2.sh
       - shell:
           !include-raw-escape: ../builders/rpm-check.sh
     publishers:
