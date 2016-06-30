@@ -176,13 +176,13 @@
 
       - '{fuel-release}.{plugin-name}.regression.test'
 
-      - '{canary-name}':
-          iso_job_name: '{download-iso-name}'
-          testrail_suite: "[9.0][PCE] VMware DVS plugin v3.0.0 Smoke/BVT"
-          testrail_milestone: "3.0.0"
-          testrail_plan: "$TREP_TESTRAIL_SUITE build#${{PKG_JOB_BUILD_NUMBER}} iso#${{ISO_VERSION}}"
-          testrail_run: "$TREP_TESTRAIL_SUITE"
-          testrail_item_case: "$TEST_GROUP"
+#      - '{canary-name}':
+#          iso_job_name: '{download-iso-name}'
+#          testrail_suite: "[9.0][PCE] VMware DVS plugin v3.0.0 Smoke/BVT"
+#          testrail_milestone: "3.0.0"
+#          testrail_plan: "$TREP_TESTRAIL_SUITE build#${{PKG_JOB_BUILD_NUMBER}} iso#${{ISO_VERSION}}"
+#          testrail_run: "$TREP_TESTRAIL_SUITE"
+#          testrail_item_case: "$TEST_GROUP"
 
       - '{fuel-release}.{plugin-name}.canary.skinny'
 
