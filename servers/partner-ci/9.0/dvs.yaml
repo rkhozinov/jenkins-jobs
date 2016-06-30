@@ -344,6 +344,12 @@
       - string:
           name: GERRIT_REFSPEC
           default: 'refs/heads/{gerrit_branch}'
+      - string:
+          name: PUPPETLINT_PATH 
+          default: './deployment_scripts/puppet/manifests ./deployment_scripts/puppet/modules/vmware_dvs'
+      - string:
+          name: PUPPETLINT_IGNORE 
+          default: 'l2.pp'
       - bool:
           name: DEBUG
           default: '{build_debug}'
