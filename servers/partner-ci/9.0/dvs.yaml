@@ -52,7 +52,7 @@
     iso_job_name: '{fuel-release}.{plugin-name}.canary'
     nightly_timer: 'H 22 * * *'
     regression_timer: 'H 18 * * *'
-    nightly_disabled: true
+    nightly_disabled: false
     regression_disabled: true
     use_snapshots: true
     force_erase: false
@@ -561,8 +561,8 @@
     node: runner
     <<: *runner-parameters
     scm: []
-    triggers:
-      - timed: '{nightly_timer}'
+#    triggers:
+#      - timed: '{nightly_timer}'
     properties:
       - runner-property:
           build-name: '{build-name}'
