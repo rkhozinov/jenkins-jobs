@@ -129,9 +129,9 @@
     
 
     testrail_project: "Contrail plugin"
-    testrail_suite: "[8.0][PCE] Fuel plugin contrail v4.0.0"
+    testrail_suite: "[8.0][PCE] Fuel plugin contrail v4.0.1"
     testrail_suite_desc: "Suite description"
-    testrail_milestone: "Fuel Contrail Plugin v4.0.0"
+    testrail_milestone: "Fuel Contrail Plugin v4.0.1"
     testrail_plan: "$TREP_TESTRAIL_SUITE iso #${{ISO_VERSION}} pkg#${{JUNIPER_PKG_VERSION}} build#${{PKG_JOB_BUILD_NUMBER}}"
     testrail_plan_desc: "Test plan description"
     testrail_run: "$TREP_TESTRAIL_SUITE"
@@ -235,7 +235,7 @@
       - '{regression-name}':
           testrail_suite: "Contrail Plugin v4.x.x"
           testrail_suite_desc: "Suite description"
-          testrail_milestone: "Fuel Contrail Plugin v4.0.0"
+          testrail_milestone: "Fuel Contrail Plugin v4.0.1"
           testrail_plan: "$TREP_TESTRAIL_SUITE iso #${{ISO_VERSION}} pkg#${{JUNIPER_PKG_VERSION}} build#${{PKG_JOB_BUILD_NUMBER}}"
           testrail_plan_desc: "Test plan description"
           testrail_run: "$TREP_TESTRAIL_SUITE"
