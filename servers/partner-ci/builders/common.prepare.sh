@@ -104,6 +104,7 @@ function get_venv_requirements {
     # bug: https://bugs.launchpad.net/fuel/+bug/1528193
     #sed -i 's/python-neutronclient.*/python-neutronclient==3.1.0/' $REQS_PATH
     #echo oslo.i18n >> $REQS_PATH
+    echo stable/8.0
   fi
   ## change version for some package
   #if [[ "${REQS_BRANCH}" != "master" ]]; then
