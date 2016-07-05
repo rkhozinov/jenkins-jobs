@@ -612,7 +612,7 @@
           properties_name: nightly.properties
           email_to: '{email_to}'
     builders:
-      !include: contrail-nightly.yaml.inc
+      !include: contrail-nightly-4.0.1.yaml.inc
 
 - job-template:
     name: '{baremetal-name}'
@@ -633,4 +633,4 @@
           properties_name: baremetal.properties
           email_to: '{email_to}'
     builders:
-      !include: contrail-baremetal.yaml.inc
+      !include: contrail-baremetal-4.0.1.yaml.inc
