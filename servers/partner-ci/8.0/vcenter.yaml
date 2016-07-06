@@ -66,6 +66,7 @@
     email_to: 'rkhozinov@mirantis.com ibumarskov@mirantis.com'
     released_plugin_path: '/storage/dvs/released/2.0/fuel-plugin-vmware-dvs-2.0-2.0.0-1.noarch.rpm'
     scm_submodule_disabled: true
+    scm_wipe_workspace: false
 
     testrail_project: "Mirantis OpenStack"
     testrail_milestone: "{fuel-release}"
@@ -217,6 +218,7 @@
     scm:
       - common-scm:
           scm_submodule_disabled: '{scm_submodule_disabled}'
+          scm_wipe_workspace: '{scm_wipe_workspace}'
           gerrit_repo: '{gerrit_repo}'
     wrappers:
       - test-wrapper:
