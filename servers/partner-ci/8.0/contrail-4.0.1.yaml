@@ -84,6 +84,7 @@
     bvt-name: '{fuel-release}.{plugin-name}.{plugin-version}.bvt'
     regression-name: '{fuel-release}.{plugin-name}.{plugin-version}.regression'
     nightly-name: '{fuel-release}.{plugin-name}.{plugin-version}.nightly'
+    full-name: '{fuel-release}.{plugin-name}.{plugin-version}.full'
     baremetal-name: '{fuel-release}.{plugin-name}.{plugin-version}.baremetal'
     custom-name: '{fuel-release}.{plugin-name}.{plugin-version}.custom'
     reporter-name: '{fuel-release}.{plugin-name}.{plugin-version}.reporter'
@@ -96,8 +97,10 @@
     pkg_job_name: '{fuel-release}.{plugin-name}.{plugin-version}.build'
     iso_job_name: ''
     nightly_timer: 'H 21 * * *'
+    full_timer: 'H 21 * * *'
     regression_timer: 'H 18 * * *'
     nightly_disabled: false
+    full_disabled: false        
     baremetal_disabled: false
     regression_disabled: true
     use_snapshots: false
@@ -201,6 +204,9 @@
       - '{shellcheck-name}'
 
       - '{nightly-name}':
+          multijob_build_pkg: true
+                  
+      - '{full-name}':
           multijob_build_pkg: true
 
       - '{baremetal-name}':
@@ -613,6 +619,28 @@
           email_to: '{email_to}'
     builders:
       !include: contrail-nightly-4.0.1.yaml.inc
+
+              
+- job-template:
+    name: '{full-name}'
+    project-type: multijob
+    disabled: '{obj:full_disabled}'
+    node: runner
+    <<: *runner-parameters
+    scm: []
+    triggers:
+      - timed: '{full_timer}'
+    properties:
+      - runner-property:
+          build-name: '{build-name}'
+    wrappers:
+      - runner-wrapper
+    publishers:
+      - runner-publisher:
+          properties_name: full.properties
+          email_to: '{email_to}'
+    builders:
+      !include: contrail-full-4.0.1.yaml.inc
 
 - job-template:
     name: '{baremetal-name}'
