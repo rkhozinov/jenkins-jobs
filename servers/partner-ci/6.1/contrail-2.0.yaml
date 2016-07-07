@@ -26,11 +26,11 @@
     runner-timeout: 600
     test-timeout: 500
 
-    iso_file: 'fuel-6.1-525-2015-06-19_13-02-31.iso'
-    gerrit_repo: 'fuel-plugin-contrail'
-    gerrit_branch: 'stable/2.0'
-    email_to: 'rkhozinov@mirantis.com'
-    released_plugin_path: '/storage/contrail/released/contrail-2.0.0.noarch.rpm'
+    iso-file: 'fuel-6.1-525-2015-06-19_13-02-31.iso'
+    gerrit-repo: 'fuel-plugin-contrail'
+    gerrit-branch: 'stable/2.0'
+    email-to: 'rkhozinov@mirantis.com'
+    released-plugin-path: '/storage/contrail/released/contrail-2.0.0.noarch.rpm'
 
     testgroup:
       - deploy_contrail

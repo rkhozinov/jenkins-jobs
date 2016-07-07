@@ -127,10 +127,10 @@
               ISO_STORAGE={iso-storage}
               TEST_GROUP={testgroup}
               ENV_NAME=''
-      - shell:
-          !include-raw-escape builders/systest.vcenter.prepare.sh
-      - shell:
-          !include-raw-escape builders/systest.vcenter.sh
+#      - shell:
+#          !include-raw-escape builders/systest.vcenter.prepare.sh
+#      - shell:
+#          !include-raw-escape builders/systest.vcenter.sh
     publishers:
       - description-setter:
           description: 'release: $fuel_release, build: $iso_version'
@@ -206,10 +206,10 @@
               OPENSTACK_RELEASE={openstack-release}
               VCENTER_SNAPSHOT={vcenter-snapshot}
               ISO_STORAGE={iso-storage}
-      - shell:
-          !include-raw-escape builders/systest.vcenter.prepare.sh
-      - shell:
-          !include-raw-escape builders/systest.vcenter.custom.sh
+#      - shell:
+#          !include-raw-escape builders/systest.vcenter.prepare.sh
+#      - shell:
+#          !include-raw-escape builders/systest.vcenter.custom.sh
     publishers:
       - description-setter:
           description: 'release: $fuel_release, build: $iso_version'
@@ -237,8 +237,8 @@
       - inject: 
           properties-content: |
               properties_file={systest-props-file}
-      - shell:
-          !include-raw-escape builders/systest.vcenter.runner.sh
+#      - shell:
+#          !include-raw-escape builders/systest.vcenter.runner.sh
       - multijob:
           name: 'System tests for vcenter'
           condition: COMPLETED
@@ -380,8 +380,8 @@
       - inject: 
           properties-content: |
               properties_file={smoke-bvt-props-file}
-      - shell:
-          !include-raw-escape builders/systest.vcenter.runner.sh
+#      - shell:
+#          !include-raw-escape builders/systest.vcenter.runner.sh
       - multijob:
           name: 'Smoke/BVT tests for vcenter'
           condition: COMPLETED

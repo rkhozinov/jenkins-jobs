@@ -87,17 +87,17 @@
     slave_node_cpu: '4'
     pkg_job_name: '{fuel-release}.{plugin-name}.{plugin-version}.build'
     iso_job_name: ''
-    nightly_timer: 'H 22 * * *'
-    regression_timer: 'H 18 * * *'
-    nightly_disabled: true
+    nightly-timer: 'H 22 * * *'
+    regression-timer: 'H 18 * * *'
+    nightly-disabled: true
     regression_disabled: true
-    use_snapshots: false
-    force_erase: true
-    recreate_venv: false
-    disable_ssl: true
+    use-snapshots: false
+    force-erase: true
+    recreate-venv: false
+    disable-ssl: true
     bonding: false
     kvm_use: false
-    update_master: true
+    update-master: true
     debug: true
     publish_results: true
     multijob_build_pkg: true
@@ -496,9 +496,9 @@
           project: '{build-name}'
           which-build: last-successful
       - shell:
-          !include-raw-escape builders/common.prepare.sh
+          !include-raw-escape 6.1/builders/common.prepare.sh
       - shell:
-          !include-raw-escape builders/contrail.test.sh
+          !include-raw-escape 6.1/builders/contrail.test.sh
     publishers:
       - postbuildscript:
           script-only-if-succeeded: False
@@ -530,7 +530,7 @@
           results: nosetests.xml
           health-scale-factor: 1.0
       - email:
-          recipients: '{email-to}'
+          recipients: '{email_to}'
       - trigger-parameterized-builds:
         - project: '{reporter-name}'
           predefined-parameters: |
@@ -565,9 +565,9 @@
           weight: 1
     builders:
       - shell:
-          !include-raw-escape: './builders/build-plugin.sh'
+          !include-raw-escape: './6.1/builders/build-plugin.sh'
       - shell:
-          !include-raw-escape: './builders/rpm-check.sh'
+          !include-raw-escape: './6.1/builders/rpm-check.sh'
     publishers:
       - postbuildscript:
           script-only-if-succeeded: False
@@ -580,7 +580,7 @@
           artifacts: 'build.properties'
           allow-empty: false
       - email:
-          recipients: '{email-to}'
+          recipients: '{email_to}'
 
 # jobs for system test
 - job-template:
@@ -662,131 +662,131 @@
           results: nosetests.xml
           health-scale-factor: 1.0
       - email:
-          recipients: '{email-to}'
+          recipients: '{email_to}'
       - trigger-parameterized-builds: []
 
-- job-template:
-    name: '{reporter-name}'
-    disabled: false
-    description: 'Testrail reporter for {fuel-release}.{plugin-name}.{plugin-version}'
-    concurrent: true
-    project-type: multijob
-    node: runner
-    wrappers:
-      - ansicolor:
-          colormap: xterm
-      - inject-passwords:
-          global: true
-          mask-password-params: true
-    parameters:
-      - string:
-          name: ISO_VERSION
-          description: "ISO number for form the test plan string"
-      - string:
-          name: PLUGIN_VERSION
-          description: "ISO number for form the test plan string"
-      - string:
-          name: TEST_JOB_NAME
-          description: 'The name of a test for getting test results'
-      - string:
-          name: TEST_JOB_BUILD_NUMBER
-          description: 'The number of a build of the test job'
-      - string:
-          name: PKG_JOB_BUILD_NUMBER
-          description: "The number of a build of the package build job"
-      - string:
-          name: TREP_TESTRAIL_URL
-          default: 'https://mirantis.testrail.com'
-          description: ""
-      - string:
-          name: TREP_TESTRAIL_PROJECT
-          default: 'Contrail plugin'
-          description: "Project name"
-      - string:
-          name: TREP_TESTRAIL_MILESTONE
-          default: 'Fuel Contrail Plugin v2.1.0'
-          description: ""
-      - string:
-          name: TREP_TESTRAIL_SUITE
-          default: 'Contrail Plugin v2.x.x'
-          description: ""
-      - string:
-          name: TREP_TESTRAIL_SUITE_DESCRIPTION
-          default: "Test suite description"
-          description: ""
-      - string:
-          name: TREP_TESTRAIL_PLAN
-          default: 'Fuel Contrail Plugin v2.1.1 #${{PKG_JOB_BUILD_NUMBER}}'
-          description: ""
-      - string:
-          name: TREP_TESTRAIL_PLAN_DESCRIPTION
-          default: "Test plan description"
-          description: ""
-      - string:
-          name: TREP_TESTRAIL_RUN
-          default: "$TREP_TESTRAIL_SUITE"
-          description: "Testrail test run name"
-      - string:
-          name: TREP_TESTRAIL_RUN_DESCRIPTION
-          default: "Test run description"
-          description: ""
-      - string:
-          name: TREP_TESTRAIL_TREP_TEST_SECTION
-          default: 'nosetests.xml'
-          description: ""
-      - string:
-          name: TREP_TESTRAIL_TREP_TEST_INCLUDE
-          default: 'nosetests.xml'
-          description: ""
-      - string:
-          name: TREP_TESTRAIL_TREP_TEST_EXCLUDE
-          default: 'nosetests.xml'
-          description: ""
-      - string:
-          name: TREP_LOG_LEVEL
-          default: "DEBUG"
-          description: "Log level of reporter"
-      - string:
-          name: TREP_LOG_FILE
-          default: "testrail_reporter.log"
-          description: "Log filename for reporter tool"
-      - string:
-          name: TREP_TEST_RESULTS_SOURCE
-          default: "xunit_items"
-          description: "Reporter tool's additional config"
-      - string:
-          name: TREP_TEST_RESULTS_XUNIT_FILENAME
-          default: "nosetests.xml"
-          description: "File with tests results"
-      - string:
-          name: TREP_TEST_RESULTS_XUNIT_ITEMS_FILENAME
-          default: "nosetests.xml"
-          description: "File with tests results"
-      - string:
-          name: TREP_TEST_RESULTS_XUNIT_ITEMS_CASE_NAME
-          default: ""
-          description: "Reporter tool's additional config"
-    scm:
-      - git:
-          url: 'https://github.com/ehles/trep.git'
-          branches:
-            - 'origin/master'
-          #choosing-strategy: default
-          clean:
-            before: false
-          wipe-workspace: false
-    builders:
-      - copyartifact:
-          project: ${{TEST_JOB_NAME}}
-          filter: ${{TREP_TEST_RESULTS_XUNIT_FILENAME}}
-          which-build: specific-build
-          build-number: ${{TEST_JOB_BUILD_NUMBER}}
-          stable: true
-      - shell:
-          !include-raw-escape: './builders/reporter.sh'
-    publishers:
-      - email:
-          recipients: '{email-to}'
+#- job-template:
+#    name: '{reporter-name}'
+#    disabled: false
+#    description: 'Testrail reporter for {fuel-release}.{plugin-name}.{plugin-version}'
+#    concurrent: true
+#    project-type: multijob
+#    node: runner
+#    wrappers:
+#      - ansicolor:
+#          colormap: xterm
+#      - inject-passwords:
+#          global: true
+#          mask-password-params: true
+#    parameters:
+#      - string:
+#          name: ISO_VERSION
+#          description: "ISO number for form the test plan string"
+#      - string:
+#          name: PLUGIN_VERSION
+#          description: "ISO number for form the test plan string"
+#      - string:
+#          name: TEST_JOB_NAME
+#          description: 'The name of a test for getting test results'
+#      - string:
+#          name: TEST_JOB_BUILD_NUMBER
+#          description: 'The number of a build of the test job'
+#      - string:
+#          name: PKG_JOB_BUILD_NUMBER
+#          description: "The number of a build of the package build job"
+#      - string:
+#          name: TREP_TESTRAIL_URL
+#          default: 'https://mirantis.testrail.com'
+#          description: ""
+#      - string:
+#          name: TREP_TESTRAIL_PROJECT
+#          default: 'Contrail plugin'
+#          description: "Project name"
+#      - string:
+#          name: TREP_TESTRAIL_MILESTONE
+#          default: 'Fuel Contrail Plugin v2.1.0'
+#          description: ""
+#      - string:
+#          name: TREP_TESTRAIL_SUITE
+#          default: 'Contrail Plugin v2.x.x'
+#          description: ""
+#      - string:
+#          name: TREP_TESTRAIL_SUITE_DESCRIPTION
+#          default: "Test suite description"
+#          description: ""
+#      - string:
+#          name: TREP_TESTRAIL_PLAN
+#          default: 'Fuel Contrail Plugin v2.1.1 #${{PKG_JOB_BUILD_NUMBER}}'
+#          description: ""
+#      - string:
+#          name: TREP_TESTRAIL_PLAN_DESCRIPTION
+#          default: "Test plan description"
+#          description: ""
+#      - string:
+#          name: TREP_TESTRAIL_RUN
+#          default: "$TREP_TESTRAIL_SUITE"
+#          description: "Testrail test run name"
+#      - string:
+#          name: TREP_TESTRAIL_RUN_DESCRIPTION
+#          default: "Test run description"
+#          description: ""
+#      - string:
+#          name: TREP_TESTRAIL_TREP_TEST_SECTION
+#          default: 'nosetests.xml'
+#          description: ""
+#      - string:
+#          name: TREP_TESTRAIL_TREP_TEST_INCLUDE
+#          default: 'nosetests.xml'
+#          description: ""
+#      - string:
+#          name: TREP_TESTRAIL_TREP_TEST_EXCLUDE
+#          default: 'nosetests.xml'
+#          description: ""
+#      - string:
+#          name: TREP_LOG_LEVEL
+#          default: "DEBUG"
+#          description: "Log level of reporter"
+#      - string:
+#          name: TREP_LOG_FILE
+#          default: "testrail_reporter.log"
+#          description: "Log filename for reporter tool"
+#      - string:
+#          name: TREP_TEST_RESULTS_SOURCE
+#          default: "xunit_items"
+#          description: "Reporter tool's additional config"
+#      - string:
+#          name: TREP_TEST_RESULTS_XUNIT_FILENAME
+#          default: "nosetests.xml"
+#          description: "File with tests results"
+#      - string:
+#          name: TREP_TEST_RESULTS_XUNIT_ITEMS_FILENAME
+#          default: "nosetests.xml"
+#          description: "File with tests results"
+#      - string:
+#          name: TREP_TEST_RESULTS_XUNIT_ITEMS_CASE_NAME
+#          default: ""
+#          description: "Reporter tool's additional config"
+#    scm:
+#      - git:
+#          url: 'https://github.com/ehles/trep.git'
+#          branches:
+#            - 'origin/master'
+#          #choosing-strategy: default
+#          clean:
+#            before: false
+#          wipe-workspace: false
+#    builders:
+#      - copyartifact:
+#          project: ${{TEST_JOB_NAME}}
+#          filter: ${{TREP_TEST_RESULTS_XUNIT_FILENAME}}
+#          which-build: specific-build
+#          build-number: ${{TEST_JOB_BUILD_NUMBER}}
+#          stable: true
+#      - shell:
+#          !include-raw-escape: './6.1/builders/reporter.sh'
+#    publishers:
+#      - email:
+#          recipients: '{email-to}'
 
 - job-template:
     name: '{smoke-name}'
@@ -838,7 +838,7 @@
           artifacts: 'smoke.properties'
           allow-empty: false
       - email:
-          recipients: '{email-to}'
+          recipients: '{email_to}'
 
 - job-template:
     name: '{bvt-name}'
@@ -892,7 +892,7 @@
           artifacts: 'bvt.properties'
           allow-empty: false
       - email:
-          recipients: '{email-to}'
+          recipients: '{email_to}'
 
 - job-template:
     name: '{regression-name}'
@@ -918,7 +918,7 @@
           artifacts: 'regression.properties'
           allow-empty: false
       - email:
-          recipients: '{email-to}'
+          recipients: '{email_to}'
     builders:
       - multijob:
           name: 'regression test for open/juniper contrail'
@@ -962,7 +962,7 @@
           artifacts: 'build.properties'
           allow-empty: false
       - email:
-          recipients: '{email-to}'
+          recipients: '{email_to}'
     scm: []
     triggers:
       - timed: '{nightly-timer}'

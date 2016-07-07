@@ -256,7 +256,7 @@
    repourl: 'https://review.openstack.org/openstack/{gerrit-repo}.git'
    iso-file: 'fuel-7.0-301-2015-09-22_20-01-53.iso'
    nightly-name: '{fuel-release}.vcenter.nightly'
-   mail-to: 'rkhozinov@mirantis.com'
+#   mail-to: 'rkhozinov@mirantis.com'
 
 
    testgroup:
@@ -294,17 +294,17 @@
       numToKeep: 10
       artifactDaysToKeep: 7
       artifactNumToKeep: 10
-    <<: *test-properties
+#    <<: *test-properties
     <<: *test-parameters
-    <<: *common-scm
+#    <<: *common-scm
     builders:
-      - copyartifact:
-          project: '{bvt-name}'
-          which-build: last-successful
+#      - copyartifact:
+#          project: '{bvt-name}'
+#          which-build: last-successful
       - inject:
           properties-file: 'pkg_properties'
-      - shell:
-          !include-raw-escape builders/vcenter.prepare.sh
+#      - shell:
+#          !include-raw-escape builders/vcenter.prepare.sh
       - shell:
           !include-raw-escape builders/vcenter.test.sh
 
@@ -327,8 +327,8 @@
             - junit:
                 pattern: '**/nosetest.xml'
                 skip-if-no-test-files: true
-      - email:
-          recipients: '{email-to}'
+#      - email:
+#          recipients: '{email-to}'
 
 ## Jobs for system tests by testgroup
 - job-template:
@@ -349,7 +349,7 @@
     triggers:
         - timed: 'H 19  * * *'
     <<: *runner-parameters
-    <<: *runner-properties
+#    <<: *runner-properties
     builders:
       - multijob:
           name: 'System tests for vcenter with vcenter5'
@@ -569,7 +569,7 @@
 #              current-parameters: true
 #              predefined-parameters: VCENTER_SNAPSHOT=vcenter6
 #              kill-phase-on: NEVER
-    publishers:
-        - email: 
-            recipients: '{mail-to}'
+#    publishers:
+#        - email: 
+#            recipients: '{mail-to}'
 
