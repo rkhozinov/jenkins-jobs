@@ -22,12 +22,6 @@
           name: VCENTER_PASSWORD
           default: 'vmware'
       - string:
-          name: VCENTER_CLUSTERS
-          default: 'Cluster1,Cluster2'
-      - string:
-          name: DVS_SWITCHES
-          default: 'Cluster1,Cluster2'
-      - string:
           name: TEST_GROUP_PREFIX
           default: 'system_test.vcenter.deploy_vcenter_dvs_run_ostf'
           description: 'Snapshot name for vsphere lab'
