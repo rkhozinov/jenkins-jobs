@@ -9,23 +9,24 @@
       - string:
           name: WORKSTATION_SNAPSHOT
           default: 'doubledvs'
-          description: 'Snapshot name for vcenter lab'
       - string:
           name: WORKSTATION_NODES
           default: 'esxi1 esxi2 esxi3 vcenter trusty'
-          description: "List of workstation's nodes"
       - string:
           name: VCENTER_IP
-          default: '172.16.0.254'
-          description: "IP address of the vCenter server"
+          default: '172.16.0.145'
+      - string:
+          name: VCENTER_USERNAME
+          default: 'openstack'
+      - string:
+          name: VCENTER_PASSWORD
+          default: 'vmware'
       - string:
           name: VCENTER_CLUSTERS
           default: 'Cluster1,Cluster2'
-          description: "List of vCenter's clusters"
       - string:
           name: DVS_SWITCHES
           default: 'Cluster1,Cluster2'
-          description: "List of vCenter's clusters"
 
 - project:
     name: 'predefined_parameters'
