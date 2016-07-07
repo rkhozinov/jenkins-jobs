@@ -81,7 +81,7 @@
           description: 'Openstack release (CentOS, Ubuntu)'
       - string:
           name: NODES_COUNT
-          default: '10'
+          default: '9'
           description: 'Amount of nodes in the test lab'
       - string:
           name: ADMIN_NODE_MEMORY
