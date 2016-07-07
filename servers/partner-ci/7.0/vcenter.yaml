@@ -1,9 +1,63 @@
-- runner-properties: &runner-properties
-    name: 'runner-properties'
-    properties:
-      - heavy-job:
-          weight: 1
+#- build-gerrit-events: &build-gerrit-events
+#    name: 'build-gerrit-events'
+#    trigger-on:
+#      - change-merged-event
+#      - draft-published-event
+#      - patchset-created-event:
+#          exclude-trivial-rebase: true
+#          exclude-no-code-change: true
+#
+### configuration of gerrit event for the smoke multijob
+### smoke multijob should run on patchset, draft events
+#- smoke-gerrit-events: &smoke-gerrit-events
+#    name: 'smoke-gerrit-events'
+#    trigger-on:
+#      - draft-published-event
+#      - patchset-created-event:
+#          exclude-trivial-rebase: true
+#          exclude-no-code-change: true
+#
+### configuration of gerrit event for the bvt multijob
+### bvt multijob should run only on merge event
+#- bvt-gerrit-events: &bvt-gerrit-events
+#    name: 'bvt-gerrit-events'
+#    trigger-on:
+#      - change-merged-event
+#
+### the main part of gerrit section as yaml anchor
+#- generic-gerrit-projects: &generic-gerrit-projects
+#    name: 'generic-gerrit-projects'
+#    projects:
+#      - project-compare-type: 'PLAIN'
+#        project-pattern: 'openstack/{gerrit-repo}'
+#        branches:
+#          - branch-compare-type: 'ANT'
+#            branch-pattern: '{gerrit-branch}'
+#        forbidden-file-paths:
+#          - compare-type: 'ANT'
+#            pattern: 'docs/*'
+#          - compare-type: 'ANT'
+#            pattern: 'specs/*'
+#    silent: false
+#    override-votes: true
+#    server-name: 'review.openstack.org'
+#    custom-url: '* $JOB_NAME $BUILD_URL'
+#    escape-quotes: true
+#    readable-message: true
+#    skip-vote:
+#      successfull: false
+#      failed: false
+#      unstable: true
+#      notbuilt: true
+#
+### properties for smoke, bvt and nightly multijobs
+#- runner-properties: &runner-properties
+#    name: 'runner-properties'
+#    properties:
+#      - heavy-job:
+#          weight: 1
 
+## parameters for smoke, bvt and nightly multijobs
 - runner-parameters: &runner-parameters
     name: 'runner-parameters'
     parameters:
@@ -33,6 +87,7 @@
           description: 'Openstack release (CentOS, Ubuntu)'
       - string:
           name: ISO_VERSION
+          description: 'Contrainer for storing an iso build number to output it as job name'
       - string:
           name: GERRIT_REFSPEC
           default: 'refs/heads/{gerrit-branch}'
@@ -43,16 +98,16 @@
           description: 'The branch for fuel-qa gerrit'
       - string:
           name: NODES_COUNT
-          default: '9'
-          description: 'Amount of nodes in the test lab'
+          default: '10'
+          description: 'Amount of nodes in a virtual cluster'
       - string:
           name: ADMIN_NODE_MEMORY
           default: '4096'
-          description: 'Amount of vitrual RAM for admin node'
+          description: 'Amount of virtual memory for the master node'
       - string:
           name: SLAVE_NODE_MEMORY
           default: '4096'
-          description: 'Amount of vitrual RAM per slave node'
+          description: 'Amount of vitrual memory per slave node'
       - string:
           name: ADMIN_NODE_CPU
           default: '4'
@@ -78,6 +133,54 @@
           default: false
           description: 'The env will be erased after test'
 
+#- common-scm: &common-scm
+#    name: 'common-scm'
+#    scm:
+#      - git:
+#          name: ''
+#          url: 'https://review.openstack.org/openstack/{gerrit-repo}'
+#          refspec: $GERRIT_REFSPEC
+#          branches:
+#            - $GERRIT_BRANCH
+#          choosing-strategy: gerrit
+#          submodule:
+#            disable: false
+#            tracking: true
+#            recursive: true
+#          clean:
+#            before: false
+#          wipe-workspace: true
+### publishers for smoke, bvt, build and nithly jobs
+### arcives rpm, pkg_properties and email conf
+#- runner-publishers: &runner-publishers
+#    name: 'runner-publishers'
+#    publishers:
+#      - archive:
+#          artifacts: 'pkg_properties'
+#          allow-empty: false
+#      - archive:
+#          artifacts: '*.rpm'
+#          allow-empty: false
+#      - email:
+#          recipients: '{email-to}'
+#
+### properties for test jobs
+#- test-properties: &test-properties
+#    name: 'test-properties'
+#    properties:
+#      - heavy-job:
+#          weight: 1
+#      - throttle:
+#          max-per-node: 0
+#          max-total: 0
+#          categories:
+#            - vcenter
+#            - dvs
+#            - nsx
+#            - contrail
+#          option: category
+
+## parameters for jobs created per test-group and custom test job
 - test-parameters: &test-parameters
     name: 'test-parameters'
     parameters:
@@ -87,11 +190,15 @@
       - string:
           name: VCENTER_SNAPSHOT
           default: 'vcenterha'
-          description: 'Snapshot name for vsphere lab'
+          description: 'Snapshot name for vcenter lab'
       - string:
           name: ISO_FILE
           default: '{iso-file}'
           description: 'ISO file name that is on the tpi-s1 in /storage/downloads'
+      - string:
+          name: ISO_STORAGE
+          default: '/storage/downloads'
+          description: 'Storage for iso files'
       - string:
           name: OPENSTACK_RELEASE
           default: 'Ubuntu'
@@ -147,13 +254,11 @@
    gerrit-branch: 'stable/7.0'
    gerrit-repo: 'fuel-qa'
    repourl: 'https://review.openstack.org/openstack/{gerrit-repo}.git'
-   #TODO: refactor usage of virualenv creation
    iso-file: 'fuel-7.0-301-2015-09-22_20-01-53.iso'
    nightly-name: '{fuel-release}.vcenter.nightly'
-   mail-to: 'rkhozinov@mirantis.com'
-   vcenter-snapshot: 'vcenterha'
-   iso-storage: '/storage/downloads'
-   env-prefix: '{fuel-release}.vcenter'
+#   mail-to: 'rkhozinov@mirantis.com'
+
+
    testgroup:
        - vcenter_cindervmdk
        - vcenter_computevmware
@@ -182,52 +287,31 @@
 
 - defaults:
     name: global
+    disabled: false
+    node: 'vcenter'
     logrotate:
       daysToKeep: 7
       numToKeep: 10
       artifactDaysToKeep: 7
       artifactNumToKeep: 10
-
-    properties:
-      - heavy-job:
-          weight: 1
-      - throttle:
-          max-per-node: 0
-          max-total: 0
-          categories:
-            - contrail
-            - vsphere
-            - dvs
-            - nsx
-          option: category
+#    <<: *test-properties
     <<: *test-parameters
-    scm:
-      - git:
-          name: ''
-          url: 'https://review.openstack.org/openstack/{gerrit-repo}'
-          refspec: $GERRIT_REFSPEC
-          branches:
-            - $GERRIT_BRANCH
-          #choosing-strategy: gerrit
-          submodule:
-            disable: false
-            tracking: true
-            recursive: true
-          clean:
-            before: false
-          wipe-workspace: true
-
-
+#    <<: *common-scm
     builders:
+#      - copyartifact:
+#          project: '{bvt-name}'
+#          which-build: last-successful
       - inject:
-          properties-content: |
-              ISO_STORAGE={iso-storage}
-      - shell:
-          !include-raw-escape builders/vcenter.prepare.sh
+          properties-file: 'pkg_properties'
+#      - shell:
+#          !include-raw-escape builders/vcenter.prepare.sh
       - shell:
           !include-raw-escape builders/vcenter.test.sh
 
     wrappers:
+      - inject-passwords:
+          global: true
+          mask-password-params: true
       - ansicolor:
           colormap: xterm
       - timeout:
@@ -243,13 +327,15 @@
             - junit:
                 pattern: '**/nosetest.xml'
                 skip-if-no-test-files: true
+#      - email:
+#          recipients: '{email-to}'
 
 ## Jobs for system tests by testgroup
 - job-template:
     name: '{fuel-release}.{testgroup}'
-    # with throttle configuration we can run some concurrent tests
+    # with throttle configuration we can run some concurrent tests 
     concurrent: true
-    node: vsphere
+    node: vcenter
 
 # multijob configuration
 # for each of testgroups a job was created early in this script.
@@ -258,15 +344,15 @@
     project-type: multijob
     name: '{nightly-name}'
     description: "System tests for vcenter feature"
-    node: runner
+    node: runner    
     scm: []
     triggers:
         - timed: 'H 19  * * *'
     <<: *runner-parameters
-    <<: *runner-properties
+#    <<: *runner-properties
     builders:
       - multijob:
-          name: 'System tests for vcenter with vsphere5'
+          name: 'System tests for vcenter with vcenter5'
           condition: COMPLETED
           projects:
             - name: '{fuel-release}.vcenter_cindervmdk'
@@ -376,7 +462,7 @@
               kill-phase-on: NEVER
 
 #      - multijob:
-#          name: 'System tests for vcenter with vsphere6'
+#          name: 'System tests for vcenter with vcenter6'
 #          condition: COMPLETED
 #          projects:
 #            - name: '{fuel-release}.vcenter_cindervmdk'
@@ -483,6 +569,7 @@
 #              current-parameters: true
 #              predefined-parameters: VCENTER_SNAPSHOT=vcenter6
 #              kill-phase-on: NEVER
-    publishers:
-        - email:
-            recipients: '{mail-to}'
+#    publishers:
+#        - email: 
+#            recipients: '{mail-to}'
+
