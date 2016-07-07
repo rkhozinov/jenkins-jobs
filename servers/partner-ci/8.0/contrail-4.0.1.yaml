@@ -628,8 +628,8 @@
     node: runner
     <<: *runner-parameters
     scm: []
-    triggers:
-      - timed: '{full_timer}'
+#    triggers:
+#      - timed: '{full_timer}'
     properties:
       - runner-property:
           build-name: '{build-name}'
