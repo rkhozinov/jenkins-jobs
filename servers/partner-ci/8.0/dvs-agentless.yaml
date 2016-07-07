@@ -34,10 +34,7 @@
       - string:
           name: VCENTER_CLUSTERS
           default: 'Cluster1,Cluster2'
-      - string:
-          name: DVS_SWITCHES
-          default: 'Cluster1,Cluster2'
-
+    
 - project:
     name: 'predefined_parameters'
     fuel-release: '8.0'
