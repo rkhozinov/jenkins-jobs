@@ -20,7 +20,7 @@ if [ -z $PLUGIN_VERSION  ]; then
    [ -f $PLUGIN_VERSION_ARTIFACT ] && source $PLUGIN_VERSION_ARTIFACT || (echo "The PLUGIN_VERSION is empty"; exit 1)
 fi
 
-[ -z $PLUGIN_VERSION  ] && (echo "PLUGIN_VERSION variable is empty"; exit 1) || export DVS_PLUGIN_VERSION=$PLUGIN_VERSION
+[ -z $PLUGIN_VERSION  ] && { echo "PLUGIN_VERSION variable is empty"; exit 1; } || export DVS_PLUGIN_VERSION=$PLUGIN_VERSION
 
 if [ -z "${PKG_JOB_BUILD_NUMBER}" ]; then
     if [ -f build.properties ]; then
@@ -36,7 +36,7 @@ fi
 [ -f nosetest.xml ] && rm -f nosetests.xml
 rm -rf logs/*
 
-export FUEL_RELEASE=$(cut -d '-' -f2-2 <<< ${ISO_FILE} | tr -d '.')
+export FUEL_RELEASE=$(cut -d- -f2-2 <<< ${ISO_FILE} | tr -d '.')
 export ISO_PATH="${ISO_STORAGE}/${ISO_FILE}"
 if [[ $ISO_FILE == *"mos"* ]] || [[ $ISO_FILE == *"kilo"* ]];then
   export ISO_VERSION=$(echo $ISO_FILE | cut -d'-' -f4-4 | tr -d '.iso' )
@@ -48,7 +48,7 @@ export ENV_NAME="${ENV_PREFIX}.${ISO_VERSION}"
 export VENV_PATH="${HOME}/${FUEL_RELEASE}-venv"
 
 [ -z "${DVS_PLUGIN_PATH}" ] && export DVS_PLUGIN_PATH=$(ls -t ${WORKSPACE}/fuel-plugin-vmware-dvs*.rpm | head -n 1)
-[ -z "${DVS_PLUGIN_PATH}" ] && ( echo "DVS_PLUGIN_PATH is empty"; exit 1 )
+[ -z "${DVS_PLUGIN_PATH}" ] && { echo "DVS_PLUGIN_PATH is empty"; exit 1; }
 [ -z "${PLUGIN_PATH}"     ] && export PLUGIN_PATH=$DVS_PLUGIN_PATH
 
 systest_parameters=''
