@@ -6,6 +6,9 @@
           name: WORKSTATION_SNAPSHOT
           default: 'vcenterha'
       - string:
+          name: PLUGIN_VERSION
+          default: '{plugin-version}'
+      - string:
           name: WORKSTATION_NODES
           default: 'esxi1 esxi2 esxi3 vcenter trusty'
       - string:
