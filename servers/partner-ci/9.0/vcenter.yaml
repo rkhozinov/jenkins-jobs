@@ -56,7 +56,7 @@
     iso_job_name: 'download_iso'
     nightly_timer: 'H 21 * * *'
     regression_timer: 'H 18 * * *'
-    nightly_disabled: true
+    nightly_disabled: false
     regression_disabled: true
     use_snapshots: false
     force_erase: true
