@@ -110,6 +110,8 @@
     released_plugin_path: '/storage/contrail/released/contrail-3.0.noarch.rpm'
     scm_submodule_disabled: true
     scm_wipe_workspace: false
+    skip_vote_successfull: false
+    skip_vote_failed: false
 
     testrail_project: "Contrail plugin"
     testrail_suite: "Contrail v3.0.0"
@@ -157,7 +159,9 @@
       - '{build-name}'
       - '{flake8-name}'
       - '{radon-name}'
-      - '{shellcheck-name}'
+      - '{shellcheck-name}':
+          skip_vote_successfull: '{skip_vote_successfull}'
+          skip_vote_failed: '{skip_vote_failed}'
 
       - '{nightly-name}':
           multijob_build_pkg: true
@@ -370,6 +374,8 @@
           testrail_suite_desc:  '{testrail_suite_desc}'
           testrail_plan:        '{testrail_plan}'
           testrail_plan_desc:   '{testrail_plan_desc}'
+          skip_vote_successfull: '{skip_vote_successfull}'
+          skip_vote_failed:     '{skip_vote_failed}'
       - plugin-specific-parameters:
           bonding:              '{bonding}'
           kvm_use:              '{kvm_use}'
@@ -412,6 +418,8 @@
           testrail_suite_desc:  '{testrail_suite_desc}'
           testrail_plan:        '{testrail_plan}'
           testrail_plan_desc:   '{testrail_plan_desc}'
+          skip_vote_successfull: '{skip_vote_successfull}'
+          skip_vote_failed:     '{skip_vote_failed}'
       - plugin-specific-parameters:
           update_master:        '{update_master}'
           bonding:              '{bonding}'
@@ -433,6 +441,8 @@
           scm_submodule_disabled: '{scm_submodule_disabled}'
           scm_wipe_workspace: '{scm_wipe_workspace}'
           gerrit_repo: '{gerrit_repo}'
+          skip_vote_successfull: '{skip_vote_successfull}'
+          skip_vote_failed: '{skip_vote_failed}'
     wrappers:
       - test-wrapper:
           test_timeout: '{test_timeout}'
@@ -490,11 +500,15 @@
       - draft-patchset-gerrit-trigger:
           gerrit_repo: '{gerrit_repo}'
           gerrit_branch: '{gerrit_branch}'
+          skip_vote_successfull: '{skip_vote_successfull}'
+          skip_vote_failed: '{skip_vote_failed}'
     scm:
       - common-scm:
           scm_wipe_workspace: '{scm_wipe_workspace}'
           scm_submodule_disabled: '{scm_submodule_disabled}'
           gerrit_repo: '{gerrit_repo}'
+          skip_vote_successfull: '{skip_vote_successfull}'
+          skip_vote_failed: '{skip_vote_failed}'
     wrapper:
       - runner-wrapper
     parameters:
@@ -619,6 +633,8 @@
       - draft-patchset-gerrit-trigger:
           gerrit_repo: '{gerrit_repo}'
           gerrit_branch: '{gerrit_branch}'
+          skip_vote_successfull: '{skip_vote_successfull}'
+          skip_vote_failed: '{skip_vote_failed}'
     properties:
       - runner-property:
           build-name: '{build-name}'
@@ -655,6 +671,8 @@
       - merge-gerrit-trigger:
           gerrit_repo: '{gerrit_repo}'
           gerrit_branch: '{gerrit_branch}'
+          skip_vote_successfull: '{skip_vote_successfull}'
+          skip_vote_failed: '{skip_vote_failed}'
     properties:
       - runner-property:
           build-name: '{build-name}'

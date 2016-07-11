@@ -74,6 +74,8 @@
     released_plugin_path: '/storage/dvs/released/2.0/fuel-plugin-vmware-dvs-2.0-2.0.0-1.noarch.rpm'
     scm_submodule_disabled: true
     scm_wipe_workspace: false
+    skip_vote_successfull: false
+    skip_vote_failed: false
 
     testrail_project: "Mirantis OpenStack"
     testrail_milestone: "{fuel-release}"
@@ -172,6 +174,8 @@
           testrail_suite_desc:  '{testrail_suite_desc}'
           testrail_plan:        '{testrail_plan}'
           testrail_plan_desc:   '{testrail_plan_desc}'
+          skip_vote_successfull: '{skip_vote_successfull}'
+          skip_vote_failed:     '{skip_vote_failed}'
       - plugin-specific-parameters
 
 # parameters for jobs created per test-group and custom test job
@@ -210,6 +214,8 @@
           testrail_suite_desc:  '{testrail_suite_desc}'
           testrail_plan:        '{testrail_plan}'
           testrail_plan_desc:   '{testrail_plan_desc}'
+          skip_vote_successfull: '{skip_vote_successfull}'
+          skip_vote_failed:     '{skip_vote_failed}'
       - plugin-specific-parameters
 
 - defaults:
@@ -227,6 +233,8 @@
           scm_submodule_disabled: '{scm_submodule_disabled}'
           scm_wipe_workspace: '{scm_wipe_workspace}'
           gerrit_repo: '{gerrit_repo}'
+          skip_vote_successfull: '{skip_vote_successfull}'
+          skip_vote_failed: '{skip_vote_failed}'
     wrappers:
       - test-wrapper:
           test_timeout: '{test_timeout}'
