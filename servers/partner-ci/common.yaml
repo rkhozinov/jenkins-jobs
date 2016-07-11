@@ -22,6 +22,14 @@
           default: '{recreate_venv}'
           description: "Recreate virtual environemnt before tests"
       - bool:
+          name: SKIP_VOTE_SUCCESSFULL
+          default: '{skip_vote_successfull}'
+          description: "configure gerrit voting"
+      - bool:
+          name: SKIP_VOTE_FAILED
+          default: '{skip_vote_failed}'
+          description: "configure gerrit voting"
+      - bool:
           name: USE_SNAPSHOTS
           default: '{use_snapshots}'
           descrition: 'Will be used existing environment'
@@ -459,7 +467,7 @@
           default: 'refs/heads/{gerrit_branch}'
       - string:
           name: ARGS
-          default: '-e SC2086,SC2046'
+          default: '-e SC2046'
           description: 'shellcheck argurments'
     properties:
       - heavy-job:
@@ -468,7 +476,9 @@
       - shell: |
           #!/bin/bash -xe
           set -o pipefail
-          shellcheck ${{ARGS}} $(find . -name '*.sh') | tee -i shellcheck.log
+          if [[ SKIP_VOTE_SUCCESSFUL==FALSE ]] && [[ SKIP_VOTE_FAILED==FALSE ]]
+            shellcheck ${{ARGS}} $(find . -name '*.sh') | tee -i shellcheck.log
+          fi  
     publishers:
       - checker-publisher
 

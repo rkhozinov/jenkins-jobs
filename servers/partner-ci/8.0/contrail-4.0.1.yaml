@@ -125,6 +125,8 @@
     released_plugin_path: '/storage/contrail/released/contrail-3.0.noarch.rpm'
     scm_submodule_disabled: true
     scm_wipe_workspace: false 
+    skip_vote_successfull: false
+    skip_vote_failed: true
 
     vsrx_original_image_path: '/storage/contrail/vSRX.400.img'
     vsrx_target_image_path: '/var/lib/libvirt/images/vSRX.400.img'
@@ -201,7 +203,9 @@
 
       - '{flake8-name}'
       - '{radon-name}'
-      - '{shellcheck-name}'
+      - '{shellcheck-name}':  
+          skip_vote_successfull: false
+          skip_vote_failed: true
 
       - '{nightly-name}':
           multijob_build_pkg: true
