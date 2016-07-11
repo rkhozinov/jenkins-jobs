@@ -37,7 +37,7 @@
 - project:
     name: 'predefined_parameters'
     fuel-release: '8.0'
-    plugin-version: '2.1.0'
+    plugin-version: '2.0.0'
     plugin-name: 'vcenter'
     build-name: '{fuel-release}.dvs.build'
     regression-name: '{fuel-release}.{plugin-name}.regression'
