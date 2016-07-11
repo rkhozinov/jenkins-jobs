@@ -132,3 +132,11 @@
        current-parameters: true
        kill-phase-on: NEVER
        property-file: build_number
+     - name: '{fuel-release}.{plugin-name}.nsxv_ability_to_bind_port'
+       current-parameters: true
+       kill-phase-on: NEVER
+       property-file: build_number
+     - name: '{fuel-release}.{plugin-name}.nsxv_insecure_false'
+       current-parameters: true
+       kill-phase-on: NEVER
+       property-file: build_number
