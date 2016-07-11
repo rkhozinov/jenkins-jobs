@@ -22,10 +22,6 @@
           default: '{recreate_venv}'
           description: "Recreate virtual environemnt before tests"
       - bool:
-          name: SKIP_VOTE_SUCCESSFULL
-          default: '{skip_vote_successfull}'
-          description: "configure gerrit voting"
-      - bool:
           name: SKIP_VOTE_FAILED
           default: '{skip_vote_failed}'
           description: "configure gerrit voting"
@@ -307,9 +303,9 @@
          custom-url: '* $JOB_NAME $BUILD_URL'
          escape-quotes: true
          readable-message: true
-         skip-vote:
-           successfull: false
-           failed: false
+         skip-vote: 
+           successfull: '{skip_vote_successfull}'
+           failed: '{skip_vote_failed}'
            unstable: true
            notbuilt: true
 
@@ -320,6 +316,8 @@
       - generic-gerrit-trigger:
           gerrit_repo: '{gerrit_repo}'
           gerrit_branch: '{gerrit_branch}'
+          skip_vote_successfull: '{skip_vote_successfull}'
+          skip_vote_failed: '{skip_vote_failed}'
           trigger_on:
             - draft-published-event
             - patchset-created-event:
@@ -333,6 +331,8 @@
       - generic-gerrit-trigger:
           gerrit_repo: '{gerrit_repo}'
           gerrit_branch: '{gerrit_branch}'
+          skip_vote_successfull: '{skip_vote_successfull}'
+          skip_vote_failed: '{skip_vote_failed}'
           trigger_on:
             - change-merged-event
 
@@ -422,6 +422,8 @@
       - draft-patchset-gerrit-trigger:
           gerrit_repo: '{gerrit_repo}'
           gerrit_branch: '{gerrit_branch}'
+          skip_vote_successfull: '{skip_vote_successfull}'
+          skip_vote_failed: '{skip_vote_failed}'
     scm:
       - common-scm:
           scm_submodule_disabled: '{scm_submodule_disabled}'
@@ -451,6 +453,9 @@
       - draft-patchset-gerrit-trigger:
           gerrit_repo: '{gerrit_repo}'
           gerrit_branch: '{gerrit_branch}'
+          skip_vote_successfull: '{skip_vote_successfull}'
+          skip_vote_failed: '{skip_vote_failed}'
+
     scm:
       - common-scm:
           scm_submodule_disabled: '{scm_submodule_disabled}'
@@ -467,7 +472,7 @@
           default: 'refs/heads/{gerrit_branch}'
       - string:
           name: ARGS
-          default: '-e SC2046'
+          default: '-e SC2086,SC2046'
           description: 'shellcheck argurments'
     properties:
       - heavy-job:
@@ -476,9 +481,7 @@
       - shell: |
           #!/bin/bash -xe
           set -o pipefail
-          if [[ SKIP_VOTE_SUCCESSFUL==FALSE ]] && [[ SKIP_VOTE_FAILED==FALSE ]]
-            shellcheck ${{ARGS}} $(find . -name '*.sh') | tee -i shellcheck.log
-          fi  
+          shellcheck ${{ARGS}} $(find . -name '*.sh') | tee -i shellcheck.log
     publishers:
       - checker-publisher
 
@@ -492,6 +495,8 @@
       - draft-patchset-gerrit-trigger:
           gerrit_repo: '{gerrit_repo}'
           gerrit_branch: '{gerrit_branch}'
+          skip_vote_successfull: '{skip_vote_successfull}'
+          skip_vote_failed: '{skip_vote_failed}'
     scm:
       - common-scm:
           scm_submodule_disabled: '{scm_submodule_disabled}'
