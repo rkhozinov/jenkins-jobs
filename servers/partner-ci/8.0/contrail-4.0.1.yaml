@@ -205,9 +205,11 @@
 
       - '{nightly-name}':
           multijob_build_pkg: true
+          testrail_suite: "[8.0][PCE] Fuel plugin contrail v4.0.1 nightly"
                   
       - '{full-name}':
           multijob_build_pkg: true
+          testrail_suite: "[8.0][PCE] Fuel plugin contrail v4.0.1 Release Acceptance"
 
       - '{baremetal-name}':
           multijob_build_pkg: true
