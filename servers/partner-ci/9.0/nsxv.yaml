@@ -123,6 +123,10 @@
 
       - nsxv_ha_edges
 
+      - nsxv_ability_to_bind_port
+      - nsxv_insecure_false
+
+
     jobs:
       - '{build-name}':
           scm_submodule_disabled: true
