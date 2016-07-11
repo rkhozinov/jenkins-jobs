@@ -83,6 +83,8 @@
     released_plugin_path: '/storage/dvs/released/2.0/fuel-plugin-vmware-dvs-2.0-2.0.0-1.noarch.rpm'
     scm_submodule_disabled: true
     scm_wipe_workspace: false
+    skip_vote_successfull: false
+    skip_vote_failed: false
 
     testrail_project: "VMware DVS plugin"
     testrail_suite: "[8.0][PCE] VMware DVS plugin v2.0.0"
@@ -121,7 +123,9 @@
           scm_wipe_workspace: true
       - '{flake8-name}'
       - '{radon-name}'
-      - '{shellcheck-name}'
+      - '{shellcheck-name}':
+          skip_vote_successfull: '{skip_vote_successfull}'
+          skip_vote_failed: '{skip_vote_failed}'
 
       - '{nightly-name}':
           multijob_build_pkg: true
@@ -207,6 +211,8 @@
           testrail_suite_desc:  '{testrail_suite_desc}'
           testrail_plan:        '{testrail_plan}'
           testrail_plan_desc:   '{testrail_plan_desc}'
+          skip_vote_successfull: '{skip_vote_successfull}'
+          skip_vote_failed:     '{skip_vote_failed}'
       - plugin-specific-parameters:
           update_master:        '{update_master}'
           
@@ -247,6 +253,8 @@
           testrail_suite_desc:  '{testrail_suite_desc}'
           testrail_plan:        '{testrail_plan}'
           testrail_plan_desc:   '{testrail_plan_desc}'
+          skip_vote_successfull: '{skip_vote_successfull}'
+          skip_vote_failed:     '{skip_vote_failed}'
       - plugin-specific-parameters:
           update_master:        '{update_master}'
 
@@ -265,6 +273,8 @@
           scm_submodule_disabled: '{scm_submodule_disabled}'
           scm_wipe_workspace: '{scm_wipe_workspace}'
           gerrit_repo: '{gerrit_repo}'
+          skip_vote_successfull: '{skip_vote_successfull}'
+          skip_vote_failed: '{skip_vote_failed}'
     wrappers:
       - test-wrapper:
           test_timeout: '{test_timeout}'
@@ -322,10 +332,14 @@
       - draft-patchset-gerrit-trigger:
           gerrit_repo: '{gerrit_repo}'
           gerrit_branch: '{gerrit_branch}'
+          skip_vote_successfull: '{skip_vote_successfull}'
+          skip_vote_failed: '{skip_vote_failed}'
     scm:
       - common-scm:
           scm_submodule_disabled: '{scm_submodule_disabled}'
           gerrit_repo: '{gerrit_repo}'
+          skip_vote_successfull: '{skip_vote_successfull}'
+          skip_vote_failed: '{skip_vote_failed}'
           scm_wipe_workspace: '{scm_wipe_workspace}'
     wrapper:
       - runner-wrapper
@@ -441,6 +455,8 @@
       - draft-patchset-gerrit-trigger:
           gerrit_repo: '{gerrit_repo}'
           gerrit_branch: '{gerrit_branch}'
+          skip_vote_successfull: '{skip_vote_successfull}'
+          skip_vote_failed: '{skip_vote_failed}'
     properties:
       - runner-property:
           build-name: '{build-name}'
@@ -477,6 +493,8 @@
       - merge-gerrit-trigger:
           gerrit_repo: '{gerrit_repo}'
           gerrit_branch: '{gerrit_branch}'
+          skip_vote_successfull: '{skip_vote_successfull}'
+          skip_vote_failed: '{skip_vote_failed}'
     properties:
       - runner-property:
           build-name: '{build-name}'
