@@ -38,6 +38,20 @@
         current-parameters: true
         kill-phase-on: NEVER
 
+      - name: '{fuel-release}.{plugin-name}.{plugin-version}.contrail_add_delete_compute_ceph.juniper'
+        property-file: build_number
+        predefined-parameters: |
+           CONTRAIL_DISTRIBUTION=juniper
+        current-parameters: true
+        kill-phase-on: NEVER
+
+      - name: '{fuel-release}.{plugin-name}.{plugin-version}.contrail_add_all_contrail.juniper'
+        property-file: build_number
+        predefined-parameters: |
+           CONTRAIL_DISTRIBUTION=juniper
+        current-parameters: true
+        kill-phase-on: NEVER
+
       - name: '{fuel-release}.{plugin-name}.{plugin-version}.contrail_ceilometer.juniper'
         property-file: build_number
         predefined-parameters: |
@@ -101,21 +115,7 @@
         current-parameters: true
         kill-phase-on: NEVER
 
-      - name: '{fuel-release}.{plugin-name}.{plugin-version}.contrail_add_control.juniper'
-        property-file: build_number
-        predefined-parameters: |
-           CONTRAIL_DISTRIBUTION=juniper
-        current-parameters: true
-        kill-phase-on: NEVER
-
       - name: '{fuel-release}.{plugin-name}.{plugin-version}.contrail_ha_with_shutdown_contrail_node.juniper'
-        property-file: build_number
-        predefined-parameters: |
-           CONTRAIL_DISTRIBUTION=juniper
-        current-parameters: true
-        kill-phase-on: NEVER
-
-      - name: '{fuel-release}.{plugin-name}.{plugin-version}.contrail_add_config.juniper'
         property-file: build_number
         predefined-parameters: |
            CONTRAIL_DISTRIBUTION=juniper
@@ -203,7 +203,7 @@
         current-parameters: true
         kill-phase-on: NEVER
 
-      - name: '{fuel-release}.{plugin-name}.{plugin-version}.contrail_ha_multiple_nodegroups'
+      - name: '{fuel-release}.{plugin-name}.{plugin-version}.contrail_ha_multiple_networks'
         property-file: build_number
         predefined-parameters: |
            CONTRAIL_DISTRIBUTION=juniper
@@ -211,7 +211,7 @@
            MULTIPLE_NETWORKS_TEMPLATE="plugin_test/fuel-qa/system_test/tests_templates/tests_configs/multirack.yaml"
         current-parameters: true
         kill-phase-on: NEVER
-      - name: '{fuel-release}.{plugin-name}.{plugin-version}.contrail_multiple_nodegroups_add_controller'
+      - name: '{fuel-release}.{plugin-name}.{plugin-version}.contrail_multiple_networks_add_controller'
         property-file: build_number
         predefined-parameters: |
            CONTRAIL_DISTRIBUTION=juniper
@@ -219,7 +219,7 @@
            MULTIPLE_NETWORKS_TEMPLATE="plugin_test/fuel-qa/system_test/tests_templates/tests_configs/multirack.yaml"
         current-parameters: true
         kill-phase-on: NEVER
-      - name: '{fuel-release}.{plugin-name}.{plugin-version}.contrail_multiple_nodegroups_delete_controller'
+      - name: '{fuel-release}.{plugin-name}.{plugin-version}.contrail_multiple_networks_delete_controller'
         property-file: build_number
         predefined-parameters: |
            CONTRAIL_DISTRIBUTION=juniper
@@ -227,7 +227,7 @@
            MULTIPLE_NETWORKS_TEMPLATE="plugin_test/fuel-qa/system_test/tests_templates/tests_configs/multirack.yaml"
         current-parameters: true
         kill-phase-on: NEVER
-      - name: '{fuel-release}.{plugin-name}.{plugin-version}.contrail_multiple_nodegroups_delete_compute'
+      - name: '{fuel-release}.{plugin-name}.{plugin-version}.contrail_multiple_networks_delete_compute'
         property-file: build_number
         predefined-parameters: |
            CONTRAIL_DISTRIBUTION=juniper
@@ -235,7 +235,7 @@
            MULTIPLE_NETWORKS_TEMPLATE="plugin_test/fuel-qa/system_test/tests_templates/tests_configs/multirack.yaml"
         current-parameters: true
         kill-phase-on: NEVER
-      - name: '{fuel-release}.{plugin-name}.{plugin-version}.contrail_multiple_nodegroups_add_compute'
+      - name: '{fuel-release}.{plugin-name}.{plugin-version}.contrail_multiple_networks_add_compute'
         property-file: build_number
         predefined-parameters: |
            CONTRAIL_DISTRIBUTION=juniper
