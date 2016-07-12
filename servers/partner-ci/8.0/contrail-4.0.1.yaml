@@ -199,6 +199,7 @@
       - contrail_add_analytics
       - contrail_delete_analytics
       - contrail_add_all_contrail 
+      - contrail_different_ha_in_multinet 
     jobs:
       - '{build-name}':
           scm_submodule_disabled: true

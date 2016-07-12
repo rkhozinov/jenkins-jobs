@@ -243,3 +243,12 @@
            MULTIPLE_NETWORKS_TEMPLATE="plugin_test/fuel-qa/system_test/tests_templates/tests_configs/multirack.yaml"
         current-parameters: true
         kill-phase-on: NEVER
+
+      - name: '{fuel-release}.{plugin-name}.{plugin-version}.contrail_different_ha_in_multinet'
+        property-file: build_number
+        predefined-parameters: |
+           CONTRAIL_DISTRIBUTION=juniper
+           MULTIPLE_NETWORKS=True
+           MULTIPLE_NETWORKS_TEMPLATE="plugin_test/fuel-qa/system_test/tests_templates/tests_configs/multirack.yaml"
+        current-parameters: true
+        kill-phase-on: NEVER
