@@ -374,6 +374,16 @@
       - test-property
     builders:
       - conditional-step:
+           condition-kind: shell
+           condition-command: |
+            [ "${{BUILD_PKG}}" == "true"       ] 
+           steps:
+             - trigger-builds:
+                 - project: ${{PKG_JOB_NAME}}
+                   current-parameters: false
+                   git-revision: false
+                   block: true      
+      - conditional-step:
           condition-kind: shell
           condition-command: |
             [ ! -z ${{PKG_JOB_NAME}}         ] && \
