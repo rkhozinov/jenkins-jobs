@@ -69,7 +69,7 @@
     test_timeout: 300
     iso_file: 'fuel-9.0-mos-495-2016-06-16_18-18-00.iso'
     gerrit_repo: 'fuel-plugin-vmware-dvs'
-    gerrit_branch: 'master'
+    gerrit_branch: 'stable/9.0'
     email_to: 'rkhozinov@mirantis.com'
     released_plugin_path: '/storage/nsxv/released/nsxv-1.1-1.1.0-1.noarch.rpm'
     scm_submodule_disabled: false
@@ -168,16 +168,16 @@
 
       - '{fuel-release}.{plugin-name}.bvt.test'
 
-#      - '{regression-name}':
-#          testrail_suite: "[8.0][PCE] VMware DVS plugin v2.1.0 Regression"
-#          testrail_suite_desc: "Suite description"
-#          testrail_plan: "$TREP_TESTRAIL_SUITE #${{DATE}}"
-#          testrail_plan_desc: "Test plan description"
-#          testrail_run: "$TREP_TESTRAIL_SUITE"
-#          testrail_run_desc: "Test run description"
-#          pkg_job_name: ''
-#          iso_job_name: ''
-#          multijob_build_pkg: false
+      - '{regression-name}':
+          testrail_suite: "[8.0][PCE] VMware DVS plugin v2.1.0 Regression"
+          testrail_suite_desc: "Suite description"
+          testrail_plan: "$TREP_TESTRAIL_SUITE #${{DATE}}"
+          testrail_plan_desc: "Test plan description"
+          testrail_run: "$TREP_TESTRAIL_SUITE"
+          testrail_run_desc: "Test run description"
+          pkg_job_name: ''
+          iso_job_name: ''
+          multijob_build_pkg: false
 
       - '{fuel-release}.{plugin-name}.regression.test'
 
