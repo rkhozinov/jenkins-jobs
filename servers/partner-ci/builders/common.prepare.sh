@@ -64,6 +64,8 @@ esac
 
 REQS_PATH="https://raw.githubusercontent.com/openstack/fuel-qa/${REQS_BRANCH}/fuelweb_test/requirements.txt"
 
+REQS_PATH_DEVOPS="https://raw.githubusercontent.com/openstack/fuel-qa/${REQS_BRANCH}/fuelweb_test/requirements-devops-source.txt"
+
 ###############################################################################
 
 ## We have limited disk resources, so before run of system tests a lab
@@ -118,8 +120,10 @@ function prepare_venv {
     easy_install -U pip
     if [[ "${DEBUG}" == "true" ]]; then
         pip install -r "${REQS_PATH}" --upgrade
+        pip install -r "${REQS_PATH_DEVOPS}" --upgrade
     else
         pip install -r "${REQS_PATH}" --upgrade > /dev/null 2>/dev/null
+        pip install -r "${REQS_PATH_DEVOPS}" --upgrade > /dev/null 2>/dev/null
     fi
 
     django-admin.py syncdb --settings=devops.settings --noinput
