@@ -2,6 +2,10 @@
 - parameter:
     name: plugin-specific-parameters
     parameters:
+      - bool:
+          name: UPDATE_MASTER
+          default: '{update_master}'
+          description: 'turns on update fuel master node to maintenance update'
       - string:
           name: WORKSTATION_SNAPSHOT
           default: 'vcenterha'
@@ -33,6 +37,16 @@
           name: TEST_GROUP_CONFIG
           default: '${TEST_GROUP}'
           description: 'Snapshot name for vsphere lab'
+      - string:
+          name: MIRROR
+          default: 'http://mirror.seed-cz1.fuel-infra.org'
+          description: 'mirror for package repositories. this mirror is optimized for CZ'
+      - string:
+          name: MIRROR_UBUNTU
+          default: >
+             deb ${{MIRROR}}/pkgs/ubuntu/ trusty main universe multiverse |
+             deb ${{MIRROR}}/pkgs/ubuntu/ trusty-updates main universe multiverse
+          description: 'proposed repositories to update ubuntu cluster'
 
 - project:
     name: 'predefined_parameters'
@@ -176,6 +190,7 @@
           testrail_plan_desc:   '{testrail_plan_desc}'
           skip_vote_successfull: '{skip_vote_successfull}'
           skip_vote_failed:     '{skip_vote_failed}'
+          update_master:        '{update_master}'
       - plugin-specific-parameters
 
 # parameters for jobs created per test-group and custom test job
@@ -216,8 +231,8 @@
           testrail_plan_desc:   '{testrail_plan_desc}'
           skip_vote_successfull: '{skip_vote_successfull}'
           skip_vote_failed:     '{skip_vote_failed}'
+          update_master:        '{update_master}'
       - plugin-specific-parameters
-
 - defaults:
     name: global
     disabled: false
