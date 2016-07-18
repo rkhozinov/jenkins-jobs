@@ -101,10 +101,12 @@ function get_venv_requirements {
   rm -f requirements.txt*
   wget $REQS_PATH
   export REQS_PATH="$(pwd)/requirements.txt"
+  wget $REQS_PATH_DEVOPS
+  export REQS_PATH_DEVOPS="$(pwd)/requirements-devops-source.txt"
 
   if [[ "${REQS_BRANCH}" == "stable/8.0" ]]; then
     # bug: https://bugs.launchpad.net/fuel/+bug/1528193
-    #sed -i 's/python-neutronclient.*/python-neutronclient==3.1.0/' $REQS_PATH
+    sed -i 's/@2.*/@2.9.20/g' $REQS_PATH_DEVOPS
     #echo oslo.i18n >> $REQS_PATH
     echo stable/8.0
   fi
