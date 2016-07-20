@@ -47,6 +47,9 @@
              deb ${{MIRROR}}/pkgs/ubuntu/ trusty main universe multiverse |
              deb ${{MIRROR}}/pkgs/ubuntu/ trusty-updates main universe multiverse
           description: 'proposed repositories to update ubuntu cluster'
+      - string:
+          name: ISO_STORAGE
+          default: '{iso_storage}'
 
 - project:
     name: 'predefined_parameters'
@@ -82,6 +85,7 @@
     runner_timeout: 600
     test_timeout: 300
     iso_file: 'fuel-8.0-570.iso'
+    iso_storage: '/storage/downloads'        
     gerrit_repo: 'fuel-qa'
     gerrit_branch: 'stable/8.0'
     email_to: 'rkhozinov@mirantis.com ibumarskov@mirantis.com'
@@ -147,6 +151,8 @@
           scm_submodule_disabled: false
 
       - '{regression-name}':
+          iso_file: 'MirantisOpenStack-8.0.iso'
+          iso_storage: '/storage/downloads'        
           pkg_job_name: ''
           iso_job_name: ''
           multijob_build_pkg: false
