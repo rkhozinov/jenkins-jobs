@@ -233,7 +233,8 @@
           testrail_plan_desc:   '{testrail_plan_desc}'
           skip_vote_successfull: '{skip_vote_successfull}'
           skip_vote_failed:     '{skip_vote_failed}'
-      - plugin-specific-parameters
+      - plugin-specific-parameters:
+          iso_storage:          '{iso_storage}'
 
 # parameters for jobs created per test-group and custom test job
 - test-parameters: &test-parameters
@@ -273,7 +274,8 @@
           testrail_plan_desc:   '{testrail_plan_desc}'
           skip_vote_successfull: '{skip_vote_successfull}'
           skip_vote_failed:     '{skip_vote_failed}'
-      - plugin-specific-parameters
+      - plugin-specific-parameters:
+          iso_storage:          '{iso_storage}'
 
 - defaults:
     name: global
