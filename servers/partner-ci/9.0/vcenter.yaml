@@ -35,6 +35,9 @@
       - string:
           name: DVS_SWITCHES
           default: 'Cluster1,Cluster2'
+      - string:
+          name: ISO_STORAGE
+          default: '{iso_storage}'
 
 - project:
     name: 'predefined_parameters'
@@ -71,6 +74,7 @@
     runner_timeout: 600
     test_timeout: 300
     iso_file: ''
+    iso_storage: '/storage/downloads'
     gerrit_repo: 'fuel-qa'
     gerrit_branch: 'stable/mitaka'
     email_to: 'rkhozinov@mirantis.com ibumarskov@mirantis.com'
@@ -164,6 +168,8 @@
           scm_submodule_disabled: false
 
       - '{regression-name}':
+          iso_file: ''
+          iso_storage: '/storage/downloads'
           pkg_job_name: ''
           iso_job_name: ''
           multijob_build_pkg: false
@@ -208,6 +214,7 @@
           skip_vote_failed:     '{skip_vote_failed}'
       - plugin-specific-parameters:
           kvm_use:              '{kvm_use}'
+          iso_storage:          '{iso_storage}'
 
 # parameters for jobs created per test-group and custom test job
 - test-parameters: &test-parameters
@@ -249,6 +256,7 @@
           skip_vote_failed:     '{skip_vote_failed}'
       - plugin-specific-parameters:
           kvm_use:              '{kvm_use}'
+          iso_storage:          '{iso_storage}'
 
 - defaults:
     name: global
