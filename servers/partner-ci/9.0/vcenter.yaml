@@ -73,7 +73,7 @@
     testjob_build_pkg: false
     runner_timeout: 600
     test_timeout: 300
-    iso_file: ''
+    iso_file: 'MirantisOpenStack-9.0.iso'
     iso_storage: '/storage/downloads'
     gerrit_repo: 'fuel-qa'
     gerrit_branch: 'stable/mitaka'
