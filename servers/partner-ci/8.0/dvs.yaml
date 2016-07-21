@@ -73,7 +73,7 @@
     testjob_build_pkg: false
     runner_timeout: 600
     test_timeout: 300
-    iso_file: 'fuel-8.0-570.iso'
+    iso_file: 'MirantisOpenStack-8.0.iso'
     iso_storage: '/storage/downloads'
     gerrit_repo: 'fuel-plugin-vmware-dvs'
     gerrit_branch: 'stable/8.0-agentful'
@@ -167,8 +167,6 @@
       - '{fuel-release}.{plugin-name}.bvt.test'
 
       - '{regression-name}':
-          iso_file: 'MirantisOpenStack-8.0.iso'
-          iso_storage: '/storage/downloads'
           testrail_suite: "[8.0][PCE] VMware DVS plugin v2.1.0 Regression"
           testrail_suite_desc: "Suite description"
           testrail_plan: "$TREP_TESTRAIL_SUITE #${{DATE}}"
