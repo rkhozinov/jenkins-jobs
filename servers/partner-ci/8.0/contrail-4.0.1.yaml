@@ -121,7 +121,7 @@
     testjob_build_pkg: false
     runner_timeout: 600
     test_timeout: 300
-    iso_file: 'fuel-8.0-570.iso'
+    iso_file: 'MirantisOpenStack-8.0.iso'
     iso_storage: '/storage/downloads'
     gerrit_repo: 'fuel-plugin-contrail'
     gerrit_branch: 'master'
@@ -253,8 +253,6 @@
       - '{fuel-release}.{plugin-name}.{plugin-version}.bvt.test.juniper'
 
       - '{regression-name}':
-          iso_file: 'MirantisOpenStack-8.0.iso'
-          iso_storage: '/storage/downloads'
           testrail_suite: "Contrail Plugin v4.x.x"
           testrail_suite_desc: "Suite description"
           testrail_milestone: "Fuel Contrail Plugin v4.0.1"
