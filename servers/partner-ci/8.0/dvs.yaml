@@ -27,6 +27,9 @@
       - string:
           name: DVS_SWITCHES
           default: 'Cluster1,Cluster2'
+      - string:
+          name: ISO_STORAGE
+          default: '{iso_storage}'
 
 - project:
     name: 'predefined_parameters'
@@ -71,6 +74,7 @@
     runner_timeout: 600
     test_timeout: 300
     iso_file: 'fuel-8.0-570.iso'
+    iso_storage: '/storage/downloads'
     gerrit_repo: 'fuel-plugin-vmware-dvs'
     gerrit_branch: 'stable/8.0-agentful'
     email_to: 'rkhozinov@mirantis.com otsvigun@mirantis.com'
@@ -163,6 +167,8 @@
       - '{fuel-release}.{plugin-name}.bvt.test'
 
       - '{regression-name}':
+          iso_file: 'MirantisOpenStack-8.0.iso'
+          iso_storage: '/storage/downloads'
           testrail_suite: "[8.0][PCE] VMware DVS plugin v2.1.0 Regression"
           testrail_suite_desc: "Suite description"
           testrail_plan: "$TREP_TESTRAIL_SUITE #${{DATE}}"
@@ -214,6 +220,7 @@
           skip_vote_failed:     '{skip_vote_failed}'
       - plugin-specific-parameters:
           update_master:        '{update_master}'
+          iso_storage:          '/storage/downloads'
 
 # parameters for jobs created per test-group and custom test job
 - test-parameters: &test-parameters
@@ -255,6 +262,7 @@
           skip_vote_failed:     '{skip_vote_failed}'
       - plugin-specific-parameters:
           update_master:        '{update_master}'
+          iso_storage:          '/storage/downloads'
 
 - defaults:
     name: global

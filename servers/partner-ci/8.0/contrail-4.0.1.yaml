@@ -70,6 +70,9 @@
           name: VSRX_TEMPLATE_PATH
           default: '{vsrx_template_path}'
           description: 'The path to the vsrx template'
+      - string:
+          name: ISO_STORAGE
+          default: '{iso_storage}'
 
 - project:
     name: 'predefined_parameters'
@@ -119,6 +122,7 @@
     runner_timeout: 600
     test_timeout: 300
     iso_file: 'fuel-8.0-570.iso'
+    iso_storage: '/storage/downloads'
     gerrit_repo: 'fuel-plugin-contrail'
     gerrit_branch: 'master'
     email_to: 'rkhozinov@mirantis.com okosse@mirantis.com otsvigun@mirantis.com'
@@ -249,6 +253,8 @@
       - '{fuel-release}.{plugin-name}.{plugin-version}.bvt.test.juniper'
 
       - '{regression-name}':
+          iso_file: 'MirantisOpenStack-8.0.iso'
+          iso_storage: '/storage/downloads'
           testrail_suite: "Contrail Plugin v4.x.x"
           testrail_suite_desc: "Suite description"
           testrail_milestone: "Fuel Contrail Plugin v4.0.1"
@@ -301,6 +307,7 @@
           vsrx_original_image_path: '{vsrx_original_image_path}'
           vsrx_target_image_path:   '{vsrx_target_image_path}'
           vsrx_template_path:       '{vsrx_template_path}'
+          iso_storage:           '{iso_storage}'
 
 # parameters for jobs created per test-group and custom test job
 - test-parameters: &test-parameters
@@ -349,6 +356,7 @@
           vsrx_original_image_path: '{vsrx_original_image_path}'
           vsrx_target_image_path:   '{vsrx_target_image_path}'
           vsrx_template_path:       '{vsrx_template_path}'
+          iso_storage:           '{iso_storage}'
 
 - defaults:
     name: global
