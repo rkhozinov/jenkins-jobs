@@ -30,12 +30,15 @@ fi
 rm -rf logs/*
 
 export ISO_PATH="${ISO_STORAGE}/${ISO_FILE}"
+
 [ ! -f $ISO_PATH ] && (echo "The $ISO_PATH isn't exist"; exit 1)
+
 if [[ $ISO_FILE == *"mos"* ]] || [[ $ISO_FILE == *"kilo"* ]]; then 
   export ISO_VERSION=$(echo $ISO_FILE | cut -d'-' -f4-4 | tr -d '.iso' )
+elif [[ $ISO_FILE == *"Mirantis"* ]]; then
+  export ISO_VERSION=$(echo $ISO_FILE | cut -d'.' -f1-2 )
 else
   export ISO_VERSION=$(echo $ISO_FILE | cut -d'-' -f3-3 | tr -d '.iso' )
-
 fi
 
 echo iso build number is $ISO_VERSION
