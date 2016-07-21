@@ -25,7 +25,7 @@
     runner-timeout: 600
     test-timeout: 500
 
-    iso-file: 'fuel-7.0-301-2015-09-22_20-01-53.iso'
+    iso-file: 'MirantisOpenStack-7.0.iso'
     gerrit-repo: 'fuel-plugin-vmware-dvs'
     gerrit-branch: 'stable/7.0'
     email-to: 'rkhozinov@mirantis.com'
