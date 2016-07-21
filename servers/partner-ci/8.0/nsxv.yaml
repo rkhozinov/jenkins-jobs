@@ -69,7 +69,7 @@
     testjob_build_pkg: false
     runner_timeout: 600
     test_timeout: 300
-    iso_file: 'fuel-8.0-570.iso'
+    iso_file: 'MirantisOpenStack-8.0.iso'
     iso_storage: '/storage/downloads'
     gerrit_repo: 'fuel-plugin-nsxv'
     gerrit_branch: '8.0'
@@ -150,8 +150,6 @@
       - '{fuel-release}.{plugin-name}.bvt.test'
 
       - '{regression-name}':
-          iso_file: 'MirantisOpenStack-8.0.iso'
-          iso_storage: '/storage/downloads'
           testrail_suite: "[8.0][PCE] VMware NSXv plugin v2.0.0 Regression"
           testrail_suite_desc: "Suite description"
           testrail_plan: "$TREP_TESTRAIL_SUITE #${{DATE}}"
