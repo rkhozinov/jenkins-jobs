@@ -82,7 +82,7 @@
     testjob_build_pkg: false
     runner_timeout: 600
     test_timeout: 300
-    iso_file: 'fuel-7.0-301-2015-09-22_20-01-53.iso'
+    iso_file: 'MirantisOpenStack-7.0.iso'
     gerrit_repo: 'fuel-plugin-nsxv'
     gerrit_branch: '7.0'
     email_to: 'rkhozinov@mirantis.com'

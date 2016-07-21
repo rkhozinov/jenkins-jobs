@@ -96,7 +96,7 @@
     runner_timeout: 600
     test_timeout: 300
 
-    iso_file: 'fuel-6.1-525-2015-06-19_13-02-31.iso'
+    iso_file: 'MirantisOpenStack-6.1.iso'
     gerrit_repo: 'fuel-plugin-contrail'
     gerrit_branch: 'stable/2.0'
     email_to: 'rkhozinov@mirantis.com okosse@mirantis.com otsvigun@mirantis.com'
