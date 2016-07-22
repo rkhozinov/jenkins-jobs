@@ -1,7 +1,7 @@
 - runner-condition
 - multijob:
     name: 'Smoke/BVT tests for vcenter5 {fuel-release}'
-    condition: COMPLETED
+    condition: SUCCESSFUL
     projects:
      - name: '{fuel-release}.{plugin-name}.vcenter_dvs_bvt'
        property-file: build_number
