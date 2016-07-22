@@ -3,6 +3,22 @@
     name: plugin-specific-parameters
     parameters:
       - bool:
+          name: UPDATE_MASTER
+          default: '{update_master}'
+          description: 'turns on update fuel master node to maintenance update'
+      - bool:
+          name: ENABLE_PROPOSED 
+          default: '{enable_proposed}'
+          description: 'turns on update fuel master node to maintenance update'
+      - string:
+          name: MIRROR_HOST
+          default: 'http://mirror.seed-cz1.fuel-infra.org'
+          description: 'mirror for package repositories. this mirror is optimized for CZ'
+      - string:
+          name: SNAPSHOTS_URL
+          default: 'https://product-ci.infra.mirantis.net/job/9.x.snapshot/lastSuccessfulBuild/artifact/snapshots.params'
+          description: 'mirror for package repositories. this mirror is optimized for CZ'
+      - bool:
           name: KVM_USE
           default: '{obj:kvm_use}'
           description: 'turns on kvm_mode for an openstack cluster'
@@ -11,7 +27,7 @@
           default: 'doubledvs'
       - string:
           name: WORKSTATION_NODES
-          default: 'esxi1 esxi2 esxi3 vcenter trusty'
+          default: 'esxi1 esxi2 esxi3 vcenter'
       - string:
           name: VCENTER_IP
           default: '172.16.0.145'
@@ -67,6 +83,7 @@
     disable_ssl: true
     kvm_use: false
     update_master: true
+    enable_proposed: false
     debug: true
     publish_results: true
     multijob_build_pkg: true
@@ -167,22 +184,6 @@
       - '{fuel-release}.{plugin-name}.{testgroup}':
           scm_submodule_disabled: false
 
-      - '{regression-name}':
-          iso_file: ''
-          iso_storage: '/storage/downloads'
-          pkg_job_name: ''
-          iso_job_name: ''
-          multijob_build_pkg: false
-          testrail_suite: "[9.0][PCE] vCenter Smoke/BVT"
-          testrail_suite_desc: "Suite description"
-          testrail_plan: "$TREP_TESTRAIL_SUITE #${{DATE}}"
-          testrail_plan_desc: "Test plan description"
-          testrail_run: "$TREP_TESTRAIL_SUITE"
-          testrail_run_desc: "Test run description"
-
-      - '{fuel-release}.{plugin-name}.regression.test':
-          scm_submodule_disabled: false
-
 - runner-parameters: &runner-parameters
     name: 'runner-parameters'
     parameters:
@@ -213,6 +214,8 @@
           skip_vote_successfull: '{skip_vote_successfull}'
           skip_vote_failed:     '{skip_vote_failed}'
       - plugin-specific-parameters:
+          enable_proposed:      '{enable_proposed}'
+          update_master:        '{update_master}'
           kvm_use:              '{kvm_use}'
           iso_storage:          '{iso_storage}'
 
@@ -255,6 +258,8 @@
           skip_vote_successfull: '{skip_vote_successfull}'
           skip_vote_failed:     '{skip_vote_failed}'
       - plugin-specific-parameters:
+          enable_proposed:      '{enable_proposed}'
+          update_master:        '{update_master}'
           kvm_use:              '{kvm_use}'
           iso_storage:          '{iso_storage}'
 
@@ -302,20 +307,14 @@
                 project: ${{PKG_JOB_NAME}}
                 which-build: specific-build
                 build-number: ${{PKG_JOB_BUILD_NUMBER}}
-      - conditional-step:
-          condition-kind: shell
-          condition-command: |
-            [ ! -z ${{ISO_JOB_NAME}} ] && \
-            [   -z ${{ISO_FILE}}     ]
-          steps:
-            - copyartifact:
-                project: "${{ISO_JOB_NAME}}"
-                filter: "iso_file"
-                which-build: last-successful
+  #      - inject:
+  #          properties-content: $ADDITIONAL_PARAMETERS
+      - inject:
+          properties-content: $ENV_PARAMETERS
       - shell:
-          !include-raw-escape: ../builders/common.prepare.sh
+          !include-raw-escape: ../builders/common.prepare.ng.sh
       - shell:
-          !include-raw-escape: ../builders/vcenter.test.sh
+          !include-raw-escape: ../builders/vcenter.test.ng.sh
     publishers:
       - runner-publisher:
           properties_name: properties
@@ -342,41 +341,6 @@
     name: '{custom-name}.dev'
     description: 'The custom test for {fuel-release}.{plugin-name}.{plugin-version}'
     concurrent: true
-
-- job-template:
-    name: '{regression-name}'
-    description: 'The regression test for {fuel-release}.{plugin-name}.{plugin-version}'
-    disabled: '{obj:regression_disabled}'
-    concurrent: true
-    project-type: multijob
-    node: runner
-    <<: *runner-parameters
-    scm: []
-    triggers:
-      - timed: '{regression_timer}'
-    properties:
-      - runner-property:
-          build-name: '{build-name}'
-    wrappers:
-      - runner-wrapper
-    publishers:
-      - runner-publisher:
-          properties_name: regression.properties
-          email_to: '{email_to}'
-    builders:
-      - multijob:
-          name: '1st phase - regression test'
-          condition: COMPLETED
-          projects:
-            - name: '{fuel-release}.{plugin-name}.regression.test'
-              predefined-parameters: |
-                TEST_GROUP=vcenter_dvs_bvt
-                TEST_GROUP_CONFIG=${{TEST_GROUP}}
-                DVS_PLUGIN_PATH={released_plugin_path}
-                PLUGIN_VERSION={plugin-version}
-                PKG_JOB_BUILD_NUMBER=released
-              current-parameters: true
-              kill-phase-on: NEVER
 
 - job-template:
     name: '{nightly-name}'
