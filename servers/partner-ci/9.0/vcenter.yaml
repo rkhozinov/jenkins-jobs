@@ -3,22 +3,6 @@
     name: plugin-specific-parameters
     parameters:
       - bool:
-          name: UPDATE_MASTER
-          default: '{update_master}'
-          description: 'turns on update fuel master node to maintenance update'
-      - bool:
-          name: ENABLE_PROPOSED 
-          default: '{enable_proposed}'
-          description: 'turns on update fuel master node to maintenance update'
-      - string:
-          name: MIRROR_HOST
-          default: 'http://mirror.seed-cz1.fuel-infra.org'
-          description: 'mirror for package repositories. this mirror is optimized for CZ'
-      - string:
-          name: SNAPSHOTS_URL
-          default: 'https://product-ci.infra.mirantis.net/job/9.x.snapshot/lastSuccessfulBuild/artifact/snapshots.params'
-          description: 'mirror for package repositories. this mirror is optimized for CZ'
-      - bool:
           name: KVM_USE
           default: '{obj:kvm_use}'
           description: 'turns on kvm_mode for an openstack cluster'
@@ -307,8 +291,8 @@
                 project: ${{PKG_JOB_NAME}}
                 which-build: specific-build
                 build-number: ${{PKG_JOB_BUILD_NUMBER}}
-  #      - inject:
-  #          properties-content: $ADDITIONAL_PARAMETERS
+      - inject:
+          properties-content: $TESTRAIL_PARAMETERS
       - inject:
           properties-content: $ENV_PARAMETERS
       - shell:
@@ -325,11 +309,6 @@
 - job-template:
     name: '{fuel-release}.{plugin-name}.{testgroup}'
     description: 'The test "{testgroup}" for {fuel-release}.{plugin-name}.{plugin-version}'
-    concurrent: true
-
-- job-template:
-    name: '{fuel-release}.{plugin-name}.regression.test'
-    description: 'The regression test for {fuel-release}.{plugin-name}.{plugin-version}'
     concurrent: true
 
 - job-template:
