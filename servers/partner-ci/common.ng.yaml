@@ -2,6 +2,33 @@
     name: common-parameters
     parameters:
       - bool:
+          name: UPDATE_MASTER
+          default: '{update_master}'
+          description: 'turns on update fuel master node to maintenance update'
+      - bool:
+          name: ENABLE_PROPOSED 
+          default: '{enable_proposed}'
+          description: 'turns on update fuel master node to maintenance update'
+      - string:
+          name: MIRROR_HOST
+          default: 'http://mirror.seed-cz1.fuel-infra.org'
+          description: 'mirror for package repositories. this mirror is optimized for CZ'
+      - string:
+          name: EXTRA_DEB_REPOS
+      - string:
+          name: UPDATE_FUEL_MIRROR
+      - string:
+          name: CUSTOM_VERSION
+          description: 'mos repo snapshots version'
+      - string:
+          name: SNAPSHOTS_ID
+          default: '${{${{CUSTOM_VERSION:10}}:-lastSuccessfulBuild}}'
+          description: 'snapshots number or lastSuccessfulBuild'
+      - string:
+          name: SNAPSHOTS_URL
+          default: 'https://product-ci.infra.mirantis.net/job/9.x.snapshot/${{SNAPSHOTS_ID}}/artifact/snapshots.params'
+          description: 'mirror for package repositories. this mirror is optimized for CZ'
+      - bool:
           name: PUBLISH_RESULTS
           default: '{obj:publish_results}'
           description: 'Reports results to testrail'
@@ -34,9 +61,6 @@
           default: '{iso_file}'
           description: 'ISO file name that is on the tpi-s1 in /storage/downloads'
       - string:
-          name: CUSTOM_VERSION
-          description: 'mos repo snapshots version'
-      - string:
           name: ISO_STORAGE
           default: '/storage/downloads'
           description: 'Storage for iso files'
@@ -55,25 +79,13 @@
       - string:
           name: PKG_JOB_BUILD_NUMBER
           description: 'The name of job for copying of plugin pkg artefacts'
-      - string:
-          name: TREP_TESTRAIL_SUITE
-          default: '{testrail_suite}'
-          description: 'The test suite name, ex.[8.0][PCE] vCenter Smoke/BVT'
-#     - string:
-#         name: TREP_TESTRAIL_CONFIGURATION
-#         default: "{testrail_suite_conf}"
-      - string:
-          name: TREP_TESTRAIL_SUITE_DESCRIPTION
-          default: '{testrail_suite_desc}'
-          description: 'Testrail suite description'
-      - string:
-          name: TREP_TESTRAIL_PLAN
-          default: '{testrail_plan}'
-          description: 'Testrail testplan name'
-      - string:
-          name: TREP_TESTRAIL_PLAN_DESCRIPTION
-          default: '{testrail_plan_desc}'
-          description: 'Testrail testplan description'
+      - text: 
+          name: TESTRAIL_PARAMETERS 
+          default: |
+            TREP_TESTRAIL_SUITE={testrail_suite}
+            TREP_TESTRAIL_SUITE_DESCRIPTION={testrail_suite_desc}
+            TREP_TESTRAIL_PLAN={testrail_plan}
+            TREP_TESTRAIL_PLAN_DESCRIPTION={testrail_plan_desc}
       - text:
           name: ENV_PARAMETERS 
           default: |
@@ -84,33 +96,6 @@
             SLAVE_NODE_MEMORY={slave_node_memory}
             ADMIN_NODE_CPU={admin_node_cpu}
             SLAVE_NODE_CPU={slave_node_cpu}
-      - text:
-          name: ADDITIONAL_PARAMETERS 
-          default: |
-            UBUNTU_MIRROR_ID=''
-            CENTOS_MIRROR_ID=''
-            MOS_UBUNTU_MIRROR_ID=''
-            MOS_CENTOS_OS_MIRROR_ID=''
-            MOS_CENTOS_PROPOSED_MIRROR_ID=''
-            MOS_CENTOS_UPDATES_MIRROR_ID=''
-            MOS_CENTOS_HOLDBACK_MIRROR_ID=''
-            MOS_CENTOS_HOTFIX_MIRROR_ID=''
-            MOS_CENTOS_SECURITY_MIRROR_ID=''
-            MOS_CENTOS_OS_MIRROR_ID=''
-            MOS_CENTOS_PROPOSED_MIRROR_ID=''
-            MOS_CENTOS_UPDATES_MIRROR_ID=''
-            MOS_CENTOS_SECURITY_MIRROR_ID=''
-            MOS_CENTOS_HOLDBACK_MIRROR_ID=''
-            MOS_CENTOS_HOTFIX_MIRROR_ID=''
-            ENABLE_MOS_UBUNTU_PROPOSED=true
-            ENABLE_MOS_UBUNTU_UPDATES=true
-            ENABLE_MOS_UBUNTU_SECURITY=true
-            ENABLE_MOS_UBUNTU_HOLDBACK=true
-            ENABLE_MOS_CENTOS_OS=true
-            ENABLE_MOS_CENTOS_PROPOSED=true
-            ENABLE_MOS_CENTOS_UPDATES=true
-            ENABLE_MOS_CENTOS_SECURITY=true
-            ENABLE_MOS_CENTOS_HOLDBACK=true
 - publisher:
     name: runner-publisher
     publishers:
