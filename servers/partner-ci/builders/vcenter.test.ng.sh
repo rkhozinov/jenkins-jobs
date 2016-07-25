@@ -4,16 +4,14 @@
 [[ "${DEBUG}" == "true" ]] && set -x || set +x
 [ -z $ISO_FILE  ] && (echo "ISO_FILE variable is empty"; exit 1)
 
-#Set statistics job-group properties for swarm tests
-FUEL_STATS_HOST="fuel-collect-systest.infra.mirantis.net"
-ANALYTICS_IP="fuel-stats-systest.infra.mirantis.net"
+#Set statistics job-group properties for tests
+export FUEL_STATS_HOST=${FUEL_STATS_HOST:-"fuel-collect-systest.infra.mirantis.net"}
+export ANALYTICS_IP="${ANALYTICS_IP:-"fuel-stats-systest.infra.mirantis.net"}"
 
-export FUEL_STATS_HOST="${FUEL_STATS_HOST}"
-export ANALYTICS_IP="${ANALYTICS_IP}"
-
-export MIRROR_HOST="mirror.seed-cz1.fuel-infra.org"
+export MIRROR_HOST=${MIRROR_HOST:-"mirror.seed-cz1.fuel-infra.org"}
 
 export SNAPSHOTS_ID=${CUSTOM_VERSION:10}   
+
 [ -z "${SNAPSHOTS_ID}" ] && { echo SNAPSHOTS_ID is empty; exit 1; }
 
 wget --no-check-certificate -O snapshots.params ${SNAPSHOTS_URL/SNAPSHOTS_ID/$SNAPSHOTS_ID}
@@ -107,7 +105,7 @@ for _dn in  "proposed"  \
     __repo_id_ptr="MOS_UBUNTU_MIRROR_ID"
     __repo_url="http://${MIRROR_HOST}/mos-repos/ubuntu/snapshots/${!__repo_id_ptr}"
     if [[ "${!__enable_ptr}" = true ]] ; then
-        __repo_name="mos-${_dn},deb ${__repo_url} mos9.0-updates main restricted"
+        __repo_name="mos-${_dn},deb ${__repo_url} mos9.0-updates main ${_dn}"
         EXTRA_DEB_REPOS="$(join "${__pipe}" "${EXTRA_DEB_REPOS}" "${__repo_name}")"
     fi
 done
@@ -147,7 +145,10 @@ if [[ $ISO_FILE == *"Mirantis"* ]]; then
   export FUEL_RELEASE=$(echo $ISO_FILE | cut -d- -f2 | tr -d '.iso')
 fi
 
-export ENV_NAME="${ENV_PREFIX}.${CUSTOM_VERSION:10}"
+[ ${SNAPSHOTS_ID} ] && export env_id=${SNAPSHOTS_ID} || export env_id=${CUSTOM_VERSION:10}
+[ -z  ${env_id}   ] && { echo "Environment ID is not defined"; exit 1; }
+
+export ENV_NAME="${ENV_PREFIX}.${env_id}"
 export VENV_PATH="${HOME}/${FUEL_RELEASE}-venv"
 
 [ -z "${DVS_PLUGIN_PATH}" ] && export DVS_PLUGIN_PATH=$(ls -t ${WORKSPACE}/fuel-plugin-vmware-dvs*.rpm | head -n 1)
@@ -170,6 +171,15 @@ echo "env-name: ${ENV_NAME}"
 echo "iso-path: ${ISO_PATH}"
 echo "plugin-path: ${DVS_PLUGIN_PATH}"
 echo "plugin-checksum: $(md5sum -b ${DVS_PLUGIN_PATH})"
+
+cat << UPDATE_PROPERTIES > update.properties
+UPDATE_FUEL_MIRROR=$UPDATE_FUEL_MIRROR
+UPDATE_MASTER=$UPDATE_MASTER
+EXTRA_RPM_REPOS=$EXTRA_RPM_REPOS
+EXTRA_DEB_REPOS=$EXTRA_DEB_REPOS
+UPDATE_PROPERTIES
+
+cat snapshots.params >> update.properties
 
 cat << REPORTER_PROPERTIES > reporter.properties
 ISO_VERSION=${CUSTOM_VERSION:10}

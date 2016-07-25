@@ -17,10 +17,10 @@
 
 - project:
     name: 'predefined_parameters'
-    fuel-release: '9.0'
+    fuel-release: '9.1'
     plugin-version: '3.0'
     plugin-name: 'vcenter'
-    build-name: '{fuel-release}.dvs.build'
+    build-name: '9.0.dvs.build'
     regression-name: '{fuel-release}.{plugin-name}.regression'
     download-iso-name: 'download_iso'
     nightly-name: '{fuel-release}.{plugin-name}.nightly'
@@ -63,9 +63,9 @@
 
     testrail_project: "Mirantis OpenStack"
     testrail_milestone: "{fuel-release}"
-    testrail_suite: "[9.0][PCE] vCenter"
+    testrail_suite: "[{fuel-release}][PCE] vCenter"
     testrail_suite_desc: "Suite description"
-    testrail_plan: "$TREP_TESTRAIL_MILESTONE mos iso #${{ISO_VERSION}}"
+    testrail_plan: "$TREP_TESTRAIL_MILESTONE mos snapshot #${{SNAPSHOTS_ID}}"
     testrail_plan_desc: "Test plan description"
     testrail_run: "$TREP_TESTRAIL_SUITE"
     testrail_run_desc: "Test run description"
@@ -226,11 +226,6 @@
     name: global
     disabled: false
     node: vcenter
-    logrotate:
-      daysToKeep: 30
-      numToKeep: 100
-      artifactDaysToKeep: 30
-      artifactNumToKeep: 100
     <<: *test-parameters
     scm:
       - common-scm:
@@ -243,7 +238,7 @@
       - test-wrapper:
           test_timeout: '{test_timeout}'
     properties:
-      - test-property
+     - test-property
     builders:
       - conditional-step:
           condition-kind: shell
@@ -272,6 +267,8 @@
           properties-content: $ENV_PARAMETERS
       - inject:
           properties-content: $VCENTER_PARAMETERS
+      - inject:
+          properties-content: $UPDATE_PARAMETERS
       - shell:
           !include-raw-escape: ../builders/common.prepare.ng.sh
       - shell:
@@ -309,7 +306,7 @@
       - timed: '{nightly_timer}'
     properties:
       - runner-property:
-          build-name: '{build-name}'
+            build-name: '{build-name}'
     wrappers:
       - runner-wrapper
     publishers:
