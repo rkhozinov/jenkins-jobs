@@ -39,7 +39,7 @@
           descrition: 'Will be used existing environment'
       - string:
           name: MIRROR_HOST
-          default: 'http://mirror.seed-cz1.fuel-infra.org'
+          default: 'mirror.seed-cz1.fuel-infra.org'
           description: 'mirror for package repositories. this mirror is optimized for CZ'
       - string:
           name: EXTRA_DEB_REPOS
