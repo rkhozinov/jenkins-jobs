@@ -9,25 +9,6 @@
           name: ENABLE_PROPOSED 
           default: '{enable_proposed}'
           description: 'turns on update fuel master node to maintenance update'
-      - string:
-          name: MIRROR_HOST
-          default: 'http://mirror.seed-cz1.fuel-infra.org'
-          description: 'mirror for package repositories. this mirror is optimized for CZ'
-      - string:
-          name: EXTRA_DEB_REPOS
-      - string:
-          name: UPDATE_FUEL_MIRROR
-      - string:
-          name: CUSTOM_VERSION
-          description: 'mos repo snapshots version'
-      - string:
-          name: SNAPSHOTS_ID
-          default: '${{${{CUSTOM_VERSION:10}}:-lastSuccessfulBuild}}'
-          description: 'snapshots number or lastSuccessfulBuild'
-      - string:
-          name: SNAPSHOTS_URL
-          default: 'https://product-ci.infra.mirantis.net/job/9.x.snapshot/${{SNAPSHOTS_ID}}/artifact/snapshots.params'
-          description: 'mirror for package repositories. this mirror is optimized for CZ'
       - bool:
           name: PUBLISH_RESULTS
           default: '{obj:publish_results}'
@@ -56,6 +37,24 @@
           name: USE_SNAPSHOTS
           default: '{use_snapshots}'
           descrition: 'Will be used existing environment'
+      - string:
+          name: MIRROR_HOST
+          default: 'http://mirror.seed-cz1.fuel-infra.org'
+          description: 'mirror for package repositories. this mirror is optimized for CZ'
+      - string:
+          name: EXTRA_DEB_REPOS
+      - string:
+          name: UPDATE_FUEL_MIRROR
+      - string:
+          name: CUSTOM_VERSION
+          description: 'mos repo snapshots version'
+      - string:
+          name: SNAPSHOTS_ID
+          description: 'snapshots number or lastSuccessfulBuild'
+      - string:
+          name: SNAPSHOTS_URL
+          default: 'https://product-ci.infra.mirantis.net/job/9.x.snapshot/SNAPSHOTS_ID/artifact/snapshots.params'
+          description: 'url to product-ci job with snapshots artifacts'
       - string:
           name: ISO_FILE
           default: '{iso_file}'
@@ -86,6 +85,10 @@
             TREP_TESTRAIL_SUITE_DESCRIPTION={testrail_suite_desc}
             TREP_TESTRAIL_PLAN={testrail_plan}
             TREP_TESTRAIL_PLAN_DESCRIPTION={testrail_plan_desc}
+      - bool:
+          name: KVM_USE
+          default: '{obj:kvm_use}'
+          description: 'turns on kvm_mode for an openstack cluster'
       - text:
           name: ENV_PARAMETERS 
           default: |
@@ -191,9 +194,9 @@
     name: runner-condition
     builders:
       - inject:
-          properties-content: $ADDITIONAL_PARAMETERS
-      - inject:
           properties-content: $ENV_PARAMETERS
+      - inject:
+          properties-content: $VCENTER_PARAMETERS
       - conditional-step:
           condition-kind: shell
           condition-command: |
@@ -246,8 +249,13 @@
           steps:
             - shell: |
                 #!/bin/bash
-                wget --no-check-certificate -O snapshots.params $SNAPSHOTS_URL  
-                cat snapshots.params >> build_number
+                SNAPSHOTS_ID=${SNAPSHOTS_ID:=lastSuccessfulBuild}
+                wget --no-check-certificate -O snapshots.params ${SNAPSHOTS_URL/SNAPSHOTS_ID/$SNAPSHOTS_ID}  
+                custom_version=$(grep "^CUSTOM_VERSION=" < snapshots.params | cut -d= -f2 | cut -d'#' -f2)
+
+                echo "SNAPSHOTS_URL=$SNAPSHOTS_URL" >> build_number
+                echo "SNAPSHOTS_ID=$SNAPSHOTS_ID" >> build_number
+                echo "CUSTOM_VERSION=snapshot #$custom_version" >> build_number
 - scm:
     name: common-scm
     scm:

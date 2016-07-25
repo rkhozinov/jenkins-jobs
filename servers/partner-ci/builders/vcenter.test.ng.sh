@@ -13,6 +13,14 @@ export ANALYTICS_IP="${ANALYTICS_IP}"
 
 export MIRROR_HOST="mirror.seed-cz1.fuel-infra.org"
 
+export SNAPSHOTS_ID=${CUSTOM_VERSION:10}   
+[ -z "${SNAPSHOTS_ID}" ] && { echo SNAPSHOTS_ID is empty; exit 1; }
+
+wget --no-check-certificate -O snapshots.params ${SNAPSHOTS_URL/SNAPSHOTS_ID/$SNAPSHOTS_ID}
+
+[ -f snapshots.params ] &&  . snapshots.params || \
+  { echo snapshots.params file is not found; exit 1; }
+
 if [[ ! "${MIRROR_UBUNTU}" ]]; then
 
     case "${UBUNTU_MIRROR_ID}" in

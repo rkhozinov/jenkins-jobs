@@ -2,42 +2,18 @@
 - parameter:
     name: plugin-specific-parameters
     parameters:
-      - bool:
-          name: KVM_USE
-          default: '{obj:kvm_use}'
-          description: 'turns on kvm_mode for an openstack cluster'
-      - string:
-          name: WORKSTATION_SNAPSHOT
-          default: 'doubledvs'
-      - string:
-          name: WORKSTATION_NODES
-          default: 'esxi1 esxi2 esxi3 vcenter'
-      - string:
-          name: VCENTER_IP
-          default: '172.16.0.145'
-      - string:
-          name: VCENTER_USERNAME
-          default: 'openstack'
-      - string:
-          name: VCENTER_PASSWORD
-          default: 'vmware'
-      - string:
-          name: VCENTER_CLUSTERS
-          default: 'Cluster1,Cluster2'
-      - string:
-          name: TEST_GROUP_PREFIX
-          default: 'system_test.vcenter.deploy_vcenter_dvs_run_ostf'
-          description: 'Snapshot name for vsphere lab'
-      - string:
-          name: TEST_GROUP_CONFIG
-          default: '${{TEST_GROUP}}'
-          description: 'Snapshot name for vsphere lab'
-      - string:
-          name: DVS_SWITCHES
-          default: 'Cluster1,Cluster2'
-      - string:
-          name: ISO_STORAGE
-          default: '{iso_storage}'
+    - text:
+        name: VCENTER_PARAMETERS
+        default: |
+          WORKSTATION_SNAPSHOT=doubledvs
+          WORKSTATION_NODES=esxi1 esxi2 esxi3 vcenter
+          VCENTER_IP=172.16.0.145
+          VCENTER_USERNAME=openstack
+          VCENTER_PASSWORD=vmware
+          VCENTER_CLUSTERS=Cluster1,Cluster2
+          TEST_GROUP_PREFIX=system_test.vcenter.deploy_vcenter_dvs_run_ostf
+          TEST_GROUP_CONFIG=${TEST_GROUP}
+          DVS_SWITCHES=Cluster1,Cluster2
 
 - project:
     name: 'predefined_parameters'
@@ -197,12 +173,11 @@
           testrail_plan_desc:   '{testrail_plan_desc}'
           skip_vote_successfull: '{skip_vote_successfull}'
           skip_vote_failed:     '{skip_vote_failed}'
-      - plugin-specific-parameters:
           enable_proposed:      '{enable_proposed}'
           update_master:        '{update_master}'
           kvm_use:              '{kvm_use}'
           iso_storage:          '{iso_storage}'
-
+      - plugin-specific-parameters
 # parameters for jobs created per test-group and custom test job
 - test-parameters: &test-parameters
     name: 'test-parameters'
@@ -241,11 +216,11 @@
           testrail_plan_desc:   '{testrail_plan_desc}'
           skip_vote_successfull: '{skip_vote_successfull}'
           skip_vote_failed:     '{skip_vote_failed}'
-      - plugin-specific-parameters:
           enable_proposed:      '{enable_proposed}'
           update_master:        '{update_master}'
           kvm_use:              '{kvm_use}'
           iso_storage:          '{iso_storage}'
+      - plugin-specific-parameters
 
 - defaults:
     name: global
@@ -295,6 +270,8 @@
           properties-content: $TESTRAIL_PARAMETERS
       - inject:
           properties-content: $ENV_PARAMETERS
+      - inject:
+          properties-content: $VCENTER_PARAMETERS
       - shell:
           !include-raw-escape: ../builders/common.prepare.ng.sh
       - shell:
