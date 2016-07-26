@@ -140,3 +140,7 @@
        current-parameters: true
        kill-phase-on: NEVER
        property-file: build_number
+     - name: '{fuel-release}.{plugin-name}.nsxv_config_ok_metadata_self_signed_certificate'
+       current-parameters: true
+       kill-phase-on: NEVER
+       property-file: build_number
