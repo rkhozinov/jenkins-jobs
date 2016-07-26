@@ -19,60 +19,41 @@
           default: '{obj:force_vsrx_copy}'
           description: 'force copying of vsrx image'
       - string:
-          name: NODE_VOLUME_SIZE
-          default: '512'
-      - string:
+          #escription: 'mirror for package repositories. this mirror is optimized for CZ'
           name: MIRROR
           default: 'http://mirror.seed-cz1.fuel-infra.org'
-          description: 'mirror for package repositories. this mirror is optimized for CZ'
       - string:
+          description: 'proposed repositories to update ubuntu cluster'
           name: MIRROR_UBUNTU
           default: >
              deb ${{MIRROR}}/pkgs/ubuntu/ trusty main universe multiverse |
-             deb ${{MIRROR}}/pkgs/ubuntu/ trusty-updates main universe multiverse
-          description: 'proposed repositories to update ubuntu cluster'
-      - string:
-          name: CONTRAIL_DISTRIBUTION
-          default: ''
-      - string:
-          name: CONTRAIL_VERSION
-          default: '{plugin-version}'
-          description: 'There is a version of juniper packages stored in common sotrage'
-      - string:
-          name: POOL_ADMIN 
-      - string:
-          name: POOL_PUBLIC
-      - string:
-          name: POOL_MANAGEMENT
-      - string:
-          name: POOL_PRIVATE
-      - string:
-          name: POOL_STORAGE
-      - string:
-          name: PLUGIN_VERSION
-          default: ${{CONTRAIL_VERSION}}
-          description: 'plugin version from metadata'
-      - string:
-          name: CONTRAIL_PLUGIN_PATH
-          description: 'The path to the contrail package on storage'
-      - string:
-          name: CONTRAIL_PLUGIN_PACK_UB_PATH
-          description: 'The path to the contrail package on storage'
-      - string:
-          name: VSRX_ORIGINAL_IMAGE_PATH
-          default: '{vsrx_original_image_path}'
-          description: 'The path to the vSRX.400.img image on storage'
-      - string:
-          name: VSRX_TARGET_IMAGE_PATH
-          default: '{vsrx_target_image_path}'
-          description: 'The path to the vsrx image on host'
-      - string:
-          name: VSRX_TEMPLATE_PATH
-          default: '{vsrx_template_path}'
-          description: 'The path to the vsrx template'
-      - string:
-          name: ISO_STORAGE
-          default: '{iso_storage}'
+             deb ${{MIRROR}}/pkgs/ubuntu/ trusty-updates main universe multiverse |
+             deb ${{MIRROR}}/pkgs/ubuntu/ trusty-security main universe multiverse
+      - text:
+          name: ADDITIONAL_PARAMETERS
+          default: |
+            NODE_VOLUME_SIZE=512
+            #description: 'There is a version of juniper packages stored in common sotrage'
+            CONTRAIL_VERSION='{plugin-version}'
+            POOL_ADMIN =''
+            POOL_PUBLIC=''
+            POOL_MANAGEMENT=''
+            POOL_PRIVATE=''
+            POOL_STORAGE=''
+            #description: 'plugin version from metadata'
+            PLUGIN_VERSION=${{CONTRAIL_VERSION}}
+            CONTRAIL_DISTRIBUTION=''
+            #description: 'The path to the contrail package on storage'
+            CONTRAIL_PLUGIN_PATH=''
+            #description: 'The path to the contrail package on storage'
+            CONTRAIL_PLUGIN_PACK_UB_PATH=''
+            #description: 'The path to the vSRX.400.img image on storage'
+            VSRX_ORIGINAL_IMAGE_PATH='{vsrx_original_image_path}'
+            #description: 'The path to the vsrx image on host'
+            VSRX_TARGET_IMAGE_PATH='{vsrx_target_image_path}'
+            #description: 'The path to the vsrx template'
+            VSRX_TEMPLATE_PATH='{vsrx_template_path}'
+            ISO_STORAGE='{iso_storage}'
 
 - project:
     name: 'predefined_parameters'
@@ -426,6 +407,9 @@
     properties:
       - test-property
     builders:
+      - inject:
+          properties-content: $ADDITIONAL_PARAMETERS
+
       - conditional-step:
            condition-kind: shell
            condition-command: |
@@ -597,6 +581,8 @@
           properties_name: regression.properties
           email_to: '{email_to}'
     builders:
+      - inject:
+          properties-content: $ADDITIONAL_PARAMETERS
       - multijob:
           name: '1st phase - regression test'
           condition: COMPLETED
@@ -632,6 +618,8 @@
       - runner-wrapper
     scm: []
     builders:
+      - inject:
+          properties-content: $ADDITIONAL_PARAMETERS
       - runner-condition
       - multijob:
           name: 'The smoke test for {fuel-release}.{plugin-name}.{plugin-version}'
@@ -670,6 +658,8 @@
     wrappers:
       - runner-wrapper
     builders:
+      - inject:
+          properties-content: $ADDITIONAL_PARAMETERS
       - runner-condition
       - multijob:
           name: 'The BVT test for {fuel-release}.{plugin-name}.{plugin-version}'
