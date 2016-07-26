@@ -349,11 +349,6 @@
     name: global
     disabled: false
     node: contrail
-    logrotate:
-      daysToKeep: 30
-      numToKeep: 100
-      artifactDaysToKeep: 30
-      artifactNumToKeep: 100
     <<: *test-parameters
     scm:
       - common-scm:
