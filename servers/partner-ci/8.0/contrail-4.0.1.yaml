@@ -307,6 +307,58 @@
           vsrx_template_path:       '{vsrx_template_path}'
           iso_storage:           '{iso_storage}'
 
+- runner-parameters: &baremetal-parameters
+    name: 'baremetal-parameters'
+    parameters:
+      - bool:
+          name: MJ_BUILD_PKG
+          default: '{multijob_build_pkg}'
+          description: "Triggers build of pkg of $PKG_JOB_NAME before run of tests"
+      - text:
+          name: BAREMETAL_PARAMETERS
+          default: |
+            BM_IPMI_USER='engineer'
+            BM_IPMI_PASSWORD='Ba2Ie23#GHgho'
+            BM_IPMI_ADDR='cz7660-kvm.host-telecom.com'
+            BM_TARGET_MACS='00:1b:21:87:21:99;00:1b:21:87:21:98'
+            BM_HOST_BRIDGE_INTERFACES='eth2:10.109.0.0/24;eth3:10.109.4.0/24'
+            KVM_USE='True'
+
+      - common-parameters:
+          publish_results:      '{publish_results}'
+          debug:                '{debug}'
+          disable_ssl:          '{disable_ssl}'
+          force_erase:          '{force_erase}'
+          recreate_venv:        '{recreate_venv}'
+          use_snapshots:        '{use_snapshots}'
+          iso_file:             '{iso_file}'
+          gerrit_branch:        '{gerrit_branch}'
+          env_prefix:           '{fuel-release}.{plugin-name}'
+          pkg_job_name:         '{pkg_job_name}'
+          iso_job_name:         '{iso_job_name}'
+          admin_node_memory:    '{admin_node_memory}'
+          slave_node_memory:    '{slave_node_memory}'
+          admin_node_cpu:       '{admin_node_cpu}'
+          slave_node_cpu:       '{slave_node_cpu}'
+          testrail_suite:       '{testrail_suite}'
+          testrail_suite_desc:  '{testrail_suite_desc}'
+          testrail_plan:        '{testrail_plan}'
+          testrail_plan_desc:   '{testrail_plan_desc}'
+          skip_vote_successfull: '{skip_vote_successfull}'
+          skip_vote_failed:     '{skip_vote_failed}'
+
+      - plugin-specific-parameters:
+          bonding:              '{bonding}'
+          kvm_use:              '{kvm_use}'
+          update_master:        '{update_master}'
+          plugin-version:       '{plugin-version}'
+          force_vsrx_copy:      '{force_vsrx_copy}'
+          vsrx_original_image_path: '{vsrx_original_image_path}'
+          vsrx_target_image_path:   '{vsrx_target_image_path}'
+          vsrx_template_path:       '{vsrx_template_path}'
+          iso_storage:           '{iso_storage}'
+    
+            
 # parameters for jobs created per test-group and custom test job
 - test-parameters: &test-parameters
     name: 'test-parameters'
@@ -683,7 +735,7 @@
     project-type: multijob
     disabled: '{obj:baremetal_disabled}'
     node: runner
-    <<: *runner-parameters
+    <<: *baremetal-parameters
     scm: []
 #   triggers:
 #     - timed: '{nightly_timer}'

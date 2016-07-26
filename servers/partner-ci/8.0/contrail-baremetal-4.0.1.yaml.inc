@@ -1,4 +1,6 @@
 - runner-condition
+- inject:
+    properties-content: $BAREMETAL_PARAMETERS
 - multijob:
     name: >
       'Baremetal tests for {fuel-release}.{plugin-name}.{plugin-version}'
