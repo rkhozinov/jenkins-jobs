@@ -429,16 +429,23 @@
           properties_name: regression.properties
           email_to: '{email_to}'
     builders:
+      - shell: |
+          #!/bin/bash
+          echo "TEST_GROUP=dvs_regression" > property
+          echo "DVS_PLUGIN_PATH={released_plugin_path}" >> property
+          echo "PLUGIN_VERSION={plugin-version}" >> property
+          echo "PKG_JOB_BUILD_NUMBER=released" >> property
       - multijob:
           name: '1st phase - regression test'
           condition: COMPLETED
           projects:
             - name: '{fuel-release}.{plugin-name}.regression.test'
-              predefined-parameters: |
-                TEST_GROUP={regression-test-name}
-                DVS_PLUGIN_PATH={released_plugin_path}
-                PLUGIN_VERSION={plugin-version}
-                PKG_JOB_BUILD_NUMBER=released
+              #predefined-parameters: |
+              #  TEST_GROUP=dvs_regression
+              #  DVS_PLUGIN_PATH={released_plugin_path}
+              #  PLUGIN_VERSION={plugin-version}
+              #  PKG_JOB_BUILD_NUMBER=released
+              property-file: property
               current-parameters: true
               kill-phase-on: NEVER
 
