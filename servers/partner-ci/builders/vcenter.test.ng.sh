@@ -23,7 +23,7 @@ if [[ ! "${MIRROR_UBUNTU}" ]]; then
 
     case "${UBUNTU_MIRROR_ID}" in
         latest)
-            UBUNTU_MIRROR_URL="$(curl "http://${MIRROR_HOST}ubuntu-latest.htm")"
+            UBUNTU_MIRROR_URL="$(curl "http://${MIRROR_HOST}/pkgs/ubuntu-latest.htm")"
             ;;
         *)
             UBUNTU_MIRROR_URL="http://${MIRROR_HOST}/pkgs/${UBUNTU_MIRROR_ID}/"
@@ -105,7 +105,7 @@ for _dn in  "proposed"  \
     __repo_id_ptr="MOS_UBUNTU_MIRROR_ID"
     __repo_url="http://${MIRROR_HOST}/mos-repos/ubuntu/snapshots/${!__repo_id_ptr}"
     if [[ "${!__enable_ptr}" = true ]] ; then
-        __repo_name="mos-${_dn},deb ${__repo_url} mos9.0-updates main ${_dn}"
+        __repo_name="mos-${_dn},deb ${__repo_url} mos9.0-${_dn} main restricted"
         EXTRA_DEB_REPOS="$(join "${__pipe}" "${EXTRA_DEB_REPOS}" "${__repo_name}")"
     fi
 done
