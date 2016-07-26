@@ -132,6 +132,7 @@
       - nsxv_ability_to_bind_port
       - nsxv_insecure_false
 
+      - nsxv_config_ok_metadata_self_signed_certificate
 
     jobs:
       - '{build-name}':
