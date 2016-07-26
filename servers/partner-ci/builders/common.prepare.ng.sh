@@ -84,17 +84,21 @@ function recreate_venv {
 }
 
 function get_venv_requirements {
-  rm -f requirements.txt*
-  wget $REQS_PATH
+  rm -f requirements.*
+  wget --no-check-certificate -O requirements.txt $REQS_PATH
   export REQS_PATH="$(pwd)/requirements.txt"
-  wget $REQS_PATH_DEVOPS
+  wget --no-check-certificate -O requirements-devops-source.txt $REQS_PATH_DEVOPS
   export REQS_PATH_DEVOPS="$(pwd)/requirements-devops-source.txt"
 
   if [[ "${REQS_BRANCH}" == "stable/8.0" ]]; then
     # bug: https://bugs.launchpad.net/fuel/+bug/1528193
     sed -i 's/@2.*/@2.9.20/g' $REQS_PATH_DEVOPS
     #echo oslo.i18n >> $REQS_PATH
-    echo stable/8.0
+    echo devops version is changed to 2.9.20 for stable/8.0 branch of fuel-qa
+  elif [[ "${REQS_BRANCH}" == "stable/mitaka" ]]; then
+    #https://raw.githubusercontent.com/openstack/fuel-devops/2.9.21/test-requirements.txt
+    echo pytest >> $REQS_PATH
+    echo devops version is changed to 2.9.20 for stable/8.0 branch of fuel-qa
   fi
 }
    

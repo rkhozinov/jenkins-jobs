@@ -53,7 +53,7 @@
     iso_file: 'MirantisOpenStack-9.0.iso'
     iso_storage: '/storage/downloads'
     gerrit_repo: 'fuel-qa'
-    gerrit_branch: 'master'
+    gerrit_branch: 'stable/mitaka'
     email_to: 'rkhozinov@mirantis.com ibumarskov@mirantis.com'
     released_plugin_path: ''
     scm_submodule_disabled: true
