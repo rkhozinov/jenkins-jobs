@@ -17,8 +17,6 @@
           TEST_GROUP_CONFIG=${TEST_GROUP}
           DVS_SWITCHES=Cluster1,Cluster2
           VCENTER_USE=true
-          VCENTER_USERNAME=administrator@vsphere.local
-          VCENTER_PASSWORD=Qwer!1234
           VC_DATACENTER=Datacenter
           VC_DATASTORE=nfs
           VC_IMAGE_DIR=openstack_glance
