@@ -5,15 +5,27 @@
     - text:
         name: VCENTER_PARAMETERS
         default: |
-          WORKSTATION_SNAPSHOT=doubledvs
+          VSPHERE_VERSION="5.5"
+          WORKSTATION_SNAPSHOT=vcenterha
           WORKSTATION_NODES=esxi1 esxi2 esxi3 vcenter
           VCENTER_IP=172.16.0.145
+          VCENTER_GLANCE_IP=172.16.0.145
           VCENTER_USERNAME=openstack
           VCENTER_PASSWORD=vmware
           VCENTER_CLUSTERS=Cluster1,Cluster2
           TEST_GROUP_PREFIX=system_test.vcenter.deploy_vcenter_dvs_run_ostf
           TEST_GROUP_CONFIG=${TEST_GROUP}
           DVS_SWITCHES=Cluster1,Cluster2
+          VCENTER_USE=true
+          VCENTER_USERNAME=administrator@vsphere.local
+          VCENTER_PASSWORD=Qwer!1234
+          VC_DATACENTER=Datacenter
+          VC_DATASTORE=nfs
+          VC_IMAGE_DIR=openstack_glance
+          VMWARE_IMG_NAME=shaker.vmdk
+          VMWARE_IMG_URL="http://pce-storage.bud.mirantis.net:5000/distr/$VMWARE_IMG_NAME"
+          VMWARE_IMG_LOGIN=root
+          VMWARE_IMG_PASSWORD=r00tme
 
 - project:
     name: 'predefined_parameters'
