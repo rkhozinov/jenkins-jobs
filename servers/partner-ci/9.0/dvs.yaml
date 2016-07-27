@@ -52,6 +52,7 @@
     regression_timer: 'H 18 * * *'
     nightly_disabled: false
     regression_disabled: true
+    use_snapshots: true
     force_erase: false
     recreate_venv: false
     disable_ssl: true
@@ -82,7 +83,7 @@
     testrail_suite_desc: "Suite description"
 #   testrail_suite_conf: "CI job: [${{JOB_NAME}}](${{JOB_URL}})"
     testrail_milestone: "3.0.1"
-    testrail_plan: "$TREP_TESTRAIL_SUITE build#${{PKG_JOB_BUILD_NUMBER}}"
+    testrail_plan: "$TREP_TESTRAIL_SUITE build#${{PKG_JOB_BUILD_NUMBER}} iso#${{ISO_VERSION}}"
     testrail_plan_desc: "Test plan description"
     testrail_run: "$TREP_TESTRAIL_SUITE"
     testrail_run_desc: "Test run description"
@@ -171,7 +172,7 @@
       - '{fuel-release}.{plugin-name}.bvt.test'
 
       - '{regression-name}':
-          testrail_suite: "[9.0][PCE] VMware DVS plugin v3.0.1 Regression"
+          testrail_suite: "[9.0][PCE] VMware DVS plugin v3.0.0 Regression"
           testrail_suite_desc: "Suite description"
           testrail_plan: "$TREP_TESTRAIL_SUITE #${{DATE}}"
           testrail_plan_desc: "Test plan description"
@@ -211,12 +212,9 @@
           testrail_plan_desc:   '{testrail_plan_desc}'
           skip_vote_successfull: '{skip_vote_successfull}'
           skip_vote_failed:     '{skip_vote_failed}'
-          enable_proposed:      '{enable_proposed}'
-          update_master:        '{update_master}'
-          kvm_use:              '{kvm_use}'
-          iso_storage:          '{iso_storage}'
-          snapshots_id:         '{snapshots_id}'
-      - plugin-specific-parameters
+      - plugin-specific-parameters:
+          iso_storage:             '{iso_storage}'
+
 
 # parameters for jobs created per test-group and custom test job
 - test-parameters: &test-parameters
@@ -254,12 +252,8 @@
           testrail_plan_desc:   '{testrail_plan_desc}'
           skip_vote_successfull: '{skip_vote_successfull}'
           skip_vote_failed:     '{skip_vote_failed}'
-          enable_proposed:      '{enable_proposed}'
-          update_master:        '{update_master}'
-          kvm_use:              '{kvm_use}'
-          iso_storage:          '{iso_storage}'
-          snapshots_id:         '{snapshots_id}'
-      - plugin-specific-parameters
+      - plugin-specific-parameters:
+          iso_storage:             '{iso_storage}'
 
 - defaults:
     name: global
@@ -362,10 +356,10 @@
           name: GERRIT_REFSPEC
           default: 'refs/heads/{gerrit_branch}'
       - string:
-          name: PUPPETLINT_PATH 
+          name: PUPPETLINT_PATH
           default: './deployment_scripts/puppet/manifests ./deployment_scripts/puppet/modules/vmware_dvs'
       - string:
-          name: PUPPETLINT_IGNORE 
+          name: PUPPETLINT_IGNORE
           default: 'l2.pp'
       - bool:
           name: DEBUG
