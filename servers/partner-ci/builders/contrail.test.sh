@@ -3,30 +3,24 @@
 # activate bash xtrace for script
 [[ "${DEBUG}" == "true" ]] && set -x || set +x
 
-
 [[ "${FORCE_VSRX_COPY}" == "true" ]] && rm -r $VSRX_TARGET_IMAGE_PATH 
-[ ! -f $VSRX_TARGET_PATH ] && cp $VSRX_ORGINAL_IMAGE_PATH $VSRX_TARGET_PATH;
+[ ! -f $VSRX_TARGET_PATH ] && cp $VSRX_ORGINAL_IMAGE_PATH $VSRX_TARGET_PATH
 
-[ -z $CONTRAIL_VERSION ] && exit 1 || echo contrail version is $CONTRAIL_VERSION
-
+[ $CONTRAIL_VERSION ] && echo "contrail version is $CONTRAIL_VERSION" \
+                      || { echo "CONTRAIL_VERSION is not defined";  exit 1; }
 
 export ISO_PATH="${ISO_STORAGE}/${ISO_FILE}"
-if [[ $ISO_FILE == *"mos"* ]] || [[ $ISO_FILE == *"kilo"* ]];then
-  export ISO_VERSION=$(echo $ISO_FILE | cut -d'-' -f4-4 | tr -d '.iso' )
-  export FUEL_RELEASE=$(echo $ISO_VERSION | cut -d- -f2)
-elif [[ $ISO_FILE == *"Mirantis"* ]]; then
-  export ISO_VERSION=$(echo $ISO_FILE | tr -d '.iso' )
-  export FUEL_RELEASE=$(echo $ISO_VERSION | cut -d- -f2)
-else
-  export ISO_VERSION=$(echo $ISO_FILE | cut -d'-' -f3-3 | tr -d '.iso' )
-  export FUEL_RELEASE=$(echo $ISO_VERSION | cut -d- -f2)
+
+if [[ $ISO_FILE == *"Mirantis"* ]]; then
+  export FUEL_RELEASE=$(echo $ISO_FILE | cut -d- -f2)
+  [[ "${UPDATE_MASTER}" -eq "true" ]] && export ISO_VERSION='mos-mu' || export ISO_VERSION='mos'
 fi
 
 export ENV_NAME="${ENV_PREFIX}.${ISO_VERSION}"
 export VENV_PATH="${HOME}/${FUEL_RELEASE}-venv"
 
 [[ -z ${CONTRAIL_PLUGIN_PATH} ]] && export CONTRAIL_PLUGIN_PATH=$(ls -t ${WORKSPACE}/contrail*.rpm | head -n 1) \
-                                 || echo CONTRAIL_PLUGIN_PATH=$CONTRAIL_PLUGIN_PATH
+                                 || echo "CONTRAIL_PLUGIN_PATH=$CONTRAIL_PLUGIN_PATH"
 
 
 export JUNIPER_PKG_PATH="/storage/contrail/${CONTRAIL_VERSION}/"
