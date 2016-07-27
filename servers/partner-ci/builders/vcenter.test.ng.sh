@@ -10,8 +10,7 @@ export ANALYTICS_IP="${ANALYTICS_IP:-"fuel-stats-systest.infra.mirantis.net"}"
 
 export MIRROR_HOST=${MIRROR_HOST:-"mirror.seed-cz1.fuel-infra.org"}
 
-export SNAPSHOTS_ID=${CUSTOM_VERSION:10}   
-
+[ ${SNAPSHOTS_ID} ] && export SNAPSHOTS_ID=${SNAPSHOTS_ID} || export SNAPSHOTS_ID=${CUSTOM_VERSION:10}
 [ -z "${SNAPSHOTS_ID}" ] && { echo SNAPSHOTS_ID is empty; exit 1; }
 
 wget --no-check-certificate -O snapshots.params ${SNAPSHOTS_URL/SNAPSHOTS_ID/$SNAPSHOTS_ID}
@@ -132,10 +131,7 @@ if [[ $ISO_FILE == *"Mirantis"* ]]; then
   export FUEL_RELEASE=$(echo $ISO_FILE | cut -d- -f2 | tr -d '.iso')
 fi
 
-[ ${SNAPSHOTS_ID} ] && export env_id=${SNAPSHOTS_ID} || export env_id=${CUSTOM_VERSION:10}
-[ -z  ${env_id}   ] && { echo "Environment ID is not defined"; exit 1; }
-
-export ENV_NAME="${ENV_PREFIX}.${env_id}"
+export ENV_NAME="${ENV_PREFIX}.${SNAPSHOTS_ID}"
 export VENV_PATH="${HOME}/${FUEL_RELEASE}-venv"
 
 [ -z "${DVS_PLUGIN_PATH}" ] && export DVS_PLUGIN_PATH=$(ls -t ${WORKSPACE}/fuel-plugin-vmware-dvs*.rpm | head -n 1)
@@ -160,6 +156,7 @@ echo "plugin-path: ${DVS_PLUGIN_PATH}"
 echo "plugin-checksum: $(md5sum -b ${DVS_PLUGIN_PATH})"
 
 cat << UPDATE_PROPERTIES > update.properties
+SNAPSHOTS_ID=$SNAPSHOTS_ID
 UPDATE_FUEL_MIRROR=$UPDATE_FUEL_MIRROR
 UPDATE_MASTER=$UPDATE_MASTER
 EXTRA_RPM_REPOS=$EXTRA_RPM_REPOS
