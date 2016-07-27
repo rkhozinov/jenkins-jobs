@@ -16,40 +16,22 @@ fi
 # activate bash xtrace for script
 [[ "${DEBUG}" == "true" ]] && set -x || set +x
 
-ISO_FILE_ARTIFACT='iso_file'
-# if user entered custom iso we should use it
-if [ -z $ISO_FILE  ]; then
-   # but if use doesn't want custom iso, we should get iso from artifacts
-   [ -f $ISO_FILE_ARTIFACT ] && source $ISO_FILE_ARTIFACT || (echo "There's not iso_file"; exit 1)
-   # check variable again - it shouldn't be empty
-   [ -z $ISO_FILE ] && (echo "ISO_FILE variable is empty"; exit 1)
-fi
-
 #remove old logs and test data
 [ -f nosetest.xml ] && rm -f nosetests.xml
 rm -rf logs/*
 
 export ISO_PATH="${ISO_STORAGE}/${ISO_FILE}"
+[ ! -f $ISO_PATH ] && { echo "The $ISO_PATH isn't exist"; exit 1; }
 
-[ ! -f $ISO_PATH ] && (echo "The $ISO_PATH isn't exist"; exit 1)
-
-if [[ $ISO_FILE == *"mos"* ]] || [[ $ISO_FILE == *"kilo"* ]]; then 
-  export ISO_VERSION=$(echo $ISO_FILE | cut -d'-' -f4-4 | tr -d '.iso' )
-  export FUEL_RELEASE=$(echo $ISO_VERSION | cut -d- -f2)
-elif [[ $ISO_FILE == *"Mirantis"* ]]; then
-  export ISO_VERSION=$(echo $ISO_FILE | tr -d '.iso' )
-  export FUEL_RELEASE=$(echo $ISO_VERSION | cut -d- -f2)
-else
-  export ISO_VERSION=$(echo $ISO_FILE | cut -d'-' -f3-3 | tr -d '.iso' )
-  export FUEL_RELEASE=$(echo $ISO_VERSION | cut -d- -f2)
+if [[ $ISO_FILE == *"Mirantis"* ]]; then
+  export FUEL_RELEASE=$(echo $ISO_FILE | cut -d- -f2)
+  [[ "${UPDATE_MASTER}" -eq "true" ]] && export ISO_VERSION='mos-mu' || export ISO_VERSION='mos'
 fi
 
-echo iso build number is $ISO_VERSION
 export REQUIRED_FREE_SPACE=200
-
 export VENV_PATH="${HOME}/${FUEL_RELEASE}-venv"
-
 export ENV_NAME="${ENV_PREFIX}.${ISO_VERSION}"
+
 echo iso-version: $ISO_VERSION
 echo fuel-release: $FUEL_RELEASE
 echo virtual-env: $VENV_PATH
