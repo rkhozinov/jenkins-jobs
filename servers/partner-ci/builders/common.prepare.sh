@@ -104,15 +104,15 @@ function recreate_venv {
 }
 
 function get_venv_requirements {
-  rm -f requirements.txt*
-  wget $REQS_PATH
+  rm -f requirements.*
+  wget -O requirements.txt $REQS_PATH
   export REQS_PATH="$(pwd)/requirements.txt"
-  wget $REQS_PATH_DEVOPS
+  wget -O requirements-devops-source.txt $REQS_PATH_DEVOPS
   export REQS_PATH_DEVOPS="$(pwd)/requirements-devops-source.txt"
 
   if [[ "${REQS_BRANCH}" == "stable/8.0" ]]; then
     # bug: https://bugs.launchpad.net/fuel/+bug/1528193
-    sed -i 's/@2.*/@2.9.20/g' $REQS_PATH_DEVOPS
+    #sed -i 's/@2.*/@2.9.20/g' $REQS_PATH_DEVOPS
     #echo oslo.i18n >> $REQS_PATH
     echo stable/8.0
   fi
@@ -139,15 +139,6 @@ function prepare_venv {
     deactivate
 }
 
-function fix_logger {
-   config_path="${HOME}/.devops/log.yaml"
-   echo devops config path $config_path
-   if [ -d $config_path]; then 
-     sed -i '/disable_existing_loggers.*/d' $config_path
-     echo disable_existing_loggers: False >> $config_path
-   fi
-}
-
 ####################################################################################
 
 [[ "${RECREATE_VENV}" == "true" ]] && recreate_venv
@@ -155,8 +146,6 @@ function fix_logger {
 get_venv_requirements
 
 [ -d $VENV_PATH ] && prepare_venv || { echo "$VENV_PATH doesn't exist $VENV_PATH will be recreated"; recreate_venv; }
-
-fix_logger
 
 source "$VENV_PATH/bin/activate"
 

@@ -33,27 +33,20 @@
           name: ADDITIONAL_PARAMETERS
           default: |
             NODE_VOLUME_SIZE=512
-            #description: 'There is a version of juniper packages stored in common sotrage'
-            CONTRAIL_VERSION='{plugin-version}'
+            CONTRAIL_VERSION={plugin-version}
             POOL_ADMIN =''
             POOL_PUBLIC=''
             POOL_MANAGEMENT=''
             POOL_PRIVATE=''
             POOL_STORAGE=''
-            #description: 'plugin version from metadata'
             PLUGIN_VERSION=${{CONTRAIL_VERSION}}
             CONTRAIL_DISTRIBUTION=''
-            #description: 'The path to the contrail package on storage'
             CONTRAIL_PLUGIN_PATH=''
-            #description: 'The path to the contrail package on storage'
             CONTRAIL_PLUGIN_PACK_UB_PATH=''
-            #description: 'The path to the vSRX.400.img image on storage'
-            VSRX_ORIGINAL_IMAGE_PATH='{vsrx_original_image_path}'
-            #description: 'The path to the vsrx image on host'
-            VSRX_TARGET_IMAGE_PATH='{vsrx_target_image_path}'
-            #description: 'The path to the vsrx template'
-            VSRX_TEMPLATE_PATH='{vsrx_template_path}'
-            ISO_STORAGE='{iso_storage}'
+            VSRX_ORIGINAL_IMAGE_PATH={vsrx_original_image_path}
+            VSRX_TARGET_IMAGE_PATH={vsrx_target_image_path}
+            VSRX_TEMPLATE_PATH={vsrx_template_path}
+            ISO_STORAGE={iso_storage}
 
 - project:
     name: 'predefined_parameters'
