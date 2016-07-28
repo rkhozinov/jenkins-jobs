@@ -24,7 +24,7 @@ export ISO_PATH="${ISO_STORAGE}/${ISO_FILE}"
 [ ! -f $ISO_PATH ] && { echo "The $ISO_PATH isn't exist"; exit 1; }
 
 if [[ $ISO_FILE == *"Mirantis"* ]]; then
-  export FUEL_RELEASE=$(echo $ISO_FILE | cut -d- -f2)
+  export FUEL_RELEASE=$(echo $ISO_FILE | cut -d- -f2 | tr -d '.iso')
   [[ "${UPDATE_MASTER}" -eq "true" ]] && export ISO_VERSION='mos-mu' || export ISO_VERSION='mos'
 fi
 
