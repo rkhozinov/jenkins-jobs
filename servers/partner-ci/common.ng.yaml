@@ -95,6 +95,7 @@
             ENV_PREFIX={env_prefix}
             OPENSTACK_RELEASE=Ubuntu
             NODES_COUNT=10
+            DESTROY_ENV_AFTER=0
             ADMIN_NODE_MEMORY={admin_node_memory}
             SLAVE_NODE_MEMORY={slave_node_memory}
             ADMIN_NODE_CPU={admin_node_cpu}
@@ -271,8 +272,7 @@
                 SNAPSHOTS_ID=${SNAPSHOTS_ID:=lastSuccessfulBuild}
                 wget --no-check-certificate -O snapshots.params ${SNAPSHOTS_URL/SNAPSHOTS_ID/$SNAPSHOTS_ID}  
                 custom_version=$(grep "^CUSTOM_VERSION=" < snapshots.params | cut -d= -f2 | cut -d'#' -f2)
-
-                echo "SNAPSHOTS_URL=$SNAPSHOTS_URL" >> build_number
+                SNAPSHOTS_ID=${custom_version:10} 
                 echo "SNAPSHOTS_ID=$SNAPSHOTS_ID" >> build_number
                 echo "CUSTOM_VERSION=snapshot #$custom_version" >> build_number
 - scm:
