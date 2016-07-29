@@ -26,8 +26,8 @@
           VMWARE_IMG_URL="http://pce-storage.bud.mirantis.net:5000/distr/$VMWARE_IMG_NAME"
           VMWARE_IMG_LOGIN=root
           VMWARE_IMG_PASSWORD=r00tme
-          ISO_STORAGE='{iso_storage}'
-          KVM_USE='{obj:kvm_use}'
+          ISO_STORAGE={iso_storage}
+          KVM_USE={obj:kvm_use}
 
 - project:
     name: 'predefined_parameters'
