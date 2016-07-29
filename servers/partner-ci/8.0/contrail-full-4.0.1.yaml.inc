@@ -254,6 +254,20 @@
         current-parameters: true
         kill-phase-on: NEVER
 
+      - name: '{fuel-release}.{plugin-name}.{plugin-version}.https_tls_selected.juniper'
+        property-file: build_number
+        predefined-parameters: |
+           CONTRAIL_DISTRIBUTION=juniper
+        current-parameters: true
+        kill-phase-on: NEVER
+
+      - name: '{fuel-release}.{plugin-name}.{plugin-version}.contrail_ostf_net_provisioning_disable.juniper'
+        property-file: build_number
+        predefined-parameters: |
+           CONTRAIL_DISTRIBUTION=juniper
+        current-parameters: true
+        kill-phase-on: NEVER
+
       - name: '{fuel-release}.{plugin-name}.{plugin-version}.contrail_ha_multiple_networks'
         property-file: build_number
         predefined-parameters: |
