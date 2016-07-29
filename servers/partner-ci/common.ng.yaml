@@ -80,7 +80,7 @@
           description: 'The name of job for copying of plugin pkg artefacts'
       - text: 
           name: TESTRAIL_PARAMETERS 
-          default: |
+          default: >
             TREP_TESTRAIL_SUITE={testrail_suite}
             TREP_TESTRAIL_SUITE_DESCRIPTION={testrail_suite_desc}
             TREP_TESTRAIL_PLAN={testrail_plan}
@@ -91,7 +91,7 @@
           description: 'turns on kvm_mode for an openstack cluster'
       - text:
           name: ENV_PARAMETERS 
-          default: |
+          default: >
             ENV_PREFIX={env_prefix}
             OPENSTACK_RELEASE=Ubuntu
             NODES_COUNT=10
@@ -103,7 +103,7 @@
 
       - text:
           name: UPDATE_PARAMETERS 
-          default: |
+          default: >
             ENABLE_MOS_CENTOS_OS=true
             ENABLE_MOS_CENTOS_PROPOSED=true
             ENABLE_MOS_CENTOS_UPDATES=true
