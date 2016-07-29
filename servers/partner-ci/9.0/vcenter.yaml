@@ -4,7 +4,7 @@
     parameters:
     - text:
         name: VCENTER_PARAMETERS
-        default: >
+        default: |
           VSPHERE_VERSION="5.5"
           WORKSTATION_SNAPSHOT=doubledvs
           WORKSTATION_NODES=esxi1 esxi2 esxi3 vcenter
