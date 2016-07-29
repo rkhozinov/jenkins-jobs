@@ -4,7 +4,7 @@
     parameters:
     - text:
         name: VCENTER_PARAMETERS
-        default: >
+        default: |
           VSPHERE_VERSION="5.5"
           WORKSTATION_SNAPSHOT=vcenterha
           WORKSTATION_NODES=esxi1 esxi2 esxi3 vcenter
@@ -12,11 +12,11 @@
           VCENTER_USERNAME=openstack
           VCENTER_PASSWORD=vmware
           VCENTER_GLANCE_IP=172.16.0.145
-          VCENTER_GLANCE_USERNAME=opentack
+          VCENTER_GLANCE_USERNAME=openstack
           VCENTER_GLANCE_PASSWORD=vmware
           VCENTER_DATACENTER=Datacenter
-          VCENTER_CLUSTERS=Cluster1,Cluster2
           VCENTER_DATASTORE=nfs
+          VCENTER_CLUSTERS=Cluster1,Cluster2
           TEST_GROUP_PREFIX=system_test.vcenter.deploy_vcenter_dvs_run_ostf
           TEST_GROUP_CONFIG=${TEST_GROUP}
           DVS_NAME=Cluster1:dvSwitch;Cluster2:dvSwitch
@@ -30,7 +30,7 @@
 - project:
     name: 'predefined_parameters'
     fuel-release: '9.1'
-    plugin-version: '3.0'
+    plugin-version: '3.0.1'
     plugin-name: 'vcenter'
     build-name: '9.0.dvs.build'
     regression-name: '{fuel-release}.{plugin-name}.regression'
