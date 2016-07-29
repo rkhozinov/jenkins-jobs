@@ -5,35 +5,29 @@
     - text:
         name: VCENTER_PARAMETERS
         default: |
-          SNAPSHOT_OUTPUT_FILE=extra_repos.sh
-          SNAPSHOT_ARTIFACTS_FILE=snapshots.params
-          ESXI_PASSWORD=swordfish
-          ESXI_USER=root
-          ESXI_HOSTS=172.16.0.250 172.16.0.252 172.16.0.253
-          NFS_SERVER=172.16.0.1
-          NFS_SHARES=nfs nfs2
-          VSPHERE_VERSION=5.5
-          WORKSTATION_SNAPSHOT=doubledvs
+          VSPHERE_VERSION="5.5"
+          WORKSTATION_SNAPSHOT=vcenterha
           WORKSTATION_NODES=esxi1 esxi2 esxi3 vcenter
           VCENTER_IP=172.16.0.145
-          VCENTER_USERNAME=root
+          VCENTER_USERNAME=openstack
           VCENTER_PASSWORD=vmware
           VCENTER_GLANCE_IP=172.16.0.145
-          VCENTER_GLANCE_USERNAME=root
+          VCENTER_GLANCE_USERNAME=openstack
           VCENTER_GLANCE_PASSWORD=vmware
           VCENTER_DATACENTER=Datacenter
           VCENTER_DATASTORE=nfs
           VCENTER_CLUSTERS=Cluster1,Cluster2
-          DVS_NAME=Cluster1:Cluster1;Cluster2:Cluster2
+          TEST_GROUP_PREFIX=system_test.vcenter.deploy_vcenter_dvs_run_ostf
+          TEST_GROUP_CONFIG=${TEST_GROUP}
+          DVS_NAME=Cluster1:dvSwitch;Cluster2:dvSwitch
           VCENTER_USE=true
           VC_IMAGE_DIR=openstack_glance
           VMWARE_IMG_NAME=shaker.vmdk
           VMWARE_IMG_URL="http://pce-storage.bud.mirantis.net:5000/distr/$VMWARE_IMG_NAME"
           VMWARE_IMG_LOGIN=root
           VMWARE_IMG_PASSWORD=r00tme
-          CLEAN_IPTABLES=true
-          DISABLE_STP=true
-
+          ISO_STORAGE={iso_storage}
+          KVM_USE={obj:kvm_use}
 - project:
     name: 'predefined_parameters'
     fuel-release: '9.0'
@@ -58,7 +52,7 @@
     recreate_venv: false
     disable_ssl: true
     kvm_use: false
-    update_master: false
+    update_master: true
     enable_proposed: false
     debug: true
     publish_results: true
@@ -197,7 +191,6 @@
           update_master:        '{update_master}'
           kvm_use:              '{kvm_use}'
           iso_storage:          '{iso_storage}'
-          snapshots_id:         '{snapshots_id}'
       - plugin-specific-parameters
 
 # parameters for jobs created per test-group and custom test job
@@ -242,9 +235,7 @@
           update_master:        '{update_master}'
           kvm_use:              '{kvm_use}'
           iso_storage:          '{iso_storage}'
-          snapshots_id:         '{snapshots_id}'
       - plugin-specific-parameters
-
 - defaults:
     name: global
     disabled: false
@@ -294,12 +285,18 @@
           condition-command: |
             [[ "${{UPDATE_MASTER}}" == "true" ]]
           steps:
-            - inject:
-                properties-content: $UPDATE_PARAMETERS
-            - shell: |
-                [ ! -n ${{SNAPSHOTS_ID}} ] && {{ echo "SNAPSHOTS_ID is empty"; exit 1; }}
-                wget --no-check-certificate -O ${{SNAPSHOT_ARTIFACTS_FILE}} ${{SNAPSHOTS_URL/SNAPSHOTS_ID/$SNAPSHOTS_ID}}
-                python utils/jenkins/conv_snapshot_file.py
+            - copyartifact:
+                project: "${{ISO_JOB_NAME}}"
+                filter: "iso_file"
+                which-build: last-successful
+      - inject:
+          properties-content: $TESTRAIL_PARAMETERS
+      - inject:
+          properties-content: $ENV_PARAMETERS
+      - inject:
+          properties-content: $VCENTER_PARAMETERS
+      - inject:
+          properties-content: $UPDATE_PARAMETERS
       - shell:
           !include-raw-escape: ../builders/common.prepare.ng.sh
       - shell:
