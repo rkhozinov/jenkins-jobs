@@ -134,8 +134,8 @@ source "$VENV_PATH/bin/activate"
 [ -z $VIRTUAL_ENV ] && { echo "VIRTUAL_ENV is empty"; exit 1; }
 
 if [[ "${FORCE_ERASE}" -eq "true" ]]; then
-  for env in $(dospy_list $ENV_NAME); do 
-    dos.py erase $env 
+  for env in $(dospy_list); do 
+    dos.py erase $env
   done 
 else
 

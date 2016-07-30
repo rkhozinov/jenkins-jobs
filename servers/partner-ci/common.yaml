@@ -53,10 +53,6 @@
           name: PKG_JOB_BUILD_NUMBER
           description: 'The name of job for copying of plugin pkg artefacts'
       - string:
-          name: ISO_JOB_NAME
-          default: '{iso_job_name}'
-          description: 'The name of job for copying of stable iso build name'
-      - string:
           name: ENV_PREFIX
           default: '{env_prefix}'
           description: 'The name of devops env. Needed to properly work of existing mode of devops'
@@ -113,9 +109,6 @@
             - shell: env > {properties_name}
       - archive:
           artifacts: '*properties'
-          allow-empty: true
-      - archive:
-          artifacts: 'iso_file'
           allow-empty: true
       - archive:
           artifacts: 'build.plugin_version'
@@ -249,21 +242,10 @@
           condition-command: >
             [ -z ${ISO_FILE} ]
           steps:
-            - copyartifact:
-                project: ${ISO_JOB_NAME}
-                filter: "iso_file"
-                which-build: last-successful
-      - conditional-step:
-          condition-kind: file-exists
-          condition-filename: "iso_file"
-          steps:
             - shell: |
                 #!/bin/bash
-                if [ ! -z $ISO_FILE ]; then
-                    echo "ISO_FILE=$ISO_FILE" >> build_number
-                else
-                    echo "$(<iso_file)" >> build_number
-                fi
+                echo "ISO_FILE should be defined"
+                exit 1
 # common git settings to get sources
 - scm:
     name: common-scm
