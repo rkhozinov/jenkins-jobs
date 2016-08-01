@@ -24,14 +24,15 @@ export VENV_PATH="${HOME}/${FUEL_RELEASE}-venv"
 
 
 export JUNIPER_PKG_PATH="/storage/contrail/${CONTRAIL_VERSION}/"
+[ -f $JUNIPER_PKG_PATH ] && echo "JUNIPER_PKG_PATH is $JUNIPER_PKG_PATH" \
+                         || { echo "$JUNIPER_PKG_PATH is not found";  exit 1; }
+
 export CONTRAIL_PLUGIN_PACK_UB_PATH=$(find $JUNIPER_PKG_PATH -maxdepth 1 -name 'contrail-install-packages*.deb' -exec stat -c "%y %n" {} + | sort -r | head -n 1 | cut -d' ' -f 4)
 export JUNIPER_PKG_VERSION=$(sed 's/[-_~]/-/g' <<< ${CONTRAIL_PLUGIN_PACK_UB_PATH} | cut -d- -f4-5)
-source $VENV_PATH/bin/activate
 
 systest_parameters=''
 [[ $USE_SNAPSHOTS == "true"  ]] && systest_parameters+=' -k' || echo new env will be created
 [[ $ERASE_AFTER   == "true"  ]] && echo the env will be erased after test || systest_parameters+=' -K'
-
 
 echo test-group: $TEST_GROUP
 echo env-name: $ENV_NAME
@@ -56,4 +57,5 @@ PLUGIN_VERSION=$PLUGIN_VERSION
 JUNIPER_PKG_VERSION=$JUNIPER_PKG_VERSION
 REPORTER_PROPERTIES
 
+source $VENV_PATH/bin/activate
 ./plugin_test/utils/jenkins/system_tests.sh -t test ${systest_parameters} -i ${ISO_PATH} -j ${JOB_NAME} -o --group=${TEST_GROUP}
