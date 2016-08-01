@@ -3,6 +3,11 @@
 # activate bash xtrace for script
 [[ "${DEBUG}" == "true" ]] && set -x || set +x
 [ -z $ISO_FILE  ] && (echo "ISO_FILE variable is empty"; exit 1)
+export SSH_ENDPOINT='ssh_connect.py'
+export ESXI_PASSWORD=${ESXI_PASSWORD:-swordfish}
+export ESXI_USER=${ESXI_USER:-root}
+export ESXI_HOSTS='172.16.0.250 172.16.0.252 172.16.0.253'
+export NFS_SHARES='nfs nfs2'
 
 #Set statistics job-group properties for tests
 export FUEL_STATS_HOST=${FUEL_STATS_HOST:-"fuel-collect-systest.infra.mirantis.net"}
@@ -189,7 +194,202 @@ source "${VENV_PATH}/bin/activate"
 #                           -t "${TEST_GROUP_PREFIX}(${TEST_GROUP_CONFIG})" \
 #                           $systest_parameters
 
-/btsync/tpi_systest_mod2.sh -d ${OPENSTACK_RELEASE} \
-                            -i ${ISO_PATH} \
-                            -t "${TEST_GROUP_PREFIX}(${TEST_GROUP_CONFIG})" \
-                            $systest_parameters
+#/btsync/tpi_systest_mod2.sh -d ${OPENSTACK_RELEASE} \
+#                            -i ${ISO_PATH} \
+#                            -t "${TEST_GROUP_PREFIX}(${TEST_GROUP_CONFIG})" \
+#                            $systest_parameters
+
+main() {
+
+  clean_old_bridges
+
+  rm -rf logs/*
+
+  #Run test in background and wait before environment is created
+  echo sh -x "utils/jenkins/system_tests.sh" -t test $systest_parameters -i "${ISO_PATH}" -o --group=$TEST_GROUP
+  sh -x "utils/jenkins/system_tests.sh" \
+      -t test $systest_parameters \
+      -i "${ISO_PATH}" \
+      -o --group="${TEST_GROUP_PREFIX}(${TEST_GROUP_CONFIG})" &
+
+  export SYSTEST_PID=$!
+
+  if ! ps -p $SYSTEST_PID > /dev/null
+  then
+    echo System tests exited prematurely, aborting
+    exit 1
+  fi
+ 
+  #Wait before environment is created
+  while [ $(virsh net-list | grep $ENV_NAME | wc -l) -ne 5 ]; do 
+    sleep 10 
+    if ! ps -p $SYSTEST_PID > /dev/null
+    then
+      echo System tests exited prematurely, aborting
+      exit 1
+    fi
+  done
+  sleep 5 
+
+  setup_net $ENV_NAME
+
+  [ -z $NOREVERT ] && revert_ws "$WORKSTATION_NODES" $SYSTEST_PID
+
+  create_ssh_endpoint
+  configure_nfs
+
+  clean_iptables
+
+  echo waiting for system tests to finish
+  wait $SYSTEST_PID
+  export RES=$?
+  echo ENVIRONMENT NAME is $ENV_NAME
+
+  virsh net-dumpxml "${ENV_NAME}_admin" | grep -P "(\d+\.){3}" -o | awk '{print "Fuel master node IP: "$0"2"}'
+
+  echo Result is $RES
+
+  if [ $RES -eq 0 ]; then
+    echo Tests succeeded
+    if [ -n  "$ERASE_ENV_AFTER" ]; then
+      echo Erasing $ENV_NAME
+      dos.py erase $ENV_NAME
+    fi
+    if [ -n "$REVERT_AFTER" ]; then
+      revert_ws "$WORKSTATION_NODES" $SYSTEST_PID 
+    fi
+  else
+    [ $DESTROY_ENV_AFTER = 1 ] && dos.py destroy $ENV_NAME
+    echo Tests failed
+  fi
+
+}
+
+kill_test(){
+    pid=$1
+    if [ ! -z $pid ]; then
+        echo "killing $pid and its childs" && pkill --parent $pid && kill $pid && exit 1;
+
+    elif [ -z $SYSTEST_PID ]; then
+        echo "killing $pid and its childs" && pkill --parent $pid && kill $pid && exit 1;
+
+    else
+        echo "test process id doesn't exist"
+        exit 1
+    fi 
+}
+
+add_interface_to_bridge() {
+  env=$1
+  net_name=$2
+  nic=$3  
+  ip=$4
+
+  for net in $(virsh net-list | grep ${env}_${net_name} | awk '{print $1}'); do
+    bridge=$(virsh net-info $net | grep -i bridge |awk '{print $2}')
+    setup_bridge $bridge $nic $ip && echo $net_name bridge $bridge ready
+  done
+}
+
+setup_bridge() {
+  bridge=$1
+  nic=$1
+
+  sudo brctl stp $bridge off
+  sudo brctl addif $bridge $nic
+
+  sudo ip address flush $nic
+  sudo ip link set dev $nic up
+  sudo ip link set dev $bridge up
+
+  if sudo /sbin/iptables-save |grep $bridge | grep -i reject | grep -q FORWARD; then
+    sudo /sbin/iptables -D FORWARD -o $bridge -j REJECT --reject-with icmp-port-unreachable
+    sudo /sbin/iptables -D FORWARD -i $bridge -j REJECT --reject-with icmp-port-unreachable
+  fi
+}
+
+clean_old_bridges() {
+  for intf in $EXT_IFS; do
+    for br in $(/sbin/brctl show | grep -v "bridge name" | cut -f1 -d'	'); do
+        brctl show $br | grep -q $intf && \
+          sudo brctl delif $br $intf  && \
+          echo $intf deleted from $br
+    done
+  done
+}
+
+clean_iptables() {
+  sudo /sbin/iptables -F
+  sudo /sbin/iptables -t nat -F
+  sudo /sbin/iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE
+}
+
+revert_ws() {
+  set +x
+  systest_pid=$2  
+  cmd="vmrun -T ws-shared -h https://localhost:443/sdk -u ${WORKSTATION_USERNAME} -p ${WORKSTATION_PASSWORD}"
+  for i in $1; do
+    $cmd listRegisteredVM | grep -q $i || { echo "VM $i does not exist"; kill_test $systest_pid; }
+    echo vmrun: reverting $i to $WORKSTATION_SNAPSHOT 
+    $cmd revertToSnapshot "[standard] $i/$i.vmx" $WORKSTATION_SNAPSHOT && echo "vmrun: $i reverted" || { echo "Error: revert of $i failed";  kill_test $systest_pid; }
+    echo vmrun: starting $i 
+    $cmd start "[standard] $i/$i.vmx" && echo "vmrun: $i is started" || { echo "Error: $i failed to start";  kill_test $systest_pid; }
+  done
+  set -x
+}
+
+setup_net() {
+  add_interface_to_bridge $env private vmnet2
+  #add_interface_to_bridge $env public vmnet1
+}
+
+create_ssh_endpoint(){
+
+cat << SSH_ENDPOINT > $SSH_ENDPOINT
+#!/usr/bin/python2
+import paramiko
+import sys
+
+host = sys.argv[1]
+user = sys.argv[2]
+secret = sys.argv[3]
+command = sys.argv[4]
+port = 22
+
+client = paramiko.SSHClient()
+client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+client.connect(hostname=host, username=user, password=secret, port=port)
+stdin, stdout, stderr = client.exec_command(command)
+data = stdout.read() + stderr.read()
+print data
+client.close()
+SSH_ENDPOINT
+
+chmod +x $SSH_ENDPOINT
+
+}
+
+configure_nfs(){
+  for esxi_host in $ESXI_HOSTS; do
+
+    python2 $SSH_ENDPOINT $esxi_host $ESXI_USER $ESXI_PASSWORD 'storages=$(esxcli storage nfs list | grep nfs | cut -d" " -f1); for storage in $storages; do esxcli storage nfs remove -v $storage; done'
+    echo "nfs storages have been successfully removed for $esxi_host"
+
+    for nfs_share in $NFS_SHARES; do
+      python2 $SSH_ENDPOINT $esxi_host $ESXI_USER $ESXI_PASSWORD "esxcli storage nfs add -H 172.16.0.1 -s /var/$nfs_share -v $nfs_share"
+      echo "$nfs_share has been successfully connected for $esxi_host"
+    done
+
+    python2 $SSH_ENDPOINT $esxi_host $ESXI_USER $ESXI_PASSWORD 'esxcli storage core adapter rescan --all'
+    echo "Rescan all datastores for $esxi_host"
+
+  done
+}
+
+check_testgroup() {
+    run_system_tests.sh explain --group=$1
+}
+
+main
+
+exit $RES
