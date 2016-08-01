@@ -177,7 +177,7 @@
       - '{fuel-release}.{plugin-name}.bvt.test'
 
       - '{regression-name}':   
-          testrail_suite: "[9.0][PCE] VMware DVS plugin v3.0.0 Regression"
+          testrail_suite: "[9.0][PCE] VMware NSXv plugin v3.0.0 Smoke/BVT"
           testrail_suite_desc: "Suite description"
           testrail_plan: "$TREP_TESTRAIL_SUITE #${{DATE}}"
           testrail_plan_desc: "Test plan description"
