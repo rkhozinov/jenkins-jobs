@@ -14,7 +14,7 @@ git log  --pretty=oneline | head
 echo 
 
 # Add debian rules from fuel-plugins-nsxv repo
-NSXV_TARBALL_VERSION='master'
+NSXV_TARBALL_VERSION='9.0'
 REPO_PATH="https://github.com/openstack/fuel-plugin-nsxv/tarball/${NSXV_TARBALL_VERSION}"
 wget -qO- "$REPO_PATH" | tar --wildcards -C ./ --strip-components=2 -zxvf - "openstack-fuel-plugin-nsxv-*/vmware-nsx/"
 
