@@ -1,40 +1,46 @@
 ---
+
 - project:
     name: 'predefined_parameters'
     fuel-release: '9.0'
     plugin-version: '1.0'
     plugin-name: 'gcs'
-    build-name: '{fuel-release}.{plugin-name}.{plugin-version}.build'
-    flake8-name: '{fuel-release}.{plugin-name}.{plugin-version}.flake8'
-    radon-name: '{fuel-release}.{plugin-name}.{plugin-version}.radon'
-    shellcheck-name: '{fuel-release}.{plugin-name}.{plugin-version}.shellcheck'
-    smoke-name: '{fuel-release}.{plugin-name}.{plugin-version}.smoke'
-    bvt-name: '{fuel-release}.{plugin-name}.{plugin-version}.bvt'
-    regression-name: '{fuel-release}.{plugin-name}.{plugin-version}.regression'
-    nightly-name: '{fuel-release}.{plugin-name}.{plugin-version}.nightly'
-    custom-name: '{fuel-release}.{plugin-name}.{plugin-version}.custom'
-    reporter-name: '{fuel-release}.{plugin-name}.{plugin-version}.reporter'
+    build-name: '{fuel-release}.{plugin-name}.build'
+    flake8-name: '{fuel-release}.{plugin-name}.flake8'
+    radon-name: '{fuel-release}.{plugin-name}.radon'
+    shellcheck-name: '{fuel-release}.{plugin-name}.shellcheck'
+    smoke-name: '{fuel-release}.{plugin-name}.smoke'
+    bvt-name: '{fuel-release}.{plugin-name}.bvt'
+    regression-name: '{fuel-release}.{plugin-name}.regression'
+    nightly-name: '{fuel-release}.{plugin-name}.nightly'
+    baremetal-name: '{fuel-release}.{plugin-name}.baremetal'
+    custom-name: '{fuel-release}.{plugin-name}.custom'
+    reporter-name: '{fuel-release}.{plugin-name}.reporter'
     smoke-test-name: 'gcs_smoke'
     bvt-test-name: 'gcs_bvt'
-    regression-test-name: 'gcs_bvt'
     admin_node_memory: '4096'
     slave_node_memory: '4096'
     admin_node_cpu: '4'
     slave_node_cpu: '4'
     pkg_job_name: '{fuel-release}.{plugin-name}.{plugin-version}.build'
+    iso_job_name: ''
     nightly_timer: 'H 21 * * *'
+    full_timer: 'H 21 * * *'
     regression_timer: 'H 18 * * *'
-    nightly_disabled: true
+    nightly_disabled: false
+    full_disabled: false        
+    baremetal_disabled: false
     regression_disabled: true
+    use_snapshots: false
     force_erase: true
-    recreate_venv: true
+    force_vsrx_copy: false
+    recreate_venv: false
     disable_ssl: false
+    bonding: false
     kvm_use: false
-    update_master: false
-    enable_proposed: false
-    snapshots_id: 'released'
+    update_master: true
     debug: true
-    build_debug: false
+    build_debug: true
     publish_results: true
     multijob_build_pkg: true
     testjob_build_pkg: false
@@ -46,81 +52,64 @@
     gerrit_branch: 'master'
     email_to: 'rkhozinov@mirantis.com okosse@mirantis.com otsvigun@mirantis.com'
     released_plugin_path: ''
-    scm_submodule_disabled: false
+    scm_submodule_disabled: true
     scm_wipe_workspace: false 
     skip_vote_successfull: false
     skip_vote_failed: false
-
-    testrail_project: "GCS-Cinder plugin"
-    testrail_suite: "[9.0][PCE] Fuel plugin GCS cinder backup v1.0.0"
-    testrail_suite_desc: "Suite descriptioni"
-    testrail_milestone: "Fuel Plugin Cinder GCS v1.0.0"
-    testrail_plan: "$TREP_TESTRAIL_SUITE build#${{PKG_JOB_BUILD_NUMBER}}"
-    testrail_plan_desc: "Test plan description"
-    testrail_run: "$TREP_TESTRAIL_SUITE"
-    testrail_run_desc: "Test run description"
-    testrail_item_case: "$TEST_GROUP"
-    trep_results_source: "xunit"
-    trep_debug_level: "DEBUG"
 
     testgroup_parameter_type: string
     testgroup_value_type: default
     testgroup_value: '{testgroup}'
 
-
     testgroup:
-      - gcs_smoke 
-      - gcs_bvt
-      - gcs_ceph
-      - gcs_cinder_multirole
-      - gcs_cinder_ceph_multirole
-      - gcs_ceilometer
-      - gcs_delete_add_controller
-      - gcs_delete_add_compute
-      - gcs_delete_add_cinder
-      - gcs_delete_add_single_cinder
-      - gcs_add_ceph
-      - gcs_gui_defaults
-
+      - testgroup_example
     jobs:
       - '{build-name}':
           scm_submodule_disabled: true
-          scm_wipe_workspace: true
-      - '{flake8-name}':
-          scm_submodule_disabled: true
-      - '{radon-name}':
-          scm_submodule_disabled: true
-      - '{shellcheck-name}':
-          scm_submodule_disabled: true
-          skip_vote_successfull: '{skip_vote_successfull}'
-          skip_vote_failed: '{skip_vote_failed}'
+          scm_wipe_workspace: false
 
-      - '{nightly-name}':
-          multijob_build_pkg: true
+      - '{flake8-name}'
+#     - '{radon-name}'
+#     - '{shellcheck-name}':  
+#         skip_vote_successfull: false
+#         skip_vote_failed: true
 
-      - '{custom-name}.qa':
-          publish_results: false
+#     - '{nightly-name}':
+#         multijob_build_pkg: true
+#         testrail_suite: "[8.0][PCE] Fuel plugin contrail v4.0.1 nightly"
+#                 
+#     - '{full-name}':
+#         multijob_build_pkg: true
+#         testrail_suite: "[8.0][PCE] Fuel plugin contrail v4.0.1 Release Acceptance"
 
-      - '{custom-name}.dev':
-          publish_results: false
-          testgroup_parameter_type: choice
-          testgroup_value_type: choices
-          testgroup_value: '{obj:testgroup}'
+#     - '{baremetal-name}':
+#         multijob_build_pkg: true
 
-      - '{reporter-name}'
-      - '{fuel-release}.{plugin-name}.{plugin-version}.{testgroup}'
+#     - '{custom-name}.qa':
+#         publish_results: false
 
-      - '{smoke-name}':
-          publish_results: false
-          multijob_build_pkg: false
+#     - '{custom-name}.dev':
+#         scm_submodule_disabled: false
+#         publish_results: false
+#         testgroup_parameter_type: choice
+#         testgroup_value_type: choices
+#         testgroup_value: '{obj:testgroup}'
 
-      - '{fuel-release}.{plugin-name}.{plugin-version}.smoke.test'
+#     - '{reporter-name}'
 
-      - '{bvt-name}':
-          publish_results: false
-          multijob_build_pkg: true
+#     - '{fuel-release}.{plugin-name}.{plugin-version}.{testgroup}.juniper'
 
-      - '{fuel-release}.{plugin-name}.{plugin-version}.bvt.test'
+#     - '{smoke-name}':
+#         multijob_build_pkg: false
+#         publish_results: false
+
+#     - '{fuel-release}.{plugin-name}.{plugin-version}.smoke.test.juniper'
+
+#     - '{bvt-name}':
+#         multijob_build_pkg: true
+#         publish_results: false
+
+#     - '{fuel-release}.{plugin-name}.{plugin-version}.bvt.test.juniper'
 
 #     - '{regression-name}':
 #         testrail_suite: "Contrail Plugin v4.x.x"
@@ -131,9 +120,10 @@
 #         testrail_run: "$TREP_TESTRAIL_SUITE"
 #         testrail_run_desc: "Test run description"
 #         pkg_job_name: ''
+#         iso_job_name: ''
 #         multijob_build_pkg: false
 
-#     - '{fuel-release}.{plugin-name}.{plugin-version}.regression.test'
+#     - '{fuel-release}.{plugin-name}.{plugin-version}.regression.test.juniper'
 
 - runner-parameters: &runner-parameters
     name: 'runner-parameters'
@@ -148,26 +138,33 @@
           disable_ssl:          '{disable_ssl}'
           force_erase:          '{force_erase}'
           recreate_venv:        '{recreate_venv}'
+          use_snapshots:        '{use_snapshots}'
           iso_file:             '{iso_file}'
           gerrit_branch:        '{gerrit_branch}'
           env_prefix:           '{fuel-release}.{plugin-name}'
           pkg_job_name:         '{pkg_job_name}'
+          iso_job_name:         '{iso_job_name}'
           admin_node_memory:    '{admin_node_memory}'
           slave_node_memory:    '{slave_node_memory}'
           admin_node_cpu:       '{admin_node_cpu}'
           slave_node_cpu:       '{slave_node_cpu}'
           testrail_suite:       '{testrail_suite}'
           testrail_suite_desc:  '{testrail_suite_desc}'
-#         testrail_suite_conf:  '{testrail_suite_conf}'
           testrail_plan:        '{testrail_plan}'
           testrail_plan_desc:   '{testrail_plan_desc}'
           skip_vote_successfull: '{skip_vote_successfull}'
           skip_vote_failed:     '{skip_vote_failed}'
-          enable_proposed:      '{enable_proposed}'
-          update_master:        '{update_master}'
+
+      - plugin-specific-parameters:
+          bonding:              '{bonding}'
           kvm_use:              '{kvm_use}'
-          iso_storage:          '{iso_storage}'
-          snapshots_id:         '{snapshots_id}'
+          update_master:        '{update_master}'
+          plugin-version:       '{plugin-version}'
+          force_vsrx_copy:      '{force_vsrx_copy}'
+          vsrx_original_image_path: '{vsrx_original_image_path}'
+          vsrx_target_image_path:   '{vsrx_target_image_path}'
+          vsrx_template_path:       '{vsrx_template_path}'
+          iso_storage:           '{iso_storage}'
 
 # parameters for jobs created per test-group and custom test job
 - test-parameters: &test-parameters
@@ -175,25 +172,28 @@
     parameters:
       - label:
           name: node
-          default: 'gcs'
+          default: 'contrail'
           description: "The node on which to run the job"
+      - bool:
+          name: BUILD_PKG
+          default: '{testjob_build_pkg}'
+          description: "Triggers build of pkg from $PKG_JOB_NAME (only for custom)"
       - '{testgroup_parameter_type}':
           name: TEST_GROUP
           '{testgroup_value_type}': '{obj:testgroup_value}'
           description: "test-group name"
-      - string:
-          name: TEST_GROUP_CONFIG
-          default: '${{TEST_GROUP}}'
       - common-parameters:
-          publish_results: '{publish_results}'
-          debug:           '{debug}'
-          disable_ssl:     '{disable_ssl}'
-          force_erase:     '{force_erase}'
-          recreate_venv:   '{recreate_venv}'
-          iso_file:        '{iso_file}'
-          gerrit_branch:   '{gerrit_branch}'
-          env_prefix:      '{fuel-release}.{plugin-name}'
-          pkg_job_name:    '{pkg_job_name}'
+          publish_results:      '{publish_results}'
+          debug:                '{debug}'
+          disable_ssl:          '{disable_ssl}'
+          force_erase:          '{force_erase}'
+          recreate_venv:        '{recreate_venv}'
+          use_snapshots:        '{use_snapshots}'
+          iso_file:             '{iso_file}'
+          gerrit_branch:        '{gerrit_branch}'
+          env_prefix:           '{fuel-release}.{plugin-name}'
+          pkg_job_name:         '{pkg_job_name}'
+          iso_job_name:         '{iso_job_name}'
           admin_node_memory:    '{admin_node_memory}'
           slave_node_memory:    '{slave_node_memory}'
           admin_node_cpu:       '{admin_node_cpu}'
@@ -203,17 +203,27 @@
           testrail_plan:        '{testrail_plan}'
           testrail_plan_desc:   '{testrail_plan_desc}'
           skip_vote_successfull: '{skip_vote_successfull}'
-          skip_vote_failed:     '{skip_vote_failed}'
-          enable_proposed:      '{enable_proposed}'
+          skip_vote_failed: '{skip_vote_failed}'
+      - plugin-specific-parameters:
           update_master:        '{update_master}'
+          bonding:              '{bonding}'
           kvm_use:              '{kvm_use}'
-          iso_storage:          '{iso_storage}'
-          snapshots_id:         '{snapshots_id}'
+          plugin-version:       '{plugin-version}'
+          force_vsrx_copy:      '{force_vsrx_copy}'
+          vsrx_original_image_path: '{vsrx_original_image_path}'
+          vsrx_target_image_path:   '{vsrx_target_image_path}'
+          vsrx_template_path:       '{vsrx_template_path}'
+          iso_storage:           '{iso_storage}'
 
 - defaults:
     name: global
     disabled: false
-    node: gcs
+    node: contrail
+    logrotate:
+      daysToKeep: 30
+      numToKeep: 100
+      artifactDaysToKeep: 30
+      artifactNumToKeep: 100
     <<: *test-parameters
     scm:
       - common-scm:
@@ -228,31 +238,22 @@
     properties:
       - test-property
     builders:
-      - inject:
-          properties-content: |
-            ENV_PREFIX={fuel-release}.{plugin-name}
-            OPENSTACK_RELEASE=Ubuntu
-            NODES_COUNT=10
-            DESTROY_ENV_AFTER=0
-            ADMIN_NODE_MEMORY={admin_node_memory}
-            SLAVE_NODE_MEMORY={slave_node_memory}
-            ADMIN_NODE_CPU={admin_node_cpu}
-            SLAVE_NODE_CPU={slave_node_cpu}
-            TREP_TESTRAIL_SUITE={testrail_suite}
-            TREP_TESTRAIL_SUITE_DESCRIPTION={testrail_suite_desc}
-            TREP_TESTRAIL_PLAN={testrail_plan}
-            TREP_TESTRAIL_PLAN_DESCRIPTION={testrail_plan_desc}
-            PLUGIN_VERSION={plugin-version}
-            GCS_BUCKET_NAME=plugin-qa-bucket
-            GCS_LOCATION=EUROPE-WEST1
-            GCS_PROJECT_ID=fuelgcsplugin
-            GCS_CERT_URL=https://www.googleapis.com/robot/v1/metadata/x509/qa-1-218%40fuelgcsplugin.iam.gserviceaccount.com
+      - conditional-step:
+           condition-kind: shell
+           condition-command: |
+            [ "${{BUILD_PKG}}" == "true"       ] 
+           steps:
+             - trigger-builds:
+                 - project: ${{PKG_JOB_NAME}}
+                   current-parameters: false
+                   git-revision: false
+                   block: true      
       - conditional-step:
           condition-kind: shell
           condition-command: |
             [ ! -z ${{PKG_JOB_NAME}}         ] && \
             [   -z ${{PKG_JOB_BUILD_NUMBER}} ] && \
-            [   -z ${{GCS_PLUGIN_PATH}} ]
+            [   -z ${{CONTRAIL_PLUGIN_PATH}} ]
           steps:
             - copyartifact:
                 project: ${{PKG_JOB_NAME}}
@@ -262,7 +263,7 @@
           condition-command: |
             [ ! -z ${{PKG_JOB_NAME}}         ] && \
             [ ! -z ${{PKG_JOB_BUILD_NUMBER}} ] && \
-            [   -z ${{GCS_PLUGIN_PATH}} ]
+            [   -z ${{CONTRAIL_PLUGIN_PATH}} ]
           steps:
             - copyartifact:
                 project: ${{PKG_JOB_NAME}}
@@ -271,31 +272,13 @@
       - conditional-step:
           condition-kind: shell
           condition-command: |
-            [[ "${{UPDATE_MASTER}}" == "true" ]]
+            [ ! -z ${{ISO_JOB_NAME}} ] && \
+            [   -z ${{ISO_FILE}}     ]
           steps:
-            - inject:
-                properties-content: |
-                  ENABLE_MOS_CENTOS_OS=true
-                  ENABLE_MOS_CENTOS_PROPOSED=true
-                  ENABLE_MOS_CENTOS_UPDATES=true
-                  ENABLE_MOS_CENTOS_HOLDBACK=true
-                  ENABLE_MOS_CENTOS_HOTFIX=false
-                  ENABLE_MOS_CENTOS_SECURITY=true
-                  ENABLE_MOS_UBUNTU_OS=true
-                  ENABLE_MOS_UBUNTU_PROPOSED=true
-                  ENABLE_MOS_UBUNTU_UPDATES=true
-                  ENABLE_MOS_UBUNTU_HOLDBACK=true
-                  ENABLE_MOS_UBUNTU_HOTFIX=false
-                  ENABLE_MOS_UBUNTU_SECURITY=true
-            - shell:
-                !include-raw-escape: ../builders/update.sh
-            - inject:
-                properties-file: update.properties
             - copyartifact:
-                project: ${{PKG_JOB_NAME}}
-                which-build: specific-build
-                build-number: ${{PKG_JOB_BUILD_NUMBER}}
-
+                project: "${{ISO_JOB_NAME}}"
+                filter: "iso_file"
+                which-build: last-successful
       - shell:
           !include-raw-escape: ../builders/common.prepare.sh
       - shell:
@@ -313,15 +296,15 @@
     concurrent: true
     disabled: false
     triggers:
-      - draft-gerrit-trigger:
+      - draft-patchset-gerrit-trigger:
           gerrit_repo: '{gerrit_repo}'
           gerrit_branch: '{gerrit_branch}'
           skip_vote_successfull: '{skip_vote_successfull}'
           skip_vote_failed: '{skip_vote_failed}'
     scm:
       - common-scm:
-          scm_wipe_workspace: '{scm_wipe_workspace}'
           scm_submodule_disabled: '{scm_submodule_disabled}'
+          scm_wipe_workspace: '{scm_wipe_workspace}'
           gerrit_repo: '{gerrit_repo}'
           skip_vote_successfull: '{skip_vote_successfull}'
           skip_vote_failed: '{skip_vote_failed}'
@@ -334,12 +317,6 @@
       - string:
           name: GERRIT_REFSPEC
           default: 'refs/heads/{gerrit_branch}'
-      - string:
-          name: PUPPETLINT_PATH
-          default: './deployment_scripts/puppet/manifests ./deployment_scripts/puppet/modules/'
-      - string:
-          name: PUPPETLINT_IGNORE
-          default: ''
       - bool:
           name: DEBUG
           default: '{build_debug}'
@@ -350,6 +327,10 @@
       - ansicolor:
           colormap: xterm
     builders:
+      - shell: |
+          rm -rf *.rpm
+          rm -rf build.properties
+          rm -rf build.plugin_version
       - shell:
           !include-raw-escape: ../builders/build-plugin-gcs.sh
       - shell:
@@ -357,25 +338,44 @@
     publishers:
       - build-publisher:
           email_to: '{email_to}'
-
 - job-template:
-    name: '{fuel-release}.{plugin-name}.{plugin-version}.{testgroup}'
-    description: 'The test "{testgroup}" for {fuel-release}.{plugin-name}.{plugin-version}'
+    name: '{fuel-release}.{plugin-name}.{plugin-version}.{testgroup}.open'
+    description: 'The test "{testgroup}" for {fuel-release}.{plugin-name}.{plugin-version} open contrail'
     concurrent: true
 
 - job-template:
-    name: '{fuel-release}.{plugin-name}.{plugin-version}.bvt.test'
-    description: 'The BVT test for {fuel-release}.{plugin-name}.{plugin-version}'
+    name: '{fuel-release}.{plugin-name}.{plugin-version}.{testgroup}.juniper'
+    description: 'The test "{testgroup}" for {fuel-release}.{plugin-name}.{plugin-version} juniper contrail'
     concurrent: true
 
 - job-template:
-    name: '{fuel-release}.{plugin-name}.{plugin-version}.smoke.test'
-    description: 'The Smoke test for {fuel-release}.{plugin-name}.{plugin-version}'
+    name: '{fuel-release}.{plugin-name}.{plugin-version}.bvt.test.open'
+    description: 'The test for {fuel-release}.{plugin-name}.{plugin-version} open contrail'
     concurrent: true
 
 - job-template:
-    name: '{fuel-release}.{plugin-name}.{plugin-version}.regression.test'
-    description: 'The Regression test for {fuel-release}.{plugin-name}.{plugin-version}'
+    name: '{fuel-release}.{plugin-name}.{plugin-version}.bvt.test.juniper'
+    description: 'The test for {fuel-release}.{plugin-name}.{plugin-version} juniper contrail'
+    concurrent: true
+
+- job-template:
+    name: '{fuel-release}.{plugin-name}.{plugin-version}.smoke.test.open'
+    description: 'The test for {fuel-release}.{plugin-name}.{plugin-version} open contrail'
+    concurrent: true
+
+- job-template:
+    name: '{fuel-release}.{plugin-name}.{plugin-version}.smoke.test.juniper'
+    description: 'The test for {fuel-release}.{plugin-name}.{plugin-version} juniper contrail'
+    concurrent: true
+
+- job-template:
+    name: '{fuel-release}.{plugin-name}.{plugin-version}.regression.test.open'
+    description: 'The test for {fuel-release}.{plugin-name}.{plugin-version} open contrail'
+    concurrent: true
+
+- job-template:
+    name: '{fuel-release}.{plugin-name}.{plugin-version}.regression.test.juniper'
+    description: 'The test for {fuel-release}.{plugin-name}.{plugin-version} juniper contrail'
     concurrent: true
 
 - job-template:
@@ -413,10 +413,11 @@
           name: '1st phase - regression test'
           condition: COMPLETED
           projects:
-            - name: '{fuel-release}.{plugin-name}.{plugin-version}.regression.test'
+            - name: '{fuel-release}.{plugin-name}.{plugin-version}.regression.test.juniper'
               predefined-parameters: |
-                TEST_GROUP={regression-test-name}
-                DVS_PLUGIN_PATH={released_plugin_path}
+                TEST_GROUP=contrail_bvt
+                CONTRAIL_DISTRIBUTION=juniper
+                CONTRAIL_PLUGIN_PATH={released_plugin_path}
                 PLUGIN_VERSION={plugin-version}
                 PKG_JOB_BUILD_NUMBER=released
               current-parameters: true
@@ -424,15 +425,14 @@
 
 - job-template:
     name: '{smoke-name}'
-    disabled: true
+    disabled: false
     description: 'The Smoke test for {fuel-release}.{plugin-name}.{plugin-version}'
     concurrent: true
-    quiet-period: 5
     project-type: multijob
     node: runner
     <<: *runner-parameters
     triggers:
-      - draft-gerrit-trigger:
+      - draft-patchset-gerrit-trigger:
           gerrit_repo: '{gerrit_repo}'
           gerrit_branch: '{gerrit_branch}'
           skip_vote_successfull: '{skip_vote_successfull}'
@@ -449,11 +449,12 @@
           name: 'The smoke test for {fuel-release}.{plugin-name}.{plugin-version}'
           condition: COMPLETED
           projects:
-            - name: '{fuel-release}.{plugin-name}.{plugin-version}.smoke.test'
+            - name: '{fuel-release}.{plugin-name}.{plugin-version}.smoke.test.juniper'
               current-parameters: true
               property-file: build_number
               predefined-parameters: |
                 TEST_GROUP={smoke-test-name}
+                CONTRAIL_DISTRIBUTION=juniper
               kill-phase-on: NEVER
     publishers:
       - runner-publisher:
@@ -463,7 +464,7 @@
 - job-template:
     name: '{bvt-name}'
     description: 'The BVT test for {fuel-release}.{plugin-name}.{plugin-version}'
-    disabled: true
+    disabled: false
     concurrent: true
     project-type: multijob
     node: runner
@@ -486,34 +487,15 @@
           name: 'The BVT test for {fuel-release}.{plugin-name}.{plugin-version}'
           condition: COMPLETED
           projects:
-            - name: '{fuel-release}.{plugin-name}.{plugin-version}.bvt.test'
+            - name: '{fuel-release}.{plugin-name}.{plugin-version}.bvt.test.juniper'
               current-parameters: true
               property-file: build_number
               predefined-parameters: |
                 TEST_GROUP={bvt-test-name}
+                CONTRAIL_DISTRIBUTION=juniper
               kill-phase-on: NEVER
     publishers:
       - runner-publisher:
           properties_name: bvt.properties
           email_to: '{email_to}'
 
-- job-template:
-    name: '{nightly-name}'
-    project-type: multijob
-    disabled: '{obj:nightly_disabled}'
-    node: runner
-    <<: *runner-parameters
-    scm: []
-    triggers:
-      - timed: '{nightly_timer}'
-    properties:
-      - runner-property:
-          build-name: '{build-name}'
-    wrappers:
-      - runner-wrapper
-    publishers:
-      - runner-publisher:
-          properties_name: nightly.properties
-          email_to: '{email_to}'
-    builders:
-      !include: gcs-nigthly.yaml.inc
