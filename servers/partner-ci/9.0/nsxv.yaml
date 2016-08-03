@@ -431,11 +431,13 @@
     builders:
       - shell:
           !include-raw-escape: ../builders/build-plugin-nsxv-neutron.sh
-      - shell:
-          !include-raw-escape: ../builders/rpm-check.sh
+      - shell: |
+          #!/bin/bash -e
+          echo $(git log -n 1 --pretty=oneline) > build.neutron_plugin_version
+          env > build.neutron.properties 
     publishers:
-      - build-publisher:
-          email_to: '{email_to}'
+      - archive:
+          artifacts: '*.deb , build.neutron_plugin_version, build.neutron.properties'
 
 - job-template:
     name: '{fuel-release}.{plugin-name}.{testgroup}'
