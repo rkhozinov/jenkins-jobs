@@ -1,0 +1,89 @@
+---
+- project:
+    name: 'utilites'
+    download_iso: 'download_iso'
+    sync_jira_with_launchpad: 'sync_jira_with_launchpad'
+    jobs:
+      - '{download_iso}'
+
+      - '{sync_jira_with_launchpad}'
+
+- job-template:
+    name: '{download_iso}'
+    node: 'download_iso'
+    concurrent: true
+    disabled: false
+    parameters:
+      - string:
+          name: RELEASE
+          default: '9.0-mos'
+    properties:
+      - heavy-job:
+          weight: 1
+    wrappers:
+      - ansicolor:
+          colormap: xterm
+    builders:
+      - copyartifact:
+          project: "{download_iso}"
+          which-build: last-successful
+          fingerprint: true
+      - shell:
+          !include-raw-escape: ../builders/build-job-download-iso.sh
+    publishers:
+      - archive:
+          artifacts: '*.txt, iso_file, iso_version'
+      - description-setter:
+          regexp: "ISO_FILE=.*"
+      - email:
+          recipients: rkhozinov@mirantis.com
+          notify-every-unstable-build: true
+                  
+- job-template:
+    name: '{sync_jira_with_launchpad}'
+    node: 'runner'
+    concurrent: false
+    disabled: false
+    triggers:
+      - timed: "H 5-18/3 * * 1-5"
+    scm:
+      - git:
+          url: $URL
+          branches:
+            - $BRANCH
+    wrappers:
+      - inject-passwords:
+          global: true
+          mask-password-params: true
+      - ansicolor:
+          colormap: xterm
+    parameters:
+      - string:
+          name: JIRA_URL
+          default: 'https://mirantis.jira.com/'
+      - string:
+          name: JIRA_USER
+          default: 'pirobot'
+      - string:
+          name: JIRA_PASSWORD
+      - string:
+          name: JIRA_PROJECT
+          default: 'FPL'
+      - string:
+          name: LAUNCHPAD_TEAM
+          default: 'fuel-partner-engineering'
+      - string:
+          name: URL
+          default: 'https://github.com/ibumarskov/qa_reports.git'
+          description: "url for git repo"
+      - string:
+          name: BRANCH
+          default: '*/master'
+          description: "default branch for git repo"    
+    properties:
+      - heavy-job:
+          weight: 1
+    builders:
+      - shell:
+          !include-raw-escape: ../builders/build-job-sync-jira-with-launchpad.sh
+
