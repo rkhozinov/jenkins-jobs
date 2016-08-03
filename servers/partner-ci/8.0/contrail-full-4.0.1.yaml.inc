@@ -247,7 +247,7 @@
         predefined-parameters: |
            CONTRAIL_DISTRIBUTION=juniper
            MULTIPLE_NETWORKS=True
-           MULTIPLE_NETWORKS_TEMPLATE="plugin_test/fuel-qa/system_test/tests_templates/tests_configs/multirack.yaml"
+           MULTIPLE_NETWORKS_TEMPLATE="${{WORKSPACE}}/plugin_test/fuel-qa/system_test/tests_templates/tests_configs/multirack.yaml"
            VSRX_CONFIG_PATH="/storage/contrail/config.txt.lo.2nodegroups"
         current-parameters: true
         kill-phase-on: NEVER
@@ -257,7 +257,7 @@
         predefined-parameters: |
            CONTRAIL_DISTRIBUTION=juniper
            MULTIPLE_NETWORKS=True
-           MULTIPLE_NETWORKS_TEMPLATE="plugin_test/fuel-qa/system_test/tests_templates/tests_configs/multirack.yaml"
+           MULTIPLE_NETWORKS_TEMPLATE="${{WORKSPACE}}/plugin_test/fuel-qa/system_test/tests_templates/tests_configs/multirack.yaml"
            VSRX_CONFIG_PATH="/storage/contrail/config.txt.lo.2nodegroups"
         current-parameters: true
         kill-phase-on: NEVER
@@ -267,7 +267,7 @@
         predefined-parameters: |
            CONTRAIL_DISTRIBUTION=juniper
            MULTIPLE_NETWORKS=True
-           MULTIPLE_NETWORKS_TEMPLATE="plugin_test/fuel-qa/system_test/tests_templates/tests_configs/multirack.yaml"
+           MULTIPLE_NETWORKS_TEMPLATE="${{WORKSPACE}}/plugin_test/fuel-qa/system_test/tests_templates/tests_configs/multirack.yaml"
            VSRX_CONFIG_PATH="/storage/contrail/config.txt.lo.2nodegroups"
         current-parameters: true
         kill-phase-on: NEVER
@@ -277,7 +277,7 @@
         predefined-parameters: |
            CONTRAIL_DISTRIBUTION=juniper
            MULTIPLE_NETWORKS=True
-           MULTIPLE_NETWORKS_TEMPLATE="plugin_test/fuel-qa/system_test/tests_templates/tests_configs/multirack.yaml"
+           MULTIPLE_NETWORKS_TEMPLATE="${{WORKSPACE}}/plugin_test/fuel-qa/system_test/tests_templates/tests_configs/multirack.yaml"
            VSRX_CONFIG_PATH="/storage/contrail/config.txt.lo.2nodegroups"
         current-parameters: true
         kill-phase-on: NEVER
@@ -287,7 +287,7 @@
         predefined-parameters: |
            CONTRAIL_DISTRIBUTION=juniper
            MULTIPLE_NETWORKS=True
-           MULTIPLE_NETWORKS_TEMPLATE="plugin_test/fuel-qa/system_test/tests_templates/tests_configs/multirack.yaml"
+           MULTIPLE_NETWORKS_TEMPLATE="${{WORKSPACE}}/plugin_test/fuel-qa/system_test/tests_templates/tests_configs/multirack.yaml"
            VSRX_CONFIG_PATH="/storage/contrail/config.txt.lo.2nodegroups"
         current-parameters: true
         kill-phase-on: NEVER
@@ -297,7 +297,7 @@
         predefined-parameters: |
            CONTRAIL_DISTRIBUTION=juniper
            MULTIPLE_NETWORKS=True
-           MULTIPLE_NETWORKS_TEMPLATE="plugin_test/fuel-qa/system_test/tests_templates/tests_configs/multirack.yaml"
+           MULTIPLE_NETWORKS_TEMPLATE="${{WORKSPACE}}/plugin_test/fuel-qa/system_test/tests_templates/tests_configs/multirack.yaml"
            VSRX_CONFIG_PATH="/storage/contrail/config.txt.lo.2nodegroups"
         current-parameters: true
         kill-phase-on: NEVER
