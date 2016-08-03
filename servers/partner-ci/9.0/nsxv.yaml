@@ -405,15 +405,23 @@
     disabled: false
     scm:
       - git:
-          url: 'https://github.com/openstack/vmware-nsx'
+          url: $URL
           branches:
-            - 'refs/heads/stable/mitaka'
+            - $BRANCH
     wrapper:
       - runner-wrapper
     parameters:
       - string:
           name: COMMIT
           description: "Commit from which build neutron plugin"
+      - string:
+          name: URL
+          default: 'https://github.com/openstack/vmware-nsx'
+          description: "url for git repo"
+      - string:
+          name: BRANCH
+          default: 'refs/heads/stable/mitaka'
+          description: "default branch for git repo"    
     properties:
       - heavy-job:
           weight: 1
