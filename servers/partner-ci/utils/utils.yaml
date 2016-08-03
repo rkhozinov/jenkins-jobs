@@ -62,11 +62,6 @@
           name: JIRA_URL
           default: 'https://mirantis.jira.com/'
       - string:
-          name: JIRA_USER
-          default: 'pirobot'
-      - string:
-          name: JIRA_PASSWORD
-      - string:
           name: JIRA_PROJECT
           default: 'FPL'
       - string:
