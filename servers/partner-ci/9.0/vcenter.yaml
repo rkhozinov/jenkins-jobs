@@ -9,7 +9,7 @@
           WORKSTATION_SNAPSHOT=vcenterha
           WORKSTATION_NODES=esxi1 esxi2 esxi3 vcenter
           VCENTER_IP=172.16.0.145
-          VCENTER_USERNAME=openstack
+          VCENTER_USERNAME=root
           VCENTER_PASSWORD=vmware
           VCENTER_GLANCE_IP=172.16.0.145
           VCENTER_GLANCE_USERNAME=openstack
@@ -17,7 +17,7 @@
           VCENTER_DATACENTER=Datacenter
           VCENTER_DATASTORE=nfs
           VCENTER_CLUSTERS=Cluster1,Cluster2
-          VCENTER_GLANCE_USERNAME=opentack
+          VCENTER_GLANCE_USERNAME=root
           VCENTER_GLANCE_PASSWORD=vmware
           VCENTER_DATACENTER=Datacenter
           VCENTER_CLUSTERS=Cluster1,Cluster2
@@ -304,8 +304,6 @@
           properties-content: $UPDATE_PARAMETERS
       - shell:
           !include-raw-escape: ../builders/common.prepare.ng.sh
-      - shell:
-          !include-raw-escape: ../builders/workstation.sh
       - shell:
           !include-raw-escape: ../builders/vcenter.test.ng.sh
     publishers:
