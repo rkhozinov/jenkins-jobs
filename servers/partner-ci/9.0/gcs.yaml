@@ -69,8 +69,8 @@
           scm_wipe_workspace: false
 
       - '{flake8-name}'
-#     - '{radon-name}'
-#     - '{shellcheck-name}':  
+      - '{radon-name}'
+      - '{shellcheck-name}':  
 #         skip_vote_successfull: false
 #         skip_vote_failed: true
 
@@ -253,7 +253,7 @@
           condition-command: |
             [ ! -z ${{PKG_JOB_NAME}}         ] && \
             [   -z ${{PKG_JOB_BUILD_NUMBER}} ] && \
-            [   -z ${{CONTRAIL_PLUGIN_PATH}} ]
+            [   -z ${{GCS_PLUGIN_PATH}} ]
           steps:
             - copyartifact:
                 project: ${{PKG_JOB_NAME}}
@@ -263,22 +263,12 @@
           condition-command: |
             [ ! -z ${{PKG_JOB_NAME}}         ] && \
             [ ! -z ${{PKG_JOB_BUILD_NUMBER}} ] && \
-            [   -z ${{CONTRAIL_PLUGIN_PATH}} ]
+            [   -z ${{GCS_PLUGIN_PATH}} ]
           steps:
             - copyartifact:
                 project: ${{PKG_JOB_NAME}}
                 which-build: specific-build
                 build-number: ${{PKG_JOB_BUILD_NUMBER}}
-      - conditional-step:
-          condition-kind: shell
-          condition-command: |
-            [ ! -z ${{ISO_JOB_NAME}} ] && \
-            [   -z ${{ISO_FILE}}     ]
-          steps:
-            - copyartifact:
-                project: "${{ISO_JOB_NAME}}"
-                filter: "iso_file"
-                which-build: last-successful
       - shell:
           !include-raw-escape: ../builders/common.prepare.sh
       - shell:
