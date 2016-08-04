@@ -29,8 +29,16 @@
       - string:
           name: CONTRAIL_PLUGIN_PACK_UB_PATH
       - string:
-          description: 'proposed repositories to update ubuntu cluster'
+          name: CONTRAIL_DISTRIBUTION
+      - string:
+          name: MULTIPLE_NETWORKS
+      - string:
+          name: MULTIPLE_NETWORKS_TEMPLATE
+      - string:
+          name: VSRX_CONFIG_PATH
+      - string:
           name: MIRROR_UBUNTU
+          description: 'proposed repositories to update ubuntu cluster'
           default: >
              deb ${{MIRROR}}/pkgs/ubuntu/ trusty main universe multiverse |
              deb ${{MIRROR}}/pkgs/ubuntu/ trusty-updates main universe multiverse |
