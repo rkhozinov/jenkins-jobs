@@ -9,10 +9,10 @@
           WORKSTATION_SNAPSHOT=vcenterha
           WORKSTATION_NODES=esxi1 esxi2 esxi3 vcenter
           VCENTER_IP=172.16.0.145
-          VCENTER_USERNAME=openstack
+          VCENTER_USERNAME=root
           VCENTER_PASSWORD=vmware
           VCENTER_GLANCE_IP=172.16.0.145
-          VCENTER_GLANCE_USERNAME=openstack
+          VCENTER_GLANCE_USERNAME=root
           VCENTER_GLANCE_PASSWORD=vmware
           VCENTER_DATACENTER=Datacenter
           VCENTER_DATASTORE=nfs
