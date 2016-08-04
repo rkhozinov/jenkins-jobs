@@ -3,8 +3,9 @@
 # activate bash xtrace for script
 [[ "${DEBUG}" == "true" ]] && set -x || set +x
 
-[[ "${FORCE_VSRX_COPY}" == "true" ]] && rm -r $VSRX_TARGET_IMAGE_PATH 
-[ ! -f $VSRX_TARGET_PATH ] && cp $VSRX_ORGINAL_IMAGE_PATH $VSRX_TARGET_PATH
+[[ "${FORCE_VSRX_COPY}" == "true" ]] && sudo rm -rf $VSRX_TARGET_IMAGE_PATH 
+[ ! -f $VSRX_TARGET_IMAGE_PATH ] && sudo cp $VSRX_ORIGINAL_IMAGE_PATH $VSRX_TARGET_IMAGE_PATH
+[ ! -f $VSRX_TARGET_IMAGE_PATH ] && { echo "ERROR: $VSRX_TARGET_IMAGE_PATH is not found"; exit 1; }
 
 [ $CONTRAIL_VERSION ] && echo "contrail version is $CONTRAIL_VERSION" \
                       || { echo "CONTRAIL_VERSION is not defined";  exit 1; }
@@ -24,10 +25,12 @@ export VENV_PATH="${HOME}/${FUEL_RELEASE}-venv"
 
 
 export JUNIPER_PKG_PATH="/storage/contrail/${CONTRAIL_VERSION}/"
-[ -f $JUNIPER_PKG_PATH ] && echo "JUNIPER_PKG_PATH is $JUNIPER_PKG_PATH" \
+[ -d $JUNIPER_PKG_PATH ] && echo "JUNIPER_PKG_PATH is $JUNIPER_PKG_PATH" \
                          || { echo "$JUNIPER_PKG_PATH is not found";  exit 1; }
 
 export CONTRAIL_PLUGIN_PACK_UB_PATH=$(find $JUNIPER_PKG_PATH -maxdepth 1 -name 'contrail-install-packages*.deb' -exec stat -c "%y %n" {} + | sort -r | head -n 1 | cut -d' ' -f 4)
+[ -f $CONTRAIL_PLUGIN_PACK_UB_PATH ] && echo "CONTRAIL_PLUGIN_PACK_UB_PATH is $CONTRAIL_PLUGIN_PACK_UB_PATH" \
+                         || { echo "CONTRAIL_PLUGIN_PACK_UB_PATH is not found";  exit 1; }
 export JUNIPER_PKG_VERSION=$(sed 's/[-_~]/-/g' <<< ${CONTRAIL_PLUGIN_PACK_UB_PATH} | cut -d- -f4-5)
 
 systest_parameters=''
