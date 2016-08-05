@@ -10,10 +10,15 @@
 
 if [ -z $PLUGIN_VERSION  ]; then
   if [ -f build.plugin_version ]; then
-    export PLUGIN_VERSION=$(grep "PLUGIN_VERSIONR" < build.plugin_version | cut -d= -f2 )
+    export PLUGIN_VERSION=$(grep "PLUGIN_VERSION" < build.plugin_version | cut -d= -f2 )
     export DVS_PLUGIN_VERSION=$PLUGIN_VERSION
+  else
+    echo "build.properties file is not available so a test couldn't be runned"
+    exit 1
   fi
 fi
+
+[ -z $DVS_PLUGIN_VERSION ] && { echo "DVS_PLUGIN_VERSION is empty"; exit 1; }
 
 if [ -z "${PKG_JOB_BUILD_NUMBER}" ]; then
     if [ -f build.properties ]; then
@@ -41,11 +46,6 @@ export VENV_PATH="${HOME}/${FUEL_RELEASE}-venv"
 [ -z "${DVS_PLUGIN_PATH}" ] && export DVS_PLUGIN_PATH=$(ls -t ${WORKSPACE}/fuel-plugin-vmware-dvs*.rpm | head -n 1)
 [ -z "${DVS_PLUGIN_PATH}" ] && { echo "DVS_PLUGIN_PATH is empty"; exit 1; }
 [ -z "${PLUGIN_PATH}"     ] && export PLUGIN_PATH=$DVS_PLUGIN_PATH
-
-systest_parameters=''
-[[ $USE_SNAPSHOTS  == 'true' ]] && systest_parameters+=' -K -k' || echo snapshots for env is not be used
-#[[ $SHUTDOWN_AFTER == 'true' ]] && systest_parameters+=' --destroy' || echo the env will not be removed after test
-#[[ $ERASE_AFTER    == 'true' ]] && systest_parameters+=' --erase' || echo the env will not be erased after test
 
 [ -z $TEST_GROUP_PREFIX ] && { echo "testgroup prefix is empty"; exit 1; } || echo test-group-prefix: $TEST_GROUP_PREFIX
 
@@ -94,7 +94,7 @@ setup_bridge() {
   bridge=$1
   nic=$2
 
-  sudo brctl stp $bridge off
+  [[ "${DISABLE_STP}" == "true" ]] && sudo brctl stp $bridge off
   sudo brctl addif $bridge $nic
 
   sudo ip address flush $nic
@@ -114,7 +114,9 @@ clean_iptables() {
 }
 
 sh -x "utils/jenkins/system_tests.sh" \
-    -t test $systest_parameters \
+    -k \
+    -K \
+    -t test \
     -i "${ISO_PATH}" \
     -o --group="${TEST_GROUP_PREFIX}(${TEST_GROUP_CONFIG})" &
 
@@ -127,7 +129,7 @@ while [ true ]; do
     { echo System tests exited prematurely, aborting; exit 1; }
 done
 
-clean_iptables
+[[ "${CLEAN_IPTABLES}" == "true" ]] && clean_iptables
 add_interface_to_bridge $ENV_NAME private vmnet2
 
 echo "Waiting for system tests to finish"

@@ -33,10 +33,6 @@
           name: SKIP_VOTE_FAILED
           default: '{skip_vote_failed}'
           description: "configure gerrit voting"
-      - bool:
-          name: USE_SNAPSHOTS
-          default: '{use_snapshots}'
-          descrition: 'Will be used existing environment'
       - string:
           name: MIRROR_HOST
           default: 'mirror.seed-cz1.fuel-infra.org'
