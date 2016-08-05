@@ -5,7 +5,12 @@
     - text:
         name: VCENTER_PARAMETERS
         default: |
-          VSPHERE_VERSION="5.5"
+          ESXI_PASSWORD=swordfish
+          ESXI_USER=root
+          ESXI_HOSTS=172.16.0.250 172.16.0.252 172.16.0.253
+          NFS_SERVER=172.16.0.1
+          NFS_SHARES=nfs nfs2
+          VSPHERE_VERSION=5.5
           WORKSTATION_SNAPSHOT=vcenterha
           WORKSTATION_NODES=esxi1 esxi2 esxi3 vcenter
           VCENTER_IP=172.16.0.145
@@ -249,6 +254,12 @@
     properties:
      - test-property
     builders:
+      - inject:
+          properties-content: $TESTRAIL_PARAMETERS
+      - inject:
+          properties-content: $ENV_PARAMETERS
+      - inject:
+          properties-content: $VCENTER_PARAMETERS
       - conditional-step:
           condition-kind: shell
           condition-command: |
@@ -270,16 +281,26 @@
                 project: ${{PKG_JOB_NAME}}
                 which-build: specific-build
                 build-number: ${{PKG_JOB_BUILD_NUMBER}}
-      - inject:
-          properties-content: $TESTRAIL_PARAMETERS
-      - inject:
-          properties-content: $ENV_PARAMETERS
-      - inject:
-          properties-content: $VCENTER_PARAMETERS
-      - inject:
-          properties-content: $UPDATE_PARAMETERS
+      - conditional-step:
+          condition-kind: shell
+          condition-command: |
+            [[ "${{UPDATE_MASTER}}"=="true" ]]
+          steps:
+            - inject:
+                properties-content: $UPDATE_PARAMETERS
+            - shell:
+                !include-raw-escape: ../builders/update.sh
+            - inject:
+                properties-file: update.properties
+            - copyartifact:
+                project: ${{PKG_JOB_NAME}}
+                which-build: specific-build
+                build-number: ${{PKG_JOB_BUILD_NUMBER}}
+
       - shell:
           !include-raw-escape: ../builders/common.prepare.ng.sh
+      - shell:
+          !include-raw-escape: ../builders/worksatation.sh
       - shell:
           !include-raw-escape: ../builders/vcenter.test.ng.sh
     publishers:
