@@ -3,6 +3,8 @@ set -e
 
 git log  --pretty=oneline | head
 
+[ -d 'fuel-qa' ] && rm -rf fuel-qa/*
+
 cmd1="find $PUPPETLINT_PATH -name '*.erb' -print0 "
 cmd2="find $PUPPETLINT_PATH -name '*.pp'  -print0 "
 cmd3="find $PUPPETLINT_PATH -name '*.pp'  -print0 "
