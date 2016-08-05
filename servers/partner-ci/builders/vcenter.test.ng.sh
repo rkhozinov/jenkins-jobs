@@ -127,8 +127,8 @@ if [ -z "${PKG_JOB_BUILD_NUMBER}" ]; then
 fi
 
 #remove old logs and test data
-[ -f nosetest.xml ] && rm -f nosetests.xml
-rm -rf logs/*
+[ -f nosetest.xml ] && sudo rm -f nosetests.xml
+sudo rm -rf logs/*
 
 export ISO_PATH="${ISO_STORAGE}/${ISO_FILE}"
 
