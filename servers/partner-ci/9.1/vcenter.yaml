@@ -31,6 +31,8 @@
           VMWARE_IMG_URL="http://pce-storage.bud.mirantis.net:5000/distr/$VMWARE_IMG_NAME"
           VMWARE_IMG_LOGIN=root
           VMWARE_IMG_PASSWORD=r00tme
+          CLEAN_IPTABLES=true
+          DISABLE_STP=false
 
 - project:
     name: 'predefined_parameters'
@@ -53,13 +55,12 @@
     regression_timer: 'H 18 * * *'
     nightly_disabled: false
     regression_disabled: true
-    use_snapshots: false
-    force_erase: true
+    force_erase: false
     recreate_venv: false
     disable_ssl: true
     kvm_use: false
     update_master: true
-    enable_proposed: false
+    enable_proposed: true
     debug: true
     publish_results: true
     multijob_build_pkg: true
@@ -173,7 +174,6 @@
           disable_ssl:          '{disable_ssl}'
           force_erase:          '{force_erase}'
           recreate_venv:        '{recreate_venv}'
-          use_snapshots:        '{use_snapshots}'
           iso_file:             '{iso_file}'
           gerrit_branch:        '{gerrit_branch}'
           env_prefix:           '{fuel-release}.{plugin-name}'
@@ -215,7 +215,6 @@
           disable_ssl:     '{disable_ssl}'
           force_erase:     '{force_erase}'
           recreate_venv:   '{recreate_venv}'
-          use_snapshots:   '{use_snapshots}'
           iso_file:        '{iso_file}'
           gerrit_branch:   '{gerrit_branch}'
           env_prefix:      '{fuel-release}.{plugin-name}'

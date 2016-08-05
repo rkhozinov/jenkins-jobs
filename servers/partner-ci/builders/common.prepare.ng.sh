@@ -68,7 +68,6 @@ function dospy {
 
 ## Gets dospy environments
 ## with prefix the function returns all env except envs like prefix
-
 function dospy_list {
   prefix=$1
   dos.py sync
@@ -76,6 +75,7 @@ function dospy_list {
     echo $(dos.py list | tail -n +3) || \
     echo $(dos.py list | tail -n +3  | grep -v $prefix)
 }
+
 
 ## Recreate all an virtual env
 function recreate_venv {
@@ -127,8 +127,8 @@ source "$VENV_PATH/bin/activate"
 
 [ -z $VIRTUAL_ENV ] && { echo "VIRTUAL_ENV is empty"; exit 1; }
 
-if [[ "${FORCE_ERASE}" -eq "true" ]]; then
-  for env in $(dospy_list $ENV_NAME); do 
+if [[ "${FORCE_ERASE}" == "true" ]]; then
+  for env in $(dospy_list); do 
     dos.py erase $env 
   done 
 else
@@ -142,6 +142,7 @@ else
   else
     echo "free-space: $free_space"
   fi
+
   # poweroff all envs
   for env in $(dospy_list $ENV_NAME); do 
     dos.py destroy $env 
