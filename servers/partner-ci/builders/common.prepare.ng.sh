@@ -105,14 +105,10 @@ function get_venv_requirements {
 function prepare_venv {
     source "${VENV_PATH}/bin/activate"
     easy_install -U pip
-    if [[ "${DEBUG}" == "true" ]]; then
-        pip install -r "${REQS_PATH}" --upgrade
-        pip install -r "${REQS_PATH_DEVOPS}" --upgrade
-    else
-        pip install -r "${REQS_PATH}" --upgrade > /dev/null 2>/dev/null
-        pip install -r "${REQS_PATH_DEVOPS}" --upgrade > /dev/null 2>/dev/null
-    fi
-
+    redirected_output='pip.properties'
+    [[ "${DEBUG}" == "true" ]] && redirected_output='/dev/null/' 
+    pip install -r "${REQS_PATH}" --upgrade > $redirected_output 2>$redirected_output
+    pip install -r "${REQS_PATH_DEVOPS}" --upgrade > $redirected_output 2>$redirected_output
     django-admin.py syncdb --settings=devops.settings --noinput
     django-admin.py migrate devops --settings=devops.settings --noinput
     deactivate
@@ -136,7 +132,6 @@ if [[ "${FORCE_ERASE}" -eq "true" ]]; then
     dos.py erase $env 
   done 
 else
-
   # determine free space before run the cleaner
   free_space=$(df -h | grep '/$' | awk '{print $4}' | tr -d G)
 
