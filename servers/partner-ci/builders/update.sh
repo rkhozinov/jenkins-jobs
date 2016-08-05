@@ -22,30 +22,30 @@ if [[ "${UPDATE_MASTER}" == "true" ]]; then
       esac
 
       UBUNTU_REPOS="deb ${UBUNTU_MIRROR_URL} trusty main universe multiverse|deb ${UBUNTU_MIRROR_URL} trusty-updates main universe multiverse|deb ${UBUNTU_MIRROR_URL} trusty-security main universe multiverse"
-  
+
       ENABLE_PROPOSED="${ENABLE_PROPOSED:-true}"
-  
+
       if [ "$ENABLE_PROPOSED" = true ]; then
           UBUNTU_PROPOSED="deb ${UBUNTU_MIRROR_URL} trusty-proposed main universe multiverse"
           UBUNTU_REPOS="$UBUNTU_REPOS|$UBUNTU_PROPOSED"
       fi
       export MIRROR_UBUNTU="$UBUNTU_REPOS"
   fi
-  
+
   function join() {
       local __sep="${1}"
       local __head="${2}"
       local __tail="${3}"
       [[ -n "${__head}" ]] && echo "${__head}${__sep}${__tail}" || echo "${__tail}"
   }
-  
+
   function to_uppercase() {
       echo "$1" | awk '{print toupper($0)}'
   }
-  
+
   __space=' '
   __pipe='|'
-  
+
   # Adding MOS rpm repos to
   # - UPDATE_FUEL_MIRROR - will be used for master node
   # - EXTRA_RPM_REPOS - will be used for nodes in cluster
@@ -66,7 +66,7 @@ if [[ "${UPDATE_MASTER}" == "true" ]]; then
           EXTRA_RPM_REPOS="$(join "${__pipe}" "${EXTRA_RPM_REPOS}" "${__repo_name}" )"
       fi
   done
-  
+
   # Adding MOS deb repos to
   # - EXTRA_DEB_REPOS - will be used for nodes in cluster
   for _dn in  "proposed"  \
@@ -84,12 +84,12 @@ if [[ "${UPDATE_MASTER}" == "true" ]]; then
           EXTRA_DEB_REPOS="$(join "${__pipe}" "${EXTRA_DEB_REPOS}" "${__repo_name}")"
       fi
   done
-  
+
   export UPDATE_FUEL_MIRROR   # for fuel-qa
   export UPDATE_MASTER        # for fuel-qa
   export EXTRA_RPM_REPOS      # for fuel-qa
   export EXTRA_DEB_REPOS      # for fuel-qa
-fi 
+fi
 
 cat << UPDATE_PROPERTIES > update.properties
 SNAPSHOTS_ID=$SNAPSHOTS_ID
