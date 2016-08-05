@@ -169,7 +169,7 @@ EXTRA_RPM_REPOS=$EXTRA_RPM_REPOS
 EXTRA_DEB_REPOS=$EXTRA_DEB_REPOS
 UPDATE_PROPERTIES
 
-cat snapshots.params >> update.properties
+[[ "${UPDATE_MASTER}" == "true" ]] && cat snapshots.params >> update.properties
 
 cat << REPORTER_PROPERTIES > reporter.properties
 ISO_VERSION=${SNAPSHOTS_ID}

@@ -12,16 +12,11 @@
           VCENTER_USERNAME=root
           VCENTER_PASSWORD=vmware
           VCENTER_GLANCE_IP=172.16.0.145
-          VCENTER_GLANCE_USERNAME=openstack
-          VCENTER_GLANCE_PASSWORD=vmware
-          VCENTER_DATACENTER=Datacenter
-          VCENTER_DATASTORE=nfs
-          VCENTER_CLUSTERS=Cluster1,Cluster2
           VCENTER_GLANCE_USERNAME=root
           VCENTER_GLANCE_PASSWORD=vmware
           VCENTER_DATACENTER=Datacenter
-          VCENTER_CLUSTERS=Cluster1,Cluster2
           VCENTER_DATASTORE=nfs
+          VCENTER_CLUSTERS=Cluster1,Cluster2
           TEST_GROUP_PREFIX=system_test.vcenter.deploy_vcenter_dvs_run_ostf
           TEST_GROUP_CONFIG=${TEST_GROUP}
           DVS_NAME=Cluster1:dvSwitch;Cluster2:dvSwitch
@@ -295,13 +290,7 @@
                 filter: "iso_file"
                 which-build: last-successful
       - inject:
-          properties-content: $TESTRAIL_PARAMETERS
-      - inject:
-          properties-content: $ENV_PARAMETERS
-      - inject:
           properties-content: $VCENTER_PARAMETERS
-      - inject:
-          properties-content: $UPDATE_PARAMETERS
       - shell:
           !include-raw-escape: ../builders/common.prepare.ng.sh
       - shell:
