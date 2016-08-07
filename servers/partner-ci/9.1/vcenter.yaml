@@ -60,7 +60,7 @@
     disable_ssl: true
     kvm_use: false
     update_master: true
-    enable_proposed: true
+    enable_proposed: false
     debug: true
     publish_results: true
     multijob_build_pkg: true

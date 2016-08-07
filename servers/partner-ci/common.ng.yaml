@@ -121,10 +121,7 @@
           builders:
             - shell: env > {properties_name}
       - archive:
-          artifacts: '*properties'
-          allow-empty: true
-      - archive:
-          artifacts: 'iso_file'
+          artifacts: '*.properties'
           allow-empty: true
       - archive:
           artifacts: 'build.plugin_version'
@@ -140,7 +137,7 @@
           builders:
             - shell: env > {properties_name}
       - archive:
-          artifacts: '*properties'
+          artifacts: '*.properties'
           allow-empty: true
       - archive:
           artifacts: 'nosetests.xml'
@@ -163,7 +160,7 @@
           artifacts: '*.rpm'
           allow-empty: false
       - archive:
-          artifacts: 'build.properties'
+          artifacts: '*.properties'
           allow-empty: false
       - archive:
           artifacts: 'build.plugin_version'
@@ -177,6 +174,9 @@
       - archive:
           artifacts: 'logs/*'
           allow-empty: false
+      - archive:
+          artifacts: '*.dump'
+          allow-empty: true
       - conditional-publisher:
           - condition-kind: file-exists
             condition-filename: 'nosetests.xml'

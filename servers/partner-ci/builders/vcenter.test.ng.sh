@@ -2,6 +2,7 @@
 
 # activate bash xtrace for script
 [[ "${DEBUG}" == "true" ]] && set -x || set +x
+export TCPDUMP_PID
 [ -z $ISO_FILE  ] && (echo "ISO_FILE variable is empty"; exit 1)
 
 [ ${SNAPSHOTS_ID} ] && export SNAPSHOTS_ID=${SNAPSHOTS_ID} || export SNAPSHOTS_ID=${CUSTOM_VERSION:10}
@@ -105,6 +106,17 @@ setup_bridge() {
     sudo /sbin/iptables -D FORWARD -o $bridge -j REJECT --reject-with icmp-port-unreachable
     sudo /sbin/iptables -D FORWARD -i $bridge -j REJECT --reject-with icmp-port-unreachable
   fi
+
+  if [[ "${DEBUG}" == "true" ]]; then
+    sudo brctl show
+    sudo brctl show $bridge
+    sudo ip link 
+    sudo ip address 
+    sudo ip address show $nic
+    sudo iptables -L -v -n
+    sudo iptables -t nat -L -v -n
+  fi
+  
 }
 
 clean_iptables() {
@@ -131,10 +143,15 @@ done
 
 [[ "${CLEAN_IPTABLES}" == "true" ]] && clean_iptables
 add_interface_to_bridge $ENV_NAME private vmnet2
+if [[ "${DEBUG}" == "true" ]]; then 
+  sudo tcpdump -i vmnet2 -w vmnet2.dump &
+  export TCPDUMP_PID=$!
+fi
 
 echo "Waiting for system tests to finish"
 wait $SYSTEST_PID
 export RESULT=$?
+[[ "${DEBUG}" == "true" ]] && sudo kill -SIGTERM $TCPDUMP_PID
 
 echo "ENVIRONMENT NAME is $ENV_NAME"
 virsh net-dumpxml "${ENV_NAME}_admin" | grep -P "(\d+\.){3}" -o | awk '{print "Fuel master node IP: "$0"2"}'
