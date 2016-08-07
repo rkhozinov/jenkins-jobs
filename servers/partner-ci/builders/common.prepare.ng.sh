@@ -107,7 +107,7 @@ function prepare_venv {
     source "${VENV_PATH}/bin/activate"
     easy_install -U pip
     export redirected_output='pip.properties'
-    [[ "${DEBUG}" == "true" ]] && export redirected_output='/dev/null/' 
+    [[ "${DEBUG}" == "true" ]] && export redirected_output='/dev/null' 
     pip install -r "${REQS_PATH}" --upgrade > $redirected_output
     pip install -r "${REQS_PATH_DEVOPS}" --upgrade > $redirected_output
     django-admin.py syncdb --settings=devops.settings --noinput
