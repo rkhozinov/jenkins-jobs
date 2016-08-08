@@ -2,17 +2,10 @@
 
 # activate bash xtrace for script
 [[ "${DEBUG}" == "true" ]] && set -x || set +x
-if [[ $ISO_FILE == *"Mirantis"* ]]; then
-  export FUEL_RELEASE=$(echo $ISO_FILE | cut -d- -f2 | tr -d '.iso')
-fi
-if [[ $ISO_FILE == *"custom"* ]]; then
-  export FUEL_RELEASE=90
-fi
-[[ "${UPDATE_MASTER}" -eq "true" ]] && export ISO_VERSION='mos-mu' || export ISO_VERSION='mos'
-export VENV_PATH="${HOME}/${FUEL_RELEASE}-venv"
+
 export SSH_ENDPOINT="ssh_connect.py"
 main(){
-  if [[ "${WS_NOREVERT}" == "false" ]]; then
+  if [ -z $NOREVERT ]; then  
     restart_ws_network
     revert_ws
     configure_nfs
@@ -20,12 +13,7 @@ main(){
 }
 restart_ws_network(){
   sudo vmware-networks --stop
-  if sudo vmware-networks --start; then
-    echo "successful networks-restart "
-  else
-    echo "WARNING you need to check configuration of vmnet adapters on this lab"
-    exit 1
-  fi
+  sudo vmware-networks --start
 }
 
 # waiting for ending of parallel processes
@@ -34,7 +22,7 @@ wait_ws() {
 }
 
 revert_ws() {
-  set +x
+  set +x 
 
   cmd="vmrun -T ws-shared -h https://localhost:443/sdk \
        -u ${WORKSTATION_USERNAME} -p ${WORKSTATION_PASSWORD}"
@@ -97,7 +85,7 @@ chmod +x $SSH_ENDPOINT
 configure_nfs(){
   set -x
   create_ssh_endpoint
-  source $VENV_PATH/bin/activate
+
   for esxi_host in $ESXI_HOSTS; do
 
     python2 $SSH_ENDPOINT $esxi_host $ESXI_USER $ESXI_PASSWORD 'storages=$(esxcli storage nfs list | grep nfs | cut -d" " -f1); for storage in $storages; do esxcli storage nfs remove -v $storage; done'
@@ -112,11 +100,9 @@ configure_nfs(){
     echo "Rescan all datastores for $esxi_host"
   done
 
-  if [[ "${NFS_CLEAN}" == "true" ]]; then
-    for nfs_share in $NFS_SHARES; do
-      sudo rm -rf "/var/$nfs_share/*"
-    done
-  fi
+  for nfs_share in $NFS_SHARES; do
+    sudo rm -rf "/var/$nfs_share/*"
+  done
 
   [[ "${DEBUG}" == "true" ]] && set -x || set +x
 }
