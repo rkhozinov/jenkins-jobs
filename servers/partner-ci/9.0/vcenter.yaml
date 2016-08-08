@@ -33,6 +33,10 @@
           VMWARE_IMG_PASSWORD=r00tme
           CLEAN_IPTABLES=true
           DISABLE_STP=false
+          MJ_BUILD_PKG={multijob_build_pkg}
+          node=vcenter
+          BUILD_PKG={testjob_build_pkg}
+          TEST_GROUP={obj:testgroup_value}
 
 - project:
     name: 'predefined_parameters'
