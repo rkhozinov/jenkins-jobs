@@ -175,7 +175,7 @@
           artifacts: 'logs/*'
           allow-empty: false
       - archive:
-          artifacts: '*.dump'
+          artifacts: '*.pcap'
           allow-empty: true
       - conditional-publisher:
           - condition-kind: file-exists
