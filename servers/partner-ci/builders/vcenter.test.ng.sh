@@ -144,7 +144,8 @@ done
 [[ "${CLEAN_IPTABLES}" == "true" ]] && clean_iptables
 add_interface_to_bridge $ENV_NAME private vmnet2
 if [[ "${DEBUG}" == "true" ]]; then 
-  sudo tcpdump -i vmnet2 -w vmnet2.dump &
+  rm -rf vmnet2.dump
+  sudo tcpdump -i vmnet2 -w vmnet2.pcap &
   export TCPDUMP_PID=$!
 fi
 
