@@ -3,8 +3,8 @@
 - runner-condition
 - multijob:
     name: >
-      'Smoke/bvt tests to check before running of nighlty tests.
-       The nightly tests scope will be runned only if smoke/bvt will have successful state'
+      'Smoke/bvt tests to check before running of full tests.
+       The full tests scope will be runned only if smoke/bvt will have successful state'
     condition: SUCCESSFUL
     projects:
       - name: '{fuel-release}.{plugin-name}.{plugin-version}.contrail_smoke.juniper'
@@ -23,7 +23,7 @@
 
 - multijob:
     name: >
-      'Nightly tests for {fuel-release}.{plugin-name}.{plugin-version}'
+      'Full tests for {fuel-release}.{plugin-name}.{plugin-version}'
     condition: COMPLETED
     projects:
       - name: '{fuel-release}.{plugin-name}.{plugin-version}.contrail_ha.juniper'
