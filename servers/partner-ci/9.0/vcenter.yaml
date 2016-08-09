@@ -22,8 +22,6 @@
           VCENTER_DATACENTER=Datacenter
           VCENTER_DATASTORE=nfs
           VCENTER_CLUSTERS=Cluster1,Cluster2
-          TEST_GROUP_PREFIX=system_test.vcenter.deploy_vcenter_dvs_run_ostf
-          TEST_GROUP_CONFIG=${TEST_GROUP}
           DVS_NAME=Cluster1:dvSwitch;Cluster2:dvSwitch
           VCENTER_USE=true
           VC_IMAGE_DIR=openstack_glance
@@ -35,6 +33,8 @@
           DISABLE_STP=false
           MJ_BUILD_PKG={multijob_build_pkg}
           BUILD_PKG={testjob_build_pkg}
+          TEST_GROUP_CONFIG=
+          TEST_GROUP_PREFIX=
           TEST_GROUP={obj:testgroup_value}
 
 - project:
@@ -204,6 +204,10 @@
           name: node
           default: 'vcenter'
           description: "The node on which to run the job"
+      - string:
+          name: TEST_GROUP_CONFIG
+      - string:
+          name: TEST_GROUP_PREFIX
       - bool:
           name: BUILD_PKG
           default: '{testjob_build_pkg}'
