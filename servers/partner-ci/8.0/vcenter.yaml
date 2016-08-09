@@ -243,11 +243,6 @@
     name: global
     disabled: false
     node: vcenter
-    logrotate:
-      daysToKeep: 30
-      numToKeep: 100
-      artifactDaysToKeep: 30
-      artifactNumToKeep: 100
     <<: *test-parameters
     scm:
       - common-scm:
@@ -261,6 +256,11 @@
           test_timeout: '{test_timeout}'
     properties:
       - test-property
+      - build-discarder:
+          days-to-keep: 30
+          num-to-keep: 100
+          artifact-days-to-keep: 30
+          artifact-num-to-keep: 100
     builders:
       - conditional-step:
           condition-kind: shell

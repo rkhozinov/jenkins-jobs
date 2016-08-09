@@ -482,15 +482,16 @@
     name: global
     disabled: false
     node: 'contrail'
-    logrotate:
-      daysToKeep: 7
-      numToKeep: 10
-      artifactDaysToKeep: 7
-      artifactNumToKeep: 10
     <<: *test-properties
     <<: *test-parameters
     <<: *common-scm
     <<: *test-wrappers
+    properties:
+      - build-discarder:
+          days-to-keep: 7
+          num-to-keep: 10
+          artifact-days-to-keep: 7
+          artifact-num-to-keep: 10
     builders:
       - copyartifact:
           project: '{build-name}'
