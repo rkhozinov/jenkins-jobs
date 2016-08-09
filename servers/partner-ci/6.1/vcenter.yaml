@@ -2,14 +2,14 @@
 - defaults:
     name: global
     disabled: false
-    logrotate:
-      daysToKeep: 7
-      numToKeep: 10
-      artifactDaysToKeep: 7  
-      artifactNumToKeep: 10 
     properties:
     - heavy-job:
         weight: 1
+    - build-discarder:
+        days-to-keep: 7
+        num-to-keep: 10
+        artifact-days-to-keep: 7
+        artifact-num-to-keep: 10
     parameters:
       - string:
           name: ISO_FILE

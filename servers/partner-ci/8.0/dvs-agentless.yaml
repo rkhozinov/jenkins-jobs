@@ -4,13 +4,13 @@
     parameters:
       - bool:
           name: ENABLE_UPDATES
-          default: true 
+          default: true
       - bool:
           name: ENABLE_SECURITY
-          default: true 
+          default: true
       - bool:
           name: ENABLE_UPDATE_CENTOS
-          default: true 
+          default: true
       - string:
           name: LOCATION
           default: bud
@@ -272,7 +272,12 @@
       - test-wrapper:
           test_timeout: '{test_timeout}'
     properties:
-     - test-property
+      - test-property
+      - build-discarder:
+          days-to-keep: 30
+          num-to-keep: 100
+          artifact-days-to-keep: 30
+          artifact-num-to-keep: 100
     builders:
       - conditional-step:
           condition-kind: shell
@@ -354,10 +359,10 @@
           name: GERRIT_REFSPEC
           default: 'refs/heads/{gerrit_branch}'
       - string:
-          name: PUPPETLINT_PATH 
+          name: PUPPETLINT_PATH
           default: './deployment_scripts/puppet/manifests ./deployment_scripts/puppet/modules/vmware_dvs'
       - string:
-          name: PUPPETLINT_IGNORE 
+          name: PUPPETLINT_IGNORE
           default: 'l2.pp'
       - bool:
           name: DEBUG
