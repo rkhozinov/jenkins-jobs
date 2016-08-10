@@ -29,8 +29,6 @@
       - string:
           name: CONTRAIL_PLUGIN_PACK_UB_PATH
       - string:
-          name: CONTRAIL_DISTRIBUTION
-      - string:
           name: MULTIPLE_NETWORKS
       - string:
           name: MULTIPLE_NETWORKS_TEMPLATE
@@ -366,6 +364,8 @@
           name: BUILD_PKG
           default: '{testjob_build_pkg}'
           description: "Triggers build of pkg from $PKG_JOB_NAME (only for custom)"
+      - string:
+          name: CONTRAIL_DISTRIBUTION
       - text:
           name: BAREMETAL_PARAMETERS
       - '{testgroup_parameter_type}':
