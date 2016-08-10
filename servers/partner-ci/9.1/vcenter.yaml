@@ -2,6 +2,10 @@
 - parameter:
     name: plugin-specific-parameters
     parameters:
+    - string:
+        name: TEST_GROUP_PREFIX
+    - string:
+        name: TEST_GROUP_CONFIG
     - text:
         name: VCENTER_PARAMETERS
         default: |
