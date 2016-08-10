@@ -1,15 +1,15 @@
 ---
 - project:
     name: 'utilites'
-    download_iso: 'download_iso'
-    sync_jira_with_launchpad: 'sync_jira_with_launchpad'
+    download_iso2: 'download_iso2'
+    sync_jira_with_launchpad2: 'sync_jira_with_launchpad2'
     jobs:
-      - '{download_iso}'
+      - '{download_iso2}'
 
-      - '{sync_jira_with_launchpad}'
+      - '{sync_jira_with_launchpad2}'
 
 - job-template:
-    name: '{download_iso}'
+    name: '{download_iso2}'
     node: 'download_iso'
     concurrent: true
     disabled: false
@@ -25,7 +25,7 @@
           colormap: xterm
     builders:
       - copyartifact:
-          project: "{download_iso}"
+          project: "{download_iso2}"
           which-build: last-successful
           fingerprint: true
       - shell:
@@ -40,7 +40,7 @@
           notify-every-unstable-build: true
                   
 - job-template:
-    name: '{sync_jira_with_launchpad}'
+    name: '{sync_jira_with_launchpad2}'
     node: 'runner'
     concurrent: false
     disabled: false
