@@ -1,6 +1,6 @@
 # Sync fuel bugs" :
 export LAUNCHPAD_PROJECT='fuel'
-export LAUNCHPAD_MILESTONE='{"9.0": "Core VMware"}'
+export LAUNCHPAD_MILESTONE='{"9.1": "Core VMware"}'
 python sync_jira_with_launchpad.py
 
 # Sync dvs bugs:
