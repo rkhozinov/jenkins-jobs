@@ -30,7 +30,7 @@
        current-parameters: true
        predefined-parameters: |
          TEST_GROUP=vcenter_delete_cindervmware
-         TEST_GROUP_PREFIX=system_test.vcenter.deploy_vcenter_dvs_run_ostf
+         TEST_GROUP_PREFIX=system_test.vcenter.scale_vcenter_dvs
          TEST_GROUP_CONFIG=vcenter_delete_cindervmware
        kill-phase-on: NEVER
 
@@ -309,7 +309,7 @@
        current-parameters: true
        predefined-parameters: |
          TEST_GROUP=vcenter_add_controller
-         TEST_GROUP_PREFIX=system_test.vcenter.deploy_vcenter_dvs_run_ostf
+         TEST_GROUP_PREFIX=system_test.vcenter.scale_vcenter_dvs
          TEST_GROUP_CONFIG=vcenter_add_controller
        kill-phase-on: NEVER
 
@@ -318,7 +318,7 @@
        current-parameters: true
        predefined-parameters: |
          TEST_GROUP=vcenter_add_cindervmware
-         TEST_GROUP_PREFIX=system_test.vcenter.deploy_vcenter_dvs_run_ostf
+         TEST_GROUP_PREFIX=system_test.vcenter.scale_vcenter_dvs
          TEST_GROUP_CONFIG=vcenter_add_cindervmware
        kill-phase-on: NEVER
           
