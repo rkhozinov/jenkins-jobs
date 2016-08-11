@@ -7,7 +7,7 @@
         default: system_test.vcenter.deploy_vcenter_dvs_run_ostf
     - string:
         name: TEST_GROUP
-        default: {obj:testgroup_value}
+        default: '{obj:testgroup_value}'
     - string:
         name: TEST_GROUP_CONFIG
     - text:
