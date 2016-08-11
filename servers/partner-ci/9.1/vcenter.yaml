@@ -4,6 +4,10 @@
     parameters:
     - string:
         name: TEST_GROUP_PREFIX
+        default: system_test.vcenter.deploy_vcenter_dvs_run_ostf
+    - string:
+        name: TEST_GROUP
+        default: {obj:testgroup_value}
     - string:
         name: TEST_GROUP_CONFIG
     - text:
@@ -34,10 +38,7 @@
           VMWARE_IMG_LOGIN=root
           VMWARE_IMG_PASSWORD=r00tme
           CLEAN_IPTABLES=true
-          DISABLE_STP=false
-          TEST_GROUP_PREFIX=
-          TEST_GROUP_CONFIG=
-          TEST_GROUP={obj:testgroup_value}
+          DISABLE_STP=true
 
 - project:
     name: 'predefined_parameters'
