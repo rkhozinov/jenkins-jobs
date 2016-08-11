@@ -2,35 +2,34 @@
 - parameter:
     name: plugin-specific-parameters
     parameters:
-      - string:
-          name: WORKSTATION_SNAPSHOT
-          default: 'doubledvs'
-      - string:
-          name: WORKSTATION_NODES
-          default: 'esxi1 esxi2 esxi3 vcenter trusty'
-      - string:
-          name: VCENTER_IP
-          default: '172.16.0.145'
-      - string:
-          name: VCENTER_USERNAME
-          default: 'openstack'
-      - string:
-          name: VCENTER_PASSWORD
-          default: 'vmware'
-      - string:
-          name: VCENTER_CLUSTERS
-          default: 'Cluster1,Cluster2'
-      - string:
-          name: DVS_SWITCHES
-          default: 'Cluster1,Cluster2'
-      - string:
-          name: ISO_STORAGE
-          default: '{iso_storage}'
+    - text:
+        name: VCENTER_PARAMETERS
+        default: |
+          ESXI_PASSWORD=swordfish
+          ESXI_USER=root
+          ESXI_HOSTS=172.16.0.250 172.16.0.252 172.16.0.253
+          NFS_SERVER=172.16.0.1
+          NFS_SHARES=nfs nfs2
+          VSPHERE_VERSION=5.5
+          WORKSTATION_SNAPSHOT=doubledvs
+          WORKSTATION_NODES=esxi1 esxi2 esxi3 vcenter
+          VCENTER_IP=172.16.0.145
+          VCENTER_USERNAME=root
+          VCENTER_PASSWORD=vmware
+          VCENTER_GLANCE_IP=172.16.0.145
+          VCENTER_GLANCE_USERNAME=root
+          VCENTER_GLANCE_PASSWORD=vmware
+          VCENTER_DATACENTER=Datacenter
+          VCENTER_DATASTORE=nfs
+          VCENTER_CLUSTERS=Cluster1,Cluster2
+          DVS_SWITCHES=Cluster1,Cluster2
+          TEST_GROUP_CONFIG=${TEST_GROUP}
+          VCENTER_USE=true
 
 - project:
     name: 'predefined_parameters'
     fuel-release: '9.1'
-    plugin-version: '3.1'
+    plugin-version: '3.1.0'
     plugin-name: 'dvs'
     build-name: '{fuel-release}.{plugin-name}.build'
     flake8-name: '{fuel-release}.{plugin-name}.flake8'
@@ -53,16 +52,15 @@
     admin_node_cpu: '4'
     slave_node_cpu: '4'
     pkg_job_name: '{fuel-release}.{plugin-name}.build'
-    iso_job_name: '{fuel-release}.{plugin-name}.canary'
     nightly_timer: 'H 22 * * *'
     regression_timer: 'H 18 * * *'
     nightly_disabled: true
     regression_disabled: false
-    use_snapshots: true
     force_erase: false
     recreate_venv: false
     disable_ssl: true
     update_master: true
+    enable_proposed: false
     debug: true
     build_debug: true
     publish_results: true
