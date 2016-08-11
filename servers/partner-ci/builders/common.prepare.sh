@@ -94,7 +94,7 @@ function get_venv_requirements {
 
   if [[ "${REQS_BRANCH}" == "stable/8.0" ]]; then
     # bug: https://bugs.launchpad.net/fuel/+bug/1528193
-    sed -i 's/@2.*/@2.9.20/g' $REQS_PATH_DEVOPS
+    #sed -i 's/@2.*/@2.9.20/g' $REQS_PATH_DEVOPS
     #echo oslo.i18n >> $REQS_PATH
     echo stable/8.0
   fi
