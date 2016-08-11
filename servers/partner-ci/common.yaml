@@ -473,7 +473,7 @@
       - shell: |
           #!/bin/bash -xe
           set -o pipefail
-          shellcheck ${{ARGS}} $(find . -name '*.sh' -not -path "*/fuel-qa/*") | tee -i shellcheck.log
+          shellcheck ${{ARGS}} $(find . -name '*.sh' -not -path "*/fuel-qa/*" -not -path "*/deployment_scripts/puppet/modules/contrail/files/cassandra-env.sh") | tee -i shellcheck.log
     publishers:
       - checker-publisher
 
