@@ -28,7 +28,8 @@ export JUNIPER_PKG_PATH="/storage/contrail/${CONTRAIL_VERSION}/"
 [ -d $JUNIPER_PKG_PATH ] && echo "JUNIPER_PKG_PATH is $JUNIPER_PKG_PATH" \
                          || { echo "$JUNIPER_PKG_PATH is not found";  exit 1; }
 
-export CONTRAIL_PLUGIN_PACK_UB_PATH=$(find $JUNIPER_PKG_PATH -maxdepth 1 -name 'contrail-install-packages*.deb' -exec stat -c "%y %n" {} + | sort -r | head -n 1 | cut -d' ' -f 4)
+[ -z $CONTRAIL_PLUGIN_PACK_UB_PATH ] && \
+  export CONTRAIL_PLUGIN_PACK_UB_PATH=$(find $JUNIPER_PKG_PATH -maxdepth 1 -name 'contrail-install-packages*.deb' -exec stat -c "%y %n" {} + | sort -r | head -n 1 | cut -d' ' -f 4)
 [ -f $CONTRAIL_PLUGIN_PACK_UB_PATH ] && echo "CONTRAIL_PLUGIN_PACK_UB_PATH is $CONTRAIL_PLUGIN_PACK_UB_PATH" \
                          || { echo "CONTRAIL_PLUGIN_PACK_UB_PATH is not found";  exit 1; }
 export JUNIPER_PKG_VERSION=$(sed 's/[-_~]/-/g' <<< ${CONTRAIL_PLUGIN_PACK_UB_PATH} | cut -d- -f4-5)
