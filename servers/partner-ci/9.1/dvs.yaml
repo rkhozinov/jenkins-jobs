@@ -52,14 +52,15 @@
     slave_node_memory: '8192'
     admin_node_cpu: '4'
     slave_node_cpu: '4'
-    pkg_job_name: '{fuel-release}.{plugin-name}.build'
+    pkg_job_name: '{fuel-release}.dvs.build'
     nightly_timer: 'H 22 * * *'
     regression_timer: 'H 18 * * *'
-    nightly_disabled: true
-    regression_disabled: false
+    nightly_disabled: false
+    regression_disabled: true
     force_erase: false
     recreate_venv: false
     disable_ssl: true
+    kvm_use: false
     update_master: true
     enable_proposed: false
     debug: true
@@ -74,8 +75,8 @@
     gerrit_repo: 'fuel-plugin-vmware-dvs'
     gerrit_branch: 'master'
     email_to: 'rkhozinov@mirantis.com'
-    released_plugin_path: '/storage/nsxv/released/nsxv-1.1-1.1.0-1.noarch.rpm'
-    scm_submodule_disabled: false
+    released_plugin_path: ''
+    scm_submodule_disabled: true
     scm_wipe_workspace: false
     skip_vote_successfull: false
     skip_vote_failed: false
@@ -143,33 +144,33 @@
           skip_vote_successfull: '{skip_vote_successfull}'
           skip_vote_failed: '{skip_vote_failed}'
 
-#     - '{nightly-name}':
-#         multijob_build_pkg: true
+      - '{nightly-name}':
+          multijob_build_pkg: true
 
-#     - '{custom-name}.qa':
-#         publish_results: false
+      - '{custom-name}.qa':
+          publish_results: false
 
-#     - '{custom-name}.dev':
-#         publish_results: false
-#         testgroup_parameter_type: choice
-#         testgroup_value_type: choices
-#         testgroup_value: '{obj:testgroup}'
+      - '{custom-name}.dev':
+          publish_results: false
+          testgroup_parameter_type: choice
+          testgroup_value_type: choices
+          testgroup_value: '{obj:testgroup}'
 
-#     - '{reporter-name}'
+      - '{reporter-name}'
 
-#     - '{fuel-release}.{plugin-name}.{testgroup}'
+      - '{fuel-release}.{plugin-name}.{testgroup}'
 
-#     - '{smoke-name}':
-#         publish_results: false
-#         multijob_build_pkg: false
+      - '{smoke-name}':
+          publish_results: false
+          multijob_build_pkg: false
 
-#     - '{fuel-release}.{plugin-name}.smoke.test'
+      - '{fuel-release}.{plugin-name}.smoke.test'
 
-#     - '{bvt-name}':
-#         publish_results: false
-#         multijob_build_pkg: true
+      - '{bvt-name}':
+          publish_results: false
+          multijob_build_pkg: true
 
-#     - '{fuel-release}.{plugin-name}.bvt.test'
+      - '{fuel-release}.{plugin-name}.bvt.test'
 
 #     - '{regression-name}':
 #         testrail_suite: "[8.0][PCE] VMware DVS plugin v2.1.0 Regression"
@@ -210,12 +211,10 @@
           disable_ssl:          '{disable_ssl}'
           force_erase:          '{force_erase}'
           recreate_venv:        '{recreate_venv}'
-          use_snapshots:        '{use_snapshots}'
           iso_file:             '{iso_file}'
           gerrit_branch:        '{gerrit_branch}'
           env_prefix:           '{fuel-release}.{plugin-name}'
           pkg_job_name:         '{pkg_job_name}'
-          iso_job_name:         '{iso_job_name}'
           admin_node_memory:    '{admin_node_memory}'
           slave_node_memory:    '{slave_node_memory}'
           admin_node_cpu:       '{admin_node_cpu}'
@@ -227,6 +226,10 @@
           testrail_plan_desc:   '{testrail_plan_desc}'
           skip_vote_successfull: '{skip_vote_successfull}'
           skip_vote_failed:     '{skip_vote_failed}'
+          enable_proposed:      '{enable_proposed}'
+          update_master:        '{update_master}'
+          kvm_use:              '{kvm_use}'
+          iso_storage:          '{iso_storage}'
       - plugin-specific-parameters
 
 # parameters for jobs created per test-group and custom test job
@@ -248,12 +251,10 @@
           disable_ssl:     '{disable_ssl}'
           force_erase:     '{force_erase}'
           recreate_venv:   '{recreate_venv}'
-          use_snapshots:   '{use_snapshots}'
           iso_file:        '{iso_file}'
           gerrit_branch:   '{gerrit_branch}'
           env_prefix:      '{fuel-release}.{plugin-name}'
           pkg_job_name:    '{pkg_job_name}'
-          iso_job_name:    '{iso_job_name}'
           admin_node_memory:    '{admin_node_memory}'
           slave_node_memory:    '{slave_node_memory}'
           admin_node_cpu:       '{admin_node_cpu}'
@@ -265,12 +266,21 @@
           testrail_plan_desc:   '{testrail_plan_desc}'
           skip_vote_successfull: '{skip_vote_successfull}'
           skip_vote_failed:     '{skip_vote_failed}'
+          enable_proposed:      '{enable_proposed}'
+          update_master:        '{update_master}'
+          kvm_use:              '{kvm_use}'
+          iso_storage:          '{iso_storage}'
       - plugin-specific-parameters
 
 - defaults:
     name: global
     disabled: false
     node: dvs
+    logrotate:
+      daysToKeep: 30
+      numToKeep: 100
+      artifactDaysToKeep: 30
+      artifactNumToKeep: 100
     <<: *test-parameters
     scm:
       - common-scm:
@@ -285,6 +295,8 @@
     properties:
       - test-property
     builders:
+      - inject:
+          properties-content: $VCENTER_PARAMETERS
       - conditional-step:
           condition-kind: shell
           condition-command: |
@@ -327,7 +339,7 @@
       - shell:
           !include-raw-escape: ../builders/workstation.sh
       - shell:
-          !include-raw-escape: ../builders/vcenter.test.ng.sh
+          !include-raw-escape: ../builders/dvs.test.ng.sh
     publishers:
       - runner-publisher:
           properties_name: properties
