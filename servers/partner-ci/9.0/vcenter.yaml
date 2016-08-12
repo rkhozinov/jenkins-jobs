@@ -8,8 +8,7 @@
     - string:
         name: TEST_GROUP_CONFIG
     - string:
-        name: TEST_GROUP
-        default: '{obj:testgroup_value}'        
+        name: TEST_GROUP      
     - text:
         name: VCENTER_PARAMETERS
         default: |
