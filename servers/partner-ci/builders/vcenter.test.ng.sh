@@ -5,7 +5,7 @@
 export TCPDUMP_PID
 export TCPDUMP_PID2
 [ -z $ISO_FILE  ] && (echo "ISO_FILE variable is empty"; exit 1)
-if [[ "${UPDATE_MASTER}"=="true" ]]; then
+if [[ "${UPDATE_MASTER}" == "true" ]]; then
   [ ${SNAPSHOTS_ID} ] && export SNAPSHOTS_ID=${SNAPSHOTS_ID} || export SNAPSHOTS_ID=${CUSTOM_VERSION:10}
   [ -z "${SNAPSHOTS_ID}" ] && { echo SNAPSHOTS_ID is empty; exit 1; }
 fi
@@ -41,7 +41,7 @@ export ISO_PATH="${ISO_STORAGE}/${ISO_FILE}"
 if [[ $ISO_FILE == *"Mirantis"* ]]; then
   export FUEL_RELEASE=$(echo $ISO_FILE | cut -d- -f2 | tr -d '.iso')
 fi
-if [[ "${UPDATE_MASTER}"=="true" ]]; then
+if [[ "${UPDATE_MASTER}" == "true" ]]; then
   export ENV_NAME="${ENV_PREFIX}.${SNAPSHOTS_ID}"
 else
   export ENV_NAME="${ENV_PREFIX}"
