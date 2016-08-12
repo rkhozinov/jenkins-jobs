@@ -2,6 +2,14 @@
 - parameter:
     name: plugin-specific-parameters
     parameters:
+    - string:
+        name: TEST_GROUP_PREFIX
+        default: system_test.vcenter.deploy_vcenter_dvs_run_ostf
+    - string:
+        name: TEST_GROUP_CONFIG
+    - string:
+        name: TEST_GROUP
+        default: '{obj:testgroup_value}'        
     - text:
         name: VCENTER_PARAMETERS
         default: |
@@ -31,11 +39,6 @@
           VMWARE_IMG_PASSWORD=r00tme
           CLEAN_IPTABLES=true
           DISABLE_STP=false
-          MJ_BUILD_PKG={multijob_build_pkg}
-          BUILD_PKG={testjob_build_pkg}
-          TEST_GROUP_CONFIG=
-          TEST_GROUP_PREFIX=
-          TEST_GROUP={obj:testgroup_value}
 
 - project:
     name: 'predefined_parameters'
