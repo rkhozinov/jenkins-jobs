@@ -42,9 +42,9 @@
 - project:
     name: 'predefined_parameters'
     fuel-release: '9.1'
-    plugin-version: '3.0.1'
+    plugin-version: '3.1.0'
     plugin-name: 'vcenter'
-    build-name: '9.0.dvs.build'
+    build-name: '{fuel-release}.dvs.build'
     regression-name: '{fuel-release}.{plugin-name}.regression'
     download-iso-name: 'download_iso'
     nightly-name: '{fuel-release}.{plugin-name}.nightly'
