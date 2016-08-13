@@ -46,7 +46,6 @@
     plugin-name: 'vcenter'
     build-name: '{fuel-release}.dvs.build'
     regression-name: '{fuel-release}.{plugin-name}.regression'
-    download-iso-name: 'download_iso'
     nightly-name: '{fuel-release}.{plugin-name}.nightly'
     custom-name: '{fuel-release}.{plugin-name}.custom'
     reporter-name: '{fuel-release}.{plugin-name}.reporter'
