@@ -74,6 +74,7 @@
     test_timeout: 300
     iso_file: 'MirantisOpenStack-9.0.iso'
     iso_storage: '/storage/downloads'
+    snapshots_id: 'released'
     gerrit_repo: 'fuel-qa'
     gerrit_branch: 'stable/mitaka'
     email_to: 'rkhozinov@mirantis.com ibumarskov@mirantis.com'
