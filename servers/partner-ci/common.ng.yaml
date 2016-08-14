@@ -261,8 +261,9 @@
                 build_number=$(grep "^BUILD_NUMBER=" < build.properties | cut -d= -f2)
                 echo "PKG_JOB_BUILD_NUMBER=$build_number" > build_number
       - conditional-step:
-          condition-kind: file-exists
-          condition-filename: "build_number"
+          condition-kind: shell
+          condition-command: |
+            [[ "${UPDATE_MASTER}" == "true" ]]
           steps:
             - shell: |
                 #!/bin/bash
@@ -310,7 +311,7 @@
          custom-url: '* $JOB_NAME $BUILD_URL'
          escape-quotes: true
          readable-message: true
-         skip-vote:
+         skip-vote: 
            successfull: '{skip_vote_successfull}'
            failed: '{skip_vote_failed}'
            unstable: true

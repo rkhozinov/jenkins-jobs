@@ -198,6 +198,7 @@
           update_master:        '{update_master}'
           kvm_use:              '{kvm_use}'
           iso_storage:          '{iso_storage}'
+          snapshots_id:         '{snapshots_id}'
       - plugin-specific-parameters
 # parameters for jobs created per test-group and custom test job
 - test-parameters: &test-parameters
@@ -235,6 +236,7 @@
           update_master:        '{update_master}'
           kvm_use:              '{kvm_use}'
           iso_storage:          '{iso_storage}'
+          snapshots_id:         '{snapshots_id}'
       - plugin-specific-parameters
 
 - defaults:
@@ -337,7 +339,7 @@
       - timed: '{nightly_timer}'
     properties:
       - runner-property:
-            build-name: '{build-name}'
+          build-name: '{build-name}'
     wrappers:
       - runner-wrapper
     publishers:

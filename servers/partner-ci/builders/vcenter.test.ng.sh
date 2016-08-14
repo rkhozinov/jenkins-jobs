@@ -2,8 +2,7 @@
 
 # activate bash xtrace for script
 [[ "${DEBUG}" == "true" ]] && set -x || set +x
-export TCPDUMP_PID
-export TCPDUMP_PID2
+
 [ -z $ISO_FILE  ] && (echo "ISO_FILE variable is empty"; exit 1)
 
 if [[ "${UPDATE_MASTER}" == "true" ]]; then
@@ -43,11 +42,8 @@ export ISO_PATH="${ISO_STORAGE}/${ISO_FILE}"
 if [[ $ISO_FILE == *"Mirantis"* ]]; then
   export FUEL_RELEASE=$(echo $ISO_FILE | cut -d- -f2 | tr -d '.iso')
 fi
-if [[ "${UPDATE_MASTER}" == "true" ]]; then
-  export ENV_NAME="${ENV_PREFIX}.${SNAPSHOTS_ID}"
-else
-  export ENV_NAME="${ENV_PREFIX}"
-fi
+
+export ENV_NAME="${ENV_PREFIX}.${SNAPSHOTS_ID}"
 export VENV_PATH="${HOME}/${FUEL_RELEASE}-venv"
 
 [ -z "${DVS_PLUGIN_PATH}" ] && export DVS_PLUGIN_PATH=$(ls -t ${WORKSPACE}/fuel-plugin-vmware-dvs*.rpm | head -n 1)
@@ -67,7 +63,8 @@ echo "plugin-path: ${DVS_PLUGIN_PATH}"
 echo "plugin-checksum: $(md5sum -b ${DVS_PLUGIN_PATH})"
 
 cat << REPORTER_PROPERTIES > reporter.properties
-ISO_VERSION="495"
+ISO_VERSION=$SNAPSHOTS_ID
+SNAPSHOTS_ID=$SNAPSHOTS_ID
 ISO_FILE=$ISO_FILE
 TEST_GROUP=$TEST_GROUP
 TEST_GROUP_CONFIG=$TEST_GROUP_CONFIG
@@ -151,19 +148,9 @@ done
 add_interface_to_bridge $ENV_NAME private vmnet2
 add_interface_to_bridge $ENV_NAME private vmnet3
 
-if [[ "${DEBUG}" == "true" ]]; then 
-  rm -rf vmnet2.dump
-  rm -rf vmnet3.dump
-  sudo tcpdump -i vmnet2 -w vmnet2.pcap &
-  export TCPDUMP_PID=$!
-  sudo tcpdump -i vmnet3 -w vmnet3.pcap &
-  export TCPDUMP_PID2=$!
-fi
-
 echo "Waiting for system tests to finish"
 wait $SYSTEST_PID
 export RESULT=$?
-[[ "${DEBUG}" == "true" ]] && { sudo kill -SIGTERM $TCPDUMP_PID; sudo kill -SIGTERM $TCPDUMP_PID; }
 
 echo "ENVIRONMENT NAME is $ENV_NAME"
 virsh net-dumpxml "${ENV_NAME}_admin" | grep -P "(\d+\.){3}" -o | awk '{print "Fuel master node IP: "$0"2"}'
