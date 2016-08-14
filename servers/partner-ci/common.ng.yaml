@@ -46,7 +46,7 @@
           description: 'mos repo snapshots version'
       - string:
           name: SNAPSHOTS_ID
-          default: '{snapshots_id}
+          default: '{snapshots_id}'
           description: 'snapshots number or lastSuccessfulBuild'
       - string:
           name: SNAPSHOTS_URL
