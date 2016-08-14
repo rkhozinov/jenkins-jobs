@@ -5,7 +5,8 @@
     - string:
         name: TEST_GROUP
     - string:
-        name: TEST_GROUP_CONFIG=${{TEST_GROUP}}
+        name: TEST_GROUP_CONFIG
+        default: ${TEST_GROUP}
     - text:
         name: VCENTER_PARAMETERS
         default: |
@@ -60,7 +61,7 @@
     recreate_venv: false
     disable_ssl: true
     kvm_use: false
-    update_master: true
+    update_master: false
     enable_proposed: false
     debug: true
     build_debug: true
@@ -71,12 +72,12 @@
     test_timeout: 300
     iso_file: 'MirantisOpenStack-9.0.iso'
     iso_storage: '/storage/downloads'
-    snapshots_id: ''
+    snapshots_id: 'released'
     gerrit_repo: 'fuel-plugin-vmware-dvs'
     gerrit_branch: 'stable/9.0'
     email_to: 'rkhozinov@mirantis.com'
-    released_plugin_path: '/storage/nsxv/released/nsxv-1.1-1.1.0-1.noarch.rpm'
-    scm_submodule_disabled: false
+    released_plugin_path: ''
+    scm_submodule_disabled: true
     scm_wipe_workspace: false
     skip_vote_successfull: false
     skip_vote_failed: false
@@ -173,7 +174,7 @@
       - '{fuel-release}.{plugin-name}.bvt.test'
 
       - '{regression-name}':
-          testrail_suite: "[8.0][PCE] VMware DVS plugin v3.0.1 Regression"
+          testrail_suite: "[9.0][PCE] VMware DVS plugin v3.0.1 Regression"
           testrail_suite_desc: "Suite description"
           testrail_plan: "$TREP_TESTRAIL_SUITE #${{DATE}}"
           testrail_plan_desc: "Test plan description"
@@ -277,8 +278,12 @@
       - test-wrapper:
           test_timeout: '{test_timeout}'
     properties:
-      - test-property
+     - test-property
     builders:
+      - inject:
+          properties-content: $TESTRAIL_PARAMETERS
+      - inject:
+          properties-content: $ENV_PARAMETERS
       - inject:
           properties-content: $VCENTER_PARAMETERS
       - conditional-step:

@@ -261,8 +261,9 @@
                 build_number=$(grep "^BUILD_NUMBER=" < build.properties | cut -d= -f2)
                 echo "PKG_JOB_BUILD_NUMBER=$build_number" > build_number
       - conditional-step:
-          condition-kind: file-exists
-          condition-filename: "build_number"
+          condition-kind: shell
+          condition-command: |
+            [[ "${UPDATE_MASTER}" == "true" ]]
           steps:
             - shell: |
                 #!/bin/bash
@@ -270,6 +271,7 @@
                 wget --no-check-certificate -O snapshots.params ${SNAPSHOTS_URL/SNAPSHOTS_ID/$SNAPSHOTS_ID}
                 custom_version=$(grep "^CUSTOM_VERSION=" < snapshots.params | cut -d= -f2 | cut -d'#' -f2)
                 SNAPSHOTS_ID=${custom_version:10}
+                [ ! -f build_number ] && { echo "build_number properties file is not exist"; exit 1; }
                 echo "SNAPSHOTS_ID=$SNAPSHOTS_ID" >> build_number
                 echo "CUSTOM_VERSION=snapshot #$custom_version" >> build_number
 - scm:

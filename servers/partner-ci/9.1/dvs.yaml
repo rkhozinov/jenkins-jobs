@@ -5,7 +5,8 @@
     - string:
         name: TEST_GROUP
     - string:
-        name: TEST_GROUP_CONFIG=${{TEST_GROUP}}
+        name: TEST_GROUP_CONFIG
+        default: ${TEST_GROUP}
     - text:
         name: VCENTER_PARAMETERS
         default: |
@@ -76,7 +77,7 @@
     gerrit_branch: 'master'
     email_to: 'rkhozinov@mirantis.com'
     released_plugin_path: ''
-    scm_submodule_disabled: true
+    scm_submodule_disabled: false
     scm_wipe_workspace: false
     skip_vote_successfull: false
     skip_vote_failed: false
@@ -172,26 +173,15 @@
 
       - '{fuel-release}.{plugin-name}.bvt.test'
 
-#     - '{regression-name}':
-#         testrail_suite: "[8.0][PCE] VMware DVS plugin v2.1.0 Regression"
-#         testrail_suite_desc: "Suite description"
-#         testrail_plan: "$TREP_TESTRAIL_SUITE #${{DATE}}"
-#         testrail_plan_desc: "Test plan description"
-#         testrail_run: "$TREP_TESTRAIL_SUITE"
-#         testrail_run_desc: "Test run description"
-#         pkg_job_name: ''
-#         iso_job_name: ''
-#         multijob_build_pkg: false
-
-#     - '{fuel-release}.{plugin-name}.regression.test'
-
-#     - '{canary-name}':
-#         iso_job_name: '{download-iso-name}'
-#         testrail_suite: "[9.0][PCE] VMware DVS plugin v3.0.0 Smoke/BVT"
-#         testrail_milestone: "3.0.0"
-#         testrail_plan: "$TREP_TESTRAIL_SUITE build#${{PKG_JOB_BUILD_NUMBER}} iso#${{ISO_VERSION}}"
-#         testrail_run: "$TREP_TESTRAIL_SUITE"
-#         testrail_item_case: "$TEST_GROUP"
+      - '{regression-name}':
+          testrail_suite: "[9.1][PCE] VMware DVS plugin v3.1.0 Regression"
+          testrail_suite_desc: "Suite description"
+          testrail_plan: "$TREP_TESTRAIL_SUITE #${{DATE}}"
+          testrail_plan_desc: "Test plan description"
+          testrail_run: "$TREP_TESTRAIL_SUITE"
+          testrail_run_desc: "Test run description"
+          pkg_job_name: ''
+          multijob_build_pkg: false
 
       - '{fuel-release}.{plugin-name}.regression.test'
 
@@ -288,8 +278,12 @@
       - test-wrapper:
           test_timeout: '{test_timeout}'
     properties:
-      - test-property
+     - test-property
     builders:
+      - inject:
+          properties-content: $TESTRAIL_PARAMETERS
+      - inject:
+          properties-content: $ENV_PARAMETERS
       - inject:
           properties-content: $VCENTER_PARAMETERS
       - conditional-step:
@@ -433,39 +427,39 @@
     description: 'The custom test for {fuel-release}.{plugin-name}.{plugin-version}'
     concurrent: true
 
-  #- job-template:
-  #    name: '{regression-name}'
-  #    description: 'The regression test for {fuel-release}.{plugin-name}.{plugin-version}'
-  #    disabled: '{obj:regression_disabled}'
-  #    concurrent: true
-  #    project-type: multijob
-  #    node: runner
-  #    <<: *runner-parameters
-  #    scm: []
-  #    triggers:
-  #      - timed: '{regression_timer}'
-  #    properties:
-  #      - runner-property:
-  #          build-name: '{build-name}'
-  #    wrappers:
-  #      - runner-wrapper
-  #    publishers:
-  #      - runner-publisher:
-  #          properties_name: regression.properties
-  #          email_to: '{email_to}'
-  #    builders:
-  #      - multijob:
-  #          name: '1st phase - regression test'
-  #          condition: COMPLETED
-  #          projects:
-  #            - name: '{fuel-release}.{plugin-name}.regression.test'
-  #              predefined-parameters: |
-  #                TEST_GROUP=dvs_regression
-  #                DVS_PLUGIN_PATH={released_plugin_path}
-  #                PLUGIN_VERSION={plugin-version}
-  #                PKG_JOB_BUILD_NUMBER=released
-  #              current-parameters: true
-  #              kill-phase-on: NEVER
+- job-template:
+    name: '{regression-name}'
+    description: 'The regression test for {fuel-release}.{plugin-name}.{plugin-version}'
+    disabled: '{obj:regression_disabled}'
+    concurrent: true
+    project-type: multijob
+    node: runner
+    <<: *runner-parameters
+    scm: []
+    triggers:
+      - timed: '{regression_timer}'
+    properties:
+      - runner-property:
+          build-name: '{build-name}'
+    wrappers:
+      - runner-wrapper
+    publishers:
+      - runner-publisher:
+          properties_name: regression.properties
+          email_to: '{email_to}'
+    builders:
+      - multijob:
+          name: '1st phase - regression test'
+          condition: COMPLETED
+          projects:
+            - name: '{fuel-release}.{plugin-name}.regression.test'
+              predefined-parameters: |
+                TEST_GROUP=dvs_regression
+                DVS_PLUGIN_PATH={released_plugin_path}
+                PLUGIN_VERSION={plugin-version}
+                PKG_JOB_BUILD_NUMBER=released
+              current-parameters: true
+              kill-phase-on: NEVER
 
 - job-template:
     name: '{smoke-name}'

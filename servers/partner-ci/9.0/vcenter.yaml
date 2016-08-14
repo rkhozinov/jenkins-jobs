@@ -339,7 +339,7 @@
       - timed: '{nightly_timer}'
     properties:
       - runner-property:
-            build-name: '{build-name}'
+          build-name: '{build-name}'
     wrappers:
       - runner-wrapper
     publishers:

@@ -19,6 +19,11 @@ fi
 
 [ -z $ISO_FILE ] && (echo "ISO_FILE variable is empty"; exit 1)
 
+if [[ "${UPDATE_MASTER}" == "true" ]]; then
+  [ ${SNAPSHOTS_ID} ] && export SNAPSHOTS_ID=${SNAPSHOTS_ID} || export SNAPSHOTS_ID=${CUSTOM_VERSION:10}
+fi
+
+[ -z "${SNAPSHOTS_ID}" ] && { echo SNAPSHOTS_ID is empty; exit 1; }
 #remove old logs and test data
 [ -f nosetest.xml ] && rm -f nosetests.xml
 rm -rf logs/*
@@ -31,7 +36,7 @@ fi
 
 export REQUIRED_FREE_SPACE=200
 
-export ENV_NAME="${ENV_PREFIX}.${CUSTOM_VERSION:10}"
+export ENV_NAME="${ENV_PREFIX}.${SNAPSHOTS_ID}"
 export VENV_PATH="${HOME}/${FUEL_RELEASE}-venv"
 
 ## For plugins we should get a valid version of requrements of python-venv

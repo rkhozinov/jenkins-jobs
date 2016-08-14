@@ -69,7 +69,7 @@ echo "plugin-checksum: $(md5sum -b ${DVS_PLUGIN_PATH})"
 
 
 cat << REPORTER_PROPERTIES > reporter.properties
-ISO_VERSION=$ISO_VERSION
+ISO_VERSION=$SNAPSHOTS_ID
 SNAPSHOTS_ID=$SNAPSHOTS_ID
 ISO_FILE=$ISO_FILE
 TEST_GROUP=$TEST_GROUP
@@ -144,3 +144,14 @@ while [ true ]; do
   [ $(virsh net-list | grep $ENV_NAME | wc -l) -eq 5 ] && break || sleep 10
   [ -e /proc/$SYSTEST_PID ] && continue || \
     { echo System tests exited prematurely, aborting; exit 1; }
+done
+  
+echo waiting for system tests to finish
+wait $SYSTEST_PID
+
+export RES=$?
+echo ENVIRONMENT NAME is $ENV_NAME
+virsh net-dumpxml ${ENV_NAME}_admin | grep -P "(\d+\.){3}" -o | awk '{print "Fuel master node IP: "$0"2"}'
+
+echo Result is $RES
+exit "${RES}"
