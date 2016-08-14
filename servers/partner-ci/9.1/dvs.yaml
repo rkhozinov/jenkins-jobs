@@ -52,7 +52,7 @@
     slave_node_memory: '8192'
     admin_node_cpu: '4'
     slave_node_cpu: '4'
-    pkg_job_name: '{fuel-release}.dvs.build'
+    pkg_job_name: '{fuel-release}.{plugin-name}.build'
     nightly_timer: 'H 22 * * *'
     regression_timer: 'H 18 * * *'
     nightly_disabled: false
