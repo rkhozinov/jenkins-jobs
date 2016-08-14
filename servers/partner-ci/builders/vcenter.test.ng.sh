@@ -5,9 +5,14 @@
 export TCPDUMP_PID
 export TCPDUMP_PID2
 [ -z $ISO_FILE  ] && (echo "ISO_FILE variable is empty"; exit 1)
+
 if [[ "${UPDATE_MASTER}" == "true" ]]; then
   [ ${SNAPSHOTS_ID} ] && export SNAPSHOTS_ID=${SNAPSHOTS_ID} || export SNAPSHOTS_ID=${CUSTOM_VERSION:10}
   [ -z "${SNAPSHOTS_ID}" ] && { echo SNAPSHOTS_ID is empty; exit 1; }
+  export ISO_VERSION=$SNAPSHOTS_ID
+else 
+  export SNAPSHOTS_ID='released'
+  export ISO_VERSION=$SNAPSHOTS_ID
 fi
 
 if [ -z $PLUGIN_VERSION  ]; then
