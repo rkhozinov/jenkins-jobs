@@ -13,7 +13,8 @@ if [[ "${UPDATE_MASTER}" == "true" ]]; then
   [ -z "${SNAPSHOTS_ID}" ] && { echo SNAPSHOTS_ID is empty; exit 1; }
   export ISO_VERSION=$SNAPSHOTS_ID
 else 
-  export ISO_VERSION='released'
+  export SNAPSHOTS_ID='released'
+  export ISO_VERSION=$SNAPSHOTS_ID
 fi
 
 PLUGIN_VERSION_ARTIFACT='build.plugin_version'
