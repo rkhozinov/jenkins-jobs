@@ -228,6 +228,7 @@
           update_master:        '{update_master}'
           kvm_use:              '{kvm_use}'
           iso_storage:          '{iso_storage}'
+          snapshots_id:         '{snapshots_id}'
       - plugin-specific-parameters
 
 # parameters for jobs created per test-group and custom test job
@@ -268,6 +269,7 @@
           update_master:        '{update_master}'
           kvm_use:              '{kvm_use}'
           iso_storage:          '{iso_storage}'
+          snapshots_id:         '{snapshots_id}'
       - plugin-specific-parameters
 
 - defaults:
