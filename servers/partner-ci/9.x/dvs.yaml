@@ -39,6 +39,7 @@
     smoke-name: '{fuel-release}.{plugin-name}.smoke'
     bvt-name: '{fuel-release}.{plugin-name}.bvt'
     regression-name: '{fuel-release}.{plugin-name}.regression'
+    canary-name: '{fuel-release}.{plugin-name}.canary'
     nightly-name: '{fuel-release}.{plugin-name}.nightly'
     custom-name: '{fuel-release}.{plugin-name}.custom'
     reporter-name: '{fuel-release}.{plugin-name}.reporter'
@@ -71,7 +72,7 @@
     test_timeout: 300
     iso_file: 'MirantisOpenStack-9.0.iso'
     iso_storage: '/storage/downloads'
-    snapshots_id: 'lastSuccessfulBuild'
+    snapshots_id: ''
     gerrit_repo: 'fuel-plugin-vmware-dvs'
     gerrit_branch: 'master'
     email_to: 'rkhozinov@mirantis.com vnaumov@mirantis.com ibumarskov@mirantis.com'
@@ -173,15 +174,26 @@
 
       - '{fuel-release}.{plugin-name}.bvt.test'
 
-      - '{regression-name}':
-          testrail_suite: "[{fuel-release}][PCE] VMware DVS plugin v{plugin-version} Regression"
-          testrail_suite_desc: "Suite description"
-          testrail_plan: "$TREP_TESTRAIL_SUITE #${{DATE}}"
-          testrail_plan_desc: "Test plan description"
-          testrail_run: "$TREP_TESTRAIL_SUITE"
-          testrail_run_desc: "Test run description"
-          pkg_job_name: ''
-          multijob_build_pkg: false
+#     - '{regression-name}':
+#         testrail_suite: "[8.0][PCE] VMware DVS plugin v2.1.0 Regression"
+#         testrail_suite_desc: "Suite description"
+#         testrail_plan: "$TREP_TESTRAIL_SUITE #${{DATE}}"
+#         testrail_plan_desc: "Test plan description"
+#         testrail_run: "$TREP_TESTRAIL_SUITE"
+#         testrail_run_desc: "Test run description"
+#         pkg_job_name: ''
+#         iso_job_name: ''
+#         multijob_build_pkg: false
+
+#     - '{fuel-release}.{plugin-name}.regression.test'
+
+#     - '{canary-name}':
+#         iso_job_name: '{download-iso-name}'
+#         testrail_suite: "[9.0][PCE] VMware DVS plugin v3.0.0 Smoke/BVT"
+#         testrail_milestone: "3.0.0"
+#         testrail_plan: "$TREP_TESTRAIL_SUITE build#${{PKG_JOB_BUILD_NUMBER}} iso#${{ISO_VERSION}}"
+#         testrail_run: "$TREP_TESTRAIL_SUITE"
+#         testrail_item_case: "$TEST_GROUP"
 
       - '{fuel-release}.{plugin-name}.regression.test'
 
