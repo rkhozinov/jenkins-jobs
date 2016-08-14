@@ -276,11 +276,6 @@
     name: global
     disabled: false
     node: dvs
-    logrotate:
-      daysToKeep: 30
-      numToKeep: 100
-      artifactDaysToKeep: 30
-      artifactNumToKeep: 100
     <<: *test-parameters
     scm:
       - common-scm:
@@ -321,7 +316,7 @@
       - conditional-step:
           condition-kind: shell
           condition-command: |
-            [[ "${{UPDATE_MASTER}}"=="true" ]]
+            [[ "${{UPDATE_MASTER}}" == "true" ]]
           steps:
             - inject:
                 properties-content: $UPDATE_PARAMETERS
