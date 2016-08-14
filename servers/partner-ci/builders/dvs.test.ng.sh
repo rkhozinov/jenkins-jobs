@@ -2,12 +2,18 @@
 
 # activate bash xtrace for script
 [[ "${DEBUG}" == "true" ]] && set -x || set +x
+
 export TCPDUMP_PID
 export TCPDUMP_PID2
+
 [ -z $ISO_FILE  ] && (echo "ISO_FILE variable is empty"; exit 1)
+
 if [[ "${UPDATE_MASTER}" == "true" ]]; then
   [ ${SNAPSHOTS_ID} ] && export SNAPSHOTS_ID=${SNAPSHOTS_ID} || export SNAPSHOTS_ID=${CUSTOM_VERSION:10}
   [ -z "${SNAPSHOTS_ID}" ] && { echo SNAPSHOTS_ID is empty; exit 1; }
+  export ISO_VERSION=$SNAPSHOTS_ID
+else 
+  export ISO_VERSION='released'
 fi
 
 PLUGIN_VERSION_ARTIFACT='build.plugin_version'
@@ -22,7 +28,6 @@ if [ -z $PLUGIN_VERSION  ]; then
     exit 1
   fi
 fi
-
 
 if [ -z "${PKG_JOB_BUILD_NUMBER}" ]; then
     if [ -f build.properties ]; then
@@ -43,12 +48,8 @@ export ISO_PATH="${ISO_STORAGE}/${ISO_FILE}"
 if [[ $ISO_FILE == *"Mirantis"* ]]; then
   export FUEL_RELEASE=$(echo $ISO_FILE | cut -d- -f2 | tr -d '.iso')
 fi
-if [[ "${UPDATE_MASTER}" == "true" ]]; then
-  export ENV_NAME="${ENV_PREFIX}.${SNAPSHOTS_ID}"
-else
-  export ENV_NAME="${ENV_PREFIX}"
-fi
 
+export ENV_NAME="${ENV_PREFIX}.${SNAPSHOTS_ID}"
 export VENV_PATH="${HOME}/${FUEL_RELEASE}-venv"
 
 [ -z "${DVS_PLUGIN_PATH}" ] && export DVS_PLUGIN_PATH=$(ls -t ${WORKSPACE}/fuel-plugin-vmware-dvs*.rpm | head -n 1)
@@ -68,8 +69,11 @@ echo "iso-path: ${ISO_PATH}"
 echo "plugin-path: ${DVS_PLUGIN_PATH}"
 echo "plugin-checksum: $(md5sum -b ${DVS_PLUGIN_PATH})"
 
+
+
 cat << REPORTER_PROPERTIES > reporter.properties
-ISO_VERSION="90"
+ISO_VERSION=$ISO_VERSION
+SNAPSHOTS_ID=$SNAPSHOTS_ID
 ISO_FILE=$ISO_FILE
 TEST_GROUP=$TEST_GROUP
 TEST_JOB_NAME=$JOB_NAME
@@ -131,12 +135,10 @@ clean_iptables() {
   sudo /sbin/iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE
 }
 
-sh -x "utils/jenkins/system_tests.sh" \
-    -k \
-    -K \
-    -t test \
-    -i "${ISO_PATH}" \
-    -o --group=--group=${TEST_GROUP} &
+# run python test set to create environments, deploy and test product
+export PYTHONPATH="${PYTHONPATH:+${PYTHONPATH}:}${WORKSPACE}"
+echo ${PYTHONPATH}
+python plugin_test/run_tests.py -q --nologcapture --with-xunit ${TEST_GROUP} &
 
 export SYSTEST_PID=$!
 
