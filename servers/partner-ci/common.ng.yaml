@@ -8,7 +8,7 @@
       - bool:
           name: ENABLE_PROPOSED
           default: '{enable_proposed}'
-          description: 'turns on update fuel master node to maintenance update'
+          description: 'related to update_master. Turns on support additional repositories for maintenance update'
       - bool:
           name: PUBLISH_RESULTS
           default: '{obj:publish_results}'
