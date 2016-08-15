@@ -242,6 +242,13 @@
         current-parameters: true
         kill-phase-on: NEVER
 
+      - name: '{fuel-release}.{plugin-name}.{plugin-version}.contrail_public_connectivity_from_instance_without_fip.juniper'
+        property-file: build_number
+        predefined-parameters: |
+           CONTRAIL_DISTRIBUTION=juniper
+        current-parameters: true
+        kill-phase-on: NEVER
+
       - name: '{fuel-release}.{plugin-name}.{plugin-version}.contrail_ha_multiple_networks.juniper'
         property-file: build_number
         predefined-parameters: |

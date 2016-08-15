@@ -196,6 +196,10 @@
       - contrail_sriov_delete_sriov
       - contrail_sriov_add_controller
       - contrail_sriov_delete_controller
+       
+      - contrail_public_connectivity_from_instance_without_fip
+      - contrail_dpdk_update_core_repos
+      - contrail_sriov_update_core_repos
 
     jobs:
       - '{build-name}':

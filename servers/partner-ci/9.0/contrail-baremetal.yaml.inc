@@ -161,3 +161,23 @@
            node=contrail-baremetal
         current-parameters: true
         kill-phase-on: NEVER
+
+      - name: '{fuel-release}.{plugin-name}.{plugin-version}.contrail_dpdk_update_core_repos.juniper'
+        property-file: build_number
+        node-label-name: 'label'
+        node-label: 'contrail-baremetal'
+        predefined-parameters: |
+           CONTRAIL_DISTRIBUTION=juniper
+           node=contrail-baremetal
+        current-parameters: true
+        kill-phase-on: NEVER
+
+      - name: '{fuel-release}.{plugin-name}.{plugin-version}.contrail_sriov_update_core_repos.juniper'
+        property-file: build_number
+        node-label-name: 'label'
+        node-label: 'contrail-baremetal'
+        predefined-parameters: |
+           CONTRAIL_DISTRIBUTION=juniper
+           node=contrail-baremetal
+        current-parameters: true
+        kill-phase-on: NEVER
