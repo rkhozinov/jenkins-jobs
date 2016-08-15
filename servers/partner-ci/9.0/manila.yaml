@@ -1,4 +1,28 @@
 ---
+- parameter:
+    name: plugin-specific-parameters
+    parameters:
+    - text:
+        name: VCENTER_PARAMETERS
+        default: |
+          ESXI_PASSWORD=swordfish
+          ESXI_USER=root
+          ESXI_HOSTS=172.16.0.250 172.16.0.252 172.16.0.253
+          NFS_SERVER=172.16.0.1
+          NFS_SHARES=nfs nfs2
+          VSPHERE_VERSION=5.5
+          WORKSTATION_SNAPSHOT=doubledvs
+          WORKSTATION_IFS=vmnet2,vmnet3
+          WORKSTATION_NODES=esxi1 esxi2 esxi3 vcenter
+          VCENTER_IP=172.16.0.145
+          VCENTER_USERNAME=root
+          VCENTER_PASSWORD=vmware
+          VC_DATACENTER=Datacenter
+          VCENTER_DATASTORE=nfs
+          VCENTER_CLUSTERS=Cluster1,Cluster2
+          DVS_SWITCHES=Cluster1,Cluster2
+          VCENTER_USE=true
+
 - project:
     name: 'predefined_parameters'
     fuel-release: '9.1'
@@ -193,6 +217,13 @@
           name: TEST_GROUP
           '{testgroup_value_type}': '{obj:testgroup_value}'
           description: "test-group name"
+      - '{testgroup_parameter_type}':
+          name: TEST_GROUP
+          '{testgroup_value_type}': '{obj:testgroup_value}'
+          description: "test-group name"
+      - string:
+          name: TEST_GROUP_CONFIG
+          default: '${{TEST_GROUP}}'
       - common-parameters:
           publish_results: '{publish_results}'
           debug:           '{debug}'

@@ -2,11 +2,6 @@
 - parameter:
     name: plugin-specific-parameters
     parameters:
-    - string:
-        name: TEST_GROUP
-    - string:
-        name: TEST_GROUP_CONFIG
-        default: ${TEST_GROUP}
     - text:
         name: VCENTER_PARAMETERS
         default: |
@@ -55,7 +50,7 @@
     pkg_job_name: '{fuel-release}.{plugin-name}.build'
     nightly_timer: 'H 22 * * *'
     regression_timer: 'H 18 * * *'
-    nightly_disabled: true
+    nightly_disabled: false
     regression_disabled: false
     force_erase: false
     recreate_venv: false
@@ -234,6 +229,13 @@
           default: '{testjob_build_pkg}'
           description: "Triggers build of pkg from $PKG_JOB_NAME (only for custom)"
           description: "test-group name"
+      - '{testgroup_parameter_type}':
+          name: TEST_GROUP
+          '{testgroup_value_type}': '{obj:testgroup_value}'
+          description: "test-group name"
+      - string:
+          name: TEST_GROUP_CONFIG
+          default: '${{TEST_GROUP}}'
       - common-parameters:
           publish_results: '{publish_results}'
           debug:           '{debug}'
