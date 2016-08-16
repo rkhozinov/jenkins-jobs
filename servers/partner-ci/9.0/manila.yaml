@@ -22,27 +22,22 @@
     smoke-name: '{fuel-release}.{plugin-name}.smoke'
     bvt-name: '{fuel-release}.{plugin-name}.bvt'
     regression-name: '{fuel-release}.{plugin-name}.regression'
-    canary-name: '{fuel-release}.{plugin-name}.canary'
-    download-iso-name: 'download_iso'
     nightly-name: '{fuel-release}.{plugin-name}.nightly'
     custom-name: '{fuel-release}.{plugin-name}.custom'
     reporter-name: '{fuel-release}.{plugin-name}.reporter'
     smoke-test-name: 'manila_smoke'
     bvt-test-name: 'manila_bvt'
-    canary-skinny-test-name: 'manila_smoke'
-    canary-fat-test-name: 'manila_bvt'
     admin_node_memory: '8192'
     slave_node_memory: '8192'
     admin_node_cpu: '4'
     slave_node_cpu: '4'
     pkg_job_name: '{fuel-release}.{plugin-name}.build'
-    iso_job_name: '{fuel-release}.{plugin-name}.canary'
     nightly_timer: 'H 22 * * *'
     regression_timer: 'H 16 * * *'
-    nightly_disabled: true
+    nightly_disabled: false
     regression_disabled: false
     use_snapshots: false
-    force_erase: true
+    force_erase: false
     recreate_venv: false
     disable_ssl: true
     update_master: true
@@ -84,7 +79,7 @@
       - manila_bvt
     jobs:
       - '{build-name}':
-          scm_submodule_disabled: false
+          scm_submodule_disabled: true
           scm_wipe_workspace: true
       - '{flake8-name}':
           scm_submodule_disabled: true
@@ -94,6 +89,25 @@
           scm_submodule_disabled: true
           skip_vote_successfull: '{skip_vote_successfull}'
           skip_vote_failed: '{skip_vote_failed}'
+      - '{nightly-name}':
+          multijob_build_pkg: true
+      - '{custom-name}.qa':
+          publish_results: false
+      - '{custom-name}.dev':
+          publish_results: false
+          testgroup_parameter_type: choice
+          testgroup_value_type: choices
+          testgroup_value: '{obj:testgroup}'
+      - '{reporter-name}'
+      - '{fuel-release}.{plugin-name}.{testgroup}'
+      - '{smoke-name}':
+          publish_results: false
+          multijob_build_pkg: false
+      - '{fuel-release}.{plugin-name}.smoke.test'
+      - '{bvt-name}':
+          publish_results: false
+          multijob_build_pkg: true
+      - '{fuel-release}.{plugin-name}.bvt.test'
 
 # parameters for smoke, bvt and nightly multijobs
 - runner-parameters: &runner-parameters
@@ -114,7 +128,6 @@
           gerrit_branch:        '{gerrit_branch}'
           env_prefix:           '{fuel-release}.{plugin-name}'
           pkg_job_name:         '{pkg_job_name}'
-          iso_job_name:         '{iso_job_name}'
           admin_node_memory:    '{admin_node_memory}'
           slave_node_memory:    '{slave_node_memory}'
           admin_node_cpu:       '{admin_node_cpu}'
@@ -135,7 +148,7 @@
     parameters:
       - label:
           name: node
-          default: 'nsxv'
+          default: 'manila'
           description: "The node on which to run the job"
       - bool:
           name: BUILD_PKG
@@ -156,7 +169,6 @@
           gerrit_branch:   '{gerrit_branch}'
           env_prefix:      '{fuel-release}.{plugin-name}'
           pkg_job_name:    '{pkg_job_name}'
-          iso_job_name:    '{iso_job_name}'
           admin_node_memory:    '{admin_node_memory}'
           slave_node_memory:    '{slave_node_memory}'
           admin_node_cpu:       '{admin_node_cpu}'
@@ -174,7 +186,7 @@
 - defaults:
     name: global
     disabled: false
-    node: nsxv
+    node: manila
     <<: *test-parameters
     scm:
       - common-scm:
@@ -215,16 +227,6 @@
                 project: ${{PKG_JOB_NAME}}
                 which-build: specific-build
                 build-number: ${{PKG_JOB_BUILD_NUMBER}}
-      - conditional-step:
-          condition-kind: shell
-          condition-command: |
-            [ ! -z ${{ISO_JOB_NAME}} ] && \
-            [   -z ${{ISO_FILE}}     ]
-          steps:
-            - copyartifact:
-                project: "${{ISO_JOB_NAME}}"
-                filter: "iso_file"
-                which-build: last-successful
       - shell:
           !include-raw-escape: ../builders/common.prepare.sh
       - shell:
@@ -297,55 +299,12 @@
     concurrent: true
 
 - job-template:
-    name: '{fuel-release}.{plugin-name}.canary.skinny'
-    concurrent: true
-
-- job-template:
-    name: '{fuel-release}.{plugin-name}.canary.fat'
-    concurrent: true
-
-- job-template:
     name: '{custom-name}.qa'
     concurrent: true
 
 - job-template:
     name: '{custom-name}.dev'
     concurrent: true
-
-- job-template:
-    name: '{regression-name}'
-    disabled: '{obj:regression_disabled}'
-    concurrent: true
-    project-type: multijob
-    node: runner
-    <<: *runner-parameters
-    scm: []
-    triggers:
-      - timed: '{regression_timer}'
-    properties:
-      - runner-property:
-          build-name: '{build-name}'
-    wrappers:
-      - runner-wrapper
-    publishers:
-      - runner-publisher:
-          properties_name: regression.properties
-          email_to: '{email_to}'
-    builders:
-      - shell: |
-          #!/bin/bash
-          echo "TEST_GROUP=manila_bvt" > property
-          echo "MANILA_PLUGIN_PATH={released_plugin_path}" >> property
-          echo "PLUGIN_VERSION={plugin-version}" >> property
-          echo "PKG_JOB_BUILD_NUMBER=released" >> property
-      - multijob:
-          name: '1st phase - regression test'
-          condition: COMPLETED
-          projects:
-            - name: '{fuel-release}.{plugin-name}.regression.test'
-              property-file: property
-              current-parameters: true
-              kill-phase-on: NEVER
 
 - job-template:
     name: '{smoke-name}'
@@ -423,47 +382,6 @@
           email_to: '{email_to}'
 
 - job-template:
-    name: '{canary-name}'
-    description: 'The Smoke test for {fuel-release}.{plugin-name}.{plugin-version}'
-    disabled: true
-    concurrent: true
-    project-type: multijob
-    node: runner
-    scm: []
-    <<: *runner-parameters
-    triggers:
-      - reverse:
-          jobs: '{download-iso-name}'
-          result: 'success'
-    properties:
-      - runner-property:
-          build-name: '{build-name}'
-    wrappers:
-      - runner-wrapper
-    publishers:
-      - runner-publisher:
-          properties_name: canary.properties
-          email_to: '{email_to}'
-    builders:
-      - runner-condition
-      - multijob:
-          name: 'Canary tests for {plugin-name}'
-          condition: SUCCESSFUL
-          projects:
-            - name: '{fuel-release}.{plugin-name}.canary.skinny'
-              property-file: build_number
-              predefined-parameters: |
-                 TEST_GROUP={canary-skinny-test-name}
-              current-parameters: true
-              kill-phase-on: NEVER
-            - name: '{fuel-release}.{plugin-name}.canary.fat'
-              property-file: build_number
-              predefined-parameters: |
-                 TEST_GROUP={canary-fat-test-name}
-              current-parameters: true
-              kill-phase-on: NEVER
-
-- job-template:
     name: '{nightly-name}'
     project-type: multijob
     disabled: '{obj:nightly_disabled}'
@@ -482,4 +400,4 @@
           properties_name: nightly.properties
           email_to: '{email_to}'
     builders:
-      !include: nsxv-nightly.yaml.inc
+      !include: manila-nightly.yaml.inc
