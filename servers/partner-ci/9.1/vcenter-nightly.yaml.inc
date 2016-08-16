@@ -347,7 +347,7 @@
        predefined-parameters: |
          TEST_GROUP=vcenter_shutdown_crtl
          TEST_GROUP_PREFIX=system_test.vcenter.vcenter_shutdown_ctrl
-         TEST_GROUP_CONFIG=vcenter_dvs_failover
+         TEST_GROUP_CONFIG=vcenter_add_controller
        kill-phase-on: NEVER
 
      - name: '{fuel-release}.{plugin-name}.vcenter_reboot_ctrl'
