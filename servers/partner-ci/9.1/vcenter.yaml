@@ -2,13 +2,6 @@
 - parameter:
     name: plugin-specific-parameters
     parameters:
-    - string:
-        name: TEST_GROUP_PREFIX
-        default: system_test.vcenter.deploy_vcenter_dvs_run_ostf
-    - string:
-        name: TEST_GROUP_CONFIG
-    - string:
-        name: TEST_GROUP
     - text:
         name: VCENTER_PARAMETERS
         default: |
@@ -211,6 +204,16 @@
           name: BUILD_PKG
           default: '{testjob_build_pkg}'
           description: "Triggers build of pkg from $PKG_JOB_NAME (only for custom)"
+      - '{testgroup_parameter_type}':
+          name: TEST_GROUP
+          '{testgroup_value_type}': '{obj:testgroup_value}'
+          description: "test-group name"
+      - string:
+          name: TEST_GROUP_PREFIX
+          default: system_test.vcenter.deploy_vcenter_dvs_run_ostf
+      - string:
+          name: TEST_GROUP_CONFIG
+          default: '${{TEST_GROUP}}'
       - common-parameters:
           publish_results: '{publish_results}'
           debug:           '{debug}'
@@ -286,7 +289,7 @@
       - conditional-step:
           condition-kind: shell
           condition-command: |
-            [[ "${{UPDATE_MASTER}}"=="true" ]]
+            [[ "${{UPDATE_MASTER}}" == "true" ]]
           steps:
             - inject:
                 properties-content: $UPDATE_PARAMETERS

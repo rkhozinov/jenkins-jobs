@@ -3,9 +3,6 @@
 # activate bash xtrace for script
 [[ "${DEBUG}" == "true" ]] && set -x || set +x
 
-export TCPDUMP_PID
-export TCPDUMP_PID2
-
 [ -z $ISO_FILE  ] && (echo "ISO_FILE variable is empty"; exit 1)
 
 if [[ "${UPDATE_MASTER}" == "true" ]]; then

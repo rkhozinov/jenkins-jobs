@@ -2,8 +2,7 @@
 
 # activate bash xtrace for script
 [[ "${DEBUG}" == "true" ]] && set -x || set +x
-export TCPDUMP_PID
-export TCPDUMP_PID2
+
 [ -z $ISO_FILE  ] && (echo "ISO_FILE variable is empty"; exit 1)
 
 if [[ "${UPDATE_MASTER}" == "true" ]]; then
@@ -149,19 +148,9 @@ done
 add_interface_to_bridge $ENV_NAME private vmnet2
 add_interface_to_bridge $ENV_NAME private vmnet3
 
-if [[ "${DEBUG}" == "true" ]]; then 
-  rm -rf vmnet2.dump
-  rm -rf vmnet3.dump
-  sudo tcpdump -i vmnet2 -w vmnet2.pcap &
-  export TCPDUMP_PID=$!
-  sudo tcpdump -i vmnet3 -w vmnet3.pcap &
-  export TCPDUMP_PID2=$!
-fi
-
 echo "Waiting for system tests to finish"
 wait $SYSTEST_PID
 export RESULT=$?
-[[ "${DEBUG}" == "true" ]] && { sudo kill -SIGTERM $TCPDUMP_PID; sudo kill -SIGTERM $TCPDUMP_PID; }
 
 echo "ENVIRONMENT NAME is $ENV_NAME"
 virsh net-dumpxml "${ENV_NAME}_admin" | grep -P "(\d+\.){3}" -o | awk '{print "Fuel master node IP: "$0"2"}'
