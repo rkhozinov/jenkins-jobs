@@ -361,7 +361,7 @@
           colormap: xterm
       - inject-passwords:
           global: true
-          mask-password-params: false
+          mask-password-params: true
       - timeout:
           fail: true
           type: no-activity
