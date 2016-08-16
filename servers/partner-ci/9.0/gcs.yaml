@@ -1,4 +1,36 @@
 ---
+- parameter:
+    name: plugin-specific-parameters
+    parameters:
+      - string:
+          name: MIRROR
+          default: 'http://mirror.seed-cz1.fuel-infra.org'
+          description: 'mirror for package repositories. this mirror is optimized for CZ'
+      - string:
+          name: MIRROR_UBUNTU
+          default: >
+             deb ${{MIRROR}}/pkgs/ubuntu/ trusty main universe multiverse |
+             deb ${{MIRROR}}/pkgs/ubuntu/ trusty-updates main universe multiverse
+          description: 'proposed repositories to update ubuntu cluster'
+      - string:
+          name: PLUGIN_VERSION
+          default: '{plugin-version}'
+          description: 'There is a version of juniper packages stored in common sotrage'
+      - string:
+          name: ISO_STORAGE
+          default: '{iso_storage}'
+      - string:
+          name: GCS_BUCKET_NAME
+          default: 'plugin-qa-bucket'
+      - string:
+          name: GCS_LOCATION
+          default: 'EUROPE-WEST1'
+      - string:
+          name: GCS_PROJECT_ID
+          default: 'fuelgcsplugin'
+      - string:
+          name: GCS_CERT_URL
+          default: 'https://www.googleapis.com/robot/v1/metadata/x509/qa-1-218%40fuelgcsplugin.iam.gserviceaccount.com'
 
 - project:
     name: 'predefined_parameters'
@@ -13,27 +45,22 @@
     bvt-name: '{fuel-release}.{plugin-name}.bvt'
     regression-name: '{fuel-release}.{plugin-name}.regression'
     nightly-name: '{fuel-release}.{plugin-name}.nightly'
-    baremetal-name: '{fuel-release}.{plugin-name}.baremetal'
     custom-name: '{fuel-release}.{plugin-name}.custom'
     reporter-name: '{fuel-release}.{plugin-name}.reporter'
     smoke-test-name: 'gcs_smoke'
     bvt-test-name: 'gcs_bvt'
+    regression-test-name: 'gcs_bvt'
     admin_node_memory: '4096'
     slave_node_memory: '4096'
     admin_node_cpu: '4'
     slave_node_cpu: '4'
     pkg_job_name: '{fuel-release}.{plugin-name}.{plugin-version}.build'
-    iso_job_name: ''
     nightly_timer: 'H 21 * * *'
-    full_timer: 'H 21 * * *'
     regression_timer: 'H 18 * * *'
     nightly_disabled: false
-    full_disabled: false        
-    baremetal_disabled: false
     regression_disabled: true
     use_snapshots: false
     force_erase: true
-    force_vsrx_copy: false
     recreate_venv: false
     disable_ssl: false
     bonding: false
@@ -41,7 +68,7 @@
     update_master: true
     debug: true
     build_debug: true
-    publish_results: true
+    publish_results: false
     multijob_build_pkg: true
     testjob_build_pkg: false
     runner_timeout: 600
@@ -62,7 +89,9 @@
     testgroup_value: '{testgroup}'
 
     testgroup:
-      - testgroup_example
+      - gcs_smoke 
+      - gcs_bvt
+
     jobs:
       - '{build-name}':
           scm_submodule_disabled: true
@@ -71,19 +100,12 @@
       - '{flake8-name}'
       - '{radon-name}'
       - '{shellcheck-name}':  
-#         skip_vote_successfull: false
-#         skip_vote_failed: true
+          skip_vote_successfull: false
+          skip_vote_failed: true
 
-#     - '{nightly-name}':
-#         multijob_build_pkg: true
-#         testrail_suite: "[8.0][PCE] Fuel plugin contrail v4.0.1 nightly"
-#                 
-#     - '{full-name}':
-#         multijob_build_pkg: true
-#         testrail_suite: "[8.0][PCE] Fuel plugin contrail v4.0.1 Release Acceptance"
-
-#     - '{baremetal-name}':
-#         multijob_build_pkg: true
+      - '{nightly-name}':
+          multijob_build_pkg: true
+          testrail_suite: "[9.0][PCE] Fuel gcs plugin v4.0.1 nightly"
 
 #     - '{custom-name}.qa':
 #         publish_results: false
@@ -95,21 +117,20 @@
 #         testgroup_value_type: choices
 #         testgroup_value: '{obj:testgroup}'
 
-#     - '{reporter-name}'
+      - '{reporter-name}'
+      - '{fuel-release}.{plugin-name}.{plugin-version}.{testgroup}'
 
-#     - '{fuel-release}.{plugin-name}.{plugin-version}.{testgroup}.juniper'
+      - '{smoke-name}':
+          multijob_build_pkg: false
+          publish_results: false
 
-#     - '{smoke-name}':
-#         multijob_build_pkg: false
-#         publish_results: false
+      - '{fuel-release}.{plugin-name}.{plugin-version}.smoke.test'
 
-#     - '{fuel-release}.{plugin-name}.{plugin-version}.smoke.test.juniper'
+      - '{bvt-name}':
+          multijob_build_pkg: true
+          publish_results: false
 
-#     - '{bvt-name}':
-#         multijob_build_pkg: true
-#         publish_results: false
-
-#     - '{fuel-release}.{plugin-name}.{plugin-version}.bvt.test.juniper'
+      - '{fuel-release}.{plugin-name}.{plugin-version}.bvt.test'
 
 #     - '{regression-name}':
 #         testrail_suite: "Contrail Plugin v4.x.x"
@@ -120,7 +141,6 @@
 #         testrail_run: "$TREP_TESTRAIL_SUITE"
 #         testrail_run_desc: "Test run description"
 #         pkg_job_name: ''
-#         iso_job_name: ''
 #         multijob_build_pkg: false
 
 #     - '{fuel-release}.{plugin-name}.{plugin-version}.regression.test.juniper'
@@ -143,7 +163,6 @@
           gerrit_branch:        '{gerrit_branch}'
           env_prefix:           '{fuel-release}.{plugin-name}'
           pkg_job_name:         '{pkg_job_name}'
-          iso_job_name:         '{iso_job_name}'
           admin_node_memory:    '{admin_node_memory}'
           slave_node_memory:    '{slave_node_memory}'
           admin_node_cpu:       '{admin_node_cpu}'
@@ -160,10 +179,6 @@
           kvm_use:              '{kvm_use}'
           update_master:        '{update_master}'
           plugin-version:       '{plugin-version}'
-          force_vsrx_copy:      '{force_vsrx_copy}'
-          vsrx_original_image_path: '{vsrx_original_image_path}'
-          vsrx_target_image_path:   '{vsrx_target_image_path}'
-          vsrx_template_path:       '{vsrx_template_path}'
           iso_storage:           '{iso_storage}'
 
 # parameters for jobs created per test-group and custom test job
@@ -172,7 +187,7 @@
     parameters:
       - label:
           name: node
-          default: 'contrail'
+          default: 'gcs'
           description: "The node on which to run the job"
       - bool:
           name: BUILD_PKG
@@ -193,7 +208,6 @@
           gerrit_branch:        '{gerrit_branch}'
           env_prefix:           '{fuel-release}.{plugin-name}'
           pkg_job_name:         '{pkg_job_name}'
-          iso_job_name:         '{iso_job_name}'
           admin_node_memory:    '{admin_node_memory}'
           slave_node_memory:    '{slave_node_memory}'
           admin_node_cpu:       '{admin_node_cpu}'
@@ -209,21 +223,12 @@
           bonding:              '{bonding}'
           kvm_use:              '{kvm_use}'
           plugin-version:       '{plugin-version}'
-          force_vsrx_copy:      '{force_vsrx_copy}'
-          vsrx_original_image_path: '{vsrx_original_image_path}'
-          vsrx_target_image_path:   '{vsrx_target_image_path}'
-          vsrx_template_path:       '{vsrx_template_path}'
           iso_storage:           '{iso_storage}'
 
 - defaults:
     name: global
     disabled: false
-    node: contrail
-    logrotate:
-      daysToKeep: 30
-      numToKeep: 100
-      artifactDaysToKeep: 30
-      artifactNumToKeep: 100
+    node: gcs
     <<: *test-parameters
     scm:
       - common-scm:
@@ -328,44 +333,25 @@
     publishers:
       - build-publisher:
           email_to: '{email_to}'
+
 - job-template:
-    name: '{fuel-release}.{plugin-name}.{plugin-version}.{testgroup}.open'
-    description: 'The test "{testgroup}" for {fuel-release}.{plugin-name}.{plugin-version} open contrail'
+    name: '{fuel-release}.{plugin-name}.{plugin-version}.{testgroup}'
+    description: 'The test "{testgroup}" for {fuel-release}.{plugin-name}.{plugin-version}'
     concurrent: true
 
 - job-template:
-    name: '{fuel-release}.{plugin-name}.{plugin-version}.{testgroup}.juniper'
-    description: 'The test "{testgroup}" for {fuel-release}.{plugin-name}.{plugin-version} juniper contrail'
+    name: '{fuel-release}.{plugin-name}.{plugin-version}.bvt.test'
+    description: 'The BVT test for {fuel-release}.{plugin-name}.{plugin-version}'
     concurrent: true
 
 - job-template:
-    name: '{fuel-release}.{plugin-name}.{plugin-version}.bvt.test.open'
-    description: 'The test for {fuel-release}.{plugin-name}.{plugin-version} open contrail'
+    name: '{fuel-release}.{plugin-name}.{plugin-version}.smoke.test'
+    description: 'The Smoke test for {fuel-release}.{plugin-name}.{plugin-version}'
     concurrent: true
 
 - job-template:
-    name: '{fuel-release}.{plugin-name}.{plugin-version}.bvt.test.juniper'
-    description: 'The test for {fuel-release}.{plugin-name}.{plugin-version} juniper contrail'
-    concurrent: true
-
-- job-template:
-    name: '{fuel-release}.{plugin-name}.{plugin-version}.smoke.test.open'
-    description: 'The test for {fuel-release}.{plugin-name}.{plugin-version} open contrail'
-    concurrent: true
-
-- job-template:
-    name: '{fuel-release}.{plugin-name}.{plugin-version}.smoke.test.juniper'
-    description: 'The test for {fuel-release}.{plugin-name}.{plugin-version} juniper contrail'
-    concurrent: true
-
-- job-template:
-    name: '{fuel-release}.{plugin-name}.{plugin-version}.regression.test.open'
-    description: 'The test for {fuel-release}.{plugin-name}.{plugin-version} open contrail'
-    concurrent: true
-
-- job-template:
-    name: '{fuel-release}.{plugin-name}.{plugin-version}.regression.test.juniper'
-    description: 'The test for {fuel-release}.{plugin-name}.{plugin-version} juniper contrail'
+    name: '{fuel-release}.{plugin-name}.{plugin-version}.regression.test'
+    description: 'The Regression test for {fuel-release}.{plugin-name}.{plugin-version}'
     concurrent: true
 
 - job-template:
@@ -403,13 +389,9 @@
           name: '1st phase - regression test'
           condition: COMPLETED
           projects:
-            - name: '{fuel-release}.{plugin-name}.{plugin-version}.regression.test.juniper'
+            - name: '{fuel-release}.{plugin-name}.{plugin-version}.regression.test'
               predefined-parameters: |
-                TEST_GROUP=contrail_bvt
-                CONTRAIL_DISTRIBUTION=juniper
-                CONTRAIL_PLUGIN_PATH={released_plugin_path}
-                PLUGIN_VERSION={plugin-version}
-                PKG_JOB_BUILD_NUMBER=released
+                TEST_GROUP={regression-test-name}
               current-parameters: true
               kill-phase-on: NEVER
 
@@ -439,12 +421,11 @@
           name: 'The smoke test for {fuel-release}.{plugin-name}.{plugin-version}'
           condition: COMPLETED
           projects:
-            - name: '{fuel-release}.{plugin-name}.{plugin-version}.smoke.test.juniper'
+            - name: '{fuel-release}.{plugin-name}.{plugin-version}.smoke.test'
               current-parameters: true
               property-file: build_number
               predefined-parameters: |
                 TEST_GROUP={smoke-test-name}
-                CONTRAIL_DISTRIBUTION=juniper
               kill-phase-on: NEVER
     publishers:
       - runner-publisher:
@@ -477,12 +458,11 @@
           name: 'The BVT test for {fuel-release}.{plugin-name}.{plugin-version}'
           condition: COMPLETED
           projects:
-            - name: '{fuel-release}.{plugin-name}.{plugin-version}.bvt.test.juniper'
+            - name: '{fuel-release}.{plugin-name}.{plugin-version}.bvt.test'
               current-parameters: true
               property-file: build_number
               predefined-parameters: |
                 TEST_GROUP={bvt-test-name}
-                CONTRAIL_DISTRIBUTION=juniper
               kill-phase-on: NEVER
     publishers:
       - runner-publisher:
