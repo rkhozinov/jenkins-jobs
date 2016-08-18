@@ -41,4 +41,7 @@ PKG_JOB_BUILD_NUMBER=$PKG_JOB_BUILD_NUMBER
 PLUGIN_VERSION=$PLUGIN_VERSION
 REPORTER_PROPERTIES
 
-./plugin_test/utils/jenkins/system_tests.sh -t test ${systest_parameters} -i ${ISO_PATH} -j ${JOB_NAME} -o --group=${TEST_GROUP}
+sh -x "plugin_test/utils/jenkins/system_tests.sh" \
+  -t test ${systest_parameters} \
+  -i ${ISO_PATH} -j ${JOB_NAME} \
+  -o --group=${TEST_GROUP}
