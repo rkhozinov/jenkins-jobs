@@ -56,7 +56,7 @@
     nightly_timer: 'H 22 * * *'
     regression_timer: 'H 16 * * *'
     nightly_disabled: true
-    regression_disabled: false
+    regression_disabled: true
     use_snapshots: false
     force_erase: true
     recreate_venv: false
