@@ -200,10 +200,6 @@
           name: node
           default: 'vcenter'
           description: "The node on which to run the job"
-      - bool:
-          name: BUILD_PKG
-          default: '{testjob_build_pkg}'
-          description: "Triggers build of pkg from $PKG_JOB_NAME (only for custom)"
       - '{testgroup_parameter_type}':
           name: TEST_GROUP
           '{testgroup_value_type}': '{obj:testgroup_value}'
