@@ -132,7 +132,7 @@ clean_iptables() {
 # run python test set to create environments, deploy and test product
 export PYTHONPATH="${PYTHONPATH:+${PYTHONPATH}:}${WORKSPACE}"
 echo ${PYTHONPATH}
-python plugin_test/run_tests.py -q --nologcapture --with-xunit ${TEST_GROUP} &
+python plugin_test/run_tests.py -q --nologcapture --with-xunit --group ${TEST_GROUP} &
 
 export SYSTEST_PID=$!
 
