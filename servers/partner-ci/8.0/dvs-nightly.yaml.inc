@@ -4,10 +4,16 @@
     condition: SUCCESSFUL
     projects:
       - name: '{fuel-release}.{plugin-name}.dvs_vcenter_smoke'
+- job-template:
+          TEST_GROUP=dvs_vcenter_smoke
+          TEST_GROUP_CONFIG=dvs_vcenter_smoke
         property-file: build_number
         current-parameters: true
         kill-phase-on: NEVER
       - name: '{fuel-release}.{plugin-name}.dvs_vcenter_bvt'
+        predefined-parameters: |
+          TEST_GROUP=dvs_vcenter_bvt
+          TEST_GROUP_CONFIG=dvs_vcenter_bvt
         property-file: build_number
         current-parameters: true
         kill-phase-on: NEVER
