@@ -19,7 +19,7 @@ REPO_PATH="https://github.com/openstack/fuel-plugin-nsxv/tarball/${NSXV_TARBALL_
 wget -qO- "$REPO_PATH" | tar --wildcards -C ./ --strip-components=2 -zxvf - "openstack-fuel-plugin-nsxv-*/vmware-nsx/"
 
 #set changelog variables 
-sed -i "s|COMMIT|$(git log -n 1 --pretty=oneline)|" debian/changelog
+sed -i "s|COMMIT|$(printf "%q" `git log -n 1 --pretty=oneline`)|" debian/changelog
 sed -ri "$ s|.*| -- Mirantis <tpi-ci@mirantis.com>  $(LANG=C date -R -u)|" debian/changelog
 
 
