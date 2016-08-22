@@ -16,12 +16,14 @@ PLUGIN_VERSION_ARTIFACT='build.plugin_version'
 if [ -z $PLUGIN_VERSION  ]; then
   if [ -f build.plugin_version ]; then
     export PLUGIN_VERSION=$(grep "PLUGIN_VERSION" < build.plugin_version | cut -d= -f2 )
-    export PLUGIN_VERSION=$PLUGIN_VERSION
+    export DVS_PLUGIN_VERSION=$PLUGIN_VERSION
   else
     echo "build.properties file is not available so a test couldn't be runned"
     exit 1
   fi
 fi
+
+[ -z $DVS_PLUGIN_VERSION ] && { echo "DVS_PLUGIN_VERSION is empty"; exit 1; }
 
 if [ -z "${PKG_JOB_BUILD_NUMBER}" ]; then
     if [ -f build.properties ]; then
@@ -63,8 +65,6 @@ echo "iso-path: ${ISO_PATH}"
 echo "plugin-path: ${DVS_PLUGIN_PATH}"
 echo "plugin-checksum: $(md5sum -b ${DVS_PLUGIN_PATH})"
 
-
-
 cat << REPORTER_PROPERTIES > reporter.properties
 ISO_VERSION=$SNAPSHOTS_ID
 SNAPSHOTS_ID=$SNAPSHOTS_ID
@@ -74,6 +74,7 @@ TEST_JOB_NAME=$JOB_NAME
 TEST_JOB_BUILD_NUMBER=$BUILD_NUMBER
 PKG_JOB_BUILD_NUMBER=$PKG_JOB_BUILD_NUMBER
 PLUGIN_VERSION=$PLUGIN_VERSION
+DVS_PLUGIN_VERSION=$DVS_PLUGIN_VERSION
 TREP_TESTRAIL_SUITE=$TREP_TESTRAIL_SUITE
 TREP_TESTRAIL_SUITE_DESCRIPTION=$TREP_TESTRAIL_SUITE_DESCRIPTION
 TREP_TESTRAIL_PLAN=$TREP_TESTRAIL_PLAN
@@ -86,7 +87,7 @@ source "${VENV_PATH}/bin/activate"
 add_interface_to_bridge() {
   env=$1
   net_name=$2
-  nic=$3
+  nic=$3  
 
   for net in $(virsh net-list | grep ${env}_${net_name} | awk '{print $1}'); do
     bridge=$(virsh net-info $net | grep -i bridge |awk '{print $2}')
@@ -114,13 +115,12 @@ setup_bridge() {
   if [[ "${DEBUG}" == "true" ]]; then
     sudo brctl show
     sudo brctl show $bridge
-    sudo ip link
-    sudo ip address
+    sudo ip link 
+    sudo ip address 
     sudo ip address show $nic
     sudo iptables -L -v -n
     sudo iptables -t nat -L -v -n
   fi
-
 }
 
 clean_iptables() {
@@ -137,18 +137,22 @@ python plugin_test/run_tests.py -q --nologcapture --with-xunit --group=${TEST_GR
 export SYSTEST_PID=$!
 
 #Wait before environment is created
-while [ true ]; do
+while [ true ]; do 
   [ $(virsh net-list | grep $ENV_NAME | wc -l) -eq 5 ] && break || sleep 10
   [ -e /proc/$SYSTEST_PID ] && continue || \
     { echo System tests exited prematurely, aborting; exit 1; }
 done
-  
-echo waiting for system tests to finish
+
+[[ "${CLEAN_IPTABLES}" == "true" ]] && clean_iptables
+
+add_interface_to_bridge $ENV_NAME private vmnet2
+add_interface_to_bridge $ENV_NAME private vmnet3
+
+echo "Waiting for system tests to finish"
 wait $SYSTEST_PID
+export RESULT=$?
 
-export RES=$?
-echo ENVIRONMENT NAME is $ENV_NAME
-virsh net-dumpxml ${ENV_NAME}_admin | grep -P "(\d+\.){3}" -o | awk '{print "Fuel master node IP: "$0"2"}'
+echo "ENVIRONMENT NAME is $ENV_NAME"
+virsh net-dumpxml "${ENV_NAME}_admin" | grep -P "(\d+\.){3}" -o | awk '{print "Fuel master node IP: "$0"2"}'
 
-echo Result is $RES
-exit "${RES}"
+[ $RESULT -eq 0 ] && { echo "Tests succeeded"; exit $RESULT; }
