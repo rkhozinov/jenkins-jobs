@@ -19,7 +19,12 @@ if [ -z $PLUGIN_VERSION  ]; then
    [ -f $PLUGIN_VERSION_ARTIFACT ] && source $PLUGIN_VERSION_ARTIFACT || (echo "The PLUGIN_VERSION is empty"; exit 1)
 fi
 
-[ -z $PLUGIN_VERSION  ] && { echo "PLUGIN_VERSION variable is empty"; exit 1; } || export MANILA_PLUGIN_VERSION=$PLUGIN_VERSION
+[ -z $PLUGIN_VERSION  ] && \
+  { echo "PLUGIN_VERSION variable is empty"; exit 1; } || \
+    export MANILA_PLUGIN_VERSION=$PLUGIN_VERSION
+
+[ ! -f $MANILA_IMAGE_PATH ] && \
+  { echo "MANILA_IMAGE_PATH is empty or doesn't exist"; exit 1; } 
 
 if [ -z "${PKG_JOB_BUILD_NUMBER}" ]; then
     if [ -f build.properties ]; then

@@ -2,6 +2,10 @@
 - parameter:
     name: plugin-specific-parameters
     parameters:
+      - string: 
+          name: MANILA_IMAGE_PATH
+          default: /storage/manila/manila-service-image.qcow2
+          description: 'Path to manila image'
       - string:
           name: PLUGIN_VERSION
           default: '{plugin-version}'
@@ -27,8 +31,8 @@
     reporter-name: '{fuel-release}.{plugin-name}.reporter'
     smoke-test-name: 'manila_smoke'
     bvt-test-name: 'manila_bvt'
-    admin_node_memory: '8192'
-    slave_node_memory: '8192'
+    admin_node_memory: '4096'
+    slave_node_memory: '4096'
     admin_node_cpu: '4'
     slave_node_cpu: '4'
     pkg_job_name: '{fuel-release}.{plugin-name}.build'
