@@ -22,6 +22,8 @@
           VCENTER_CLUSTERS=Cluster1,Cluster2
           DVS_SWITCHES=Cluster1,Cluster2
           VCENTER_USE=true
+          CLEAN_IPTABLES=true
+          DISABLE_STP=true
 
 - project:
     name: 'predefined_parameters'
@@ -273,12 +275,6 @@
     properties:
      - test-property
     builders:
-      - inject:
-          properties-content: $TESTRAIL_PARAMETERS
-      - inject:
-          properties-content: $ENV_PARAMETERS
-      - inject:
-          properties-content: $VCENTER_PARAMETERS
       - conditional-step:
           condition-kind: shell
           condition-command: |
@@ -315,7 +311,12 @@
                 project: ${{PKG_JOB_NAME}}
                 which-build: specific-build
                 build-number: ${{PKG_JOB_BUILD_NUMBER}}
-
+      - inject:
+          properties-content: $TESTRAIL_PARAMETERS
+      - inject:
+          properties-content: $ENV_PARAMETERS
+      - inject:
+          properties-content: $VCENTER_PARAMETERS
       - shell:
           !include-raw-escape: ../builders/common.prepare.ng.sh
       - shell:
