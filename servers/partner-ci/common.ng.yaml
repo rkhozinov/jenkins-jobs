@@ -174,7 +174,7 @@
     publishers:
       - archive:
           artifacts: 'logs/*'
-          allow-empty: false
+          allow-empty: true
       - archive:
           artifacts: '*.pcap'
           allow-empty: true
