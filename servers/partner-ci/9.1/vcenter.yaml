@@ -138,6 +138,11 @@
       - vcenter_idatastore  
       - vcenter_iname_glance_dc 
       - vcenter_iname_glance_ds 
+       
+      - vcenter_add_cluster_to_ctrl
+      - vcenter_mv_cluster_compute_to_compute
+      - vcenter_mv_cluster_compute_to_ctrl
+      - vcenter_mv_cluster_ctrl_to_compute
 
     jobs:
       - '{nightly-name}':
