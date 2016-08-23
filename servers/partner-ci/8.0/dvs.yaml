@@ -2,28 +2,40 @@
 - parameter:
     name: plugin-specific-parameters
     parameters:
-    - text:
-        name: VCENTER_PARAMETERS
-        default: |
-          ESXI_PASSWORD=swordfish
-          ESXI_USER=root
-          ESXI_HOSTS=172.16.0.250 172.16.0.252 172.16.0.253
-          NFS_SERVER=172.16.0.1
-          NFS_SHARES=nfs nfs2
-          VSPHERE_VERSION=5.5
-          WORKSTATION_SNAPSHOT=doubledvs
-          WORKSTATION_IFS=vmnet2,vmnet3
-          WORKSTATION_NODES=esxi1 esxi2 esxi3 vcenter
-          VCENTER_IP=172.16.0.145
-          VCENTER_USERNAME=root
-          VCENTER_PASSWORD=vmware
-          VC_DATACENTER=Datacenter
-          VCENTER_DATASTORE=nfs
-          VCENTER_CLUSTERS=Cluster1,Cluster2
-          DVS_SWITCHES=Cluster1,Cluster2
-          VCENTER_USE=true
-          CLEAN_IPTABLES=true
-          DISABLE_STP=true
+      - bool:
+          name: ENABLE_UPDATES
+          default: true
+      - bool:
+          name: ENABLE_SECURITY
+          default: true
+      - bool:
+          name: ENABLE_UPDATE_CENTOS
+          default: true
+      - string:
+          name: LOCATION
+          default: bud
+      - text:
+          name: VCENTER_PARAMETERS
+          default: |
+            ESXI_PASSWORD=swordfish
+            ESXI_USER=root
+            ESXI_HOSTS=172.16.0.250 172.16.0.252 172.16.0.253
+            NFS_SERVER=172.16.0.1
+            NFS_SHARES=nfs nfs2
+            VSPHERE_VERSION=5.5
+            WORKSTATION_SNAPSHOT=doubledvs
+            WORKSTATION_IFS=vmnet2,vmnet3
+            WORKSTATION_NODES=esxi1 esxi2 esxi3 vcenter
+            VCENTER_IP=172.16.0.145
+            VCENTER_USERNAME=root
+            VCENTER_PASSWORD=vmware
+            VC_DATACENTER=Datacenter
+            VCENTER_DATASTORE=nfs
+            VCENTER_CLUSTERS=Cluster1,Cluster2
+            DVS_SWITCHES=Cluster1,Cluster2
+            VCENTER_USE=true
+            CLEAN_IPTABLES=true
+            DISABLE_STP=true
 
 - project:
     name: 'predefined_parameters'
@@ -298,8 +310,6 @@
           condition-command: |
             [[ "${{UPDATE_MASTER}}" == "true" ]]
           steps:
-            - inject:
-                properties-content: $UPDATE_PARAMETERS
             - shell:
                 !include-raw-escape: ../builders/update.sh
             - inject:
@@ -355,10 +365,10 @@
           name: GERRIT_REFSPEC
           default: 'refs/heads/{gerrit_branch}'
       - string:
-          name: PUPPETLINT_PATH 
+          name: PUPPETLINT_PATH
           default: './deployment_scripts/puppet/manifests ./deployment_scripts/puppet/modules/vmware_dvs'
       - string:
-          name: PUPPETLINT_IGNORE 
+          name: PUPPETLINT_IGNORE
           default: 'l2.pp'
       - bool:
           name: DEBUG
