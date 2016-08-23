@@ -404,11 +404,38 @@
          TEST_GROUP_CONFIG=vcenter_glance_backend
        kill-phase-on: NEVER
 
-     - name: '{fuel-release}.{plugin-name}.vcenter_iname_glance_ds'
+     - name: '{fuel-release}.{plugin-name}.vcenter_add_cluster_to_ctrl'
        property-file: build_number
        current-parameters: true
        predefined-parameters: |
-         TEST_GROUP=vcenter_iname_glance_ds
-         TEST_GROUP_PREFIX=system_test.vcenter.vcenter_iname_glance_ds
-         TEST_GROUP_CONFIG=vcenter_glance_backend
+         TEST_GROUP=vcenter_add_cluster_to_ctrl
+         TEST_GROUP_CONFIG=vcenter_add_cluster_to_ctrl
+         TEST_GROUP_PREFIX=system_test.vcenter.scale_vcenter_dvs
+       kill-phase-on: NEVER
+
+     - name: '{fuel-release}.{plugin-name}.vcenter_mv_cluster_compute_to_compute'
+       property-file: build_number
+       current-parameters: true
+       predefined-parameters: |
+         TEST_GROUP=vcenter_mv_cluster_compute_to_compute
+         TEST_GROUP_CONFIG=vcenter_mv_cluster_compute_to_compute
+         TEST_GROUP_PREFIX=system_test.vcenter.scale_vcenter_dvs
+       kill-phase-on: NEVER
+
+     - name: '{fuel-release}.{plugin-name}.vcenter_mv_cluster_compute_to_ctrl'
+       property-file: build_number
+       current-parameters: true
+       predefined-parameters: |
+         TEST_GROUP=vcenter_mv_cluster_compute_to_ctrl
+         TEST_GROUP_CONFIG=vcenter_mv_cluster_compute_to_ctrl
+         TEST_GROUP_PREFIX=system_test.vcenter.scale_vcenter_dvs
+       kill-phase-on: NEVER
+
+     - name: '{fuel-release}.{plugin-name}.vcenter_mv_cluster_ctrl_to_compute'
+       property-file: build_number
+       current-parameters: true
+       predefined-parameters: |
+         TEST_GROUP=vcenter_mv_cluster_ctrl_to_compute
+         TEST_GROUP_CONFIG=vcenter_mv_cluster_ctrl_to_compute
+         TEST_GROUP_PREFIX=system_test.vcenter.scale_vcenter_dvs
        kill-phase-on: NEVER
