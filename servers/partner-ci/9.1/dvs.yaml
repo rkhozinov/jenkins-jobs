@@ -126,6 +126,7 @@
       - dvs_volume
       - dvs_vcenter_smoke
       - dvs_vcenter_bvt
+      - dvs_heat
     jobs:
       - '{build-name}':
           scm_submodule_disabled: true
