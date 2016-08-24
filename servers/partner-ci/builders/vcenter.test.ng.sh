@@ -111,10 +111,8 @@ setup_bridge() {
   fi
 
   if [[ "${DEBUG}" == "true" ]]; then
-    sudo brctl show
     sudo brctl show $bridge
-    sudo ip link 
-    sudo ip address 
+    sudo ip address show $bridge
     sudo ip address show $nic
     sudo iptables -L -v -n
     sudo iptables -t nat -L -v -n
