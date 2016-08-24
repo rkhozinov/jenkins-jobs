@@ -123,8 +123,8 @@
       - name: '{fuel-release}.{plugin-name}.dvs_connect_nodefault_net'
         property-file: build_number
         predefined-parameters: |
-          TEST_GROUP=dvs_connect_default_net
-          TEST_GROUP_CONFIG=dvs_connect_default_net
+          TEST_GROUP=dvs_connect_nodefault_net
+          TEST_GROUP_CONFIG=dvs_connect_nodefault_net
         current-parameters: true
         kill-phase-on: NEVER
       - name: '{fuel-release}.{plugin-name}.dvs_ping_without_fip'
