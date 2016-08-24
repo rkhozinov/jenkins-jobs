@@ -1,26 +1,30 @@
 #!/bin/bash -e
 
-# activate bash xtrace for script
 [[ "${DEBUG}" == "true" ]] && set -x || set +x
 
-[ -z $ISO_FILE  ] && (echo "ISO_FILE variable is empty"; exit 1)
+export ISO_PATH="${ISO_STORAGE}/${ISO_FILE}"
+[ -z $ISO_PATH  ] && { echo "ISO_PATH is empty or doesn't exist"; exit 1; }
 
 if [[ "${UPDATE_MASTER}" == "true" ]]; then
-  [ ${SNAPSHOTS_ID} ] && export SNAPSHOTS_ID=${SNAPSHOTS_ID} || export SNAPSHOTS_ID=${CUSTOM_VERSION:10}
-fi
-
-[ -z "${SNAPSHOTS_ID}" ] && { echo SNAPSHOTS_ID is empty; exit 1; }
-
-if [ -z $PLUGIN_VERSION  ]; then
-  if [ -f build.plugin_version ]; then
-    export PLUGIN_VERSION=$(grep "PLUGIN_VERSION" < build.plugin_version | cut -d= -f2 )
-    export DVS_PLUGIN_VERSION=$PLUGIN_VERSION
+  if [ -f $SNAPSHOT_OUTPUT_FILE ]; then
+    . $SNAPSHOT_OUTPUT_FILE
+    export EXTRA_RPM_REPOS
+    export UPDATE_FUEL_MIRROR
+    export EXTRA_DEB_REPOS
   else
-    echo "build.properties file is not available so a test couldn't be runned"
+    echo "SNAPSHOT_OUTPUT_FILE is empty or doesn't exist"
     exit 1
   fi
 fi
 
+[ -z "${SNAPSHOTS_ID}" ] && { echo SNAPSHOTS_ID is empty; exit 1; }
+
+if [ -f build.plugin_version ]; then
+  export DVS_PLUGIN_VERSION=$(grep "PLUGIN_VERSION" < build.plugin_version | cut -d= -f2 )
+else
+  echo "build.properties file is not available so a test couldn't be runned"
+  exit 1
+fi
 [ -z $DVS_PLUGIN_VERSION ] && { echo "DVS_PLUGIN_VERSION is empty"; exit 1; }
 
 if [ -z "${PKG_JOB_BUILD_NUMBER}" ]; then
@@ -36,8 +40,6 @@ fi
 #remove old logs and test data
 [ -f nosetest.xml ] && sudo rm -f nosetests.xml
 sudo rm -rf logs/*
-
-export ISO_PATH="${ISO_STORAGE}/${ISO_FILE}"
 
 if [[ $ISO_FILE == *"Mirantis"* ]]; then
   export FUEL_RELEASE=$(echo $ISO_FILE | cut -d- -f2 | tr -d '.iso')
@@ -85,7 +87,7 @@ source "${VENV_PATH}/bin/activate"
 add_interface_to_bridge() {
   env=$1
   net_name=$2
-  nic=$3  
+  nic=$3
 
   for net in $(virsh net-list | grep ${env}_${net_name} | awk '{print $1}'); do
     bridge=$(virsh net-info $net | grep -i bridge |awk '{print $2}')
@@ -94,7 +96,7 @@ add_interface_to_bridge() {
 }
 
 setup_bridge() {
-  set -x 
+  set -x
   bridge=$1
   nic=$2
 
@@ -114,8 +116,6 @@ setup_bridge() {
     sudo brctl show $bridge
     sudo ip address show $bridge
     sudo ip address show $nic
-    sudo iptables -L -v -n
-    sudo iptables -t nat -L -v -n
   fi
 }
 
@@ -135,7 +135,7 @@ sh -x "utils/jenkins/system_tests.sh" \
 export SYSTEST_PID=$!
 
 #Wait before environment is created
-while [ true ]; do 
+while [ true ]; do
   [ $(virsh net-list | grep $ENV_NAME | wc -l) -eq 5 ] && break || sleep 10
   [ -e /proc/$SYSTEST_PID ] && continue || \
     { echo System tests exited prematurely, aborting; exit 1; }
@@ -146,11 +146,14 @@ done
 add_interface_to_bridge $ENV_NAME private vmnet2
 add_interface_to_bridge $ENV_NAME private vmnet3
 
+[[ "${DEBUG}" == "true" ]] && \
+    sudo iptables -L -v -n; sudo iptables -t nat -L -v -n
+
 echo "Waiting for system tests to finish"
 wait $SYSTEST_PID
 export RESULT=$?
 
 echo "ENVIRONMENT NAME is $ENV_NAME"
-virsh net-dumpxml "${ENV_NAME}_admin" | grep -P "(\d+\.){3}" -o | awk '{print "Fuel master node IP: "$0"2"}'
+dos.py list --ips | grep ${ENV_NAME}
 
 [ $RESULT -eq 0 ] && { echo "Tests succeeded"; exit $RESULT; }
