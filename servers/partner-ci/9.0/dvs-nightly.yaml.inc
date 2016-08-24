@@ -197,3 +197,11 @@
           TEST_GROUP_CONFIG=dvs_vcenter_uninstall
         current-parameters: true
         kill-phase-on: NEVER
+
+      - name: '{fuel-release}.{plugin-name}.dvs_heat'
+        property-file: build_number
+        predefined-parameters: |
+          TEST_GROUP=dvs_heat
+          TEST_GROUP_CONFIG=dvs_heat
+        current-parameters: true
+        kill-phase-on: NEVER
