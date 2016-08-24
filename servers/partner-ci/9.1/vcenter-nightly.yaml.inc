@@ -404,6 +404,15 @@
          TEST_GROUP_CONFIG=vcenter_glance_backend
        kill-phase-on: NEVER
 
+     - name: '{fuel-release}.{plugin-name}.vcenter_iname_glance_ds'
+       property-file: build_number
+       current-parameters: true
+       predefined-parameters: |
+         TEST_GROUP=vcenter_iname_glance_ds
+         TEST_GROUP_PREFIX=system_test.vcenter.vcenter_iname_glance_ds
+         TEST_GROUP_CONFIG=vcenter_glance_backend
+       kill-phase-on: NEVER
+
      - name: '{fuel-release}.{plugin-name}.vcenter_add_cluster_to_ctrl'
        property-file: build_number
        current-parameters: true
