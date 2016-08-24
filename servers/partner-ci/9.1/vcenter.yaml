@@ -5,6 +5,8 @@
     - text:
         name: VCENTER_PARAMETERS
         default: |
+          SNAPSHOT_OUTPUT_FILE=extra_repos.sh
+          SNAPSHOT_ARTIFACTS_FILE=snapshots.params
           ESXI_PASSWORD=swordfish
           ESXI_USER=root
           ESXI_HOSTS=172.16.0.250 172.16.0.252 172.16.0.253
@@ -66,7 +68,7 @@
     test_timeout: 300
     iso_file: 'MirantisOpenStack-9.0.iso'
     iso_storage: '/storage/downloads'
-    snapshots_id: ''
+    snapshots_id: 'lastSuccessfulBuild'
     gerrit_repo: 'fuel-qa'
     gerrit_branch: 'stable/mitaka'
     email_to: 'rkhozinov@mirantis.com ibumarskov@mirantis.com'
@@ -77,10 +79,10 @@
     skip_vote_failed: false
 
     testrail_project: "Mirantis OpenStack"
-    testrail_milestone: "{fuel-release}"
     testrail_suite: "[{fuel-release}][PCE] vCenter"
     testrail_suite_desc: "Suite description"
-    testrail_plan: "$TREP_TESTRAIL_MILESTONE snapshot #${{ISO_VERSION}}"
+    testrail_milestone: "{fuel-release}"
+    testrail_plan: "$TREP_TESTRAIL_MILESTONE snapshot #${{SNAPSHOTS_ID}}"
     testrail_plan_desc: "Test plan description"
     testrail_run: "$TREP_TESTRAIL_SUITE"
     testrail_run_desc: "Test run description"
@@ -129,16 +131,16 @@
       - vcenter_disktypes
       - vcenter_ha_kvm
       - vcenter_disable_hosts
-       
-      - vcenter_shutdown_ctrl 
-      - vcenter_reboot_ctrl 
-      - vcenter_reset_ctrl  
-      - vcenter_shutdown_cindervmware 
-      - vcenter_reboot_cindervmware 
-      - vcenter_idatastore  
-      - vcenter_iname_glance_dc 
-      - vcenter_iname_glance_ds 
-       
+
+      - vcenter_shutdown_ctrl
+      - vcenter_reboot_ctrl
+      - vcenter_reset_ctrl
+      - vcenter_shutdown_cindervmware
+      - vcenter_reboot_cindervmware
+      - vcenter_idatastore
+      - vcenter_iname_glance_dc
+      - vcenter_iname_glance_ds
+
       - vcenter_add_cluster_to_ctrl
       - vcenter_mv_cluster_compute_to_compute
       - vcenter_mv_cluster_compute_to_ctrl
@@ -197,6 +199,7 @@
           iso_storage:          '{iso_storage}'
           snapshots_id:         '{snapshots_id}'
       - plugin-specific-parameters
+
 # parameters for jobs created per test-group and custom test job
 - test-parameters: &test-parameters
     name: 'test-parameters'
@@ -261,11 +264,10 @@
      - test-property
     builders:
       - inject:
-          properties-content: $TESTRAIL_PARAMETERS
-      - inject:
-          properties-content: $ENV_PARAMETERS
-      - inject:
-          properties-content: $VCENTER_PARAMETERS
+          properties-content: |
+            $TESTRAIL_PARAMETERS
+            $ENV_PARAMETERS
+            $VCENTER_PARAMETERS
       - conditional-step:
           condition-kind: shell
           condition-command: |
@@ -294,15 +296,10 @@
           steps:
             - inject:
                 properties-content: $UPDATE_PARAMETERS
-            - shell:
-                !include-raw-escape: ../builders/update.sh
-            - inject:
-                properties-file: update.properties
-            - copyartifact:
-                project: ${{PKG_JOB_NAME}}
-                which-build: specific-build
-                build-number: ${{PKG_JOB_BUILD_NUMBER}}
-
+            - shell: |
+                [ ! -n ${{SNAPSHOTS_ID}} ] && {{ echo "SNAPSHOTS_ID is empty"; exit 1; }}
+                wget --no-check-certificate -O ${{SNAPSHOT_ARTIFACTS_FILE}} ${{SNAPSHOTS_URL/SNAPSHOTS_ID/$SNAPSHOTS_ID}}
+                python utils/jenkins/conv_snapshot_file.py
       - shell:
           !include-raw-escape: ../builders/common.prepare.ng.sh
       - shell:
@@ -342,7 +339,7 @@
       - timed: '{nightly_timer}'
     properties:
       - runner-property:
-            build-name: '{build-name}'
+          build-name: '{build-name}'
     wrappers:
       - runner-wrapper
     publishers:
