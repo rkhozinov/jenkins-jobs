@@ -13,11 +13,15 @@
       - string:
           name: ISO_STORAGE
           default: '{iso_storage}'
+      - bool:
+          name: CLEAN_ENVS
+          default: '{clean_envs}'
 
 - project:
     name: 'predefined_parameters'
     fuel-release: '9.0'
     plugin-version: '1.0'
+    clean_envs: false
     plugin-name: 'manila'
     build-name: '{fuel-release}.{plugin-name}.build'
     flake8-name: '{fuel-release}.{plugin-name}.flake8'
@@ -146,6 +150,7 @@
       - plugin-specific-parameters:
           plugin-version: '{plugin-version}'
           iso_storage:    '{iso_storage}'
+          clean_envs:     '{clean_envs}'
 
 # parameters for jobs created per test-group and custom test job
 - test-parameters: &test-parameters
@@ -187,6 +192,7 @@
       - plugin-specific-parameters:
           plugin-version: '{plugin-version}'
           iso_storage:    '{iso_storage}'
+          clean_envs:     '{clean_envs}'
 
 - defaults:
     name: global
