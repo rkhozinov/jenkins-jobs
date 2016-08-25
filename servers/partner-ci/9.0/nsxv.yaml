@@ -40,7 +40,6 @@
     bvt-name: '{fuel-release}.{plugin-name}.bvt'
     regression-name: '{fuel-release}.{plugin-name}.regression'
     canary-name: '{fuel-release}.{plugin-name}.canary'
-    download-iso-name: 'download_iso'
     nightly-name: '{fuel-release}.{plugin-name}.nightly'
     custom-name: '{fuel-release}.{plugin-name}.custom'
     reporter-name: '{fuel-release}.{plugin-name}.reporter'
@@ -196,7 +195,6 @@
       - '{fuel-release}.{plugin-name}.regression.test'
 
       - '{canary-name}':
-          iso_job_name: '{download-iso-name}'
           testrail_suite: "[9.0][PCE] VMware NSXv plugin v3.0.0 Smoke/BVT"
           testrail_suite_desc: "Suite description"
           testrail_milestone: "3.0.0"

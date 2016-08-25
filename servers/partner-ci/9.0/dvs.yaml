@@ -40,7 +40,6 @@
     bvt-name: '{fuel-release}.{plugin-name}.bvt'
     regression-name: '{fuel-release}.{plugin-name}.regression'
     canary-name: '{fuel-release}.{plugin-name}.canary'
-    download-iso-name: 'download_iso'
     nightly-name: '{fuel-release}.{plugin-name}.nightly'
     custom-name: '{fuel-release}.{plugin-name}.custom'
     reporter-name: '{fuel-release}.{plugin-name}.reporter'
@@ -187,7 +186,6 @@
       - '{fuel-release}.{plugin-name}.regression.test'
 
       - '{canary-name}':
-          iso_job_name: '{download-iso-name}'
           testrail_suite: "[9.0][PCE] VMware DVS plugin v3.0.0 Smoke/BVT"
           testrail_milestone: "3.0.0"
           testrail_plan: "$TREP_TESTRAIL_SUITE build#${{PKG_JOB_BUILD_NUMBER}} iso#${{ISO_VERSION}}"
