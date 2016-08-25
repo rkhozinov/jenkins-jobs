@@ -24,7 +24,7 @@ fi
     export MANILA_PLUGIN_VERSION=$PLUGIN_VERSION
 
 [ ! -f $MANILA_IMAGE_PATH ] && \
-  { echo "MANILA_IMAGE_PATH is empty or doesn't exist"; exit 1; } 
+  { echo "MANILA_IMAGE_PATH is empty or doesn't exist"; exit 1; }
 
 if [ -z "${PKG_JOB_BUILD_NUMBER}" ]; then
     if [ -f build.properties ]; then
@@ -45,7 +45,7 @@ if [[ $ISO_FILE == *"Mirantis"* ]]; then
   export ISO_VERSION=$(echo $ISO_FILE | tr -d '.iso' )
   export FUEL_RELEASE=$(echo $ISO_VERSION | cut -d- -f2)
 fi
-    
+
 export ENV_NAME="${ENV_PREFIX}.${ISO_VERSION}"
 export VENV_PATH="${HOME}/${FUEL_RELEASE}-venv"
 
