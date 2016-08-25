@@ -529,10 +529,10 @@
     node: runner
     scm: []
     <<: *runner-parameters
-    triggers:
-      - reverse:
-          jobs: '{download-iso-name}'
-          result: 'success'
+#    triggers:
+#      - reverse:
+#          jobs: '{download-iso-name}'
+#          result: 'success'
     properties:
       - runner-property:
           build-name: '{build-name}'
