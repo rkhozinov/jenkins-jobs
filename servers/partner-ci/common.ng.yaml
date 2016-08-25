@@ -527,7 +527,7 @@
           name: ARGS
           default: >
              --doctest --exclude .git,doc,specs,fuel-qa,__init__.py,./plugin_test/run_tests.py
-             --select=H903,H201,H101,H105,H106,H904,H301,H303,H304,H306,H401,H403,H404,H405,H501,H702,H703,H231,H232,H233,H234,H235,H236,H237,H238,H202,H203,H102,H103,H104 --show-source --statistics --output-file=flake8.log
+             --select=H903,H201,H101,H105,H106,H904,H301,H303,H304,H306,H401,H403,H404,H405,H501,H702,H703,H231,H232,H233,H234,H235,H236,H237,H238,H202,H203,H102,H103,H104 --show-source --statistics
           description: "Default args from fuel-qa gate job"
     properties:
       - heavy-job:
@@ -536,7 +536,7 @@
       - shell: |
           #!/bin/bash -xe
           set -o pipefail
-          flake8 ${{ARGS}} ./
+          flake8 ${{ARGS}} ./ | tee -i flake8.log
     publishers:
       - checker-publisher
 
