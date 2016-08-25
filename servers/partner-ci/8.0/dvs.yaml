@@ -49,6 +49,7 @@
     smoke-name: '{fuel-release}.{plugin-name}.smoke'
     bvt-name: '{fuel-release}.{plugin-name}.bvt'
     regression-name: '{fuel-release}.{plugin-name}.regression'
+    canary-name: '{fuel-release}.{plugin-name}.canary'
     nightly-name: '{fuel-release}.{plugin-name}.nightly'
     custom-name: '{fuel-release}.{plugin-name}.custom'
     reporter-name: '{fuel-release}.{plugin-name}.reporter'
@@ -187,6 +188,12 @@
           multijob_build_pkg: false
 
       - '{fuel-release}.{plugin-name}.regression.test'
+
+      - '{canary-name}'
+
+      - '{fuel-release}.{plugin-name}.canary.skinny'
+
+      - '{fuel-release}.{plugin-name}.canary.fat'
 
 # parameters for smoke, bvt and nightly multijobs
 - runner-parameters: &runner-parameters
