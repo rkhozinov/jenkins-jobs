@@ -518,6 +518,47 @@
           email_to: '{email_to}'
 
 - job-template:
+    name: '{canary-name}'
+    description: 'The Smoke test for {fuel-release}.{plugin-name}.{plugin-version}'
+    disabled: true
+    concurrent: true
+    project-type: multijob
+    node: runner
+    scm: []
+    <<: *runner-parameters
+#    triggers:
+#      - reverse:
+#          jobs: '{download-iso-name}'
+#          result: 'success'
+    properties:
+      - runner-property:
+          build-name: '{build-name}'
+    wrappers:
+      - runner-wrapper
+    publishers:
+      - runner-publisher:
+          properties_name: canary.properties
+          email_to: '{email_to}'
+    builders:
+      - runner-condition
+      - multijob:
+          name: 'Canary tests for {plugin-name}'
+          condition: SUCCESSFUL
+          projects:
+            - name: '{fuel-release}.{plugin-name}.canary.skinny'
+              property-file: build_number
+              predefined-parameters: |
+                 TEST_GROUP={canary-skinny-test-name}
+              current-parameters: true
+              kill-phase-on: NEVER
+            - name: '{fuel-release}.{plugin-name}.canary.fat'
+              property-file: build_number
+              predefined-parameters: |
+                 TEST_GROUP={canary-fat-test-name}
+              current-parameters: true
+              kill-phase-on: NEVER
+
+- job-template:
     name: '{nightly-name}'
     project-type: multijob
     disabled: '{obj:nightly_disabled}'
