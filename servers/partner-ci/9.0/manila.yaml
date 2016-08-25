@@ -2,7 +2,7 @@
 - parameter:
     name: plugin-specific-parameters
     parameters:
-      - string: 
+      - string:
           name: MANILA_IMAGE_PATH
           default: /storage/manila/manila-service-image.qcow2
           description: 'Path to manila image'
@@ -65,8 +65,8 @@
     testrail_project: "Manila plugin"
     testrail_suite: "[9.0][PCE] Manila plugin v1.0.0"
     testrail_suite_desc: "Suite description"
-    testrail_milestone: "2.0.0"
-    testrail_plan: "[9.0][PCE] Manila plugin v1.0.0 build#${{PKG_JOB_BUILD_NUMBER}} iso#${{ISO_VERSION}}"
+    testrail_milestone: "1.0.0"
+    testrail_plan: "[9.0][PCE] Manila plugin v1.0.0 build#${{PKG_JOB_BUILD_NUMBER}}"
     testrail_plan_desc: "Test plan description"
     testrail_run: "$TREP_TESTRAIL_SUITE"
     testrail_run_desc: "Test run description"
@@ -81,6 +81,7 @@
     testgroup:
       - manila_smoke
       - manila_bvt
+      - manila_install
     jobs:
       - '{build-name}':
           scm_submodule_disabled: true
