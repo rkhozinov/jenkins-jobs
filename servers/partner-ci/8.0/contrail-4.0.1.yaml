@@ -80,10 +80,10 @@
     nightly_timer: 'H 21 * * *'
     full_timer: 'H 21 * * *'
     regression_timer: 'H 18 * * *'
-    nightly_disabled: false
-    full_disabled: false        
+    nightly_disabled: true
+    full_disabled: true
     baremetal_disabled: false
-    regression_disabled: true
+    regression_disabled: false
     use_snapshots: false
     force_erase: true
     force_vsrx_copy: false
@@ -246,7 +246,7 @@
       - '{fuel-release}.{plugin-name}.{plugin-version}.bvt.test.juniper'
 
       - '{regression-name}':
-          testrail_suite: "Contrail Plugin v4.x.x"
+          testrail_suite: "[8.0][PCE] Fuel plugin contrail v4.0.1 regression"
           testrail_suite_desc: "Suite description"
           testrail_milestone: "Fuel Contrail Plugin v4.0.1"
           testrail_plan: "$TREP_TESTRAIL_SUITE iso #${{ISO_VERSION}} pkg#${{JUNIPER_PKG_VERSION}} build#${{PKG_JOB_BUILD_NUMBER}}"
