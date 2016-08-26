@@ -85,7 +85,7 @@ chmod +x $SSH_ENDPOINT
 configure_nfs(){
   set -x
   create_ssh_endpoint
-
+  source /home/jenkins/90-venv/bin/activate
   for esxi_host in $ESXI_HOSTS; do
 
     python2 $SSH_ENDPOINT $esxi_host $ESXI_USER $ESXI_PASSWORD 'storages=$(esxcli storage nfs list | grep nfs | cut -d" " -f1); for storage in $storages; do esxcli storage nfs remove -v $storage; done'
