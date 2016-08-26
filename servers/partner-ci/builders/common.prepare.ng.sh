@@ -134,8 +134,10 @@ source "$VENV_PATH/bin/activate"
 [ -z $VIRTUAL_ENV ] && { echo "VIRTUAL_ENV is empty"; exit 1; }
 
 if [[ "${FORCE_ERASE}" == "true" ]]; then
-  for env in $(dospy_list); do 
-    dos.py erase $env 
+  for env in $(dospy_list $ENV_NAME); do 
+    if [[ $env  != "released" ]]; then
+      dos.py erase $env
+    fi
   done 
 else
   # determine free space before run the cleaner
@@ -143,7 +145,16 @@ else
 
   if (( $free_space < $REQUIRED_FREE_SPACE )); then 
     for env in $(dospy_list $ENV_NAME); do 
-      dos.py erase $env 
+      if [[ $env  != "released" ]]; then
+        dos.py erase $env
+      fi
+    done 
+  fi
+
+export REQUIRED_FREE_SPACE=300
+  if (( $free_space < $REQUIRED_FREE_SPACE )); then 
+    for env in $(dospy_list $ENV_NAME); do 
+      dos.py erase $env
     done 
   else
     echo "free-space: $free_space"
