@@ -3,23 +3,15 @@
     name: plugin-specific-parameters
     parameters:
       - bool:
-          name: UPDATE_MASTER
-          default: '{update_master}'
-          description: 'turns on update fuel master node to maintenance update'
-      - bool:
           name: BONDING
           default: '{obj:bonding}'
           description: 'turns on bonding'
-      - bool:
-          name: KVM_USE
-          default: '{obj:kvm_use}'
-          description: 'turns on kvm_mode for an openstack cluster'
       - bool:
           name: FORCE_VSRX_COPY
           default: '{obj:force_vsrx_copy}'
           description: 'force copying of vsrx image'
       - string:
-          #escription: 'mirror for package repositories. this mirror is optimized for CZ'
+          description: 'mirror for package repositories. this mirror is optimized for CZ'
           name: MIRROR
           default: 'http://mirror.seed-cz1.fuel-infra.org'
       - string:
@@ -253,12 +245,11 @@
           testrail_suite: "Contrail Plugin v5.x.x"
           testrail_suite_desc: "Suite description"
           testrail_milestone: "Fuel Contrail Plugin v5.0"
-          testrail_plan: "$TREP_TESTRAIL_SUITE iso #${{ISO_VERSION}} pkg#${{JUNIPER_PKG_VERSION}} build#${{PKG_JOB_BUILD_NUMBER}}"
+          testrail_plan: "$TREP_TESTRAIL_SUITE pkg#${{JUNIPER_PKG_VERSION}} build#${{PKG_JOB_BUILD_NUMBER}}"
           testrail_plan_desc: "Test plan description"
           testrail_run: "$TREP_TESTRAIL_SUITE"
           testrail_run_desc: "Test run description"
           pkg_job_name: ''
-          iso_job_name: ''
           multijob_build_pkg: false
 
       - '{fuel-release}.{plugin-name}.{plugin-version}.regression.test.juniper'
@@ -281,7 +272,6 @@
           gerrit_branch:        '{gerrit_branch}'
           env_prefix:           '{fuel-release}.{plugin-name}'
           pkg_job_name:         '{pkg_job_name}'
-          iso_job_name:         '{iso_job_name}'
           admin_node_memory:    '{admin_node_memory}'
           slave_node_memory:    '{slave_node_memory}'
           admin_node_cpu:       '{admin_node_cpu}'
@@ -293,11 +283,10 @@
           skip_vote_successfull: '{skip_vote_successfull}'
           skip_vote_failed:     '{skip_vote_failed}'
           kvm_use:              '{kvm_use}'
+          update_master:        '{update_master}'
 
       - plugin-specific-parameters:
           bonding:              '{bonding}'
-          kvm_use:              '{kvm_use}'
-          update_master:        '{update_master}'
           plugin-version:       '{plugin-version}'
           force_vsrx_copy:      '{force_vsrx_copy}'
           vsrx_original_image_path: '{vsrx_original_image_path}'
@@ -333,7 +322,6 @@
           gerrit_branch:        '{gerrit_branch}'
           env_prefix:           '{fuel-release}.{plugin-name}'
           pkg_job_name:         '{pkg_job_name}'
-          iso_job_name:         '{iso_job_name}'
           admin_node_memory:    '{admin_node_memory}'
           slave_node_memory:    '{slave_node_memory}'
           admin_node_cpu:       '{admin_node_cpu}'
@@ -345,11 +333,10 @@
           skip_vote_successfull: '{skip_vote_successfull}'
           skip_vote_failed:     '{skip_vote_failed}'
           kvm_use:              '{kvm_use}'
+          update_master:        '{update_master}'
 
       - plugin-specific-parameters:
           bonding:              '{bonding}'
-          kvm_use:              '{kvm_use}'
-          update_master:        '{update_master}'
           plugin-version:       '{plugin-version}'
           force_vsrx_copy:      '{force_vsrx_copy}'
           vsrx_original_image_path: '{vsrx_original_image_path}'
@@ -389,7 +376,6 @@
           gerrit_branch:        '{gerrit_branch}'
           env_prefix:           '{fuel-release}.{plugin-name}'
           pkg_job_name:         '{pkg_job_name}'
-          iso_job_name:         '{iso_job_name}'
           admin_node_memory:    '{admin_node_memory}'
           slave_node_memory:    '{slave_node_memory}'
           admin_node_cpu:       '{admin_node_cpu}'
@@ -401,10 +387,10 @@
           skip_vote_successfull: '{skip_vote_successfull}'
           skip_vote_failed: '{skip_vote_failed}'
           kvm_use:              '{kvm_use}'
-      - plugin-specific-parameters:
           update_master:        '{update_master}'
+
+      - plugin-specific-parameters:
           bonding:              '{bonding}'
-          kvm_use:              '{kvm_use}'
           plugin-version:       '{plugin-version}'
           force_vsrx_copy:      '{force_vsrx_copy}'
           vsrx_original_image_path: '{vsrx_original_image_path}'
