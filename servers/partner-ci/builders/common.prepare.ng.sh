@@ -143,7 +143,16 @@ else
 
   if (( $free_space < $REQUIRED_FREE_SPACE )); then 
     for env in $(dospy_list $ENV_NAME); do 
-      dos.py erase $env 
+      if [[ $env  != "released" ]]; then
+        dos.py erase $env
+      fi
+    done 
+  fi
+
+export REQUIRED_FREE_SPACE=300
+  if (( $free_space < $REQUIRED_FREE_SPACE )); then 
+    for env in $(dospy_list $ENV_NAME); do 
+      dos.py erase $env
     done 
   else
     echo "free-space: $free_space"
