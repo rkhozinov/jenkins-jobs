@@ -2,6 +2,14 @@
     name: common-parameters
     parameters:
       - bool:
+          name: UPDATE_MASTER
+          default: '{update_master}'
+          description: 'turns on update fuel master node to maintenance update'
+      - bool:
+          name: ENABLE_PROPOSED
+          default: '{enable_proposed}'
+          description: 'related to update_master. Turns on support additional repositories for maintenance update'
+      - bool:
           name: PUBLISH_RESULTS
           default: '{obj:publish_results}'
           description: 'Reports results to testrail'
@@ -25,10 +33,18 @@
           name: SKIP_VOTE_FAILED
           default: '{skip_vote_failed}'
           description: "configure gerrit voting"
-      - bool:
-          name: USE_SNAPSHOTS
-          default: '{use_snapshots}'
-          descrition: 'Will be used existing environment'
+      - string:
+          name: MIRROR_HOST
+          default: 'mirror.seed-cz1.fuel-infra.org'
+          description: 'mirror for package repositories. this mirror is optimized for CZ'
+      - string:
+          name: SNAPSHOTS_ID
+          default: '{snapshots_id}'
+          description: 'snapshots number or lastSuccessfulBuild'
+      - string:
+          name: SNAPSHOTS_URL
+          default: 'https://product-ci.infra.mirantis.net/job/9.x.snapshot/SNAPSHOTS_ID/artifact/snapshots.params'
+          description: 'url to product-ci job with snapshots artifacts'
       - string:
           name: ISO_FILE
           default: '{iso_file}'
@@ -52,53 +68,44 @@
       - string:
           name: PKG_JOB_BUILD_NUMBER
           description: 'The name of job for copying of plugin pkg artefacts'
-      - string:
-          name: ENV_PREFIX
-          default: '{env_prefix}'
-          description: 'The name of devops env. Needed to properly work of existing mode of devops'
-      - string:
-          name: TREP_TESTRAIL_SUITE
-          default: '{testrail_suite}'
-          description: 'The test suite name, ex.[8.0][PCE] vCenter Smoke/BVT'
-#     - string:
-#         name: TREP_TESTRAIL_CONFIGURATION
-#         default: "{testrail_suite_conf}"
-      - string:
-          name: TREP_TESTRAIL_SUITE_DESCRIPTION
-          default: '{testrail_suite_desc}'
-          description: 'Testrail suite description'
-      - string:
-          name: TREP_TESTRAIL_PLAN
-          default: '{testrail_plan}'
-          description: 'Testrail testplan name'
-      - string:
-          name: TREP_TESTRAIL_PLAN_DESCRIPTION
-          default: '{testrail_plan_desc}'
-          description: 'Testrail testplan description'
-      - string:
-          name: OPENSTACK_RELEASE
-          default: 'Ubuntu'
-          description: 'Openstack release (CentOS, Ubuntu)'
-      - string:
-          name: NODES_COUNT
-          default: '10'
-          description: 'Amount of nodes in the test lab'
-      - string:
-          name: ADMIN_NODE_MEMORY
-          default: '{admin_node_memory}'
-          description: 'Amount of vitrual RAM for admin node'
-      - string:
-          name: SLAVE_NODE_MEMORY
-          default: '{slave_node_memory}'
-          description: 'Amount of vitrual RAM per slave node'
-      - string:
-          name: ADMIN_NODE_CPU
-          default: '{admin_node_cpu}'
-          description: 'Amount of vitrual CPUs for admin node'
-      - string:
-          name: SLAVE_NODE_CPU
-          default: '{slave_node_cpu}'
-          description: 'Amount of vitrual CPUs per slave node'
+      - text:
+          name: TESTRAIL_PARAMETERS
+          default: |
+            TREP_TESTRAIL_SUITE={testrail_suite}
+            TREP_TESTRAIL_SUITE_DESCRIPTION={testrail_suite_desc}
+            TREP_TESTRAIL_PLAN={testrail_plan}
+            TREP_TESTRAIL_PLAN_DESCRIPTION={testrail_plan_desc}
+      - bool:
+          name: KVM_USE
+          default: '{obj:kvm_use}'
+          description: 'turns on kvm_mode for an openstack cluster'
+      - text:
+          name: ENV_PARAMETERS
+          default: |
+            ENV_PREFIX={env_prefix}
+            OPENSTACK_RELEASE=Ubuntu
+            NODES_COUNT=10
+            DESTROY_ENV_AFTER=0
+            ADMIN_NODE_MEMORY={admin_node_memory}
+            SLAVE_NODE_MEMORY={slave_node_memory}
+            ADMIN_NODE_CPU={admin_node_cpu}
+            SLAVE_NODE_CPU={slave_node_cpu}
+
+      - text:
+          name: UPDATE_PARAMETERS
+          default: |
+            ENABLE_MOS_CENTOS_OS=true
+            ENABLE_MOS_CENTOS_PROPOSED=true
+            ENABLE_MOS_CENTOS_UPDATES=true
+            ENABLE_MOS_CENTOS_HOLDBACK=true
+            ENABLE_MOS_CENTOS_HOTFIX=false
+            ENABLE_MOS_CENTOS_SECURITY=true
+            ENABLE_MOS_UBUNTU_OS=true
+            ENABLE_MOS_UBUNTU_PROPOSED=true
+            ENABLE_MOS_UBUNTU_UPDATES=true
+            ENABLE_MOS_UBUNTU_HOLDBACK=true
+            ENABLE_MOS_UBUNTU_HOTFIX=false
+            ENABLE_MOS_UBUNTU_SECURITY=true
 
 - publisher:
     name: runner-publisher
@@ -108,7 +115,7 @@
           builders:
             - shell: env > {properties_name}
       - archive:
-          artifacts: '*properties'
+          artifacts: '*.properties'
           allow-empty: true
       - archive:
           artifacts: 'build.plugin_version'
@@ -124,7 +131,7 @@
           builders:
             - shell: env > {properties_name}
       - archive:
-          artifacts: '*properties'
+          artifacts: '*.properties'
           allow-empty: true
       - archive:
           artifacts: 'nosetests.xml'
@@ -147,7 +154,7 @@
           artifacts: '*.rpm'
           allow-empty: false
       - archive:
-          artifacts: 'build.properties'
+          artifacts: '*.properties'
           allow-empty: false
       - archive:
           artifacts: 'build.plugin_version'
@@ -160,7 +167,10 @@
     publishers:
       - archive:
           artifacts: 'logs/*'
-          allow-empty: false
+          allow-empty: true
+      - archive:
+          artifacts: '*.pcap'
+          allow-empty: true
       - conditional-publisher:
           - condition-kind: file-exists
             condition-filename: 'nosetests.xml'
@@ -285,13 +295,13 @@
          custom-url: '* $JOB_NAME $BUILD_URL'
          escape-quotes: true
          readable-message: true
-         skip-vote: 
+         skip-vote:
            successfull: '{skip_vote_successfull}'
            failed: '{skip_vote_failed}'
            unstable: true
            notbuilt: true
 
-# build and smoke should trigger on patchset event               
+# build and smoke should trigger on patchset event
 - trigger:
     name: draft-patchset-gerrit-trigger
     triggers:
@@ -306,7 +316,7 @@
                 exclude-trivial-rebase: false
                 exclude-no-code-change: true
 
-# bvt should trigger on merge event     
+# bvt should trigger on merge event
 - trigger:
     name: merge-gerrit-trigger
     triggers:
@@ -334,7 +344,7 @@
           colormap: xterm
       - inject-passwords:
           global: true
-          mask-password-params: false
+          mask-password-params: true
       - timeout:
           fail: true
           type: no-activity
@@ -345,10 +355,10 @@
     name: runner-property
     properties:
       - build-discarder:
-          days-to-keep: 40 
-          num-to-keep: 40 
-          artifact-days-to-keep: 30 
-          artifact-num-to-keep: 20 
+          days-to-keep: 40
+          num-to-keep: 40
+          artifact-days-to-keep: 30
+          artifact-num-to-keep: 20
       - heavy-job:
           weight: 1
       - build-blocker:
@@ -363,10 +373,10 @@
     name: test-property
     properties:
       - build-discarder:
-          days-to-keep: 40 
-          num-to-keep: 40 
-          artifact-days-to-keep: 30 
-          artifact-num-to-keep: 20 
+          days-to-keep: 40
+          num-to-keep: 40
+          artifact-days-to-keep: 30
+          artifact-num-to-keep: 20
       - heavy-job:
           weight: 1
       - throttle:

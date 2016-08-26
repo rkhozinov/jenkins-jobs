@@ -370,6 +370,11 @@
 - property:
     name: runner-property
     properties:
+      - build-discarder:
+          days-to-keep: 40
+          num-to-keep: 40
+          artifact-days-to-keep: 30
+          artifact-num-to-keep: 20
       - heavy-job:
           weight: 1
       - build-blocker:
@@ -384,10 +389,10 @@
     name: test-property
     properties:
       - build-discarder:
-          days-to-keep: 42
-          num-to-keep: 43
-          artifact-days-to-keep: 44
-          artifact-num-to-keep: 45
+          days-to-keep: 40
+          num-to-keep: 40
+          artifact-days-to-keep: 30
+          artifact-num-to-keep: 20
       - heavy-job:
           weight: 1
       - throttle:
@@ -400,6 +405,9 @@
             - nsxv
             - contrail
             - contrail-baremetal
+            - gcs
+            - mistral
+            - manila
           option: category
 
 - publisher:
@@ -494,7 +502,7 @@
       - shell: |
           #!/bin/bash -xe
           set -o pipefail
-          shellcheck ${{ARGS}} $(find . -name '*.sh') | tee -i shellcheck.log
+          shellcheck ${{ARGS}} $(find . -name '*.sh' -not -path "*/fuel-qa/*" -not -path "*/deployment_scripts/puppet/modules/contrail/files/cassandra-env.sh") | tee -i shellcheck.log
     publishers:
       - checker-publisher
 
