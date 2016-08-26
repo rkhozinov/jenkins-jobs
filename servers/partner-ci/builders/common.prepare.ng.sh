@@ -135,7 +135,7 @@ source "$VENV_PATH/bin/activate"
 
 if [[ "${FORCE_ERASE}" == "true" ]]; then
   for env in $(dospy_list $ENV_NAME); do 
-    if [[ $env  != "released" ]]; then
+    if [[ $env  != *"released"* ]]; then
       dos.py erase $env
     fi
   done 
@@ -145,7 +145,7 @@ else
 
   if (( $free_space < $REQUIRED_FREE_SPACE )); then 
     for env in $(dospy_list $ENV_NAME); do 
-      if [[ $env  != "released" ]]; then
+      if [[ $env  != *"released"* ]]; then
         dos.py erase $env
       fi
     done 
