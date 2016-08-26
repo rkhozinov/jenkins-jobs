@@ -2,7 +2,7 @@
 
 # activate bash xtrace for script
 [[ "${DEBUG}" == "true" ]] && set -x || set +x
-
+export FUEL_RELEASE=$(echo $ISO_FILE | cut -d- -f2 | tr -d '.iso')
 export SSH_ENDPOINT="ssh_connect.py"
 main(){
   if [ -z $NOREVERT ]; then  
@@ -85,7 +85,7 @@ chmod +x $SSH_ENDPOINT
 configure_nfs(){
   set -x
   create_ssh_endpoint
-  source /home/jenkins/90-venv/bin/activate
+  source /home/jenkins/$FUEL_RELEASE-venv/bin/activate
   for esxi_host in $ESXI_HOSTS; do
 
     python2 $SSH_ENDPOINT $esxi_host $ESXI_USER $ESXI_PASSWORD 'storages=$(esxcli storage nfs list | grep nfs | cut -d" " -f1); for storage in $storages; do esxcli storage nfs remove -v $storage; done'
