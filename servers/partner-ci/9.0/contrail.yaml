@@ -11,10 +11,6 @@
           default: '{obj:bonding}'
           description: 'turns on bonding'
       - bool:
-          name: KVM_USE
-          default: '{obj:kvm_use}'
-          description: 'turns on kvm_mode for an openstack cluster'
-      - bool:
           name: FORCE_VSRX_COPY
           default: '{obj:force_vsrx_copy}'
           description: 'force copying of vsrx image'
@@ -296,7 +292,6 @@
 
       - plugin-specific-parameters:
           bonding:              '{bonding}'
-          kvm_use:              '{kvm_use}'
           update_master:        '{update_master}'
           plugin-version:       '{plugin-version}'
           force_vsrx_copy:      '{force_vsrx_copy}'
@@ -348,7 +343,6 @@
 
       - plugin-specific-parameters:
           bonding:              '{bonding}'
-          kvm_use:              '{kvm_use}'
           update_master:        '{update_master}'
           plugin-version:       '{plugin-version}'
           force_vsrx_copy:      '{force_vsrx_copy}'
@@ -404,7 +398,6 @@
       - plugin-specific-parameters:
           update_master:        '{update_master}'
           bonding:              '{bonding}'
-          kvm_use:              '{kvm_use}'
           plugin-version:       '{plugin-version}'
           force_vsrx_copy:      '{force_vsrx_copy}'
           vsrx_original_image_path: '{vsrx_original_image_path}'
