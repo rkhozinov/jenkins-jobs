@@ -129,6 +129,7 @@
       - dvs_vcenter_smoke
       - dvs_vcenter_bvt
       - dvs_heat
+
     jobs:
       - '{build-name}':
           scm_submodule_disabled: true
@@ -276,11 +277,6 @@
           test_timeout: '{test_timeout}'
     properties:
       - test-property
-      - build-discarder:
-          days-to-keep: 30
-          num-to-keep: 100
-          artifact-days-to-keep: 30
-          artifact-num-to-keep: 100
     builders:
       - inject:
           properties-content: |
@@ -494,6 +490,8 @@
 
 - job-template:
     name: '{bvt-name}'
+    description: 'The BVT test for {fuel-release}.{plugin-name}.{plugin-version}'
+    disabled: false
     description: 'The BVT test for {fuel-release}.{plugin-name}.{plugin-version}'
     disabled: false
     concurrent: true
