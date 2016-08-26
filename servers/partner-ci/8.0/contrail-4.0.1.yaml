@@ -104,7 +104,7 @@
     gerrit_repo: 'fuel-plugin-contrail'
     gerrit_branch: 'stable/4.0.1'
     email_to: 'rkhozinov@mirantis.com okosse@mirantis.com otsvigun@mirantis.com'
-    released_plugin_path: '/storage/contrail/released/contrail-3.0.noarch.rpm'
+    released_plugin_path: '/storage/contrail/released/contrail-4.0-4.0.1-1.noarch.rpm'
     scm_submodule_disabled: true
     scm_wipe_workspace: false 
     skip_vote_successfull: false
@@ -288,6 +288,7 @@
           testrail_plan_desc:   '{testrail_plan_desc}'
           skip_vote_successfull: '{skip_vote_successfull}'
           skip_vote_failed:     '{skip_vote_failed}'
+          kvm_use:              '{kvm_use}'
 
       - plugin-specific-parameters:
           bonding:              '{bonding}'
@@ -339,6 +340,7 @@
           testrail_plan_desc:   '{testrail_plan_desc}'
           skip_vote_successfull: '{skip_vote_successfull}'
           skip_vote_failed:     '{skip_vote_failed}'
+          kvm_use:              '{kvm_use}'
 
       - plugin-specific-parameters:
           bonding:              '{bonding}'
@@ -394,6 +396,7 @@
           testrail_plan_desc:   '{testrail_plan_desc}'
           skip_vote_successfull: '{skip_vote_successfull}'
           skip_vote_failed: '{skip_vote_failed}'
+          kvm_use:              '{kvm_use}'
       - plugin-specific-parameters:
           update_master:        '{update_master}'
           bonding:              '{bonding}'
