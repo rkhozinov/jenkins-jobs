@@ -292,6 +292,7 @@
           testrail_plan_desc:   '{testrail_plan_desc}'
           skip_vote_successfull: '{skip_vote_successfull}'
           skip_vote_failed:     '{skip_vote_failed}'
+          kvm_use:              '{kvm_use}'
 
       - plugin-specific-parameters:
           bonding:              '{bonding}'
@@ -343,6 +344,7 @@
           testrail_plan_desc:   '{testrail_plan_desc}'
           skip_vote_successfull: '{skip_vote_successfull}'
           skip_vote_failed:     '{skip_vote_failed}'
+          kvm_use:              '{kvm_use}'
 
       - plugin-specific-parameters:
           bonding:              '{bonding}'
@@ -398,6 +400,7 @@
           testrail_plan_desc:   '{testrail_plan_desc}'
           skip_vote_successfull: '{skip_vote_successfull}'
           skip_vote_failed: '{skip_vote_failed}'
+          kvm_use:              '{kvm_use}'
       - plugin-specific-parameters:
           update_master:        '{update_master}'
           bonding:              '{bonding}'
