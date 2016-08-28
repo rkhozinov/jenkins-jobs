@@ -10,18 +10,11 @@
           name: PLUGIN_VERSION
           default: '{plugin-version}'
           description: 'Snapshot name for vcenter lab'
-      - string:
-          name: ISO_STORAGE
-          default: '{iso_storage}'
-      - bool:
-          name: CLEAN_ENVS
-          default: '{clean_envs}'
 
 - project:
     name: 'predefined_parameters'
     fuel-release: '9.0'
-    plugin-version: '1.0'
-    clean_envs: false
+    plugin-version: '1.0.0'
     plugin-name: 'manila'
     build-name: '{fuel-release}.{plugin-name}.build'
     flake8-name: '{fuel-release}.{plugin-name}.flake8'
@@ -35,6 +28,7 @@
     reporter-name: '{fuel-release}.{plugin-name}.reporter'
     smoke-test-name: 'manila_smoke'
     bvt-test-name: 'manila_bvt'
+    regression-test-name: 'manila_regression'
     admin_node_memory: '4096'
     slave_node_memory: '4096'
     admin_node_cpu: '4'
@@ -43,12 +37,13 @@
     nightly_timer: 'H 22 * * *'
     regression_timer: 'H 16 * * *'
     nightly_disabled: false
-    regression_disabled: false
-    use_snapshots: false
+    regression_disabled: true
     force_erase: false
     recreate_venv: false
     disable_ssl: true
-    update_master: true
+    kvm_use: false
+    update_master: false
+    enable_proposed: false
     debug: true
     build_debug: true
     publish_results: true
@@ -58,19 +53,21 @@
     test_timeout: 300
     iso_file: 'MirantisOpenStack-9.0.iso'
     iso_storage: '/storage/downloads'
+    snapshots_id: 'released'
     gerrit_repo: 'fuel-plugin-manila'
     gerrit_branch: 'master'
-    email_to: 'rkhozinov@mirantis.com okosse@mirantis.com'
+    email_to: 'rkhozinov@mirantis.com vnaumov@mirantis.com vrozhanskyy@mirantis.com'
     released_plugin_path: ''
     scm_submodule_disabled: false
     scm_wipe_workspace: false
     skip_vote_successfull: false
     skip_vote_failed: false
+
     testrail_project: "Manila plugin"
-    testrail_suite: "[9.0][PCE] Manila plugin v1.0.0"
+    testrail_suite: "[{fuel-release}][PCE] Manila plugin v{plugin-version}"
     testrail_suite_desc: "Suite description"
-    testrail_milestone: "1.0.0"
-    testrail_plan: "[9.0][PCE] Manila plugin v1.0.0 build#${{PKG_JOB_BUILD_NUMBER}}"
+    testrail_milestone: "{plugin-version}"
+    testrail_plan: "$TREP_TESTRAIL_SUITE build#${{PKG_JOB_BUILD_NUMBER}}"
     testrail_plan_desc: "Test plan description"
     testrail_run: "$TREP_TESTRAIL_SUITE"
     testrail_run_desc: "Test run description"
@@ -98,25 +95,46 @@
           scm_submodule_disabled: true
           skip_vote_successfull: '{skip_vote_successfull}'
           skip_vote_failed: '{skip_vote_failed}'
+
       - '{nightly-name}':
           multijob_build_pkg: true
+
       - '{custom-name}.qa':
           publish_results: false
+
       - '{custom-name}.dev':
           publish_results: false
           testgroup_parameter_type: choice
           testgroup_value_type: choices
           testgroup_value: '{obj:testgroup}'
+
       - '{reporter-name}'
+
       - '{fuel-release}.{plugin-name}.{testgroup}'
+
       - '{smoke-name}':
           publish_results: false
           multijob_build_pkg: false
+
       - '{fuel-release}.{plugin-name}.smoke.test'
+
       - '{bvt-name}':
           publish_results: false
           multijob_build_pkg: true
+
       - '{fuel-release}.{plugin-name}.bvt.test'
+
+      - '{regression-name}':
+          testrail_suite: "[{fuel-release}][PCE] Manila plugin v{plugin-version} Regression"
+          testrail_suite_desc: "Suite description"
+          testrail_plan: "$TREP_TESTRAIL_SUITE #${{DATE}}"
+          testrail_plan_desc: "Test plan description"
+          testrail_run: "$TREP_TESTRAIL_SUITE"
+          testrail_run_desc: "Test run description"
+          pkg_job_name: ''
+          multijob_build_pkg: false
+
+      - '{fuel-release}.{plugin-name}.regression.test'
 
 # parameters for smoke, bvt and nightly multijobs
 - runner-parameters: &runner-parameters
@@ -132,7 +150,6 @@
           disable_ssl:          '{disable_ssl}'
           force_erase:          '{force_erase}'
           recreate_venv:        '{recreate_venv}'
-          use_snapshots:        '{use_snapshots}'
           iso_file:             '{iso_file}'
           gerrit_branch:        '{gerrit_branch}'
           env_prefix:           '{fuel-release}.{plugin-name}'
@@ -143,14 +160,18 @@
           slave_node_cpu:       '{slave_node_cpu}'
           testrail_suite:       '{testrail_suite}'
           testrail_suite_desc:  '{testrail_suite_desc}'
+#         testrail_suite_conf:  '{testrail_suite_conf}'
           testrail_plan:        '{testrail_plan}'
           testrail_plan_desc:   '{testrail_plan_desc}'
           skip_vote_successfull: '{skip_vote_successfull}'
           skip_vote_failed:     '{skip_vote_failed}'
+          enable_proposed:      '{enable_proposed}'
+          update_master:        '{update_master}'
+          kvm_use:              '{kvm_use}'
+          iso_storage:          '{iso_storage}'
+          snapshots_id:         '{snapshots_id}'
       - plugin-specific-parameters:
           plugin-version: '{plugin-version}'
-          iso_storage:    '{iso_storage}'
-          clean_envs:     '{clean_envs}'
 
 # parameters for jobs created per test-group and custom test job
 - test-parameters: &test-parameters
@@ -185,14 +206,18 @@
           slave_node_cpu:       '{slave_node_cpu}'
           testrail_suite:       '{testrail_suite}'
           testrail_suite_desc:  '{testrail_suite_desc}'
+#         testrail_suite_conf:  '{testrail_suite_conf}'
           testrail_plan:        '{testrail_plan}'
           testrail_plan_desc:   '{testrail_plan_desc}'
           skip_vote_successfull: '{skip_vote_successfull}'
           skip_vote_failed:     '{skip_vote_failed}'
+          enable_proposed:      '{enable_proposed}'
+          update_master:        '{update_master}'
+          kvm_use:              '{kvm_use}'
+          iso_storage:          '{iso_storage}'
+          snapshots_id:         '{snapshots_id}'
       - plugin-specific-parameters:
           plugin-version: '{plugin-version}'
-          iso_storage:    '{iso_storage}'
-          clean_envs:     '{clean_envs}'
 
 - defaults:
     name: global
@@ -211,11 +236,6 @@
           test_timeout: '{test_timeout}'
     properties:
       - test-property
-      - build-discarder:
-          days-to-keep: 30
-          num-to-keep: 100
-          artifact-days-to-keep: 30
-          artifact-num-to-keep: 100
     builders:
       - conditional-step:
           condition-kind: shell
@@ -238,6 +258,10 @@
                 project: ${{PKG_JOB_NAME}}
                 which-build: specific-build
                 build-number: ${{PKG_JOB_BUILD_NUMBER}}
+      - inject:
+          properties-content: |
+            $TESTRAIL_PARAMETERS
+            $ENV_PARAMETERS
       - shell:
           !include-raw-escape: ../builders/common.prepare.sh
       - shell:
@@ -262,8 +286,8 @@
           skip_vote_failed: '{skip_vote_failed}'
     scm:
       - common-scm:
-          scm_submodule_disabled: '{scm_submodule_disabled}'
           scm_wipe_workspace: '{scm_wipe_workspace}'
+          scm_submodule_disabled: '{scm_submodule_disabled}'
           gerrit_repo: '{gerrit_repo}'
           skip_vote_successfull: '{skip_vote_successfull}'
           skip_vote_failed: '{skip_vote_failed}'
@@ -276,6 +300,12 @@
       - string:
           name: GERRIT_REFSPEC
           default: 'refs/heads/{gerrit_branch}'
+      - string:
+          name: PUPPETLINT_PATH
+          default: './deployment_scripts/puppet/manifests ./deployment_scripts/puppet/modules/'
+      - string:
+          name: PUPPETLINT_IGNORE
+          default: 'l2.pp'
       - bool:
           name: DEBUG
           default: '{build_debug}'
@@ -293,29 +323,70 @@
     publishers:
       - build-publisher:
           email_to: '{email_to}'
+
 - job-template:
     name: '{fuel-release}.{plugin-name}.{testgroup}'
+    description: 'The test "{testgroup}" for {fuel-release}.{plugin-name}.{plugin-version}'
     concurrent: true
 
 - job-template:
     name: '{fuel-release}.{plugin-name}.bvt.test'
+    description: 'The BVT test for {fuel-release}.{plugin-name}.{plugin-version}'
     concurrent: true
 
 - job-template:
     name: '{fuel-release}.{plugin-name}.smoke.test'
+    description: 'The Smoke test for {fuel-release}.{plugin-name}.{plugin-version}'
     concurrent: true
 
 - job-template:
     name: '{fuel-release}.{plugin-name}.regression.test'
+    description: 'The regression test for {fuel-release}.{plugin-name}.{plugin-version}'
     concurrent: true
 
 - job-template:
     name: '{custom-name}.qa'
+    description: 'The custom test for {fuel-release}.{plugin-name}.{plugin-version}'
     concurrent: true
 
 - job-template:
     name: '{custom-name}.dev'
+    description: 'The custom test for {fuel-release}.{plugin-name}.{plugin-version}'
     concurrent: true
+
+- job-template:
+    name: '{regression-name}'
+    description: 'The regression test for {fuel-release}.{plugin-name}.{plugin-version}'
+    disabled: '{obj:regression_disabled}'
+    concurrent: true
+    project-type: multijob
+    node: runner
+    <<: *runner-parameters
+    scm: []
+    triggers:
+      - timed: '{regression_timer}'
+    properties:
+      - runner-property:
+          build-name: '{build-name}'
+    wrappers:
+      - runner-wrapper
+    publishers:
+      - runner-publisher:
+          properties_name: regression.properties
+          email_to: '{email_to}'
+    builders:
+      - multijob:
+          name: '1st phase - regression test'
+          condition: COMPLETED
+          projects:
+            - name: '{fuel-release}.{plugin-name}.regression.test'
+              predefined-parameters: |
+                TEST_GROUP={regression-test-name}
+                MANILA_PLUGIN_PATH={released_plugin_path}
+                PLUGIN_VERSION={plugin-version}
+                PKG_JOB_BUILD_NUMBER=released
+              current-parameters: true
+              kill-phase-on: NEVER
 
 - job-template:
     name: '{smoke-name}'
