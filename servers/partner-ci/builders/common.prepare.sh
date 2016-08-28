@@ -104,7 +104,7 @@ function get_venv_requirements {
   #  sed -i 's/python-novaclient>=2.15.0/python-novaclient==2.35.0/' $REQS_PATH
   #fi
 }
-   
+
 function prepare_venv {
     source "${VENV_PATH}/bin/activate"
     easy_install -U pip
@@ -134,23 +134,23 @@ source "$VENV_PATH/bin/activate"
 [ -z $VIRTUAL_ENV ] && { echo "VIRTUAL_ENV is empty"; exit 1; }
 
 if [[ "${FORCE_ERASE}" -eq "true" ]]; then
-  for env in $(dospy_list); do 
+  for env in $(dospy_list); do
     dos.py erase $env
-  done 
+  done
 else
 
   # determine free space before run the cleaner
   free_space=$(df -h | grep '/$' | awk '{print $4}' | tr -d G)
 
-  if (( $free_space < $REQUIRED_FREE_SPACE )); then 
-    for env in $(dospy_list $ENV_NAME); do 
-      dos.py erase $env 
-    done 
+  if (( $free_space < $REQUIRED_FREE_SPACE )); then
+    for env in $(dospy_list $ENV_NAME); do
+      dos.py erase $env
+    done
   else
     echo "free-space: $free_space"
   fi
   # poweroff all envs
-  for env in $(dospy_list $ENV_NAME); do 
-    dos.py destroy $env 
-  done 
+  for env in $(dospy_list $ENV_NAME); do
+    dos.py destroy $env
+  done
 fi

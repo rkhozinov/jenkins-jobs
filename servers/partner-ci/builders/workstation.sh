@@ -2,10 +2,14 @@
 
 # activate bash xtrace for script
 [[ "${DEBUG}" == "true" ]] && set -x || set +x
-export VENV_PATH="${WORKSPACE}/$(echo $ISO_FILE | cut -d- -f2 | tr -d '.iso')-venv"
+if [[ $ISO_FILE == *"Mirantis"* ]]; then
+  export FUEL_RELEASE=$(echo $ISO_FILE | cut -d- -f2 | tr -d '.iso')
+  [[ "${UPDATE_MASTER}" -eq "true" ]] && export ISO_VERSION='mos-mu' || export ISO_VERSION='mos'
+fi
+export VENV_PATH="${HOME}/${FUEL_RELEASE}-venv"
 export SSH_ENDPOINT="ssh_connect.py"
 main(){
-  if [ -z $NOREVERT ]; then  
+  if [ -z $NOREVERT ]; then
     restart_ws_network
     revert_ws
     configure_nfs
@@ -22,7 +26,7 @@ wait_ws() {
 }
 
 revert_ws() {
-  set +x 
+  set +x
 
   cmd="vmrun -T ws-shared -h https://localhost:443/sdk \
        -u ${WORKSTATION_USERNAME} -p ${WORKSTATION_PASSWORD}"
