@@ -201,6 +201,11 @@
 - builder:
     name: runner-condition
     builders:
+      - inject:
+          properties-content: |
+            $TESTRAIL_PARAMETERS
+            $ENV_PARAMETERS
+            $VCENTER_PARAMETERS
       - conditional-step:
           condition-kind: shell
           condition-command: |
@@ -249,14 +254,15 @@
                 echo "PKG_JOB_BUILD_NUMBER=$build_number" > build_number
       - conditional-step:
           condition-kind: shell
-          condition-command: >
-            [ -z ${ISO_FILE} ]
+          condition-command: |
+            [[ "${UPDATE_MASTER}" == "true" ]]
           steps:
             - shell: |
                 #!/bin/bash
-                echo "ISO_FILE should be defined"
-                exit 1
-# common git settings to get sources
+                SNAPSHOTS_ID=${SNAPSHOTS_ID:=lastSuccessfulBuild}
+                wget --no-check-certificate -O snapshots.params ${SNAPSHOTS_URL/SNAPSHOTS_ID/$SNAPSHOTS_ID}
+                snapshots_id=$(grep "^CUSTOM_VERSION=" < snapshots.params | cut -d= -f2 | cut -d'#' -f2)
+                echo "SNAPSHOTS_ID=${snapshots_id}" >> build_number
 - scm:
     name: common-scm
     scm:
