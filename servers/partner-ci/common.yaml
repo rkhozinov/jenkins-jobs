@@ -631,7 +631,7 @@
           description: "Tests to exclude from results"
       - string:
           name: TREP_LOG_LEVEL
-          default: "{trep_debug_level}"
+          default: "WARNING"
           description: "Log level of reporter"
       - string:
           name: TREP_LOG_FILE
@@ -676,3 +676,8 @@
       - reporter-publisher:
           properties_name: reporter.properties
           email_to: '{email_to}'
+      - description-setter:
+          regexp: '^\[TestRun URL\] (.*)'
+          regexp-for-failed: '"error":(.*)'
+          description: '<a href="\1">TestRail Report URL</a>'
+          description-for-failed: '\1'
