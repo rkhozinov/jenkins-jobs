@@ -47,7 +47,7 @@
     nightly_timer: 'H 21 * * *'
     regression_timer: 'H 18 * * *'
     nightly_disabled: true
-    regression_disabled: true
+    regression_disabled: false
     force_erase: false
     recreate_venv: false
     disable_ssl: true
@@ -65,7 +65,7 @@
     snapshots_id: 'released'
     gerrit_repo: 'fuel-qa'
     gerrit_branch: 'stable/mitaka'
-    email_to: 'rkhozinov@mirantis.com ibumarskov@mirantis.com'
+    email_to: 'rkhozinov@mirantis.com ibumarskov@mirantis.com vnaumov@mirantis.com'
     released_plugin_path: ''
     scm_submodule_disabled: true
     scm_wipe_workspace: false
@@ -329,8 +329,7 @@
     node: runner
     <<: *runner-parameters
     scm: []
-    triggers:
-      - timed: '{nightly_timer}'
+    triggers: []
     properties:
       - runner-property:
           build-name: '{build-name}'
