@@ -165,11 +165,10 @@
 - publisher:
     name: test-publisher
     publishers:
+      - description-setter:
+          regexp-for-failed: '^ERROR:.*'
       - archive:
           artifacts: 'logs/*'
-          allow-empty: true
-      - archive:
-          artifacts: '*.pcap'
           allow-empty: true
       - conditional-publisher:
           - condition-kind: file-exists
