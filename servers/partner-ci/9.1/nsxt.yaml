@@ -96,7 +96,6 @@
     testgroup_value: '{testgroup}'
 
     testgroup:
-      - dvs_vcenter_systest_setup
       - dvs_vcenter_networks
       - dvs_vcenter_ping_public
       - dvs_instances_one_group
@@ -116,8 +115,6 @@
       - dvs_attached_ports
       - dvs_instances_batch_mix_sg
       - dvs_different_networks
-      - dvs_install
-      - dvs_uninstall
       - dvs_remote_sg_simple
       - dvs_remote_ip_prefix
       - dvs_connect_default_net
