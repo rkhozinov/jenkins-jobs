@@ -10,7 +10,7 @@
          TEST_GROUP=vcenter_dvs_bvt
          TEST_GROUP_PREFIX=system_test.vcenter.deploy_vcenter_dvs_run_ostf
          TEST_GROUP_CONFIG=vcenter_dvs_bvt
-       kill-phase-on: NEVER 
+       kill-phase-on: NEVER
 
      - name: '{fuel-release}.{plugin-name}.vcenter_dvs_smoke'
        property-file: build_number
@@ -240,7 +240,7 @@
          TEST_GROUP_PREFIX=system_test.vcenter.attach_empty_volume
          TEST_GROUP_CONFIG=vcenter_vmware_roles
        kill-phase-on: NEVER
-         
+
      - name: '{fuel-release}.{plugin-name}.vcenter_bootable_vol'
        property-file: build_number
        current-parameters: true
@@ -249,7 +249,7 @@
          TEST_GROUP_PREFIX=system_test.vcenter.bootable_vol
          TEST_GROUP_CONFIG=vcenter_vmware_roles
        kill-phase-on: NEVER
-          
+
      - name: '{fuel-release}.{plugin-name}.vcenter_vmware_datastore_upload_img'
        property-file: build_number
        current-parameters: true
@@ -258,7 +258,7 @@
          TEST_GROUP_PREFIX=system_test.vcenter.upload_image
          TEST_GROUP_CONFIG=vcenter_glance_backend_and_computevmware
        kill-phase-on: NEVER
-          
+
      - name: '{fuel-release}.{plugin-name}.vcenter_cinder_upload_img'
        property-file: build_number
        current-parameters: true
@@ -267,7 +267,7 @@
          TEST_GROUP_PREFIX=system_test.vcenter.upload_image
          TEST_GROUP_CONFIG=vcenter_vmware_roles
        kill-phase-on: NEVER
-          
+
      - name: '{fuel-release}.{plugin-name}.vcenter_ceph_upload_img'
        property-file: build_number
        current-parameters: true
@@ -276,7 +276,7 @@
          TEST_GROUP_PREFIX=system_test.vcenter.upload_image
          TEST_GROUP_CONFIG=vcenter_ceph_and_computevmware
        kill-phase-on: NEVER
-          
+
      - name: '{fuel-release}.{plugin-name}.vcenter_vmxnet3'
        property-file: build_number
        current-parameters: true
@@ -285,7 +285,7 @@
          TEST_GROUP_PREFIX=system_test.vcenter.vmxnet3
          TEST_GROUP_CONFIG=vcenter_vmware_roles
        kill-phase-on: NEVER
-          
+
      - name: '{fuel-release}.{plugin-name}.vcenter_batch_instance_creation'
        property-file: build_number
        current-parameters: true
@@ -294,7 +294,7 @@
          TEST_GROUP_PREFIX=system_test.vcenter.create_batch_of_instances
          TEST_GROUP_CONFIG=vcenter_vmware_roles
        kill-phase-on: NEVER
-          
+
      - name: '{fuel-release}.{plugin-name}.vcenter_disktypes'
        property-file: build_number
        current-parameters: true
@@ -321,7 +321,7 @@
          TEST_GROUP_PREFIX=system_test.vcenter.scale_vcenter_dvs
          TEST_GROUP_CONFIG=vcenter_add_cindervmware
        kill-phase-on: NEVER
-          
+
      - name: '{fuel-release}.{plugin-name}.vcenter_ha_kvm'
        property-file: build_number
        current-parameters: true
@@ -345,7 +345,7 @@
        property-file: build_number
        current-parameters: true
        predefined-parameters: |
-         TEST_GROUP=vcenter_shutdown_crtl
+         TEST_GROUP=vcenter_shutdown_ctrl
          TEST_GROUP_PREFIX=system_test.vcenter.vcenter_shutdown_ctrl
          TEST_GROUP_CONFIG=vcenter_add_controller
        kill-phase-on: NEVER
