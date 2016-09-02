@@ -133,8 +133,13 @@
           weight: 1
     builders:
       - shell: |
-          if sudo puppet agent -tdv --server tpi-puppet.vm.mirantis.net --waitforcert 30 ; then
+          if sudo puppet agent -tdv --server tpi-puppet.vm.mirantis.net --waitforcert 30;  then
               echo "Command succeeded"
           else
-              echo "Some packages,libraries failed to load on lab ${HOSTNAME}"
+              ref=$?
+              if [[ $ref==1 ]]; then
+                  echo "Some packages,libraries failed to load on lab ${HOSTNAME}"
+              else
+                  echo $res
+              fi    
           fi 
