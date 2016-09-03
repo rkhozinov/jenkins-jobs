@@ -3,14 +3,14 @@
     name: 'utilites'        
     download_iso: 'download_iso'
     sync_jira_with_launchpad: 'sync_jira_with_launchpad'
-    clean_envs: 'clean_envs'
+#    clean_envs: 'clean_envs'
     puppet_run: 'puppet_run'
     jobs:
       - '{download_iso}'
 
       - '{sync_jira_with_launchpad}'
 
-      - '{clean_envs}'
+        #      - '{clean_envs}'
 
       - '{puppet_run}'
 
@@ -88,34 +88,34 @@
       - shell:
           !include-raw-escape: ../builders/build-job-sync-jira-with-launchpad.sh
 
-- job-template:
-    name: '{clean_envs}'
-    node: 'runner'
-    concurrent: false
-    disabled: false
-    triggers:
-      - timed: "H 5-18/3 * * 1-5"
-    wrappers:
-      - ansicolor:
-          colormap: xterm
-    parameters:
-      - string:
-          name: LABEL
-          description: "set plugin-label for cleaning envs"
-    properties:
-      - heavy-job:
-          weight: 1
-    builders:
-      - multijob:
-          name: Cleaning
-          condition: COMPLETED
-          projects:
-            - name: Cleaning_via_label
-              current-parameters: true
-              node-label: ${{LABEL}}
-              builders:
-                - shell:
-                    !include-raw-escape: ../builders/build-clean-envs.sh
+#- job-template:
+#    name: '{clean_envs}'
+#    node: 'runner'
+#    concurrent: false
+#    disabled: false
+#    triggers:
+#      - timed: "H 5-18/3 * * 1-5"
+#    wrappers:
+#      - ansicolor:
+#          colormap: xterm
+#    parameters:
+#      - string:
+#          name: LABEL
+#          description: "set plugin-label for cleaning envs"
+#    properties:
+#      - heavy-job:
+#          weight: 1
+#    builders:
+#      - multijob:
+#          name: Cleaning
+#          condition: COMPLETED
+#          projects:
+#            - name: Cleaning_via_label
+#              current-parameters: true
+#              node-label: ${{LABEL}}
+#              builders:
+#                - shell:
+#                    !include-raw-escape: ../builders/build-clean-envs.sh
 
 - job-template:
     name: '{puppet_run}'
@@ -129,17 +129,37 @@
           name: node
           description: "set plugin-label, PAY ATTENTION, checker Run on all 'nodes matching the label' must be enabled in configure tab"
     properties:
+      - build-discarder:
+          days-to-keep: 40
+          num-to-keep: 40
+          artifact-days-to-keep: 30
+          artifact-num-to-keep: 20
       - heavy-job:
           weight: 1
+      - throttle:
+          max-per-node: 0
+          max-total: 0
+          enabled: true
+          categories:
+            - vcenter
+            - dvs
+            - nsxv
+            - contrail
+            - contrail-baremetal
+            - gcs
+            - mistral
+            - manila
+          option: category
     builders:
       - shell: |
           if sudo puppet agent -tdv --server tpi-puppet.vm.mirantis.net --waitforcert 30;  then
               echo "Command succeeded"
           else
               ref=$?
-              if [[ $ref==1 ]]; then
-                  echo "Some packages,libraries failed to load on lab ${HOSTNAME}"
+              if [ "$ref" == "1" ]; then
+                echo "Some packages,libraries failed to load on lab ${HOSTNAME}"
               else
-                  echo $res
+                echo "result in acceptable limits ( exit code = $ref )"
               fi    
           fi 
+
