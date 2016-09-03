@@ -10,7 +10,7 @@
 
       - '{sync_jira_with_launchpad}'
 
-        #      - '{clean_envs}'
+#      - '{clean_envs}'
 
       - '{puppet_run}'
 
