@@ -19,21 +19,13 @@
           default: '{obj:force_vsrx_copy}'
           description: 'force copying of vsrx image'
       - string:
-          name: NODE_VOLUME_SIZE
-          default: '512'
-      - string:
           name: MIRROR
           default: 'http://mirror.seed-cz1.fuel-infra.org'
           description: 'mirror for package repositories. this mirror is optimized for CZ'
       - string:
-          name: MIRROR_UBUNTU
-          default: >
-             deb ${{MIRROR}}/pkgs/ubuntu/ trusty main universe multiverse |
-             deb ${{MIRROR}}/pkgs/ubuntu/ trusty-updates main universe multiverse
-          description: 'proposed repositories to update ubuntu cluster'
+          name: CONTRAIL_PLUGIN_PATH
       - string:
           name: CONTRAIL_DISTRIBUTION
-          default: ''
       - string:
           name: CONTRAIL_VERSION
           default: '{plugin-version}'
@@ -49,30 +41,25 @@
       - string:
           name: POOL_STORAGE
       - string:
-          name: PLUGIN_VERSION
-          default: ${{CONTRAIL_VERSION}}
-          description: 'plugin version from metadata'
-      - string:
-          name: CONTRAIL_PLUGIN_PATH
-          description: 'The path to the contrail package on storage'
-      - string:
           name: CONTRAIL_PLUGIN_PACK_UB_PATH
           description: 'The path to the contrail package on storage'
       - string:
-          name: VSRX_ORIGINAL_IMAGE_PATH
-          default: '{vsrx_original_image_path}'
-          description: 'The path to the vSRX.400.img image on storage'
-      - string:
-          name: VSRX_TARGET_IMAGE_PATH
-          default: '{vsrx_target_image_path}'
-          description: 'The path to the vsrx image on host'
-      - string:
-          name: VSRX_TEMPLATE_PATH
-          default: '{vsrx_template_path}'
-          description: 'The path to the vsrx template'
-      - string:
-          name: ISO_STORAGE
-          default: '{iso_storage}'
+          name: MIRROR_UBUNTU
+          default: >
+             deb ${{MIRROR}}/pkgs/ubuntu/ trusty main universe multiverse |
+             deb ${{MIRROR}}/pkgs/ubuntu/ trusty-updates main universe multiverse |
+             deb ${{MIRROR}}/pkgs/ubuntu/ trusty-security main universe multiverse
+          description: 'proposed repositories to update ubuntu cluster'
+      - text:
+          name: ADDITIONAL_PARAMETERS
+          default: |
+            NODE_VOLUME_SIZE=512
+            CONTRAIL_VERSION={plugin-version}
+            PLUGIN_VERSION=${{CONTRAIL_VERSION}}
+            VSRX_ORIGINAL_IMAGE_PATH={vsrx_original_image_path}
+            VSRX_TARGET_IMAGE_PATH={vsrx_target_image_path}
+            VSRX_TEMPLATE_PATH={vsrx_template_path}
+            ISO_STORAGE={iso_storage}
 
 - project:
     name: 'predefined_parameters'
@@ -118,7 +105,7 @@
     testjob_build_pkg: false
     runner_timeout: 600
     test_timeout: 300
-    iso_file: 'fuel-8.0-570.iso'
+    iso_file: 'MirantisOpenStack-8.0.iso'
     iso_storage: '/storage/downloads'
     gerrit_repo: 'fuel-plugin-contrail'
     gerrit_branch: 'stable/4.0'
@@ -138,7 +125,7 @@
     testrail_suite: "[8.0][PCE] Fuel plugin contrail v4.0.0"
     testrail_suite_desc: "Suite description"
     testrail_milestone: "Fuel Contrail Plugin v4.0.0"
-    testrail_plan: "$TREP_TESTRAIL_SUITE iso #${{ISO_VERSION}} pkg#${{JUNIPER_PKG_VERSION}} build#${{PKG_JOB_BUILD_NUMBER}}"
+    testrail_plan: "$TREP_TESTRAIL_SUITE pkg#${{JUNIPER_PKG_VERSION}} build#${{PKG_JOB_BUILD_NUMBER}}"
     testrail_plan_desc: "Test plan description"
     testrail_run: "$TREP_TESTRAIL_SUITE"
     testrail_run_desc: "Test run description"
@@ -285,6 +272,8 @@
           testrail_plan_desc:   '{testrail_plan_desc}'
           skip_vote_successfull: '{skip_vote_successfull}'
           skip_vote_failed:     '{skip_vote_failed}'
+          kvm_use:              '{kvm_use}'
+
       - plugin-specific-parameters:
           bonding:              '{bonding}'
           kvm_use:              '{kvm_use}'
@@ -334,6 +323,7 @@
           testrail_plan_desc:   '{testrail_plan_desc}'
           skip_vote_successfull: '{skip_vote_successfull}'
           skip_vote_failed:     '{skip_vote_failed}'
+          kvm_use:              '{kvm_use}'
       - plugin-specific-parameters:
           update_master:        '{update_master}'
           bonding:              '{bonding}'
@@ -363,6 +353,18 @@
     properties:
       - test-property
     builders:
+      - inject:
+          properties-content: $ADDITIONAL_PARAMETERS
+      - conditional-step:
+           condition-kind: shell
+           condition-command: |
+            [ "${{BUILD_PKG}}" == "true"       ]
+           steps:
+             - trigger-builds:
+                 - project: ${{PKG_JOB_NAME}}
+                   current-parameters: false
+                   git-revision: false
+                   block: true
       - conditional-step:
           condition-kind: shell
           condition-command: |
@@ -436,6 +438,11 @@
           name: DEBUG
           default: '{build_debug}'
     properties:
+      - build-discarder:
+          days-to-keep: 30
+          num-to-keep: 50
+          artifact-days-to-keep: 30
+          artifact-num-to-keep: 50
       - heavy-job:
           weight: 1
     wrappers:
@@ -524,6 +531,8 @@
           properties_name: regression.properties
           email_to: '{email_to}'
     builders:
+      - inject:
+          properties-content: $ADDITIONAL_PARAMETERS
       - multijob:
           name: '1st phase - regression test'
           condition: COMPLETED
@@ -559,6 +568,8 @@
       - runner-wrapper
     scm: []
     builders:
+      - inject:
+          properties-content: $ADDITIONAL_PARAMETERS
       - runner-condition
       - multijob:
           name: 'The smoke test for {fuel-release}.{plugin-name}.{plugin-version}'
@@ -597,6 +608,8 @@
     wrappers:
       - runner-wrapper
     builders:
+      - inject:
+          properties-content: $ADDITIONAL_PARAMETERS
       - runner-condition
       - multijob:
           name: 'The BVT test for {fuel-release}.{plugin-name}.{plugin-version}'

@@ -323,12 +323,6 @@
             $TESTRAIL_PARAMETERS
             $ENV_PARAMETERS
             $VCENTER_PARAMETERS
-  #      - inject:
-  #          properties-content: $TESTRAIL_PARAMETERS
-  #      - inject:
-  #          properties-content: $ENV_PARAMETERS
-  #      - inject:
-  #          properties-content: $VCENTER_PARAMETERS
       - shell:
           !include-raw-escape: ../builders/common.prepare.ng.sh
       - shell:
@@ -370,10 +364,10 @@
           name: GERRIT_REFSPEC
           default: 'refs/heads/{gerrit_branch}'
       - string:
-          name: PUPPETLINT_PATH 
+          name: PUPPETLINT_PATH
           default: './deployment_scripts/puppet/manifests ./deployment_scripts/puppet/modules/vmware_dvs'
       - string:
-          name: PUPPETLINT_IGNORE 
+          name: PUPPETLINT_IGNORE
           default: 'l2.pp'
       - bool:
           name: DEBUG
@@ -444,6 +438,12 @@
           properties_name: regression.properties
           email_to: '{email_to}'
     builders:
+      - shell: |
+          #!/bin/bash
+          echo "TEST_GROUP=dvs_regression" > property
+          echo "DVS_PLUGIN_PATH={released_plugin_path}" >> property
+          echo "PLUGIN_VERSION={plugin-version}" >> property
+          echo "PKG_JOB_BUILD_NUMBER=released" >> property
       - multijob:
           name: '1st phase - regression test'
           condition: COMPLETED
