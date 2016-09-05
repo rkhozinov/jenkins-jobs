@@ -99,6 +99,10 @@
       - label:
           name: node
           description: "set plugin-label, PAY ATTENTION, checker Run on all 'nodes matching the label' must be enabled in configure tab"
+      - string:
+          name: FUEL_RELEASE_NUMBER
+          default: '90'
+          description: "set number of active venv, as example = '90' for 90-venv, default= '90' ; all cases = 90,80,70,61"
     properties:
       - test-property
     builders:
