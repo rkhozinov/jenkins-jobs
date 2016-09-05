@@ -129,27 +129,7 @@
           name: node
           description: "set plugin-label, PAY ATTENTION, checker Run on all 'nodes matching the label' must be enabled in configure tab"
     properties:
-      - build-discarder:
-          days-to-keep: 40
-          num-to-keep: 40
-          artifact-days-to-keep: 30
-          artifact-num-to-keep: 20
-      - heavy-job:
-          weight: 1
-      - throttle:
-          max-per-node: 0
-          max-total: 0
-          enabled: true
-          categories:
-            - vcenter
-            - dvs
-            - nsxv
-            - contrail
-            - contrail-baremetal
-            - gcs
-            - mistral
-            - manila
-          option: category
+      - test-property
     builders:
       - shell: |
           if sudo puppet agent -tdv --server tpi-puppet.vm.mirantis.net --waitforcert 30;  then
