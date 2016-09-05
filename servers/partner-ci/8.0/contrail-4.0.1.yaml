@@ -19,9 +19,9 @@
           default: '{obj:force_vsrx_copy}'
           description: 'force copying of vsrx image'
       - string:
-          #escription: 'mirror for package repositories. this mirror is optimized for CZ'
           name: MIRROR
           default: 'http://mirror.seed-cz1.fuel-infra.org'
+          description: 'mirror for package repositories. this mirror is optimized for CZ'
       - string:
           name: CONTRAIL_PLUGIN_PATH
       - string:
@@ -41,6 +41,7 @@
              deb ${{MIRROR}}/pkgs/ubuntu/ trusty main universe multiverse |
              deb ${{MIRROR}}/pkgs/ubuntu/ trusty-updates main universe multiverse |
              deb ${{MIRROR}}/pkgs/ubuntu/ trusty-security main universe multiverse
+          description: 'proposed repositories to update ubuntu cluster'
       - text:
           name: ADDITIONAL_PARAMETERS
           default: |
@@ -395,7 +396,7 @@
           testrail_plan:        '{testrail_plan}'
           testrail_plan_desc:   '{testrail_plan_desc}'
           skip_vote_successfull: '{skip_vote_successfull}'
-          skip_vote_failed: '{skip_vote_failed}'
+          skip_vote_failed:     '{skip_vote_failed}'
           kvm_use:              '{kvm_use}'
       - plugin-specific-parameters:
           update_master:        '{update_master}'
@@ -419,7 +420,7 @@
           scm_wipe_workspace: '{scm_wipe_workspace}'
           gerrit_repo: '{gerrit_repo}'
           skip_vote_successfull: '{skip_vote_successfull}'
-          skip_vote_failed: '{skip_vote_failed}'
+          skip_vote_failed:     '{skip_vote_failed}'
     wrappers:
       - test-wrapper:
           test_timeout: '{test_timeout}'
