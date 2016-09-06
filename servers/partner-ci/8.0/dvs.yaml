@@ -13,7 +13,13 @@
           default: true
       - string:
           name: LOCATION
-          default: bud
+          default: 'bud'
+      - string:
+          name: DEB_LATEST
+          default: 'latest'
+      - string:
+          name: RPM_LATEST
+          default: 'latest'
       - text:
           name: VCENTER_PARAMETERS
           default: |
