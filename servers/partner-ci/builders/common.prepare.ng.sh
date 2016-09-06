@@ -19,10 +19,13 @@ fi
 
 [ -z $ISO_FILE ] && (echo "ISO_FILE variable is empty"; exit 1)
 
-if [[ "${UPDATE_MASTER}" == "true" ]]; then
-  [ ${SNAPSHOTS_ID} ] && export SNAPSHOTS_ID=${SNAPSHOTS_ID} || export SNAPSHOTS_ID=${CUSTOM_VERSION:10}
-fi
+export FUEL_RELEASE=$(echo $ISO_FILE | cut -d- -f2 | tr -d '.iso')
 
+if [[ "${UPDATE_MASTER}" == "true" ]] && [[ ${FUEL_RELEASE} != *"80"* ]]; then
+  [ ${SNAPSHOTS_ID} ] && export SNAPSHOTS_ID=${SNAPSHOTS_ID} || export SNAPSHOTS_ID=${CUSTOM_VERSION:10}
+else
+  export SNAPSHOTS_ID="released"
+fi
 [ -z "${SNAPSHOTS_ID}" ] && { echo SNAPSHOTS_ID is empty; exit 1; }
 #remove old logs and test data
 [ -f nosetest.xml ] && rm -f nosetests.xml
