@@ -503,13 +503,7 @@
           name: DEBUG
           default: '{build_debug}'
     properties:
-      - build-discarder:
-          days-to-keep: 30
-          num-to-keep: 50
-          artifact-days-to-keep: 30
-          artifact-num-to-keep: 50
-      - heavy-job:
-          weight: 1
+      - test-property
     wrappers:
       - ansicolor:
           colormap: xterm
