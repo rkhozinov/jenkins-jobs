@@ -254,7 +254,7 @@
       - conditional-step:
           condition-kind: shell
           condition-command: |
-            [[ "${UPDATE_MASTER}" == "true" ]]
+            [[ "${UPDATE_MASTER}" == "true" ]] && [[ $SNAPSHOTS_ID != *"released"* ]]
           steps:
             - shell: |
                 #!/bin/bash
