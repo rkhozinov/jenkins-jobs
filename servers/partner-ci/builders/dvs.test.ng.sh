@@ -20,7 +20,9 @@ if [[ "${UPDATE_MASTER}" == "true" ]] && [[ ${FUEL_RELEASE} != *"80"* ]]; then
 else
   export SNAPSHOTS_ID="released"
 fi
-
+if [[ $SNAPSHOTS_ID == *"lastSuccessfulBuild"* ]]; then
+  export SNAPSHOTS_ID=$(cat snapshots.params | grep -Po '#\K[^ ]+')
+fi  
 [ -z "${SNAPSHOTS_ID}" ] && { echo SNAPSHOTS_ID is empty; exit 1; }
 
 if [ -f build.plugin_version ]; then
