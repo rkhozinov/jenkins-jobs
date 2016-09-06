@@ -8,13 +8,13 @@ export LAUNCHPAD_PROJECT='fuel-plugin-vmware-dvs'
 export LAUNCHPAD_MILESTONE='{"3.1.0": "DVS plugin 3.1.0"}'
 python sync_jira_with_launchpad.py
 
-# Sync nsxv bugs:
-export LAUNCHPAD_PROJECT='fuel-plugin-nsxv'
-export LAUNCHPAD_MILESTONE='{"3.0.0": "NSXv plugin 3.0.0"}'
+# Sync nsx-t bugs:
+export LAUNCHPAD_PROJECT='fuel-plugin-nsx-t'
+export LAUNCHPAD_MILESTONE='{"1.0.0": "NSX-t plugin 1.0.0"}'
 python sync_jira_with_launchpad.py
 
 # Sync contrail bugs:
 export LAUNCHPAD_PROJECT='fuel-plugin-contrail'
-export LAUNCHPAD_MILESTONE='{"3.0.1": "Contrail plugin 3.0.1", "4.0.1": "Contrail plugin 4.0.1"}'
+export LAUNCHPAD_MILESTONE='{"5.0.0": "Contrail plugin 5.0"}'
 #export LAUNCHPAD_TAGS='contrail'
 python sync_jira_with_launchpad.py
