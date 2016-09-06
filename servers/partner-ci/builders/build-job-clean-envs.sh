@@ -23,7 +23,7 @@ function dospy_list {
 export REQUIRED_FREE_SPACE=200
 #export VENV_PATH="${HOME}/${FUEL_RELEASE_NUMBER}-venv"
 if source "${HOME}/${FUEL_RELEASE_NUMBER}-venv/bin/activate"; then
-  echo "Command succeeded"
+  echo "${FUEL_RELEASE_NUMBER}-venv has been successfully activated"
 else
   echo "there is no venv named ${FUEL_RELEASE_NUMBER}, switched to 90 (default)"
   source "${HOME}/90-venv/bin/activate"
