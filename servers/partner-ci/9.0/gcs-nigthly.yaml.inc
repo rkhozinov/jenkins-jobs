@@ -20,3 +20,48 @@
        current-parameters: true
        kill-phase-on: NEVER
        property-file: build_number
+       
+     - name: '{fuel-release}.{plugin-name}.{plugin-version}.gcs_ceph'
+       current-parameters: true
+       kill-phase-on: NEVER
+       property-file: build_number
+       
+     - name: '{fuel-release}.{plugin-name}.{plugin-version}.gcs_cinder_multirole'
+       current-parameters: true
+       kill-phase-on: NEVER
+       property-file: build_number
+       
+     - name: '{fuel-release}.{plugin-name}.{plugin-version}.gcs_cinder_ceph_multirole'
+       current-parameters: true
+       kill-phase-on: NEVER
+       property-file: build_number
+       
+     - name: '{fuel-release}.{plugin-name}.{plugin-version}.gcs_ceilometer'
+       current-parameters: true
+       kill-phase-on: NEVER
+       property-file: build_number
+       
+     - name: '{fuel-release}.{plugin-name}.{plugin-version}.gcs_delete_add_controller'
+       current-parameters: true
+       kill-phase-on: NEVER
+       property-file: build_number
+       
+     - name: '{fuel-release}.{plugin-name}.{plugin-version}.gcs_delete_add_compute'
+       current-parameters: true
+       kill-phase-on: NEVER
+       property-file: build_number
+       
+     - name: '{fuel-release}.{plugin-name}.{plugin-version}.gcs_delete_add_cinder'
+       current-parameters: true
+       kill-phase-on: NEVER
+       property-file: build_number
+       
+     - name: '{fuel-release}.{plugin-name}.{plugin-version}.gcs_delete_add_single_cinder'
+       current-parameters: true
+       kill-phase-on: NEVER
+       property-file: build_number
+       
+     - name: '{fuel-release}.{plugin-name}.{plugin-version}.gcs_add_ceph'
+       current-parameters: true
+       kill-phase-on: NEVER
+       property-file: build_number

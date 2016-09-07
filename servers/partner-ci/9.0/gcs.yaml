@@ -91,6 +91,15 @@
     testgroup:
       - gcs_smoke 
       - gcs_bvt
+      - gcs_ceph
+      - gcs_cinder_multirole
+      - gcs_cinder_ceph_multirole
+      - gcs_ceilometer
+      - gcs_delete_add_controller
+      - gcs_delete_add_compute
+      - gcs_delete_add_cinder
+      - gcs_delete_add_single_cinder
+      - gcs_add_ceph
 
     jobs:
       - '{build-name}':
