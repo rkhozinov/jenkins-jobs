@@ -14,8 +14,9 @@ export ISO_PATH="${ISO_STORAGE}/${ISO_FILE}"
 
 if [[ $ISO_FILE == *"Mirantis"* ]]; then
   export FUEL_RELEASE=$(echo $ISO_FILE | cut -d- -f2 | tr -d '.iso')
-  [[ "${UPDATE_MASTER}" -eq "true" ]] && export ISO_VERSION='mos-mu' || export ISO_VERSION='mos'
+  [[ "${UPDATE_MASTER}" -eq "true" ]] && export ISO_VERSION='released' || export ISO_VERSION='mos'
 fi
+
 
 export ENV_NAME="${ENV_PREFIX}.${ISO_VERSION}"
 export VENV_PATH="${HOME}/${FUEL_RELEASE}-venv"
