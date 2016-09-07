@@ -16,11 +16,6 @@
     name: 'Nightly suite {plugin-name} {fuel-release}.{plugin-version}'
     condition: COMPLETED
     projects:
-     - name: '{fuel-release}.{plugin-name}.{plugin-version}.gcs_smoke'
-       current-parameters: true
-       kill-phase-on: NEVER
-       property-file: build_number
-       
      - name: '{fuel-release}.{plugin-name}.{plugin-version}.gcs_ceph'
        current-parameters: true
        kill-phase-on: NEVER
