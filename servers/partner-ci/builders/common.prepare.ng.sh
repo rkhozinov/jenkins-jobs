@@ -1,5 +1,4 @@
 #!/bin/bash -e
-
 git log  --pretty=oneline | head
 IS_NESTED=$(cat /sys/module/kvm_intel/parameters/nested)
 IS_IGNORE_MSRS=$(cat /sys/module/kvm/parameters/ignore_msrs)
@@ -68,26 +67,6 @@ REQS_PATH_DEVOPS="https://raw.githubusercontent.com/openstack/fuel-qa/${REQS_BRA
 ## We have limited disk resources, so before run of system tests a lab
 ## may have many deployed and runned envs, those may cause errors during test
 
-function dospy {
-  env_list=$2
-  action=$1
-
-  if [[ ! -z "${env_list}" ]] && [[ ! -z "${action}" ]]; then
-    for env in $env_list; do dos.py $action $env; done
-  fi
-}
-
-## Gets dospy environments
-## with prefix the function returns all env except envs like prefix
-function dospy_list {
-  prefix=$1
-  dos.py sync
-  [ -z $prefix ] && \
-    echo $(dos.py list | tail -n +3) || \
-    echo $(dos.py list | tail -n +3  | grep -v $prefix)
-}
-
-
 ## Recreate all an virtual env
 function recreate_venv {
   [ -d $VENV_PATH ] && rm -rf ${VENV_PATH} || echo "The directory ${VENV_PATH} doesn't exist"
@@ -126,8 +105,28 @@ function prepare_venv {
     deactivate
 }
 
-####################################################################################
 
+#################################################################
+function dospy {
+  env_list=$2
+  action=$1
+
+  if [[ ! -z "${env_list}" ]] && [[ ! -z "${action}" ]]; then
+    for env in $env_list; do dos.py $action $env; done
+  fi
+}
+
+## Gets dospy environments
+## with prefix the function returns all env except envs like prefix
+function dospy_list {
+  prefix=$1
+  dos.py sync
+  [ -z $prefix ] && \
+    echo $(dos.py list | tail -n +3) || \
+    echo $(dos.py list | tail -n +3  | grep $prefix)
+}
+
+##################################################################
 [[ "${RECREATE_VENV}" == "true" ]] && recreate_venv
 
 get_venv_requirements
@@ -140,10 +139,8 @@ source "$VENV_PATH/bin/activate"
 [ -z $VIRTUAL_ENV ] && { echo "VIRTUAL_ENV is empty"; exit 1; }
 
 if [[ "${FORCE_ERASE}" == "true" ]]; then
-  for env in $(dospy_list $ENV_NAME); do 
-    if [[ $env  != *"released"* ]]; then
-      dos.py erase $env
-    fi
+  for env in $(dospy_list); do 
+    dos.py erase $env
   done 
 else
   # determine free space before run the cleaner
@@ -157,15 +154,25 @@ else
     done 
   fi
 
-  export REQUIRED_FREE_SPACE=300
-  if (( $free_space < $REQUIRED_FREE_SPACE )); then 
-    for env in $(dospy_list $ENV_NAME); do 
-      dos.py erase $env
-    done 
-  else
-    echo "free-space: $free_space"
-  fi
-
+  ###############################################################
+  ##############possibility of reusing envs######################
+  for env in $(dospy_list $ENV_NAME); do
+    if [[ $env  == $ENV_NAME ]]; then
+      snap_date=$(dos.py snapshot-list $env | grep empty | awk '{print $2}')
+      current_date=$(date +'%Y-%m-%d')
+      mod_snap_date=$(date -d $snap_date +"%Y%m%d")
+      mod_current_date=$(date -d $current_date +"%Y%m%d")
+      if [[ mod_snap_date -eq mod_current_date ]]; then
+        echo "$env is suitable for test, it will be reused"
+      else
+        echo "$env is not suitable for test, it will be erased"
+        dos.py erase $env
+      fi
+    else
+      echo "there is no cases to reuse env"
+    fi
+  done
+  ###############################################################
   # poweroff all envs
   for env in $(dospy_list $ENV_NAME); do 
     dos.py destroy $env 
