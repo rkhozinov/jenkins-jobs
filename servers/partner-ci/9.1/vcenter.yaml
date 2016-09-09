@@ -44,7 +44,6 @@
     nightly-name: '{fuel-release}.{plugin-name}.nightly'
     custom-name: '{fuel-release}.{plugin-name}.custom'
     reporter-name: '{fuel-release}.{plugin-name}.reporter'
-
     admin_node_memory: '8192'
     slave_node_memory: '8192'
     admin_node_cpu: '4'

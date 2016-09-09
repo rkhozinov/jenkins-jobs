@@ -449,7 +449,7 @@
          TEST_GROUP_PREFIX=system_test.vcenter.scale_vcenter_dvs
        kill-phase-on: NEVER
 
-     - name: '{fuel-release}.{plugin-name}.vcenter_redeploy_successful_cluster
+     - name: '{fuel-release}.{plugin-name}.vcenter_redeploy_successful_cluster'
        property-file: build_number
        current-parameters: true
        predefined-parameters: |
@@ -458,7 +458,7 @@
          TEST_GROUP_PREFIX=system_test.vcenter.vcenter_redeploy_successful_cluster
        kill-phase-on: NEVER
 
-     - name: '{fuel-release}.{plugin-name}.vcenter_redeploy_stopped_cluster
+     - name: '{fuel-release}.{plugin-name}.vcenter_redeploy_stopped_cluster'
        property-file: build_number
        current-parameters: true
        predefined-parameters: |
@@ -468,7 +468,7 @@
          PROGRESS_TO_STOP=50
        kill-phase-on: NEVER
 
-     - name: '{fuel-release}.{plugin-name}.vcenter_redeploy_failed_cluster
+     - name: '{fuel-release}.{plugin-name}.vcenter_redeploy_failed_cluster'
        property-file: build_number
        current-parameters: true
        predefined-parameters: |
