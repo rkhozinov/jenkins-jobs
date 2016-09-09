@@ -449,15 +449,6 @@
          TEST_GROUP_PREFIX=system_test.vcenter.scale_vcenter_dvs
        kill-phase-on: NEVER
 
-     - name: '{fuel-release}.{plugin-name}.vcenter_mv_cluster_ctrl_to_compute'
-       property-file: build_number
-       current-parameters: true
-       predefined-parameters: |
-         TEST_GROUP=vcenter_mv_cluster_ctrl_to_compute
-         TEST_GROUP_CONFIG=vcenter_mv_cluster_ctrl_to_compute
-         TEST_GROUP_PREFIX=system_test.vcenter.scale_vcenter_dvs
-       kill-phase-on: NEVER
-
      - name: '{fuel-release}.{plugin-name}.vcenter_redeploy_successful_cluster
        property-file: build_number
        current-parameters: true
