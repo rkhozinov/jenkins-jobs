@@ -146,6 +146,10 @@
       - vcenter_mv_cluster_compute_to_ctrl
       - vcenter_mv_cluster_ctrl_to_compute
 
+      - vcenter_redeploy_successful_cluster
+      - vcenter_redeploy_stopped_cluster
+      - vcenter_redeploy_failed_cluster
+
     jobs:
       - '{nightly-name}':
           multijob_build_pkg: true
