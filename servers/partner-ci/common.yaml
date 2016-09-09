@@ -170,6 +170,9 @@
       - archive:
           artifacts: 'logs/*'
           allow-empty: true
+      - archive:
+          artifacts: 'sys_test.log'
+          allow-empty: true
       - conditional-publisher:
           - condition-kind: file-exists
             condition-filename: 'nosetests.xml'
