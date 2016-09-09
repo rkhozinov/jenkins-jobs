@@ -154,24 +154,29 @@ else
     done 
   fi
 
-  ###############################################################
-  ##############possibility of reusing envs######################
-  for env in $(dospy_list $ENV_NAME); do
-    if [[ $env  == $ENV_NAME ]]; then
+###############################################################
+##############possibility of reusing envs######################
+for env in $(dospy_list $ENV_NAME); do
+  if [[ $env  == $ENV_NAME ]]; then
+    if dos.py snapshot-list $env | grep empty; then
       snap_date=$(dos.py snapshot-list $env | grep empty | awk '{print $2}')
       current_date=$(date +'%Y-%m-%d')
       mod_snap_date=$(date -d $snap_date +"%Y%m%d")
       mod_current_date=$(date -d $current_date +"%Y%m%d")
-      if [[ mod_snap_date -eq mod_current_date ]]; then
+      if [[ $mod_snap_date -eq $mod_current_date ]]; then
         echo "$env is suitable for test, it will be reused"
       else
         echo "$env is not suitable for test, it will be erased"
         dos.py erase $env
       fi
     else
-      echo "there is no cases to reuse env"
+      echo "there is no date-metadate, $env will be erased"
+      dos.py erase $env
     fi
-  done
+  else
+    echo "there is no cases to reuse env"
+  fi
+done
   ###############################################################
   # poweroff all envs
   for env in $(dospy_list $ENV_NAME); do 
