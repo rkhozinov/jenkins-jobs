@@ -107,15 +107,6 @@ function prepare_venv {
 
 
 #################################################################
-function dospy {
-  env_list=$2
-  action=$1
-
-  if [[ ! -z "${env_list}" ]] && [[ ! -z "${action}" ]]; then
-    for env in $env_list; do dos.py $action $env; done
-  fi
-}
-
 ## Gets dospy environments
 ## with prefix the function returns all env except envs like prefix
 function dospy_list {
