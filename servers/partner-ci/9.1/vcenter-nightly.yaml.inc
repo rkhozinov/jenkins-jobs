@@ -448,3 +448,40 @@
          TEST_GROUP_CONFIG=vcenter_mv_cluster_ctrl_to_compute
          TEST_GROUP_PREFIX=system_test.vcenter.scale_vcenter_dvs
        kill-phase-on: NEVER
+
+     - name: '{fuel-release}.{plugin-name}.vcenter_mv_cluster_ctrl_to_compute'
+       property-file: build_number
+       current-parameters: true
+       predefined-parameters: |
+         TEST_GROUP=vcenter_mv_cluster_ctrl_to_compute
+         TEST_GROUP_CONFIG=vcenter_mv_cluster_ctrl_to_compute
+         TEST_GROUP_PREFIX=system_test.vcenter.scale_vcenter_dvs
+       kill-phase-on: NEVER
+
+     - name: '{fuel-release}.{plugin-name}.vcenter_redeploy_successful_cluster
+       property-file: build_number
+       current-parameters: true
+       predefined-parameters: |
+         TEST_GROUP=vcenter_redeploy_successful_cluster
+         TEST_GROUP_CONFIG=vcenter_glance_vmware_roles
+         TEST_GROUP_PREFIX=system_test.vcenter.vcenter_redeploy_successful_cluster
+       kill-phase-on: NEVER
+
+     - name: '{fuel-release}.{plugin-name}.vcenter_redeploy_stopped_cluster
+       property-file: build_number
+       current-parameters: true
+       predefined-parameters: |
+         TEST_GROUP=vcenter_redeploy_stopped_cluster
+         TEST_GROUP_CONFIG=vcenter_glance_vmware_roles
+         TEST_GROUP_PREFIX=system_test.vcenter.vcenter_redeploy_stopped_cluster
+         PROGRESS_TO_STOP=50
+       kill-phase-on: NEVER
+
+     - name: '{fuel-release}.{plugin-name}.vcenter_redeploy_failed_cluster
+       property-file: build_number
+       current-parameters: true
+       predefined-parameters: |
+         TEST_GROUP=vcenter_redeploy_failed_cluster
+         TEST_GROUP_CONFIG=vcenter_glance_vmware_roles
+         TEST_GROUP_PREFIX=system_test.vcenter.vcenter_redeploy_failed_cluster
+       kill-phase-on: NEVER
