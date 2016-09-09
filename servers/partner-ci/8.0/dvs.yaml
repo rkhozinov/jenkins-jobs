@@ -36,7 +36,7 @@
             VCENTER_USERNAME=root
             VCENTER_PASSWORD=vmware
             VC_DATACENTER=Datacenter
-            VCENTER_DATASTORE=nfs
+            VC_DATASTORE=nfs
             VCENTER_CLUSTERS=Cluster1,Cluster2
             DVS_SWITCHES=Cluster1,Cluster2
             VCENTER_USE=true
