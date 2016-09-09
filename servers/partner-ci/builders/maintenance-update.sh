@@ -27,7 +27,7 @@ fi
 ###################### Set extra DEB and RPM repos ####
 
 if [[ -n "${RPM_LATEST}" ]]; then
-    RPM_MIRROR="${MIRROR_HOST}mos-repos/centos/mos8.0-centos7-fuel/snapshots/"
+    RPM_MIRROR="${MIRROR_HOST}/mos-repos/centos/mos8.0-centos7-fuel/snapshots/"
     if [[ "${ENABLE_PROPOSED}" == "true" ]]; then
         RPM_PROPOSED="mos-proposed,${RPM_MIRROR}proposed-${RPM_LATEST}/x86_64"
         EXTRA_RPM_REPOS+="${RPM_PROPOSED}"
@@ -65,7 +65,7 @@ if [[ -n "${RPM_LATEST}" ]]; then
 fi
 
 if [[ -n "${DEB_LATEST}" ]]; then
-    DEB_MIRROR="${MIRROR_HOST}mos-repos/ubuntu/snapshots/8.0-${DEB_LATEST}"
+    DEB_MIRROR="${MIRROR_HOST}/mos-repos/ubuntu/snapshots/8.0-${DEB_LATEST}"
     if [[ "${ENABLE_PROPOSED}" == "true" ]]; then
         DEB_PROPOSED="mos-proposed,deb ${DEB_MIRROR} mos8.0-proposed main restricted"
         EXTRA_DEB_REPOS+="${DEB_PROPOSED}"
