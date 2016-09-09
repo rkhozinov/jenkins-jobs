@@ -165,7 +165,7 @@ for env in $(dospy_list $ENV_NAME); do
       dos.py erase $env
     fi
   else
-    echo "there is no cases to reuse env"
+    echo "there're no snapshots to reuse"
   fi
 done
   ###############################################################
