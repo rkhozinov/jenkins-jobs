@@ -60,6 +60,7 @@
     force_erase: true
     recreate_venv: false
     disable_ssl: true
+    kvm_use: false
     update_master: true
     debug: true
     build_debug: true
@@ -206,6 +207,7 @@
           testrail_plan_desc:   '{testrail_plan_desc}'
           skip_vote_successfull: '{skip_vote_successfull}'
           skip_vote_failed:     '{skip_vote_failed}'
+          kvm_use:              '{kvm_use}'
       - plugin-specific-parameters:
           plugin-version: '{plugin-version}'
           iso_storage:    '{iso_storage}'
@@ -248,6 +250,7 @@
           testrail_plan_desc:   '{testrail_plan_desc}'
           skip_vote_successfull: '{skip_vote_successfull}'
           skip_vote_failed:     '{skip_vote_failed}'
+          kvm_use:              '{kvm_use}'
       - plugin-specific-parameters:
           plugin-version: '{plugin-version}'
           iso_storage:    '{iso_storage}'
