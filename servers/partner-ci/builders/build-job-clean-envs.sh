@@ -29,21 +29,6 @@ else
   source "${HOME}/90-venv/bin/activate"
 fi
 
-if [[ "${FORCE_ERASE}" -eq "true" ]]; then
-  for env in $(dospy_list); do
-    if [[ $env  != *"released"* ]]; then
-      dos.py erase $env
-    fi  
-  done
-fi
-
-free_space_2nd_check=$(df -h | grep '/$' | awk '{print $4}' | tr -d G)
-if (( $free_space_2nd_check < $REQUIRED_FREE_SPACE )); then 
-  for env in $(dospy_list); do 
-    dos.py erase $env
-  done 
-else
-  echo "free-space: $free_space_2nd_check"
-fi 
-
-    
+for env in $(dospy_list); do
+  dos.py erase $env
+done
