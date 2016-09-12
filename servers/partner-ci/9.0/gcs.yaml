@@ -46,8 +46,8 @@
     regression_timer: 'H 18 * * *'
     nightly_disabled: false
     regression_disabled: true
-    force_erase: false
-    recreate_venv: false
+    force_erase: true
+    recreate_venv: true
     disable_ssl: false
     kvm_use: false
     update_master: false

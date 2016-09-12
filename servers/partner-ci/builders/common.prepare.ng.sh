@@ -144,7 +144,7 @@ else
       fi
     done 
   fi
-
+fi
 ###############################################################
 ##############possibility of reusing envs######################
 current_date=$(date +'%Y-%m-%d')
@@ -170,7 +170,6 @@ for env in $(dospy_list $ENV_NAME); do
 done
   ###############################################################
   # poweroff all envs
-  for env in $(dospy_list $ENV_NAME); do 
-    dos.py destroy $env 
-  done 
-fi
+for env in $(dospy_list); do 
+  dos.py destroy $env 
+done 
