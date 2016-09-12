@@ -77,7 +77,7 @@
     regression_disabled: true
     force_erase: true
     force_vsrx_copy: false
-    recreate_venv: false
+    recreate_venv: true
     disable_ssl: false
     bonding: false
     kvm_use: false
