@@ -37,6 +37,7 @@ export ISO_PATH="${ISO_STORAGE}/${ISO_FILE}"
 
 if [[ $ISO_FILE == *"Mirantis"* ]]; then
   export FUEL_RELEASE=$(echo $ISO_FILE | cut -d- -f2 | tr -d '.iso')
+  [[ "${UPDATE_MASTER}" -eq "true" ]] && export ISO_VERSION='mos-mu' || export ISO_VERSION='mos'
 fi
 
 export REQUIRED_FREE_SPACE=200
@@ -80,31 +81,32 @@ function get_venv_requirements {
   export REQS_PATH="$(pwd)/requirements.txt"
   wget --no-check-certificate -O requirements-devops-source.txt $REQS_PATH_DEVOPS
   export REQS_PATH_DEVOPS="$(pwd)/requirements-devops-source.txt"
-
-  #if [[ "${REQS_BRANCH}" == "stable/8.0" ]]; then
-    # bug: https://bugs.launchpad.net/fuel/+bug/1528193
-    #sed -i 's/@2.*/@2.9.20/g' $REQS_PATH_DEVOPS
-    #echo oslo.i18n >> $REQS_PATH
-    #echo devops version is changed to 2.9.20 for stable/8.0 branch of fuel-qa
-  #elif [[ "${REQS_BRANCH}" == "stable/mitaka" ]]; then
-    #https://raw.githubusercontent.com/openstack/fuel-devops/2.9.21/test-requirements.txt
-   # echo pytest >> $REQS_PATH
-   # echo devops version is changed to 2.9.20 for stable/8.0 branch of fuel-qa
-  #fi
+  export SPEC_REQS_PATH="${WORKSPACE}/plugin_test/requirement.txt"
 }
-   
+
 function prepare_venv {
     source "${VENV_PATH}/bin/activate"
     easy_install -U pip
-    export redirected_output='pip.properties'
-    [[ "${DEBUG}" == "true" ]] && export redirected_output='/dev/null' 
-    pip install -r "${REQS_PATH}" --upgrade > $redirected_output
-    pip install -r "${REQS_PATH_DEVOPS}" --upgrade > $redirected_output
+    if [[ "${DEBUG}" == "true" ]]; then
+        pip install -r "${REQS_PATH}" --upgrade
+        pip install -r "${REQS_PATH_DEVOPS}" --upgrade
+        if [[ -d $SPEC_REQS_PATH ]]; then
+	         pip install -r "${SPEC_REQS_PATH}" --upgrade
+        fi
+    else
+        pip install -r "${REQS_PATH}" --upgrade > /dev/null 2>/dev/null
+        pip install -r "${REQS_PATH_DEVOPS}" --upgrade > /dev/null 2>/dev/null
+        if [[ -d $SPEC_REQS_PATH ]]; then
+	         pip install -r "${SPEC_REQS_PATH}" --upgrade > /dev/null 2>/dev/null
+        fi
+    fi
+
     django-admin.py syncdb --settings=devops.settings --noinput
     django-admin.py migrate devops --settings=devops.settings --noinput
     deactivate
 }
 
+####################################################################################
 
 #################################################################
 ## Gets dospy environments
