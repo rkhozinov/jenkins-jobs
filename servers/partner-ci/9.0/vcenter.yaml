@@ -297,9 +297,11 @@
       - inject:
           properties-content: $VCENTER_PARAMETERS
       - shell:
-          !include-raw-escape: ../builders/common.prepare.ng.sh
+          !include-raw-escape: ../builders/common.prepare.sh
       - shell:
-          !include-raw-escape: ../builders/vcenter.test.ng.sh
+          !include-raw-escape: ../builders/workstation.sh
+      - shell:
+          !include-raw-escape: ../builders/vcenter.test.sh
     publishers:
       - runner-publisher:
           properties_name: properties
