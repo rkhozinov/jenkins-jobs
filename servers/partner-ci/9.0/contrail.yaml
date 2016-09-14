@@ -448,7 +448,7 @@
                 which-build: specific-build
                 build-number: ${{PKG_JOB_BUILD_NUMBER}}
       - shell:
-          !include-raw-escape: ../builders/common.prepare.sh
+          !include-raw-escape: ../builders/common.prepare.ng.sh
       - shell:
           !include-raw-escape: ../builders/contrail.test.sh
     publishers:
