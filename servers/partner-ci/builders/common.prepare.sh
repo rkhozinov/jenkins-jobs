@@ -1,4 +1,5 @@
 #!/bin/bash -e
+
 git log  --pretty=oneline | head
 IS_NESTED=$(cat /sys/module/kvm_intel/parameters/nested)
 IS_IGNORE_MSRS=$(cat /sys/module/kvm/parameters/ignore_msrs)
@@ -34,10 +35,10 @@ fi
 rm -rf logs/*
 
 export ISO_PATH="${ISO_STORAGE}/${ISO_FILE}"
+[ ! -f $ISO_PATH ] && { echo "The $ISO_PATH isn't exist"; exit 1; }
 
 if [[ $ISO_FILE == *"Mirantis"* ]]; then
   export FUEL_RELEASE=$(echo $ISO_FILE | cut -d- -f2 | tr -d '.iso')
-  [[ "${UPDATE_MASTER}" -eq "true" ]] && export ISO_VERSION='mos-mu' || export ISO_VERSION='mos'
 fi
 
 export REQUIRED_FREE_SPACE=200
@@ -72,7 +73,6 @@ REQS_PATH_DEVOPS="https://raw.githubusercontent.com/openstack/fuel-qa/${REQS_BRA
 function recreate_venv {
   [ -d $VENV_PATH ] && rm -rf ${VENV_PATH} || echo "The directory ${VENV_PATH} doesn't exist"
   virtualenv --clear "${VENV_PATH}"
-  #virtualenv "${VENV_PATH}"
 }
 
 function get_venv_requirements {
@@ -87,30 +87,16 @@ function get_venv_requirements {
 function prepare_venv {
     source "${VENV_PATH}/bin/activate"
     easy_install -U pip
-    if [[ "${DEBUG}" == "true" ]]; then
-        pip install -r "${REQS_PATH}" --upgrade
-        pip install -r "${REQS_PATH_DEVOPS}" --upgrade
-        if [[ -e $SPEC_REQS_PATH ]]; then
-	    pip install -r "${SPEC_REQS_PATH}" --upgrade
-        else
-	    echo "there is no special requirements"
-        fi
-    else
-        pip install -r "${REQS_PATH}" --upgrade > /dev/null 2>/dev/null
-        pip install -r "${REQS_PATH_DEVOPS}" --upgrade > /dev/null 2>/dev/null
-        if [[ -e $SPEC_REQS_PATH ]]; then
-	  pip install -r "${SPEC_REQS_PATH}" --upgrade > /dev/null 2>/dev/null
-        else
-	  echo "there is no special requirements"
-        fi
-    fi
-
+    export redirected_output='pip.properties'
+    [[ "${DEBUG}" == "true" ]] && export redirected_output='/dev/null'
+    pip install -r "${REQS_PATH}" --upgrade > $redirected_output
+    pip install -r "${REQS_PATH_DEVOPS}" --upgrade > $redirected_output
+    [ -e $SPEC_REQS_PATH ] && pip install -r "${SPEC_REQS_PATH}" --upgrade > $redirected_output
     django-admin.py syncdb --settings=devops.settings --noinput
     django-admin.py migrate devops --settings=devops.settings --noinput
     deactivate
 }
 
-####################################################################################
 
 #################################################################
 ## Gets dospy environments
