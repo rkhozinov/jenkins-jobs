@@ -3,41 +3,40 @@
     name: plugin-specific-parameters
     parameters:
       - bool:
-          name: UPDATE_MASTER
-          default: '{update_master}'
-          description: 'turns on update fuel master node to maintenance update'
+          name: ENABLE_UPDATES
+          default: true 
+      - bool:
+          name: ENABLE_SECURITY
+          default: true 
+      - bool:
+          name: ENABLE_UPDATE_CENTOS
+          default: true 
       - string:
-          name: MIRROR
-          default: 'http://mirror.seed-cz1.fuel-infra.org'
-          description: 'cz mirror'
-      - string:
-          name: MIRROR_UBUNTU
-          default: >
-             deb ${{MIRROR}}/pkgs/ubuntu/ trusty main universe multiverse |
-             deb ${{MIRROR}}/pkgs/ubuntu/ trusty-updates main universe multiverse
-          description: 'proposed repositories to update ubuntu cluster'
-      - string:
-          name: WORKSTATION_SNAPSHOT
-          default: 'doubledvs'
-      - string:
-          name: WORKSTATION_NODES
-          default: 'esxi1 esxi2 esxi3 vcenter trusty'
-      - string:
-          name: VCENTER_IP
-          default: '172.16.0.145'
-      - string:
-          name: VCENTER_USERNAME
-          default: 'openstack'
-      - string:
-          name: VCENTER_PASSWORD
-          default: 'vmware'
-      - string:
-          name: VCENTER_CLUSTERS
-          default: 'Cluster1,Cluster2'
-      - string:
-          name: ISO_STORAGE
-          default: '{iso_storage}'
-    
+          name: LOCATION
+          default: bud
+      - text:
+          name: VCENTER_PARAMETERS
+          default: |
+            ESXI_PASSWORD=swordfish
+            ESXI_USER=root
+            ESXI_HOSTS=172.16.0.250 172.16.0.252 172.16.0.253
+            NFS_SERVER=172.16.0.1
+            NFS_SHARES=nfs nfs2
+            VSPHERE_VERSION=5.5
+            WORKSTATION_SNAPSHOT=doubledvs
+            WORKSTATION_IFS=vmnet2,vmnet3
+            WORKSTATION_NODES=esxi1 esxi2 esxi3 vcenter
+            VCENTER_IP=172.16.0.145
+            VCENTER_USERNAME=root
+            VCENTER_PASSWORD=vmware
+            VC_DATACENTER=Datacenter
+            VCENTER_DATASTORE=nfs
+            VCENTER_CLUSTERS=Cluster1,Cluster2
+            DVS_SWITCHES=Cluster1,Cluster2
+            VCENTER_USE=true
+            CLEAN_IPTABLES=true
+            DISABLE_STP=true
+
 - project:
     name: 'predefined_parameters'
     fuel-release: '8.0'
@@ -55,33 +54,37 @@
     reporter-name: '{fuel-release}.{plugin-name}.reporter'
     smoke-test-name: 'dvs_vcenter_smoke'
     bvt-test-name: 'dvs_vcenter_bvt'
+    regression-test-name: 'dvs_regression'
     admin_node_memory: '8192'
     slave_node_memory: '8192'
     admin_node_cpu: '4'
     slave_node_cpu: '4'
     pkg_job_name: '{fuel-release}.{plugin-name}.build'
-    iso_job_name: '{fuel-release}.{plugin-name}.canary'
     nightly_timer: 'H 22 * * *'
     regression_timer: 'H 18 * * *'
-    nightly_disabled: true
+    nightly_disabled: false
     regression_disabled: true
-    force_erase: true
+    force_erase: false
     recreate_venv: false
     disable_ssl: true
+    kvm_use: false
     update_master: true
+    enable_proposed: false
     debug: true
+    build_debug: true
     publish_results: true
     multijob_build_pkg: true
     testjob_build_pkg: false
     runner_timeout: 600
     test_timeout: 300
-    iso_file: 'fuel-8.0-570.iso'
+    iso_file: 'MirantisOpenStack-8.0.iso'
     iso_storage: '/storage/downloads'
+    snapshots_id: 'released'
     gerrit_repo: 'fuel-plugin-vmware-dvs'
     gerrit_branch: 'stable/8.0-agentless'
-    email_to: 'rkhozinov@mirantis.com otsvigun@mirantis.com'
+    email_to: 'rkhozinov@mirantis.com vgorin@mirantis.com vnaumov@mirantis.com ibumarskov@mirantis.com'
     released_plugin_path: '/storage/dvs/released/2.0/fuel-plugin-vmware-dvs-2.0-2.0.0-1.noarch.rpm'
-    scm_submodule_disabled: true
+    scm_submodule_disabled: false
     scm_wipe_workspace: false
     skip_vote_successfull: false
     skip_vote_failed: false
@@ -89,8 +92,9 @@
     testrail_project: "VMware DVS plugin"
     testrail_suite: "[8.0][PCE] VMware DVS plugin v2.0.0"
     testrail_suite_desc: "Suite description"
+#   testrail_suite_conf: "CI job: [${{JOB_NAME}}](${{JOB_URL}})"
     testrail_milestone: "2.0.0"
-    testrail_plan: "$TREP_TESTRAIL_SUITE build#${{PKG_JOB_BUILD_NUMBER}} iso#${{ISO_VERSION}}"
+    testrail_plan: "$TREP_TESTRAIL_SUITE build#${{PKG_JOB_BUILD_NUMBER}}"
     testrail_plan_desc: "Test plan description"
     testrail_run: "$TREP_TESTRAIL_SUITE"
     testrail_run_desc: "Test run description"
@@ -118,12 +122,18 @@
       - dvs_vcenter_net_template
       - dvs_vcenter_shutdown_controller
 
+      - dvs_vcenter_smoke
+      - dvs_vcenter_bvt
     jobs:
       - '{build-name}':
+          scm_submodule_disabled: true
           scm_wipe_workspace: true
-      - '{flake8-name}'
-      - '{radon-name}'
+      - '{flake8-name}':
+          scm_submodule_disabled: true
+      - '{radon-name}':
+          scm_submodule_disabled: true
       - '{shellcheck-name}':
+          scm_submodule_disabled: true
           skip_vote_successfull: '{skip_vote_successfull}'
           skip_vote_failed: '{skip_vote_failed}'
 
@@ -132,10 +142,8 @@
 
       - '{custom-name}.qa':
           publish_results: false
-          scm_submodule_disabled: false
 
       - '{custom-name}.dev':
-          scm_submodule_disabled: false
           publish_results: false
           testgroup_parameter_type: choice
           testgroup_value_type: choices
@@ -143,26 +151,21 @@
 
       - '{reporter-name}'
 
-      - '{fuel-release}.{plugin-name}.{testgroup}':
-          scm_submodule_disabled: false
+      - '{fuel-release}.{plugin-name}.{testgroup}'
 
       - '{smoke-name}':
           publish_results: false
           multijob_build_pkg: false
 
-      - '{fuel-release}.{plugin-name}.smoke.test':
-          scm_submodule_disabled: false
+      - '{fuel-release}.{plugin-name}.smoke.test'
 
       - '{bvt-name}':
           publish_results: false
           multijob_build_pkg: true
 
-      - '{fuel-release}.{plugin-name}.bvt.test':
-          scm_submodule_disabled: false
+      - '{fuel-release}.{plugin-name}.bvt.test'
 
       - '{regression-name}':
-          iso_file: 'MirantisOpenStack-8.0.iso'
-          iso_storage: '/storage/downloads'
           testrail_suite: "[8.0][PCE] VMware DVS plugin v2.0.0 Regression"
           testrail_suite_desc: "Suite description"
           testrail_plan: "$TREP_TESTRAIL_SUITE #${{DATE}}"
@@ -170,12 +173,9 @@
           testrail_run: "$TREP_TESTRAIL_SUITE"
           testrail_run_desc: "Test run description"
           pkg_job_name: ''
-          iso_job_name: ''
           multijob_build_pkg: false
 
-      - '{fuel-release}.{plugin-name}.regression.test':
-          scm_submodule_disabled: false
-
+      - '{fuel-release}.{plugin-name}.regression.test'
 
 # parameters for smoke, bvt and nightly multijobs
 - runner-parameters: &runner-parameters
@@ -191,26 +191,27 @@
           disable_ssl:          '{disable_ssl}'
           force_erase:          '{force_erase}'
           recreate_venv:        '{recreate_venv}'
-          use_snapshots:        '{use_snapshots}'
           iso_file:             '{iso_file}'
           gerrit_branch:        '{gerrit_branch}'
           env_prefix:           '{fuel-release}.{plugin-name}'
           pkg_job_name:         '{pkg_job_name}'
-          iso_job_name:         '{iso_job_name}'
           admin_node_memory:    '{admin_node_memory}'
           slave_node_memory:    '{slave_node_memory}'
           admin_node_cpu:       '{admin_node_cpu}'
           slave_node_cpu:       '{slave_node_cpu}'
           testrail_suite:       '{testrail_suite}'
           testrail_suite_desc:  '{testrail_suite_desc}'
+#         testrail_suite_conf:  '{testrail_suite_conf}'
           testrail_plan:        '{testrail_plan}'
           testrail_plan_desc:   '{testrail_plan_desc}'
           skip_vote_successfull: '{skip_vote_successfull}'
           skip_vote_failed:     '{skip_vote_failed}'
-      - plugin-specific-parameters:
+          enable_proposed:      '{enable_proposed}'
           update_master:        '{update_master}'
+          kvm_use:              '{kvm_use}'
           iso_storage:          '{iso_storage}'
-          
+          snapshots_id:         '{snapshots_id}'
+      - plugin-specific-parameters
 
 # parameters for jobs created per test-group and custom test job
 - test-parameters: &test-parameters
@@ -220,39 +221,40 @@
           name: node
           default: 'dvs'
           description: "The node on which to run the job"
-      - bool:
-          name: BUILD_PKG
-          default: '{testjob_build_pkg}'
-          description: "Triggers build of pkg from $PKG_JOB_NAME (only for custom)"
       - '{testgroup_parameter_type}':
           name: TEST_GROUP
           '{testgroup_value_type}': '{obj:testgroup_value}'
           description: "test-group name"
+      - string:
+          name: TEST_GROUP_CONFIG
+          default: '${{TEST_GROUP}}'
       - common-parameters:
-          publish_results:      '{publish_results}'
-          debug:                '{debug}'
-          disable_ssl:          '{disable_ssl}'
-          force_erase:          '{force_erase}'
-          recreate_venv:        '{recreate_venv}'
-          use_snapshots:        '{use_snapshots}'
-          iso_file:             '{iso_file}'
-          gerrit_branch:        '{gerrit_branch}'
-          env_prefix:           '{fuel-release}.{plugin-name}'
-          pkg_job_name:         '{pkg_job_name}'
-          iso_job_name:         '{iso_job_name}'
+          publish_results: '{publish_results}'
+          debug:           '{debug}'
+          disable_ssl:     '{disable_ssl}'
+          force_erase:     '{force_erase}'
+          recreate_venv:   '{recreate_venv}'
+          iso_file:        '{iso_file}'
+          gerrit_branch:   '{gerrit_branch}'
+          env_prefix:      '{fuel-release}.{plugin-name}'
+          pkg_job_name:    '{pkg_job_name}'
           admin_node_memory:    '{admin_node_memory}'
           slave_node_memory:    '{slave_node_memory}'
           admin_node_cpu:       '{admin_node_cpu}'
           slave_node_cpu:       '{slave_node_cpu}'
           testrail_suite:       '{testrail_suite}'
           testrail_suite_desc:  '{testrail_suite_desc}'
+#         testrail_suite_conf:  '{testrail_suite_conf}'
           testrail_plan:        '{testrail_plan}'
           testrail_plan_desc:   '{testrail_plan_desc}'
           skip_vote_successfull: '{skip_vote_successfull}'
           skip_vote_failed:     '{skip_vote_failed}'
-      - plugin-specific-parameters:
+          enable_proposed:      '{enable_proposed}'
           update_master:        '{update_master}'
+          kvm_use:              '{kvm_use}'
           iso_storage:          '{iso_storage}'
+          snapshots_id:         '{snapshots_id}'
+      - plugin-specific-parameters
 
 - defaults:
     name: global
@@ -270,7 +272,7 @@
       - test-wrapper:
           test_timeout: '{test_timeout}'
     properties:
-      - test-property
+     - test-property
     builders:
       - conditional-step:
           condition-kind: shell
@@ -296,15 +298,25 @@
       - conditional-step:
           condition-kind: shell
           condition-command: |
-            [ ! -z ${{ISO_JOB_NAME}} ] && \
-            [   -z ${{ISO_FILE}}     ]
+            [[ "${{UPDATE_MASTER}}" == "true" ]]
           steps:
-            - copyartifact:
-                project: "${{ISO_JOB_NAME}}"
-                filter: "iso_file"
-                which-build: last-successful
+            - shell:
+                !include-raw-escape: ../builders/maintenance-update.sh
+      - inject:
+          properties-content: |
+            $TESTRAIL_PARAMETERS
+            $ENV_PARAMETERS
+            $VCENTER_PARAMETERS
+  #      - inject:
+  #          properties-content: $TESTRAIL_PARAMETERS
+  #      - inject:
+  #          properties-content: $ENV_PARAMETERS
+  #      - inject:
+  #          properties-content: $VCENTER_PARAMETERS
       - shell:
           !include-raw-escape: ../builders/common.prepare.sh
+      - shell:
+          !include-raw-escape: ../builders/workstation.sh
       - shell:
           !include-raw-escape: ../builders/dvs.test.sh
     publishers:
@@ -327,11 +339,11 @@
           skip_vote_failed: '{skip_vote_failed}'
     scm:
       - common-scm:
+          scm_wipe_workspace: '{scm_wipe_workspace}'
           scm_submodule_disabled: '{scm_submodule_disabled}'
           gerrit_repo: '{gerrit_repo}'
           skip_vote_successfull: '{skip_vote_successfull}'
           skip_vote_failed: '{skip_vote_failed}'
-          scm_wipe_workspace: '{scm_wipe_workspace}'
     wrapper:
       - runner-wrapper
     parameters:
@@ -341,6 +353,15 @@
       - string:
           name: GERRIT_REFSPEC
           default: 'refs/heads/{gerrit_branch}'
+      - string:
+          name: PUPPETLINT_PATH 
+          default: './deployment_scripts/puppet/manifests ./deployment_scripts/puppet/modules/vmware_dvs'
+      - string:
+          name: PUPPETLINT_IGNORE 
+          default: 'l2.pp'
+      - bool:
+          name: DEBUG
+          default: '{build_debug}'
     properties:
       - heavy-job:
           weight: 1
@@ -348,10 +369,6 @@
       - ansicolor:
           colormap: xterm
     builders:
-      - shell: |
-          rm -rf *.rpm
-          rm -rf build.properties
-          rm -rf build.plugin_version
       - shell:
           !include-raw-escape: ../builders/build-plugin-dvs.sh
       - shell:
@@ -359,6 +376,7 @@
     publishers:
       - build-publisher:
           email_to: '{email_to}'
+
 - job-template:
     name: '{fuel-release}.{plugin-name}.{testgroup}'
     description: 'The test "{testgroup}" for {fuel-release}.{plugin-name}.{plugin-version}'
@@ -366,12 +384,12 @@
 
 - job-template:
     name: '{fuel-release}.{plugin-name}.bvt.test'
-    description: 'The test for {fuel-release}.{plugin-name}.{plugin-version}'
+    description: 'The BVT test for {fuel-release}.{plugin-name}.{plugin-version}'
     concurrent: true
 
 - job-template:
     name: '{fuel-release}.{plugin-name}.smoke.test'
-    description: 'The test for {fuel-release}.{plugin-name}.{plugin-version}'
+    description: 'The Smoke test for {fuel-release}.{plugin-name}.{plugin-version}'
     concurrent: true
 
 - job-template:
@@ -416,7 +434,7 @@
           projects:
             - name: '{fuel-release}.{plugin-name}.regression.test'
               predefined-parameters: |
-                TEST_GROUP=dvs_regression
+                TEST_GROUP={regression-test-name}
                 DVS_PLUGIN_PATH={released_plugin_path}
                 PLUGIN_VERSION={plugin-version}
                 PKG_JOB_BUILD_NUMBER=released
@@ -498,7 +516,6 @@
           properties_name: bvt.properties
           email_to: '{email_to}'
 
-
 - job-template:
     name: '{nightly-name}'
     project-type: multijob
@@ -506,8 +523,8 @@
     node: runner
     <<: *runner-parameters
     scm: []
-    triggers:
-      - timed: '{nightly_timer}'
+    triggers: []
+#      - timed: '{nightly_timer}'
     properties:
       - runner-property:
           build-name: '{build-name}'

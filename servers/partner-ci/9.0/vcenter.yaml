@@ -301,11 +301,11 @@
                 wget --no-check-certificate -O ${{SNAPSHOT_ARTIFACTS_FILE}} ${{SNAPSHOTS_URL/SNAPSHOTS_ID/$SNAPSHOTS_ID}}
                 python utils/jenkins/conv_snapshot_file.py
       - shell:
-          !include-raw-escape: ../builders/common.prepare.ng.sh
+          !include-raw-escape: ../builders/common.prepare.sh
       - shell:
           !include-raw-escape: ../builders/workstation.sh
       - shell:
-          !include-raw-escape: ../builders/vcenter.test.ng.sh
+          !include-raw-escape: ../builders/vcenter.test.sh
     publishers:
       - runner-publisher:
           properties_name: properties

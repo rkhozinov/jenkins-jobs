@@ -293,7 +293,7 @@
                 build-number: ${{PKG_JOB_BUILD_NUMBER}}
 
       - shell:
-          !include-raw-escape: ../builders/common.prepare.ng.sh
+          !include-raw-escape: ../builders/common.prepare.sh
       - shell:
           !include-raw-escape: ../builders/gcs.test.sh
     publishers:
