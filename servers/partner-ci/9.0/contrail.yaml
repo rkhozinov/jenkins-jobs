@@ -108,9 +108,9 @@
     
 
     testrail_project: "Contrail plugin"
-    testrail_suite: "[9.0][PCE] Fuel plugin contrail v5.0 nightly"
+    testrail_suite: "[9.0][PCE] Fuel plugin contrail v5.0.0 nightly"
     testrail_suite_desc: "Suite description"
-    testrail_milestone: "Fuel Contrail Plugin v5.0"
+    testrail_milestone: "Fuel Contrail Plugin v5.0.0"
     testrail_plan: "$TREP_TESTRAIL_SUITE pkg#${{JUNIPER_PKG_VERSION}} build#${{PKG_JOB_BUILD_NUMBER}}"
     testrail_plan_desc: "Test plan description"
     testrail_run: "$TREP_TESTRAIL_SUITE"
@@ -448,7 +448,7 @@
                 which-build: specific-build
                 build-number: ${{PKG_JOB_BUILD_NUMBER}}
       - shell:
-          !include-raw-escape: ../builders/common.prepare.ng.sh
+          !include-raw-escape: ../builders/common.prepare.sh
       - shell:
           !include-raw-escape: ../builders/contrail.test.sh
     publishers:
