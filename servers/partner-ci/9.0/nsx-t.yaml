@@ -241,12 +241,10 @@
           disable_ssl:     '{disable_ssl}'
           force_erase:     '{force_erase}'
           recreate_venv:   '{recreate_venv}'
-          use_snapshots:   '{use_snapshots}'
           iso_file:        '{iso_file}'
           gerrit_branch:   '{gerrit_branch}'
           env_prefix:      '{fuel-release}.{plugin-name}'
           pkg_job_name:    '{pkg_job_name}'
-          iso_job_name:    '{iso_job_name}'
           admin_node_memory:    '{admin_node_memory}'
           slave_node_memory:    '{slave_node_memory}'
           admin_node_cpu:       '{admin_node_cpu}'
@@ -406,7 +404,7 @@
     builders:
       - shell: |
           #!/bin/bash
-          echo "TEST_GROUP={regression-test-name}" > property
+          echo "TEST_GROUP={regression-name}" > property
           echo "NSXV_PLUGIN_PATH={released_plugin_path}" >> property
           echo "PLUGIN_VERSION={plugin-version}" >> property
           echo "PKG_JOB_BUILD_NUMBER=released" >> property
