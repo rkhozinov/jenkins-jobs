@@ -43,25 +43,6 @@
             VSRX_TARGET_IMAGE_PATH={vsrx_target_image_path}
             VSRX_TEMPLATE_PATH={vsrx_template_path}
             ISO_STORAGE={iso_storage}
-            ESXI_PASSWORD=swordfish
-            ESXI_USER=root
-            ESXI_HOSTS=172.16.0.250 172.16.0.252 172.16.0.253
-            NFS_SERVER=172.16.0.1
-            NFS_SHARES=nfs nfs2
-            VSPHERE_VERSION=5.5
-            WORKSTATION_SNAPSHOT=contrail
-            WORKSTATION_IFS=vmnet2,vmnet3,vmnet4
-            WORKSTATION_NODES=esxi1 esxi2 esxi3 vcenter
-            VCENTER_IP=172.16.0.145
-            VCENTER_USERNAME=openstack
-            VCENTER_PASSWORD=vmware
-            VC_DATACENTER=Datacenter
-            VCENTER_DATASTORE=nfs
-            VCENTER_CLUSTERS=Cluster1,Cluster2
-            DVS_SWITCHES=Cluster1,Cluster2
-            VCENTER_USE=true
-            CLEAN_IPTABLES=true
-            DISABLE_STP=true
 
 - project:
     name: 'predefined_parameters'
@@ -91,7 +72,7 @@
     full_timer: 'H 21 * * *'
     regression_timer: 'H 18 * * *'
     nightly_disabled: false
-    full_disabled: false
+    full_disabled: false        
     baremetal_disabled: false
     regression_disabled: true
     force_erase: true
@@ -124,12 +105,12 @@
     vsrx_original_image_path: '/storage/contrail/vSRX.400.img'
     vsrx_target_image_path: '/var/lib/libvirt/images/vSRX.400.img'
     vsrx_template_path: '/storage/contrail/vSRX_400.template'
-
+    
 
     testrail_project: "Contrail plugin"
-    testrail_suite: "[9.0][PCE] Fuel plugin contrail v5.0.0 nightly"
+    testrail_suite: "[9.0][PCE] Fuel plugin contrail v5.0 nightly"
     testrail_suite_desc: "Suite description"
-    testrail_milestone: "Fuel Contrail Plugin v5.0.0"
+    testrail_milestone: "Fuel Contrail Plugin v5.0"
     testrail_plan: "$TREP_TESTRAIL_SUITE pkg#${{JUNIPER_PKG_VERSION}} build#${{PKG_JOB_BUILD_NUMBER}}"
     testrail_plan_desc: "Test plan description"
     testrail_run: "$TREP_TESTRAIL_SUITE"
@@ -168,7 +149,7 @@
       - contrail_add_ha_analytics_db
       - contrail_add_analytics_db
       - contrail_net_template
-      - create_new_network_via_contrail
+      - create_new_network_via_contrail 
       - create_networks
 
       - contrail_login_password
@@ -193,8 +174,8 @@
       - contrail_add_delete_compute_ceph
       - contrail_add_analytics
       - contrail_delete_analytics
-      - contrail_add_all_contrail
-      - contrail_different_ha_in_multinet
+      - contrail_add_all_contrail 
+      - contrail_different_ha_in_multinet 
 
       - https_tls_selected
       - contrail_ostf_net_provisioning_disable
@@ -209,11 +190,11 @@
       - contrail_sriov_delete_sriov
       - contrail_sriov_add_controller
       - contrail_sriov_delete_controller
-
+       
       - contrail_public_connectivity_from_instance_without_fip
       - contrail_dpdk_update_core_repos
       - contrail_sriov_update_core_repos
-
+       
       - contrail_murano
       - contrail_sahara
 
@@ -233,7 +214,7 @@
       - '{nightly-name}':
           multijob_build_pkg: true
           testrail_suite: "[9.0][PCE] Fuel plugin contrail v5.0 nightly"
-
+                  
       - '{full-name}':
           multijob_build_pkg: true
           testrail_suite: "[9.0][PCE] Fuel plugin contrail v5.0 Release Acceptance"
@@ -356,8 +337,8 @@
           vsrx_target_image_path:   '{vsrx_target_image_path}'
           vsrx_template_path:       '{vsrx_template_path}'
           iso_storage:           '{iso_storage}'
-
-
+    
+            
 # parameters for jobs created per test-group and custom test job
 - test-parameters: &test-parameters
     name: 'test-parameters'
@@ -439,13 +420,13 @@
       - conditional-step:
            condition-kind: shell
            condition-command: |
-            [ "${{BUILD_PKG}}" == "true"       ]
+            [ "${{BUILD_PKG}}" == "true"       ] 
            steps:
              - trigger-builds:
                  - project: ${{PKG_JOB_NAME}}
                    current-parameters: false
                    git-revision: false
-                   block: true
+                   block: true      
       - conditional-step:
           condition-kind: shell
           condition-command: |
@@ -460,8 +441,7 @@
           condition-kind: shell
           condition-command: |
             [ ! -z ${{PKG_JOB_NAME}}         ] && \
-            [ ! -z ${{PKG_JOB_BUILD_NUMBER}} ] && \
-            [   -z ${{CONTRAIL_PLUGIN_PATH}} ]
+            [ ! -z ${{PKG_JOB_BUILD_NUMBER}} ]
           steps:
             - copyartifact:
                 project: ${{PKG_JOB_NAME}}
@@ -469,8 +449,6 @@
                 build-number: ${{PKG_JOB_BUILD_NUMBER}}
       - shell:
           !include-raw-escape: ../builders/common.prepare.sh
-      - shell:
-          !include-raw-escape: ../builders/workstation.sh
       - shell:
           !include-raw-escape: ../builders/contrail.test.sh
     publishers:
@@ -493,8 +471,8 @@
           skip_vote_failed: '{skip_vote_failed}'
     scm:
       - common-scm:
-          scm_wipe_workspace: '{scm_wipe_workspace}'
           scm_submodule_disabled: '{scm_submodule_disabled}'
+          scm_wipe_workspace: '{scm_wipe_workspace}'
           gerrit_repo: '{gerrit_repo}'
           skip_vote_successfull: '{skip_vote_successfull}'
           skip_vote_failed: '{skip_vote_failed}'
@@ -511,12 +489,21 @@
           name: DEBUG
           default: '{build_debug}'
     properties:
+      - build-discarder:
+          days-to-keep: 30
+          num-to-keep: 50
+          artifact-days-to-keep: 30
+          artifact-num-to-keep: 50
       - heavy-job:
           weight: 1
     wrappers:
       - ansicolor:
           colormap: xterm
     builders:
+      - shell: |
+          rm -rf *.rpm
+          rm -rf build.properties
+          rm -rf build.plugin_version
       - shell:
           !include-raw-escape: ../builders/build-plugin-contrail.sh
       - shell:
@@ -524,10 +511,19 @@
     publishers:
       - build-publisher:
           email_to: '{email_to}'
+- job-template:
+    name: '{fuel-release}.{plugin-name}.{plugin-version}.{testgroup}.open'
+    description: 'The test "{testgroup}" for {fuel-release}.{plugin-name}.{plugin-version} open contrail'
+    concurrent: true
 
 - job-template:
     name: '{fuel-release}.{plugin-name}.{plugin-version}.{testgroup}.juniper'
     description: 'The test "{testgroup}" for {fuel-release}.{plugin-name}.{plugin-version} juniper contrail'
+    concurrent: true
+
+- job-template:
+    name: '{fuel-release}.{plugin-name}.{plugin-version}.bvt.test.open'
+    description: 'The test for {fuel-release}.{plugin-name}.{plugin-version} open contrail'
     concurrent: true
 
 - job-template:
@@ -536,13 +532,23 @@
     concurrent: true
 
 - job-template:
+    name: '{fuel-release}.{plugin-name}.{plugin-version}.smoke.test.open'
+    description: 'The test for {fuel-release}.{plugin-name}.{plugin-version} open contrail'
+    concurrent: true
+
+- job-template:
     name: '{fuel-release}.{plugin-name}.{plugin-version}.smoke.test.juniper'
     description: 'The test for {fuel-release}.{plugin-name}.{plugin-version} juniper contrail'
     concurrent: true
 
 - job-template:
+    name: '{fuel-release}.{plugin-name}.{plugin-version}.regression.test.open'
+    description: 'The test for {fuel-release}.{plugin-name}.{plugin-version} open contrail'
+    concurrent: true
+
+- job-template:
     name: '{fuel-release}.{plugin-name}.{plugin-version}.regression.test.juniper'
-    description: 'The regression test for {fuel-release}.{plugin-name}.{plugin-version}'
+    description: 'The test for {fuel-release}.{plugin-name}.{plugin-version} juniper contrail'
     concurrent: true
 
 - job-template:
@@ -578,19 +584,17 @@
     builders:
       - inject:
           properties-content: $ADDITIONAL_PARAMETERS
-      - shell: |
-          #!/bin/bash
-          echo "TEST_GROUP=contrail_bvt" > property
-          echo "CONTRAIL_DISTRIBUTION=juniper" >> property
-          echo "CONTRAIL_PLUGIN_PATH={released_plugin_path}" >> property
-          echo "PLUGIN_VERSION={plugin-version}" >> property
-          echo "PKG_JOB_BUILD_NUMBER=released" >> property
       - multijob:
           name: '1st phase - regression test'
           condition: COMPLETED
           projects:
             - name: '{fuel-release}.{plugin-name}.{plugin-version}.regression.test.juniper'
-              property-file: property
+              predefined-parameters: |
+                TEST_GROUP=contrail_bvt
+                CONTRAIL_DISTRIBUTION=juniper
+                CONTRAIL_PLUGIN_PATH={released_plugin_path}
+                PLUGIN_VERSION={plugin-version}
+                PKG_JOB_BUILD_NUMBER=released
               current-parameters: true
               kill-phase-on: NEVER
 
@@ -599,7 +603,6 @@
     disabled: false
     description: 'The Smoke test for {fuel-release}.{plugin-name}.{plugin-version}'
     concurrent: true
-    quiet-period: 5
     project-type: multijob
     node: runner
     <<: *runner-parameters
@@ -696,7 +699,7 @@
     builders:
       !include: contrail-nightly.yaml.inc
 
-
+              
 - job-template:
     name: '{full-name}'
     project-type: multijob
