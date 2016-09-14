@@ -92,12 +92,16 @@ function prepare_venv {
         pip install -r "${REQS_PATH_DEVOPS}" --upgrade
         if [[ -d $SPEC_REQS_PATH ]]; then
 	  pip install -r "${SPEC_REQS_PATH}" --upgrade
+        else
+	  echo "there is no special requirements"
         fi
     else
         pip install -r "${REQS_PATH}" --upgrade > /dev/null 2>/dev/null
         pip install -r "${REQS_PATH_DEVOPS}" --upgrade > /dev/null 2>/dev/null
         if [[ -d $SPEC_REQS_PATH ]]; then
 	  pip install -r "${SPEC_REQS_PATH}" --upgrade > /dev/null 2>/dev/null
+        else
+	  echo "there is no special requirements"
         fi
     fi
 
