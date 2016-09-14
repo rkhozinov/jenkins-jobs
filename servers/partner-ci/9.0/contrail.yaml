@@ -470,8 +470,6 @@
       - shell:
           !include-raw-escape: ../builders/common.prepare.sh
       - shell:
-          !include-raw-escape: ../builders/workstation.sh
-      - shell:
           !include-raw-escape: ../builders/contrail.test.sh
     publishers:
       - runner-publisher:

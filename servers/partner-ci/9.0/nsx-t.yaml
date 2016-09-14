@@ -4,7 +4,7 @@
     parameters:
       - string:
           name: WORKSTATION_SNAPSHOT
-          default: 'nsx-t_6.2.0'
+          default: 'nsx-t-1.0'
           description: 'Snapshot name for vcenter lab'
       - string:
           name: WORKSTATION_NODES
@@ -50,9 +50,8 @@
     pkg_job_name: '{fuel-release}.{plugin-name}.build'
     nightly_timer: 'H 22 * * *'
     regression_timer: 'H 18 * * *'
-    nightly_disabled: true
-    regression_disabled: false
-    use_snapshots: false
+    nightly_disabled: false
+    regression_disabled: true
     force_erase: true
     recreate_venv: false
     disable_ssl: true
@@ -67,7 +66,7 @@
     test_timeout: 300
     iso_file: 'MirantisOpenStack-9.0.iso'
     iso_storage: '/storage/downloads'
-    snapshots_id: ''
+    snapshots_id: 'released'
     gerrit_repo: 'fuel-plugin-nsx-t'
     gerrit_branch: 'master'
     email_to: 'rkhozinov@mirantis.com'
@@ -77,7 +76,7 @@
     skip_vote_successfull: false
     skip_vote_failed: false
 
-    testrail_project: "VMware NSX-t plugin"
+    testrail_project: "VMware NSX-T plugin"
     testrail_suite: "[9.0][PCE] VMware NSX-t plugin v1.0.0"
     testrail_suite_desc: "Suite description"
     testrail_milestone: "1.0.0"
@@ -87,7 +86,7 @@
     testrail_run_desc: "Test run description"
     testrail_item_case: "$TEST_GROUP"
     trep_results_source: "xunit"
-    trep_debug_level: "DEBUG"
+    trep_debug_level: "INFO"
 
     testgroup_parameter_type: string
     testgroup_value_type: default
@@ -175,15 +174,15 @@
 
       - '{fuel-release}.{plugin-name}.bvt.test'
 
-      - '{regression-name}':
-          testrail_suite: "[9.0][PCE] VMware NSX-t plugin v1.0.0 Smoke/BVT"
-          testrail_suite_desc: "Suite description"
-          testrail_plan: "$TREP_TESTRAIL_SUITE #${{DATE}}"
-          testrail_plan_desc: "Test plan description"
-          testrail_run: "$TREP_TESTRAIL_SUITE"
-          testrail_run_desc: "Test run description"
-          pkg_job_name: ''
-          multijob_build_pkg: false
+      - '{regression-name}'
+          #testrail_suite: "[9.0][PCE] VMware NSX-t plugin v1.0.0 Smoke/BVT"
+          #testrail_suite_desc: "Suite description"
+          #testrail_plan: "$TREP_TESTRAIL_SUITE #${{DATE}}"
+          #testrail_plan_desc: "Test plan description"
+          #testrail_run: "$TREP_TESTRAIL_SUITE"
+          #testrail_run_desc: "Test run description"
+          #pkg_job_name: ''
+          #multijob_build_pkg: false
 
       - '{fuel-release}.{plugin-name}.regression.test'
 
@@ -201,7 +200,6 @@
           disable_ssl:          '{disable_ssl}'
           force_erase:          '{force_erase}'
           recreate_venv:        '{recreate_venv}'
-          use_snapshots:        '{use_snapshots}'
           iso_file:             '{iso_file}'
           gerrit_branch:        '{gerrit_branch}'
           env_prefix:           '{fuel-release}.{plugin-name}'
@@ -217,10 +215,9 @@
           skip_vote_successfull: '{skip_vote_successfull}'
           skip_vote_failed:     '{skip_vote_failed}'
           kvm_use:              '{kvm_use}'
-      - plugin-specific-parameters:
           iso_storage:          '{iso_storage}'
           snapshots_id:         '{snapshots_id}'
-
+      - plugin-specific-parameters
 
 # parameters for jobs created per test-group and custom test job
 - test-parameters: &test-parameters
@@ -261,9 +258,9 @@
           skip_vote_successfull: '{skip_vote_successfull}'
           skip_vote_failed:     '{skip_vote_failed}'
           kvm_use:              '{kvm_use}'
-      - plugin-specific-parameters:
           iso_storage:          '{iso_storage}'
           snapshots_id:         '{snapshots_id}'
+      - plugin-specific-parameters
 
 - defaults:
     name: global
@@ -288,7 +285,7 @@
           condition-command: |
             [ ! -z ${{PKG_JOB_NAME}}          ] && \
             [   -z ${{PKG_JOB_BUILD_NUMBER}}  ] && \
-            [   -z ${{NSXV_PLUGIN_PATH}}      ]
+            [   -z ${{NSX-T_PLUGIN_PATH}}      ]
           steps:
             - copyartifact:
                 project: ${{PKG_JOB_NAME}}
@@ -298,22 +295,12 @@
           condition-command: |
             [ ! -z ${{PKG_JOB_NAME}}          ] && \
             [ ! -z ${{PKG_JOB_BUILD_NUMBER}}  ] && \
-            [   -z ${{NSXV_PLUGIN_PATH}}      ]
+            [   -z ${{NSX-T_PLUGIN_PATH}}      ]
           steps:
             - copyartifact:
                 project: ${{PKG_JOB_NAME}}
                 which-build: specific-build
                 build-number: ${{PKG_JOB_BUILD_NUMBER}}
-      - conditional-step:
-          condition-kind: shell
-          condition-command: |
-            [ ! -z ${{ISO_JOB_NAME}} ] && \
-            [   -z ${{ISO_FILE}}     ]
-          steps:
-            - copyartifact:
-                project: "${{ISO_JOB_NAME}}"
-                filter: "iso_file"
-                which-build: last-successful
       - shell:
           !include-raw-escape: ../builders/common.prepare.sh
       - shell:
@@ -331,11 +318,7 @@
     concurrent: true
     disabled: false
     triggers:
-      - draft-patchset-gerrit-trigger:
-          gerrit_repo: '{gerrit_repo}'
-          gerrit_branch: '{gerrit_branch}'
-          skip_vote_successfull: '{skip_vote_successfull}'
-          skip_vote_failed:     '{skip_vote_failed}'
+      - draft-patchset-gerrit-trigger
     scm:
       - common-scm:
           scm_wipe_workspace: '{scm_wipe_workspace}'
@@ -423,7 +406,7 @@
     builders:
       - shell: |
           #!/bin/bash
-          echo "TEST_GROUP=nsx-t_bvt" > property
+          echo "TEST_GROUP={regression-test-name}" > property
           echo "NSXV_PLUGIN_PATH={released_plugin_path}" >> property
           echo "PLUGIN_VERSION={plugin-version}" >> property
           echo "PKG_JOB_BUILD_NUMBER=released" >> property
@@ -446,11 +429,7 @@
     node: runner
     <<: *runner-parameters
     triggers:
-      - draft-patchset-gerrit-trigger:
-          gerrit_repo: '{gerrit_repo}'
-          gerrit_branch: '{gerrit_branch}'
-          skip_vote_successfull: '{skip_vote_successfull}'
-          skip_vote_failed:     '{skip_vote_failed}'
+      - draft-patchset-gerrit-trigger
     properties:
       - runner-property:
           build-name: '{build-name}'
@@ -484,11 +463,7 @@
     <<: *runner-parameters
     scm: []
     triggers:
-      - merge-gerrit-trigger:
-          gerrit_repo: '{gerrit_repo}'
-          gerrit_branch: '{gerrit_branch}'
-          skip_vote_successfull: '{skip_vote_successfull}'
-          skip_vote_failed:     '{skip_vote_failed}'
+      - merge-gerrit-trigger
     properties:
       - runner-property:
           build-name: '{build-name}'
