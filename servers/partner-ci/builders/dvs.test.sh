@@ -1,5 +1,4 @@
 #!/bin/bash -e
-
 [[ "${DEBUG}" == "true" ]] && set -x || set +x
 
 export ISO_PATH="${ISO_STORAGE}/${ISO_FILE}"
@@ -60,7 +59,6 @@ export VENV_PATH="${HOME}/${FUEL_RELEASE}-venv"
 [ -z "${DVS_PLUGIN_PATH}" ] && export DVS_PLUGIN_PATH=$(ls -t ${WORKSPACE}/fuel-plugin-vmware-dvs*.rpm | head -n 1)
 [ -z "${DVS_PLUGIN_PATH}" ] && { echo "DVS_PLUGIN_PATH is empty"; exit 1; }
 [ -z "${PLUGIN_PATH}"     ] && export PLUGIN_PATH=$DVS_PLUGIN_PATH
-
 
 echo "test-group: ${TEST_GROUP}"
 echo "env-name: ${ENV_NAME}"
