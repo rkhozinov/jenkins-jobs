@@ -14,10 +14,10 @@
           NFS_SHARES=nfs nfs2
           VSPHERE_VERSION=5.5
           WORKSTATION_SNAPSHOT=doubledvs
-          WORKSTATION_IFS=vmnet2,vmnet3
+          WORKSTATION_IFS=vmnet2,vmnet3,vmnet4
           WORKSTATION_NODES=esxi1 esxi2 esxi3 vcenter
           VCENTER_IP=172.16.0.145
-          VCENTER_USERNAME=root
+          VCENTER_USERNAME=openstack
           VCENTER_PASSWORD=vmware
           VC_DATACENTER=Datacenter
           VCENTER_DATASTORE=nfs
