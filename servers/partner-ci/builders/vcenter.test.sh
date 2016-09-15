@@ -5,7 +5,9 @@
 export ISO_PATH="${ISO_STORAGE}/${ISO_FILE}"
 [ -z $ISO_PATH  ] && { echo "ISO_PATH is empty or doesn't exist"; exit 1; }
 
-if [[ "${UPDATE_MASTER}" == "true" ]]; then
+export FUEL_RELEASE=$(echo $ISO_FILE | cut -d- -f2 | tr -d '.iso')
+
+if [[ "${UPDATE_MASTER}" == "true" ]] && [[ ${FUEL_RELEASE} != *"80"* ]]; then
   if [ -f $SNAPSHOT_OUTPUT_FILE ]; then
     . $SNAPSHOT_OUTPUT_FILE
     export EXTRA_RPM_REPOS
@@ -15,6 +17,12 @@ if [[ "${UPDATE_MASTER}" == "true" ]]; then
     echo "SNAPSHOT_OUTPUT_FILE is empty or doesn't exist"
     exit 1
   fi
+else
+  export SNAPSHOTS_ID="released"
+fi
+
+if [[ $SNAPSHOTS_ID == *"lastSuccessfulBuild"* ]]; then
+  export SNAPSHOTS_ID=$(cat snapshots.params | grep -Po '#\K[^ ]+')
 fi
 
 [ -z "${SNAPSHOTS_ID}" ] && { echo SNAPSHOTS_ID is empty; exit 1; }
@@ -25,6 +33,7 @@ else
   echo "build.properties file is not available so a test couldn't be runned"
   exit 1
 fi
+
 [ -z $DVS_PLUGIN_VERSION ] && { echo "DVS_PLUGIN_VERSION is empty"; exit 1; }
 
 if [ -z "${PKG_JOB_BUILD_NUMBER}" ]; then
@@ -143,11 +152,13 @@ done
 
 [[ "${CLEAN_IPTABLES}" == "true" ]] && clean_iptables
 
-add_interface_to_bridge $ENV_NAME private vmnet2
-add_interface_to_bridge $ENV_NAME private vmnet3
+for iface in $(echo $WORKSTATION_IFS | tr ',' ' '); do
+    add_interface_to_bridge $ENV_NAME private $iface
+done
 
 [[ "${DEBUG}" == "true" ]] && \
-    sudo iptables -L -v -n; sudo iptables -t nat -L -v -n
+    sudo iptables -L -v -n;   \
+    sudo iptables -t nat -L -v -n
 
 echo "Waiting for system tests to finish"
 wait $SYSTEST_PID

@@ -5,14 +5,22 @@
     - text:
         name: VCENTER_PARAMETERS
         default: |
-          VSPHERE_VERSION="5.5"
-          WORKSTATION_SNAPSHOT=vcenterha
+          SNAPSHOT_OUTPUT_FILE=extra_repos.sh
+          SNAPSHOT_ARTIFACTS_FILE=snapshots.params
+          ESXI_PASSWORD=swordfish
+          ESXI_USER=root
+          ESXI_HOSTS=172.16.0.250 172.16.0.252 172.16.0.253
+          NFS_SERVER=172.16.0.1
+          NFS_SHARES=nfs nfs2
+          VSPHERE_VERSION=5.5
+          WORKSTATION_SNAPSHOT=doubledvs
+          WORKSTATION_IFS=vmnet2,vmnet3,vmnet4
           WORKSTATION_NODES=esxi1 esxi2 esxi3 vcenter
           VCENTER_IP=172.16.0.145
-          VCENTER_USERNAME=root
+          VCENTER_USERNAME=openstack
           VCENTER_PASSWORD=vmware
           VCENTER_GLANCE_IP=172.16.0.145
-          VCENTER_GLANCE_USERNAME=root
+          VCENTER_GLANCE_USERNAME=openstack
           VCENTER_GLANCE_PASSWORD=vmware
           VCENTER_DATACENTER=Datacenter
           VCENTER_DATASTORE=nfs
@@ -73,9 +81,9 @@
     skip_vote_failed: false
 
     testrail_project: "Mirantis OpenStack"
-    testrail_milestone: "{fuel-release}"
     testrail_suite: "[{fuel-release}][PCE] vCenter"
     testrail_suite_desc: "Suite description"
+    testrail_milestone: "{fuel-release}"
     testrail_plan: "$TREP_TESTRAIL_MILESTONE snapshot #${{SNAPSHOTS_ID}}"
     testrail_plan_desc: "Test plan description"
     testrail_run: "$TREP_TESTRAIL_SUITE"
