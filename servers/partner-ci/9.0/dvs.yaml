@@ -23,6 +23,7 @@
           VCENTER_DATASTORE=nfs
           VCENTER_CLUSTERS=Cluster1,Cluster2
           DVS_SWITCHES=Cluster1,Cluster2
+          DVS_UPLINKS=dvUplink1,dvUplink2,dvUplink3
           VCENTER_USE=true
           CLEAN_IPTABLES=true
           DISABLE_STP=true
@@ -223,6 +224,10 @@
           name: node
           default: 'dvs'
           description: "The node on which to run the job"
+      - bool:
+          name: BUILD_PKG
+          default: '{testjob_build_pkg}'
+          description: "Triggers build of pkg from $PKG_JOB_NAME (only for custom)"
       - '{testgroup_parameter_type}':
           name: TEST_GROUP
           '{testgroup_value_type}': '{obj:testgroup_value}'
