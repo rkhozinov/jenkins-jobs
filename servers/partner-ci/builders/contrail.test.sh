@@ -3,9 +3,9 @@
 # activate bash xtrace for script
 [[ "${DEBUG}" == "true" ]] && set -x || set +x
 
-[[ "${FORCE_VSRX_COPY}" == "true" ]] && sudo rm -rf $VSRX_TARGET_IMAGE_PATH 
-[ ! -f $VSRX_TARGET_PATH ] && sudo cp $VSRX_ORGINAL_IMAGE_PATH $VSRX_TARGET_PATH
-[ ! -f $VSRX_TARGET_PATH ] && { echo "ERROR: $VSRX_TARGET_PATH is not found"; exit 1; }
+[[ "${FORCE_VSRX_COPY}" == "true" ]] && sudo rm -rf $VSRX_TARGET_IMAGE_PATH
+[ ! -f $VSRX_TARGET_IMAGE_PATH ] && sudo cp $VSRX_ORIGINAL_IMAGE_PATH $VSRX_TARGET_IMAGE_PATH
+[ ! -f $VSRX_TARGET_IMAGE_PATH ] && { echo "ERROR: $VSRX_TARGET_IMAGE_PATH is not found"; exit 1; }
 
 [ $CONTRAIL_VERSION ] && echo "contrail version is $CONTRAIL_VERSION" \
                       || { echo "CONTRAIL_VERSION is not defined";  exit 1; }
@@ -45,7 +45,7 @@ echo use-snapshots: $USE_SNAPSHOTS
 echo fuel-release: $FUEL_RELEASE
 echo venv-path: $VENV_PATH
 echo env-name: $ENV_NAME
-echo iso-path: $ISO_PATH   
+echo iso-path: $ISO_PATH
 echo plugin-path: $CONTRAIL_PLUGIN_PATH
 echo ubuntu-plugin-path: $CONTRAIL_PLUGIN_PACK_UB_PATH
 echo juniper-package-version: $JUNIPER_PKG_VERSION
@@ -60,6 +60,11 @@ TEST_JOB_BUILD_NUMBER=$BUILD_NUMBER
 PKG_JOB_BUILD_NUMBER=$PKG_JOB_BUILD_NUMBER
 PLUGIN_VERSION=$PLUGIN_VERSION
 JUNIPER_PKG_VERSION=$JUNIPER_PKG_VERSION
+TREP_TESTRAIL_SUITE=$TREP_TESTRAIL_SUITE
+TREP_TESTRAIL_SUITE_DESCRIPTION=$TREP_TESTRAIL_SUITE_DESCRIPTION
+TREP_TESTRAIL_PLAN=$TREP_TESTRAIL_PLAN
+TREP_TESTRAIL_PLAN_DESCRIPTION=$TREP_TESTRAIL_PLAN_DESCRIPTION
+DATE=$(date +'%B-%d')
 REPORTER_PROPERTIES
 
 source $VENV_PATH/bin/activate
