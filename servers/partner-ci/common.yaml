@@ -168,10 +168,10 @@
       - description-setter:
           regexp-for-failed: '^ERROR:.*'
       - archive:
-          artifacts: 'logs/*'
+          artifacts: 'logs/**'
           allow-empty: true
       - archive:
-          artifacts: '*.log'
+          artifacts: 'logs/**.log'
           allow-empty: true
       - conditional-publisher:
           - condition-kind: file-exists
