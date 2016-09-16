@@ -124,6 +124,7 @@
       - test-property
     builders:
       - shell: |
+          sudo pkill vmx || echo  'virtual machines are killed'
           if sudo puppet agent -tdv --server tpi-puppet.vm.mirantis.net --waitforcert 30;  then
               echo "Command succeeded"
           else
@@ -132,6 +133,5 @@
                 echo "Some packages,libraries failed to load on lab ${HOSTNAME}"
               else
                 echo "result in acceptable limits ( exit code = $ref )"
-              fi    
+              fi
           fi 
-
