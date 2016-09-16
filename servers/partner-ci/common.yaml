@@ -30,6 +30,14 @@
           default: '{recreate_venv}'
           description: "Recreate virtual environemnt before tests"
       - bool:
+          name: WS_NOREVERT
+          default: '{ws_norevert}'
+          description: "disable reverting workstation snapshots"
+      - bool:
+          name: NFS_CLEAN
+          default: '{nfs_clean}'
+          description: "cleaning nfs-storages"
+      - bool:
           name: SKIP_VOTE_FAILED
           default: '{skip_vote_failed}'
           description: "configure gerrit voting"
