@@ -19,9 +19,6 @@
           default: 'Cluster1,Cluster2'
           description: "List of vCenter's clusters"
       - string:
-          name: ISO_STORAGE
-          default: '{iso_storage}'
-      - string:
           name: PLUGIN_VERSION
       - string:
           name: NSXV_PLUGIN_PATH
@@ -82,7 +79,7 @@
     testrail_suite: "[9.0][PCE] VMware NSXv plugin v3.0.0"
     testrail_suite_desc: "Suite description"
     testrail_milestone: "3.0.0"
-    testrail_plan: "[9.0][PCE] NSXv plugin v3.0.0 build#${{PKG_JOB_BUILD_NUMBER}} iso#${{ISO_VERSION}}"
+    testrail_plan: "$TREP_TESTRAIL_SUITE build#${{PKG_JOB_BUILD_NUMBER}}"
     testrail_plan_desc: "Test plan description"
     testrail_run: "$TREP_TESTRAIL_SUITE"
     testrail_run_desc: "Test run description"
@@ -179,7 +176,7 @@
 
       - '{fuel-release}.{plugin-name}.bvt.test'
 
-      - '{regression-name}':   
+      - '{regression-name}':
           testrail_suite: "[9.0][PCE] VMware NSXv plugin v3.0.0 Regression"
           testrail_suite_desc: "Suite description"
           testrail_plan: "$TREP_TESTRAIL_SUITE #${{DATE}}"
@@ -290,6 +287,7 @@
       - inject:
           properties-content: |
             $TESTRAIL_PARAMETERS
+            $ENV_PARAMETERS
       - conditional-step:
           condition-kind: shell
           condition-command: |
