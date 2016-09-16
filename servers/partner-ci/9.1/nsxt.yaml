@@ -57,6 +57,8 @@
     regression_disabled: true
     force_erase: false
     recreate_venv: false
+    ws_norevert: false
+    nfs_clean: false
     disable_ssl: true
     kvm_use: false
     update_master: true
@@ -195,6 +197,8 @@
           disable_ssl:          '{disable_ssl}'
           force_erase:          '{force_erase}'
           recreate_venv:        '{recreate_venv}'
+          ws_norevert:          '{ws_norevert}'
+          nfs_clean:            '{nfs_clean}'
           iso_file:             '{iso_file}'
           gerrit_branch:        '{gerrit_branch}'
           env_prefix:           '{fuel-release}.{plugin-name}'
@@ -241,6 +245,8 @@
           disable_ssl:     '{disable_ssl}'
           force_erase:     '{force_erase}'
           recreate_venv:   '{recreate_venv}'
+          ws_norevert:     '{ws_norevert}'
+          nfs_clean:       '{nfs_clean}'
           iso_file:        '{iso_file}'
           gerrit_branch:   '{gerrit_branch}'
           env_prefix:      '{fuel-release}.{plugin-name}'

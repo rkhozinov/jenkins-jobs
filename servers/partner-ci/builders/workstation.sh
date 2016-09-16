@@ -9,7 +9,7 @@ fi
 export VENV_PATH="${HOME}/${FUEL_RELEASE}-venv"
 export SSH_ENDPOINT="ssh_connect.py"
 main(){
-  if [ -z $NOREVERT ]; then
+  if [[ "${WS_NOREVERT}" == "false" ]]; then
     restart_ws_network
     revert_ws
     configure_nfs
@@ -104,9 +104,11 @@ configure_nfs(){
     echo "Rescan all datastores for $esxi_host"
   done
 
-  for nfs_share in $NFS_SHARES; do
-    sudo rm -rf "/var/$nfs_share/*"
-  done
+  if [[ "${NFS_CLEAN}" == "true" ]]; then
+    for nfs_share in $NFS_SHARES; do
+      sudo rm -rf "/var/$nfs_share/*"
+    done
+  fi
 
   [[ "${DEBUG}" == "true" ]] && set -x || set +x
 }
