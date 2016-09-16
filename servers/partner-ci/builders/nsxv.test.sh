@@ -40,8 +40,8 @@ if [[ $ISO_FILE == *"mos"* ]] || [[ $ISO_FILE == *"kilo"* ]];then
   export ISO_VERSION=$(echo $ISO_FILE | cut -d'-' -f4-4 | tr -d '.iso' )
   export FUEL_RELEASE=$(echo $ISO_VERSION | cut -d- -f2)
 elif [[ $ISO_FILE == *"Mirantis"* ]]; then
-  export ISO_VERSION=$(echo $ISO_FILE | tr -d '.iso' )
-  export FUEL_RELEASE=$(echo $ISO_VERSION | cut -d- -f2)
+  export ISO_VERSION=$(echo $ISO_FILE | sed 's/\.iso//g' )
+  export FUEL_RELEASE=$(echo $ISO_VERSION | cut -d- -f2 | sed 's/\.//g')
 else
   export ISO_VERSION=$(echo $ISO_FILE | cut -d'-' -f3-3 | tr -d '.iso' )
   export FUEL_RELEASE=$(echo $ISO_VERSION | cut -d- -f2)
