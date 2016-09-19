@@ -179,7 +179,7 @@
           artifacts: 'logs/**'
           allow-empty: true
       - archive:
-          artifacts: 'logs/**.log'
+          artifacts: '**.log'
           allow-empty: true
       - conditional-publisher:
           - condition-kind: file-exists
