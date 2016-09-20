@@ -6,13 +6,13 @@
           name: PLUGIN_VERSION
           default: '{plugin-version}'
           description: 'Snapshot name for vcenter lab'
-    - text:
-        name: WORKSTATION_PARAMETERS
-        default: |
-          MANILA_IMAGE_PATH=/storage/manila/manila-service-image.qcow2
-          WORKSTATION_SNAPSHOT=base_image
-          WORKSTATION_IFS=vmnet2:management,vmnet3:private,vmnet4:storage
-          WORKSTATION_NODES=netapp
+      - text:
+          name: WORKSTATION_PARAMETERS
+          default: |
+            MANILA_IMAGE_PATH=/storage/manila/manila-service-image.qcow2
+            WORKSTATION_SNAPSHOT=base_image
+            WORKSTATION_IFS=vmnet2:management,vmnet3:private,vmnet4:storage
+            WORKSTATION_NODES=netapp
 
 - project:
     name: 'predefined_parameters'
@@ -86,6 +86,7 @@
       - manila_smoke
       - manila_bvt
       - manila_install
+      - manila_integration
     jobs:
       - '{build-name}':
           scm_submodule_disabled: true
