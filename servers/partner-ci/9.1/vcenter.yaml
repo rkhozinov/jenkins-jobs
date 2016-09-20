@@ -231,6 +231,8 @@
           name: TEST_GROUP_PREFIX
           default: system_test.vcenter.deploy_vcenter_dvs_run_ostf
       - string:
+          name: PROGRESS_TO_STOP
+      - string:
           name: TEST_GROUP_CONFIG
           default: '${{TEST_GROUP}}'
       - common-parameters:
