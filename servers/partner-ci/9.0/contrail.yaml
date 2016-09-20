@@ -7,6 +7,10 @@
           default: '{obj:bonding}'
           description: 'turns on bonding'
       - bool:
+          name: SPECIFIC_VC
+          default: false
+          description: 'enable inject specific vcenter parameters for testing'
+      - bool:
           name: FORCE_VSRX_COPY
           default: '{obj:force_vsrx_copy}'
           description: 'force copying of vsrx image'
@@ -43,6 +47,9 @@
             VSRX_TARGET_IMAGE_PATH={vsrx_target_image_path}
             VSRX_TEMPLATE_PATH={vsrx_template_path}
             ISO_STORAGE={iso_storage}
+      - text:
+          name: SPECIFIC_VC_PARAMETERS
+          default: |
             ESXI_PASSWORD=swordfish
             ESXI_USER=root
             ESXI_HOSTS=172.16.0.250 172.16.0.252 172.16.0.253
@@ -442,6 +449,14 @@
             $ENV_PARAMETERS
             $BAREMETAL_PARAMETERS
             $ADDITIONAL_PARAMETERS
+      - conditional-step:
+           condition-kind: shell
+           condition-command: |
+            [ "${{SPECIFIC_VC}}" == "true"       ]
+           steps:
+             - inject:
+                 properties-content: |
+                   $SPECIFIC_VC_PARAMETERS
       - conditional-step:
            condition-kind: shell
            condition-command: |
