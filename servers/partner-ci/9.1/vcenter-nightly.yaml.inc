@@ -61,13 +61,13 @@
          TEST_GROUP_CONFIG=vcenter_add_computevmware
        kill-phase-on: NEVER
 
-     - name: '{fuel-release}.{plugin-name}.vcenter_multiroles_computevmware_cindervmvare'
+     - name: '{fuel-release}.{plugin-name}.vcenter_multiroles_computevmware_cindervmware'
        property-file: build_number
        current-parameters: true
        predefined-parameters: |
-         TEST_GROUP=vcenter_multiroles_computevmware_cindervmvare
+         TEST_GROUP=vcenter_multiroles_computevmware_cindervmware
          TEST_GROUP_PREFIX=system_test.vcenter.deploy_vcenter_dvs_run_ostf
-         TEST_GROUP_CONFIG=vcenter_multiroles_computevmware_cindervmvare
+         TEST_GROUP_CONFIG=vcenter_multiroles_computevmware_cindervmware
        kill-phase-on: NEVER
 
      - name: '{fuel-release}.{plugin-name}.vcenter_custom_hostname'
@@ -79,12 +79,12 @@
          TEST_GROUP_CONFIG=vcenter_vmware_roles
        kill-phase-on: NEVER
 
-     - name: '{fuel-release}.{plugin-name}.vcenter_check_nova_conf'
+     - name: '{fuel-release}.{plugin-name}.vcenter_check_vcenter_configs'
        property-file: build_number
        current-parameters: true
        predefined-parameters: |
-         TEST_GROUP=vcenter_check_nova_conf
-         TEST_GROUP_PREFIX=system_test.vcenter.check_nova_config
+         TEST_GROUP=vcenter_check_vcenter_configs
+         TEST_GROUP_PREFIX=system_test.vcenter.check_vcenter_configs
          TEST_GROUP_CONFIG=vcenter_dvs_bvt
        kill-phase-on: NEVER
 
@@ -475,4 +475,25 @@
          TEST_GROUP=vcenter_redeploy_failed_cluster
          TEST_GROUP_CONFIG=vcenter_glance_vmware_roles
          TEST_GROUP_PREFIX=system_test.vcenter.vcenter_redeploy_failed_cluster
+       kill-phase-on: NEVER
+
+     - name: '{fuel-release}.{plugin-name}.vcenter_secure_nova_cinder'
+       property-file: build_number
+       current-parameters: true
+       predefined-parameters: |
+         TEST_GROUP_CONFIG=vcenter_multiroles_computevmware_cindervmware
+         TEST_GROUP_PREFIX=system_test.vcenter.check_vcenter_configs
+         VCENTER_CERT_URL="http://tpi-s2.bud.mirantis.net:5000/downloads/certs/server.pem"
+         VCENTER_CERT_BYPASS=False
+       kill-phase-on: NEVER
+
+     - name: '{fuel-release}.{plugin-name}.vcenter_secure_glance'
+       property-file: build_number
+       current-parameters: true
+       predefined-parameters: |
+         TEST_GROUP=vcenter_secure_glance
+         TEST_GROUP_CONFIG=vcenter_multiroles_computevmware_cindervmware
+         TEST_GROUP_PREFIX=system_test.vcenter.check_vcenter_configs
+         VCENTER_GLANCE_CERT_URL="http://tpi-s2.bud.mirantis.net:5000/downloads/certs/server.pem"
+         VCENTER_GLANCE_CERT_BYPASS=False
        kill-phase-on: NEVER

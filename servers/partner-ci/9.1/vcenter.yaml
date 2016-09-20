@@ -25,7 +25,7 @@
           VCENTER_DATACENTER=Datacenter
           VCENTER_DATASTORE=nfs
           VCENTER_CLUSTERS=Cluster1,Cluster2
-          DVS_NAME=Cluster1:Cluster1;Cluster2:Cluster2
+          #DVS_NAME=Cluster1:Cluster1;Cluster2:Cluster2
           VCENTER_USE=true
           VC_IMAGE_DIR=openstack_glance
           VMWARE_IMG_NAME=shaker.vmdk
@@ -117,9 +117,9 @@
       - vcenter_delete_cindervmware
       - vcenter_delete_computevmware
       - vcenter_add_computevmware
-      - vcenter_multiroles_computevmware_cindervmvare
+      - vcenter_multiroles_computevmware_cindervmware
       - vcenter_custom_hostname
-      - vcenter_check_nova_conf
+      - vcenter_check_vcenter_configs
       - vcenter_check_nova_services
       - vcenter_check_cindervmware_srv
       - vcenter_check_gw
@@ -151,6 +151,9 @@
       - vcenter_redeploy_successful_cluster
       - vcenter_redeploy_stopped_cluster
       - vcenter_redeploy_failed_cluster
+
+      - vcenter_secure_nova_cinder
+      - vcenter_secure_glance
 
     jobs:
       - '{nightly-name}':
