@@ -34,6 +34,10 @@
           VMWARE_IMG_PASSWORD=r00tme
           CLEAN_IPTABLES=true
           DISABLE_STP=true
+          VCENTER_GLANCE_CERT_URL="http://tpi-s2.bud.mirantis.net:5000/downloads/certs/server.pem"
+          VCENTER_GLANCE_CERT_BYPASS=True
+          VCENTER_CERT_URL="http://tpi-s2.bud.mirantis.net:5000/downloads/certs/server.pem"
+          VCENTER_CERT_BYPASS=True
 
 - project:
     name: 'predefined_parameters'
