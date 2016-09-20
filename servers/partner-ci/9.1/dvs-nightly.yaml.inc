@@ -229,3 +229,19 @@
           TEST_GROUP_CONFIG=dvs_heat
         current-parameters: true
         kill-phase-on: NEVER
+
+      - name: '{fuel-release}.{plugin-name}.dvs_multiple_uplinks_teaming'
+        property-file: build_number
+        predefined-parameters: |
+          TEST_GROUP=dvs_multiple_uplinks_teaming
+          TEST_GROUP_CONFIG=dvs_multiple_uplinks_teaming
+        current-parameters: true
+        kill-phase-on: NEVER
+
+      - name: '{fuel-release}.{plugin-name}.dvs_multiple_uplinks_teaming_fallback'
+        property-file: build_number
+        predefined-parameters: |
+          TEST_GROUP=dvs_multiple_uplinks_teaming_fallback
+          TEST_GROUP_CONFIG=dvs_multiple_uplinks_teaming_fallback
+        current-parameters: true
+        kill-phase-on: NEVER
