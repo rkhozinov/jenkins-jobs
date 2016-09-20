@@ -129,6 +129,8 @@
       - dvs_vcenter_smoke
       - dvs_vcenter_bvt
       - dvs_heat
+      - dvs_multiple_uplinks_teaming
+      - dvs_multiple_uplinks_teaming_fallback
 
     jobs:
       - '{build-name}':
