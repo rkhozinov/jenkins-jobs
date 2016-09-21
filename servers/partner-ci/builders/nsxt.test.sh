@@ -34,7 +34,7 @@ else
   exit 1
 fi
 
-[ -z $PLUGIN_VERSION  ] && { echo "PLUGIN_VERSION variable is empty"; exit 1; } || export NSX-T_PLUGIN_VERSION=$PLUGIN_VERSION
+[ -z $PLUGIN_VERSION  ] && { echo "PLUGIN_VERSION variable is empty"; exit 1; } || export NSXT_PLUGIN_VERSION=$PLUGIN_VERSION
 
 if [ -z "${PKG_JOB_BUILD_NUMBER}" ]; then
     if [ -f build.properties ]; then
@@ -55,9 +55,9 @@ rm -rf logs/*
 export ENV_NAME="${ENV_PREFIX}.${SNAPSHOTS_ID}"
 export VENV_PATH="${HOME}/${FUEL_RELEASE}-venv"
 
-[ -z "${NSX-T_PLUGIN_PATH}"  ] && export NSX-T_PLUGIN_PATH=$(ls -t ${WORKSPACE}/nsx-t*.rpm | head -n 1)
-[ -z "${NSX-T_PLUGIN_PATH}"  ] && { echo "NSX-T_PLUGIN_PATH is empty"; exit 1; }
-[ -z "${PLUGIN_PATH}"       ] && export PLUGIN_PATH=$NSX-T_PLUGIN_PATH
+[ -z "${NSXT_PLUGIN_PATH}"  ] && export NSXT_PLUGIN_PATH=$(ls -t ${WORKSPACE}/nsx-t*.rpm | head -n 1)
+[ -z "${NSXT_PLUGIN_PATH}"  ] && { echo "NSXT_PLUGIN_PATH is empty"; exit 1; }
+[ -z "${PLUGIN_PATH}"       ] && export PLUGIN_PATH=$NSXT_PLUGIN_PATH
 
 systest_parameters=''
 [[ $USE_SNAPSHOTS == "true"  ]] && systest_parameters+=' -k' || echo "new env will be created"
@@ -70,8 +70,8 @@ echo "fuel-release: ${FUEL_RELEASE}"
 echo "venv-path: ${VENV_PATH}"
 echo "env-name: ${ENV_NAME}"
 echo "iso-path: ${ISO_PATH}"
-echo "plugin-path: ${NSX-T_PLUGIN_PATH}"
-echo "plugin-checksum: $(md5sum -b ${NSX-T_PLUGIN_PATH})"
+echo "plugin-path: ${NSXT_PLUGIN_PATH}"
+echo "plugin-checksum: $(md5sum -b ${NSXT_PLUGIN_PATH})"
 
 cat << REPORTER_PROPERTIES > reporter.properties
 ISO_VERSION=$SNAPSHOTS_ID

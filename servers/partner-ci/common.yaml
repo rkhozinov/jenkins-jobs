@@ -156,8 +156,10 @@
             - shell: |
                 #!/bin/bash
                 plugin_version=$(grep '^version' metadata.yaml | cut -d ' ' -f2)
-                echo PLUGIN_VERSION=${{plugin_version}} | tr -d "'"> build.plugin_version
+                version=$(echo PLUGIN_VERSION=${{plugin_version}} | tr -d "'")
+                echo $version > build.plugin_version
                 env > build.properties
+                echo $version >> build.properties
       - archive:
           artifacts: '*.rpm'
           allow-empty: false

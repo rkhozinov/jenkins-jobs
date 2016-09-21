@@ -21,13 +21,13 @@
       - string:
           name: PLUGIN_VERSION
       - string:
-          name: NSXV_PLUGIN_PATH
+          name: NSXT_PLUGIN_PATH
 
 - project:
     name: 'predefined_parameters'
     fuel-release: '9.0'
     plugin-version: '1.0.0'
-    plugin-name: 'nsx-t'
+    plugin-name: 'nsxt'
     build-name: '{fuel-release}.{plugin-name}.build'
     flake8-name: '{fuel-release}.{plugin-name}.flake8'
     radon-name: '{fuel-release}.{plugin-name}.radon'
@@ -38,8 +38,8 @@
     nightly-name: '{fuel-release}.{plugin-name}.nightly'
     custom-name: '{fuel-release}.{plugin-name}.custom'
     reporter-name: '{fuel-release}.{plugin-name}.reporter'
-    smoke-test-name: 'nsx-t_smoke'
-    bvt-test-name: 'nsx-t_bvt'
+    smoke-test-name: 'nsxt_smoke'
+    bvt-test-name: 'nsxt_bvt'
     admin_node_memory: '8192'
     slave_node_memory: '8192'
     admin_node_cpu: '4'
@@ -93,45 +93,45 @@
     testgroup_value: '{testgroup}'
 
     testgroup:
-      - nsx-t_add_delete_nodes
-      - nsx-t_add_delete_controller
+      - nsxt_add_delete_nodes
+      - nsxt_add_delete_controller
 
-      - nsx-t_ceilometer
-      - nsx-t_ha_mode
+      - nsxt_ceilometer
+      - nsxt_ha_mode
 
-      - nsx-t_smoke
-      - nsx-t_bvt
+      - nsxt_smoke
+      - nsxt_bvt
 
-      - nsx-t_floating_ip_to_public
-      - nsx-t_create_and_delete_vms
-      - nsx-t_smoke_add_compute
-      - nsx-t_public_network_availability
-      - nsx-t_connectivity_via_shared_router
-      - nsx-t_connectivity_via_distributed_router
-      - nsx-t_connectivity_via_exclusive_router
-      - nsx-t_create_terminate_networks
-      - nsx-t_public_network_to_all_nodes
-      - nsx-t_kvm_deploy
-      - nsx-t_specified_router_type
-      - nsx-t_metadata_mgt_disabled
-      - nsx-t_metadata_listen_public
-      - nsx-t_metadata_listen_management
-      - nsx-t_create_and_delete_secgroups
-      - nsx-t_multi_vnic
-      - nsx-t_install
-      - nsx-t_uninstall
-      - nsx-t_uninstall_negative
-      - nsx-t_connectivity_diff_networks
-      - nsx-t_different_tenants
-      - nsx-t_same_ip_different_tenants
-      - nsx-t_disable_hosts
+      - nsxt_floating_ip_to_public
+      - nsxt_create_and_delete_vms
+      - nsxt_smoke_add_compute
+      - nsxt_public_network_availability
+      - nsxt_connectivity_via_shared_router
+      - nsxt_connectivity_via_distributed_router
+      - nsxt_connectivity_via_exclusive_router
+      - nsxt_create_terminate_networks
+      - nsxt_public_network_to_all_nodes
+      - nsxt_kvm_deploy
+      - nsxt_specified_router_type
+      - nsxt_metadata_mgt_disabled
+      - nsxt_metadata_listen_public
+      - nsxt_metadata_listen_management
+      - nsxt_create_and_delete_secgroups
+      - nsxt_multi_vnic
+      - nsxt_install
+      - nsxt_uninstall
+      - nsxt_uninstall_negative
+      - nsxt_connectivity_diff_networks
+      - nsxt_different_tenants
+      - nsxt_same_ip_different_tenants
+      - nsxt_disable_hosts
 
-      - nsx-t_ha_edges
+      - nsxt_ha_edges
 
-      - nsx-t_ability_to_bind_port
-      - nsx-t_insecure_false
+      - nsxt_ability_to_bind_port
+      - nsxt_insecure_false
 
-      - nsx-t_config_ok_metadata_self_signed_certificate
+      - nsxt_config_ok_metadata_self_signed_certificate
 
     jobs:
       - '{build-name}':
@@ -229,7 +229,7 @@
     parameters:
       - label:
           name: node
-          default: 'nsx-t'
+          default: 'nsxt'
           description: "The node on which to run the job"
       - bool:
           name: BUILD_PKG
@@ -271,7 +271,7 @@
 - defaults:
     name: global
     disabled: false
-    node: nsx-t
+    node: nsxt
     <<: *test-parameters
     scm:
       - common-scm:
@@ -305,7 +305,7 @@
           condition-command: |
             [ ! -z ${{PKG_JOB_NAME}}          ] && \
             [   -z ${{PKG_JOB_BUILD_NUMBER}}  ] && \
-            [   -z ${{NSX-T_PLUGIN_PATH}}      ]
+            [   -z ${{NSXT_PLUGIN_PATH}}      ]
           steps:
             - copyartifact:
                 project: ${{PKG_JOB_NAME}}
@@ -315,7 +315,7 @@
           condition-command: |
             [ ! -z ${{PKG_JOB_NAME}}          ] && \
             [ ! -z ${{PKG_JOB_BUILD_NUMBER}}  ] && \
-            [   -z ${{NSX-T_PLUGIN_PATH}}      ]
+            [   -z ${{NSXT_PLUGIN_PATH}}      ]
           steps:
             - copyartifact:
                 project: ${{PKG_JOB_NAME}}
@@ -335,7 +335,7 @@
       - shell:
           !include-raw-escape: ../builders/common.prepare.sh
       - shell:
-          !include-raw-escape: ../builders/nsx-t.test.sh
+          !include-raw-escape: ../builders/nsxt.test.sh
     publishers:
       - runner-publisher:
           properties_name: properties
@@ -377,7 +377,7 @@
           colormap: xterm
     builders:
       - shell:
-          !include-raw-escape: ../builders/build-plugin-nsx-t.sh
+          !include-raw-escape: ../builders/build-plugin-nsxt.sh
       - shell:
           !include-raw-escape: ../builders/rpm-check.sh
     publishers:
@@ -536,4 +536,4 @@
           properties_name: nightly.properties
           email_to: '{email_to}'
     builders:
-      !include: nsx-t-nightly.yaml.inc
+      !include: nsxt-nightly.yaml.inc
