@@ -492,7 +492,7 @@
        current-parameters: true
        predefined-parameters: |
          TEST_GROUP=vcenter_secure_glance
-         TEST_GROUP_CONFIG=vcenter_multiroles_computevmware_cindervmware
+         TEST_GROUP_CONFIG=vcenter_glance_backend
          TEST_GROUP_PREFIX=system_test.vcenter.check_vcenter_configs
          VCENTER_GLANCE_CERT_URL="http://tpi-s2.bud.mirantis.net:5000/downloads/certs/server.pem"
          VCENTER_GLANCE_CERT_BYPASS=False
