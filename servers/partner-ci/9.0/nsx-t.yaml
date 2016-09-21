@@ -4,11 +4,11 @@
     parameters:
       - string:
           name: WORKSTATION_SNAPSHOT
-          default: 'nsx-t-1.0'
+          default: 'nsx-t-1.0.1'
           description: 'Snapshot name for vcenter lab'
       - string:
           name: WORKSTATION_NODES
-          default: 'esxi1 esxi2 esxi3 vcenter trusty'
+          default: 'esxi1 esxi2 esxi3 vcenter nsx-edge trusty'
           description: "List of workstation's nodes"
       - string:
           name: VCENTER_IP
@@ -18,9 +18,6 @@
           name: VCENTER_CLUSTERS
           default: 'Cluster1,Cluster2'
           description: "List of vCenter's clusters"
-      - string:
-          name: ISO_STORAGE
-          default: '{iso_storage}'
       - string:
           name: PLUGIN_VERSION
       - string:
@@ -54,9 +51,12 @@
     regression_disabled: true
     force_erase: true
     recreate_venv: false
+    ws_norevert: false
+    nfs_clean: false
     disable_ssl: true
     kvm_use: false
-    update_master: true
+    update_master: false
+    enable_proposed: false
     debug: true
     build_debug: true
     publish_results: true
@@ -200,6 +200,8 @@
           disable_ssl:          '{disable_ssl}'
           force_erase:          '{force_erase}'
           recreate_venv:        '{recreate_venv}'
+          ws_norevert:          '{ws_norevert}'
+          nfs_clean:            '{nfs_clean}'
           iso_file:             '{iso_file}'
           gerrit_branch:        '{gerrit_branch}'
           env_prefix:           '{fuel-release}.{plugin-name}'
@@ -214,6 +216,8 @@
           testrail_plan_desc:   '{testrail_plan_desc}'
           skip_vote_successfull: '{skip_vote_successfull}'
           skip_vote_failed:     '{skip_vote_failed}'
+          enable_proposed:      '{enable_proposed}'
+          update_master:        '{update_master}'
           kvm_use:              '{kvm_use}'
           iso_storage:          '{iso_storage}'
           snapshots_id:         '{snapshots_id}'
@@ -241,6 +245,8 @@
           disable_ssl:     '{disable_ssl}'
           force_erase:     '{force_erase}'
           recreate_venv:   '{recreate_venv}'
+          ws_norevert:     '{ws_norevert}'
+          nfs_clean:       '{nfs_clean}'
           iso_file:        '{iso_file}'
           gerrit_branch:   '{gerrit_branch}'
           env_prefix:      '{fuel-release}.{plugin-name}'
@@ -255,6 +261,8 @@
           testrail_plan_desc:   '{testrail_plan_desc}'
           skip_vote_successfull: '{skip_vote_successfull}'
           skip_vote_failed:     '{skip_vote_failed}'
+          enable_proposed:      '{enable_proposed}'
+          update_master:        '{update_master}'
           kvm_use:              '{kvm_use}'
           iso_storage:          '{iso_storage}'
           snapshots_id:         '{snapshots_id}'
@@ -278,6 +286,20 @@
     properties:
       - test-property
     builders:
+      - inject:
+          properties-content: |
+            $TESTRAIL_PARAMETERS
+            $ENV_PARAMETERS
+      - conditional-step:
+           condition-kind: shell
+           condition-command: |
+            [ "${{BUILD_PKG}}" == "true"       ]
+           steps:
+             - trigger-builds:
+                 - project: ${{PKG_JOB_NAME}}
+                   current-parameters: false
+                   git-revision: false
+                   block: true
       - conditional-step:
           condition-kind: shell
           condition-command: |
@@ -299,6 +321,17 @@
                 project: ${{PKG_JOB_NAME}}
                 which-build: specific-build
                 build-number: ${{PKG_JOB_BUILD_NUMBER}}
+      - conditional-step:
+          condition-kind: shell
+          condition-command: |
+            [[ "${{UPDATE_MASTER}}" == "true" ]]
+          steps:
+            - inject:
+                properties-content: $UPDATE_PARAMETERS
+            - shell: |
+                [ ! -n ${{SNAPSHOTS_ID}} ] && {{ echo "SNAPSHOTS_ID is empty"; exit 1; }}
+                wget --no-check-certificate -O ${{SNAPSHOT_ARTIFACTS_FILE}} ${{SNAPSHOTS_URL/SNAPSHOTS_ID/$SNAPSHOTS_ID}}
+                python plugin_test/fuel-qa/utils/jenkins/conv_snapshot_file.py
       - shell:
           !include-raw-escape: ../builders/common.prepare.sh
       - shell:
