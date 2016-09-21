@@ -2,21 +2,36 @@
 # activate bash xtrace for script
 [[ "${DEBUG}" == "true" ]] && set -x || set +x
 
-ISO_FILE_ARTIFACT='iso_file'
-# if user entered custom iso we should use it
-if [ -z $ISO_FILE  ]; then
-   # but if use doesn't want custom iso, we should get iso from artifacts
-   [ -f $ISO_FILE_ARTIFACT ] && source $ISO_FILE_ARTIFACT || (echo "There's not iso_file"; exit 1)
-   # check variable again - it shouldn't be empty
-   [ -z $ISO_FILE  ] && (echo "ISO_FILE variable is empty"; exit 1)
+export ISO_PATH="${ISO_STORAGE}/${ISO_FILE}"
+[ -z $ISO_PATH  ] && { echo "ISO_PATH is empty or doesn't exist"; exit 1; }
+
+export FUEL_RELEASE=$(echo $ISO_FILE | cut -d- -f2 | tr -d '.iso')
+
+if [[ "${UPDATE_MASTER}" == "true" ]] && [[ ${FUEL_RELEASE} != *"80"* ]]; then
+  if [ -f $SNAPSHOT_OUTPUT_FILE ]; then
+    . $SNAPSHOT_OUTPUT_FILE
+    export EXTRA_RPM_REPOS
+    export UPDATE_FUEL_MIRROR
+    export EXTRA_DEB_REPOS
+  else
+    echo "SNAPSHOT_OUTPUT_FILE is empty or doesn't exist"
+    exit 1
+  fi
+else
+  export SNAPSHOTS_ID="released"
 fi
 
-PLUGIN_VERSION_ARTIFACT='build.plugin_version'
-# if user entered custom iso we should use it
+if [[ $SNAPSHOTS_ID == *"lastSuccessfulBuild"* ]]; then
+  export SNAPSHOTS_ID=$(cat snapshots.params | grep -Po '#\K[^ ]+')
+fi
 
-if [ -z $PLUGIN_VERSION  ]; then
-   # but if use doesn't want custom iso, we should get iso from artifacts
-   [ -f $PLUGIN_VERSION_ARTIFACT ] && source $PLUGIN_VERSION_ARTIFACT || (echo "The PLUGIN_VERSION is empty"; exit 1)
+[ -z "${SNAPSHOTS_ID}" ] && { echo SNAPSHOTS_ID is empty; exit 1; }
+
+if [ -f build.plugin_version ]; then
+  export PLUGIN_VERSION=$(grep "PLUGIN_VERSION" < build.plugin_version | cut -d= -f2 )
+else
+  echo "build.properties file is not available so a test couldn't be runned"
+  exit 1
 fi
 
 [ -z $PLUGIN_VERSION  ] && { echo "PLUGIN_VERSION variable is empty"; exit 1; } || export NSX-T_PLUGIN_VERSION=$PLUGIN_VERSION
@@ -35,19 +50,9 @@ fi
 [ -f nosetest.xml ] && rm -f nosetests.xml
 rm -rf logs/*
 
-export ISO_PATH="${ISO_STORAGE}/${ISO_FILE}"
-if [[ $ISO_FILE == *"mos"* ]] || [[ $ISO_FILE == *"kilo"* ]];then
-  export ISO_VERSION=$(echo $ISO_FILE | cut -d'-' -f4-4 | tr -d '.iso' )
-  export FUEL_RELEASE=$(echo $ISO_VERSION | cut -d- -f2)
-elif [[ $ISO_FILE == *"Mirantis"* ]]; then
-  export ISO_VERSION=$(echo $ISO_FILE | tr -d '.iso' )
-  export FUEL_RELEASE=$(echo $ISO_VERSION | cut -d- -f2)
-else
-  export ISO_VERSION=$(echo $ISO_FILE | cut -d'-' -f3-3 | tr -d '.iso' )
-  export FUEL_RELEASE=$(echo $ISO_VERSION | cut -d- -f2)
-fi
-    
-export ENV_NAME="${ENV_PREFIX}.${ISO_VERSION}"
+
+
+export ENV_NAME="${ENV_PREFIX}.${SNAPSHOTS_ID}"
 export VENV_PATH="${HOME}/${FUEL_RELEASE}-venv"
 
 [ -z "${NSX-T_PLUGIN_PATH}"  ] && export NSX-T_PLUGIN_PATH=$(ls -t ${WORKSPACE}/nsx-t*.rpm | head -n 1)
@@ -69,7 +74,8 @@ echo "plugin-path: ${NSX-T_PLUGIN_PATH}"
 echo "plugin-checksum: $(md5sum -b ${NSX-T_PLUGIN_PATH})"
 
 cat << REPORTER_PROPERTIES > reporter.properties
-ISO_VERSION=$ISO_VERSION
+ISO_VERSION=$SNAPSHOTS_ID
+SNAPSHOTS_ID=$SNAPSHOTS_ID
 ISO_FILE=$ISO_FILE
 TEST_GROUP=$TEST_GROUP
 TEST_JOB_NAME=$JOB_NAME
