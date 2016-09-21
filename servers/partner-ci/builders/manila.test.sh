@@ -33,7 +33,7 @@ else
   exit 1
 fi
 
-[ -z $DVS_PLUGIN_VERSION ] && { echo "DVS_PLUGIN_VERSION is empty"; exit 1; }
+[ -z $MANILA_PLUGIN_VERSION ] && { echo "MANILA_PLUGIN_VERSION is empty"; exit 1; }
 
 [ ! -f $MANILA_IMAGE_PATH ] && \
   { echo "MANILA_IMAGE_PATH is empty or doesn't exist"; exit 1; }
@@ -70,8 +70,8 @@ echo "fuel-release: ${FUEL_RELEASE}"
 echo "venv-path: ${VENV_PATH}"
 echo "env-name: ${ENV_NAME}"
 echo "iso-path: ${ISO_PATH}"
-echo "plugin-path: ${DVS_PLUGIN_PATH}"
-echo "plugin-checksum: $(md5sum -b ${DVS_PLUGIN_PATH})"
+echo "plugin-path: ${MANILA_PLUGIN_PATH}"
+echo "plugin-checksum: $(md5sum -b ${MANILA_PLUGIN_PATH})"
 
 cat << REPORTER_PROPERTIES > reporter.properties
 ISO_VERSION=$SNAPSHOTS_ID
