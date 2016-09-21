@@ -48,7 +48,7 @@
             VSRX_TEMPLATE_PATH={vsrx_template_path}
             ISO_STORAGE={iso_storage}
       - text:
-          name: SPECIFIC_VC_PARAMETERS
+          name: WORKSTATION_PARAMETERS
           default: |
             ESXI_PASSWORD=swordfish
             ESXI_USER=root
@@ -57,7 +57,7 @@
             NFS_SHARES=nfs nfs2
             VSPHERE_VERSION=5.5
             WORKSTATION_SNAPSHOT=contrail
-            WORKSTATION_IFS=vmnet2,vmnet3,vmnet4
+            WORKSTATION_IFS=vmnet2:admin,vmnet3:private
             WORKSTATION_NODES=esxi1 esxi2 esxi3 vcenter
             VCENTER_IP=172.16.0.145
             VCENTER_USERNAME=openstack
@@ -452,15 +452,15 @@
       - conditional-step:
            condition-kind: shell
            condition-command: |
-            [ "${{SPECIFIC_VC}}" == "true"       ]
+            [ "${{VCENTER_USE}}" == "true"       ]
            steps:
              - inject:
                  properties-content: |
-                   $SPECIFIC_VC_PARAMETERS
+                   $WORKSTATION_PARAMETERS
       - conditional-step:
            condition-kind: shell
            condition-command: |
-            [ "${{BUILD_PKG}}" == "true"       ]
+            [ "${{BUILD_PKG}}" == "true"         ]
            steps:
              - trigger-builds:
                  - project: ${{PKG_JOB_NAME}}
@@ -490,8 +490,13 @@
                 build-number: ${{PKG_JOB_BUILD_NUMBER}}
       - shell:
           !include-raw-escape: ../builders/common.prepare.sh
-      - shell:
-          !include-raw-escape: ../builders/workstation.sh
+      - conditional-step:
+           condition-kind: shell
+           condition-command: |
+            [ "${{VCENTER_USE}}" == "true"       ]
+           steps:
+             - shell:
+                 !include-raw-escape: ../builders/workstation.sh
       - shell:
           !include-raw-escape: ../builders/contrail.test.sh
     publishers:
