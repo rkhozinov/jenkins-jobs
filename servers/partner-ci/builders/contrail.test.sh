@@ -17,7 +17,6 @@ if [[ $ISO_FILE == *"Mirantis"* ]]; then
   [[ "${UPDATE_MASTER}" -eq "true" ]] && export ISO_VERSION='released' || export ISO_VERSION='mos'
 fi
 
-
 export ENV_NAME="${ENV_PREFIX}.${ISO_VERSION}"
 export VENV_PATH="${HOME}/${FUEL_RELEASE}-venv"
 
@@ -35,9 +34,44 @@ export JUNIPER_PKG_PATH="/storage/contrail/${CONTRAIL_VERSION}/"
                          || { echo "CONTRAIL_PLUGIN_PACK_UB_PATH is not found";  exit 1; }
 export JUNIPER_PKG_VERSION=$(sed 's/[-_~]/-/g' <<< ${CONTRAIL_PLUGIN_PACK_UB_PATH} | cut -d- -f4-5)
 
-systest_parameters=''
-[[ $USE_SNAPSHOTS == "true"  ]] && systest_parameters+=' -k' || echo new env will be created
-[[ $ERASE_AFTER   == "true"  ]] && echo the env will be erased after test || systest_parameters+=' -K'
+if [[ $VCENTER_USE == "true"  ]]; then
+
+  add_interface_to_bridge() {
+    env=$1
+    net_name=$2
+    nic=$3
+
+    for net in $(virsh net-list | grep ${env}_${net_name} | awk '{print $1}'); do
+      bridge=$(virsh net-info $net | grep -i bridge |awk '{print $2}')
+      setup_bridge $bridge $nic && echo $net_name bridge $bridge ready
+    done
+  }
+
+  setup_bridge() {
+    set -x
+    bridge=$1
+    nic=$2
+
+    [[ "${DISABLE_STP}" == "true" ]] && sudo brctl stp $bridge off
+    sudo brctl addif $bridge $nic
+
+    sudo ip address flush $nic
+    sudo ip link set dev $nic up
+    sudo ip link set dev $bridge up
+
+    if sudo /sbin/iptables-save | grep $bridge | grep -i reject | grep -q FORWARD; then
+      sudo /sbin/iptables -D FORWARD -o $bridge -j REJECT --reject-with icmp-port-unreachable
+      sudo /sbin/iptables -D FORWARD -i $bridge -j REJECT --reject-with icmp-port-unreachable
+    fi
+
+  }
+
+  clean_iptables() {
+    sudo /sbin/iptables -F
+    sudo /sbin/iptables -t nat -F
+    sudo /sbin/iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE
+  }
+fi
 
 echo test-group: $TEST_GROUP
 echo env-name: $ENV_NAME
@@ -49,7 +83,7 @@ echo iso-path: $ISO_PATH
 echo plugin-path: $CONTRAIL_PLUGIN_PATH
 echo ubuntu-plugin-path: $CONTRAIL_PLUGIN_PACK_UB_PATH
 echo juniper-package-version: $JUNIPER_PKG_VERSION
-echo plugin-checksum: $(md5sum -b $DVS_PLUGIN_PATH)
+echo plugin-checksum: $(md5sum -b $CONTRAIL_PLUGIN_PATH)
 
 cat << REPORTER_PROPERTIES > reporter.properties
 ISO_VERSION=$ISO_VERSION
@@ -68,4 +102,37 @@ DATE=$(date +'%B-%d')
 REPORTER_PROPERTIES
 
 source $VENV_PATH/bin/activate
-./plugin_test/utils/jenkins/system_tests.sh -t test ${systest_parameters} -i ${ISO_PATH} -j ${JOB_NAME} -o --group=${TEST_GROUP}
+#./plugin_test/utils/jenkins/system_tests.sh -t test ${systest_parameters} -i ${ISO_PATH} -j ${JOB_NAME} -o --group=${TEST_GROUP}
+
+# run python test set to create environments, deploy and test product
+export PYTHONPATH="${PYTHONPATH:+${PYTHONPATH}:}${WORKSPACE}"
+echo ${PYTHONPATH}
+python plugin_test/run_tests.py -q --nologcapture --with-xunit --group=${TEST_GROUP} &
+
+export SYSTEST_PID=$!
+
+if [[ $VCENTER_USE == "true"  ]]; then
+  #Wait before environment is created
+  while [ true ]; do
+    [ $(virsh net-list | grep $ENV_NAME | wc -l) -eq 5 ] && break || sleep 10
+    [ -e /proc/$SYSTEST_PID ] && continue || \
+      { echo System tests exited prematurely, aborting; exit 1; }
+  done
+
+  [[ "${CLEAN_IPTABLES}" == "true" ]] && clean_iptables
+
+  for iface_map in $(echo $WORKSTATION_IFS | tr ',' ' '); do
+      iface=$(echo $iface_map | cut -d: -f1)
+      network=$(echo $iface_map | cut -d: -f2)
+      add_interface_to_bridge $ENV_NAME $network $iface
+  done
+fi
+
+echo "Waiting for system tests to finish"
+wait $SYSTEST_PID
+export RESULT=$?
+
+echo "ENVIRONMENT NAME is $ENV_NAME"
+dos.py list --ips | grep ${ENV_NAME}
+
+[ $RESULT -eq 0 ] && { echo "Tests succeeded"; exit $RESULT; }
