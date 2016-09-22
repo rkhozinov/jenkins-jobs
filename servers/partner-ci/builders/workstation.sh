@@ -17,7 +17,12 @@ main(){
 }
 restart_ws_network(){
   sudo vmware-networks --stop
-  sudo vmware-networks --start
+  if sudo vmware-networks --start; then
+    echo "successful networks-restart "
+  else
+    echo "WARNING you need to check configuration of vmnet adapters on this lab"
+    exit 1
+  fi
 }
 
 # waiting for ending of parallel processes
