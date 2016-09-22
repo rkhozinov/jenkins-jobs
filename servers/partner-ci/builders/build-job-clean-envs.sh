@@ -1,22 +1,10 @@
 #####################################################################
-function dospy {
-  env_list=$2
-  action=$1
-
-  if [[ ! -z "${env_list}" ]] && [[ ! -z "${action}" ]]; then
-    for env in $env_list; do dos.py $action $env; done
-  fi
-}
-
-## Gets dospy environments
-## with prefix the function returns all env except envs like prefix
-
 function dospy_list {
   prefix=$1
   dos.py sync
   [ -z $prefix ] && \
     echo $(dos.py list | tail -n +3) || \
-    echo $(dos.py list | tail -n +3  | grep -v $prefix)
+    echo $(dos.py list | tail -n +3  | grep  $prefix)
 }
 ######################################################################
 
