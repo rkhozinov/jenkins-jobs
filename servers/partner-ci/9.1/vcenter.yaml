@@ -1,44 +1,4 @@
 ---
-- parameter:
-    name: plugin-specific-parameters
-    parameters:
-    - text:
-        name: VCENTER_PARAMETERS
-        default: |
-          SNAPSHOT_OUTPUT_FILE=extra_repos.sh
-          SNAPSHOT_ARTIFACTS_FILE=snapshots.params
-          ESXI_PASSWORD=swordfish
-          ESXI_USER=root
-          ESXI_HOSTS=172.16.0.250 172.16.0.252 172.16.0.253
-          NFS_SERVER=172.16.0.1
-          NFS_SHARES=nfs nfs2
-          VSPHERE_VERSION=5.5
-          WORKSTATION_SNAPSHOT=doubledvs
-          WORKSTATION_IFS=vmnet2,vmnet3,vmnet4
-          WORKSTATION_NODES=esxi1 esxi2 esxi3 vcenter
-          VCENTER_IP=172.16.0.145
-          VCENTER_USERNAME=openstack
-          VCENTER_PASSWORD=vmware
-          VCENTER_GLANCE_IP=172.16.0.145
-          VCENTER_GLANCE_USERNAME=openstack
-          VCENTER_GLANCE_PASSWORD=vmware
-          VCENTER_DATACENTER=Datacenter
-          VCENTER_DATASTORE=nfs
-          VCENTER_CLUSTERS=Cluster1,Cluster2
-          #DVS_NAME=Cluster1:Cluster1;Cluster2:Cluster2
-          VCENTER_USE=true
-          VC_IMAGE_DIR=openstack_glance
-          VMWARE_IMG_NAME=shaker.vmdk
-          VMWARE_IMG_URL="http://pce-storage.bud.mirantis.net:5000/distr/$VMWARE_IMG_NAME"
-          VMWARE_IMG_LOGIN=root
-          VMWARE_IMG_PASSWORD=r00tme
-          CLEAN_IPTABLES=true
-          DISABLE_STP=true
-          VCENTER_GLANCE_CERT_URL="http://tpi-s2.bud.mirantis.net:5000/downloads/certs/server.pem"
-          VCENTER_GLANCE_CERT_BYPASS=True
-          VCENTER_CERT_URL="http://tpi-s2.bud.mirantis.net:5000/downloads/certs/server.pem"
-          VCENTER_CERT_BYPASS=True
-
 - project:
     name: 'predefined_parameters'
     fuel-release: '9.1'
@@ -213,7 +173,6 @@
           kvm_use:              '{kvm_use}'
           iso_storage:          '{iso_storage}'
           snapshots_id:         '{snapshots_id}'
-      - plugin-specific-parameters
 
 # parameters for jobs created per test-group and custom test job
 - test-parameters: &test-parameters
@@ -262,7 +221,6 @@
           kvm_use:              '{kvm_use}'
           iso_storage:          '{iso_storage}'
           snapshots_id:         '{snapshots_id}'
-      - plugin-specific-parameters
 
 - defaults:
     name: global
@@ -284,9 +242,51 @@
     builders:
       - inject:
           properties-content: |
-            $TESTRAIL_PARAMETERS
-            $ENV_PARAMETERS
-            $VCENTER_PARAMETERS
+            ENV_PREFIX={fuel-release}.{plugin-name}
+            OPENSTACK_RELEASE=Ubuntu
+            NODES_COUNT=10
+            DESTROY_ENV_AFTER=0
+            ADMIN_NODE_MEMORY={admin_node_memory}
+            SLAVE_NODE_MEMORY={slave_node_memory}
+            ADMIN_NODE_CPU={admin_node_cpu}
+            SLAVE_NODE_CPU={slave_node_cpu}
+            TREP_TESTRAIL_SUITE={testrail_suite}
+            TREP_TESTRAIL_SUITE_DESCRIPTION={testrail_suite_desc}
+            TREP_TESTRAIL_PLAN={testrail_plan}
+            TREP_TESTRAIL_PLAN_DESCRIPTION={testrail_plan_desc}
+            SNAPSHOT_OUTPUT_FILE=extra_repos.sh
+            SNAPSHOT_ARTIFACTS_FILE=snapshots.params
+            ESXI_PASSWORD=swordfish
+            ESXI_USER=root
+            ESXI_HOSTS=172.16.0.250 172.16.0.252 172.16.0.253
+            NFS_SERVER=172.16.0.1
+            NFS_SHARES=nfs nfs2
+            VSPHERE_VERSION=5.5
+            WORKSTATION_SNAPSHOT=doubledvs
+            WORKSTATION_IFS=vmnet2,vmnet3,vmnet4
+            WORKSTATION_NODES=esxi1 esxi2 esxi3 vcenter
+            VCENTER_IP=172.16.0.145
+            VCENTER_USERNAME=openstack
+            VCENTER_PASSWORD=vmware
+            VCENTER_GLANCE_IP=172.16.0.145
+            VCENTER_GLANCE_USERNAME=openstack
+            VCENTER_GLANCE_PASSWORD=vmware
+            VCENTER_DATACENTER=Datacenter
+            VCENTER_DATASTORE=nfs
+            VCENTER_CLUSTERS=Cluster1,Cluster2
+            #DVS_NAME=Cluster1:Cluster1;Cluster2:Cluster2
+            VCENTER_USE=true
+            VC_IMAGE_DIR=openstack_glance
+            VMWARE_IMG_NAME=shaker.vmdk
+            VMWARE_IMG_URL="http://pce-storage.bud.mirantis.net:5000/distr/$VMWARE_IMG_NAME"
+            VMWARE_IMG_LOGIN=root
+            VMWARE_IMG_PASSWORD=r00tme
+            CLEAN_IPTABLES=true
+            DISABLE_STP=true
+            VCENTER_GLANCE_CERT_URL="http://tpi-s2.bud.mirantis.net:5000/downloads/certs/server.pem"
+            VCENTER_GLANCE_CERT_BYPASS=True
+            VCENTER_CERT_URL="http://tpi-s2.bud.mirantis.net:5000/downloads/certs/server.pem"
+            VCENTER_CERT_BYPASS=True
       - conditional-step:
           condition-kind: shell
           condition-command: |
