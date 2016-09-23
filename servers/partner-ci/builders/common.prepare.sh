@@ -148,6 +148,7 @@ for env in $(dospy_list $ENV_NAME); do
       mod_snap_date=$(date -d $snap_date +"%Y%m%d")      
       if [[ $mod_snap_date -eq $mod_current_date ]]; then
         echo "$env is suitable for test, it will be reused"
+        USEFUL_ENV=$env
       else
         echo "$env is not suitable for test, it will be erased"
         dos.py erase $env
@@ -160,6 +161,11 @@ for env in $(dospy_list $ENV_NAME); do
     echo "there're no snapshots to reuse"
   fi
 done
+
+for env in $(dospy_list $ENV_NAME); do
+  if [[ $env  != $USEFUL_ENV ]] && [[ $env  != *"released"* ]]; then
+    dos.py erase $env
+  fi
   ###############################################################
   # poweroff all envs
 for env in $(dospy_list); do 
