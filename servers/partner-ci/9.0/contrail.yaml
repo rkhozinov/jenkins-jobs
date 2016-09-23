@@ -37,38 +37,6 @@
              deb ${{MIRROR}}/pkgs/ubuntu/ trusty main universe multiverse |
              deb ${{MIRROR}}/pkgs/ubuntu/ trusty-updates main universe multiverse |
              deb ${{MIRROR}}/pkgs/ubuntu/ trusty-security main universe multiverse
-      - text:
-          name: ADDITIONAL_PARAMETERS
-          default: |
-            NODE_VOLUME_SIZE=512
-            CONTRAIL_VERSION={plugin-version}
-            PLUGIN_VERSION=${{CONTRAIL_VERSION}}
-            VSRX_ORIGINAL_IMAGE_PATH={vsrx_original_image_path}
-            VSRX_TARGET_IMAGE_PATH={vsrx_target_image_path}
-            VSRX_TEMPLATE_PATH={vsrx_template_path}
-            ISO_STORAGE={iso_storage}
-      - text:
-          name: WORKSTATION_PARAMETERS
-          default: |
-            ESXI_PASSWORD=swordfish
-            ESXI_USER=root
-            ESXI_HOSTS=172.16.0.250 172.16.0.252 172.16.0.253
-            NFS_SERVER=172.16.0.1
-            NFS_SHARES=nfs nfs2
-            VSPHERE_VERSION=5.5
-            WORKSTATION_SNAPSHOT=contrail
-            WORKSTATION_IFS=vmnet2:admin,vmnet3:private
-            WORKSTATION_NODES=esxi1 esxi2 esxi3 vcenter
-            VCENTER_IP=172.16.0.145
-            VCENTER_USERNAME=openstack
-            VCENTER_PASSWORD=vmware
-            VC_DATACENTER=Datacenter
-            VCENTER_DATASTORE=nfs
-            VCENTER_CLUSTERS=Cluster1,Cluster2
-            DVS_SWITCHES=Cluster1,Cluster2
-            VCENTER_USE=true
-            CLEAN_IPTABLES=true
-            DISABLE_STP=true
 
 - project:
     name: 'predefined_parameters'
@@ -325,15 +293,6 @@
           name: MJ_BUILD_PKG
           default: '{multijob_build_pkg}'
           description: "Triggers build of pkg of $PKG_JOB_NAME before run of tests"
-      - text:
-          name: BAREMETAL_PARAMETERS
-          default: |
-            BM_IPMI_USER=engineer
-            BM_IPMI_PASSWORD=Ba2Ie23#GHgho
-            BM_IPMI_ADDR=cz7660-kvm.host-telecom.com
-            BM_TARGET_MACS=00:1b:21:87:21:99;00:1b:21:87:21:98
-            BM_HOST_BRIDGE_INTERFACES=eth2:10.109.0.0/24;eth3:10.109.4.0/24
-            KVM_USE=True
 
       - common-parameters:
           publish_results:      '{publish_results}'
@@ -445,10 +404,31 @@
     builders:
       - inject:
           properties-content: |
-            $TESTRAIL_PARAMETERS
-            $ENV_PARAMETERS
-            $BAREMETAL_PARAMETERS
-            $ADDITIONAL_PARAMETERS
+            ENV_PREFIX={fuel-release}.{plugin-name}
+            OPENSTACK_RELEASE=Ubuntu
+            NODES_COUNT=10
+            DESTROY_ENV_AFTER=0
+            ADMIN_NODE_MEMORY={admin_node_memory}
+            SLAVE_NODE_MEMORY={slave_node_memory}
+            ADMIN_NODE_CPU={admin_node_cpu}
+            SLAVE_NODE_CPU={slave_node_cpu}
+            TREP_TESTRAIL_SUITE={testrail_suite}
+            TREP_TESTRAIL_SUITE_DESCRIPTION={testrail_suite_desc}
+            TREP_TESTRAIL_PLAN={testrail_plan}
+            TREP_TESTRAIL_PLAN_DESCRIPTION={testrail_plan_desc}
+            BM_IPMI_USER=engineer
+            BM_IPMI_PASSWORD=Ba2Ie23#GHgho
+            BM_IPMI_ADDR=cz7660-kvm.host-telecom.com
+            BM_TARGET_MACS=00:1b:21:87:21:99;00:1b:21:87:21:98
+            BM_HOST_BRIDGE_INTERFACES=eth2:10.109.0.0/24;eth3:10.109.4.0/24
+            KVM_USE=True
+            NODE_VOLUME_SIZE=512
+            CONTRAIL_VERSION={plugin-version}
+            PLUGIN_VERSION=${{CONTRAIL_VERSION}}
+            VSRX_ORIGINAL_IMAGE_PATH={vsrx_original_image_path}
+            VSRX_TARGET_IMAGE_PATH={vsrx_target_image_path}
+            VSRX_TEMPLATE_PATH={vsrx_template_path}
+            ISO_STORAGE={iso_storage}
       - conditional-step:
            condition-kind: shell
            condition-command: |
@@ -456,7 +436,25 @@
            steps:
              - inject:
                  properties-content: |
-                   $WORKSTATION_PARAMETERS
+                   ESXI_PASSWORD=swordfish
+                   ESXI_USER=root
+                   ESXI_HOSTS=172.16.0.250 172.16.0.252 172.16.0.253
+                   NFS_SERVER=172.16.0.1
+                   NFS_SHARES=nfs nfs2
+                   VSPHERE_VERSION=5.5
+                   WORKSTATION_SNAPSHOT=contrail
+                   WORKSTATION_IFS=vmnet2:admin,vmnet3:private
+                   WORKSTATION_NODES=esxi1 esxi2 esxi3 vcenter
+                   VCENTER_IP=172.16.0.145
+                   VCENTER_USERNAME=openstack
+                   VCENTER_PASSWORD=vmware
+                   VC_DATACENTER=Datacenter
+                   VCENTER_DATASTORE=nfs
+                   VCENTER_CLUSTERS=Cluster1,Cluster2
+                   DVS_SWITCHES=Cluster1,Cluster2
+                   VCENTER_USE=true
+                   CLEAN_IPTABLES=true
+                   DISABLE_STP=true
       - conditional-step:
            condition-kind: shell
            condition-command: |
