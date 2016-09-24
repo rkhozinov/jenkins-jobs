@@ -100,6 +100,7 @@
       - gcs_delete_add_cinder
       - gcs_delete_add_single_cinder
       - gcs_add_ceph
+      - gcs_gui_defaults
 
     jobs:
       - '{build-name}':
