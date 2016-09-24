@@ -60,3 +60,8 @@
        current-parameters: true
        kill-phase-on: NEVER
        property-file: build_number
+
+     - name: '{fuel-release}.{plugin-name}.{plugin-version}.gcs_gui_defaults'
+       current-parameters: true
+       kill-phase-on: NEVER
+       property-file: build_number

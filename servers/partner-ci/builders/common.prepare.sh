@@ -162,7 +162,7 @@ for env in $(dospy_list $ENV_NAME); do
   fi
 done
 
-for env in $(dospy_list $ENV_NAME); do
+for env in $(dospy_list); do
   if [[ $env  != $USEFUL_ENV ]] && [[ $env  != *"released"* ]]; then
     dos.py erase $env
   fi
@@ -170,5 +170,7 @@ done
   ###############################################################
   # poweroff all envs
 for env in $(dospy_list); do 
-  dos.py destroy $env 
+  if [[ $env  != $USEFUL_ENV ]]; then
+  dos.py destroy $env
+  fi
 done 

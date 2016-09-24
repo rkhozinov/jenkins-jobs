@@ -6,24 +6,24 @@
           name: PLUGIN_VERSION
           default: '{plugin-version}'
           description: 'There is a version of juniper packages stored in common sotrage'
-      - string:
-          name: GCS_BUCKET_NAME
-          default: 'plugin-qa-bucket'
-      - string:
-          name: GCS_LOCATION
-          default: 'EUROPE-WEST1'
-      - string:
-          name: GCS_PROJECT_ID
-          default: 'fuelgcsplugin'
-      - string:
-          name: GCS_CERT_URL
-          default: 'https://www.googleapis.com/robot/v1/metadata/x509/qa-1-218%40fuelgcsplugin.iam.gserviceaccount.com'
+#      - string:
+#          name: MISTRAL_BUCKET_NAME
+#          default: 'plugin-qa-bucket'
+#      - string:
+#          name: MISTRAL_LOCATION
+#          default: 'EUROPE-WEST1'
+#      - string:
+#          name: MISTRAL_PROJECT_ID
+#          default: 'fuelmistralplugin'
+#      - string:
+#          name: MISTRAL_CERT_URL
+#          default: 'https://www.googleapis.com/robot/v1/metadata/x509/qa-1-218%40fuelmistralplugin.iam.gserviceaccount.com'
 
 - project:
     name: 'predefined_parameters'
     fuel-release: '9.0'
     plugin-version: '1.0'
-    plugin-name: 'gcs'
+    plugin-name: 'mistral'
     build-name: '{fuel-release}.{plugin-name}.{plugin-version}.build'
     flake8-name: '{fuel-release}.{plugin-name}.{plugin-version}.flake8'
     radon-name: '{fuel-release}.{plugin-name}.{plugin-version}.radon'
@@ -34,9 +34,9 @@
     nightly-name: '{fuel-release}.{plugin-name}.{plugin-version}.nightly'
     custom-name: '{fuel-release}.{plugin-name}.{plugin-version}.custom'
     reporter-name: '{fuel-release}.{plugin-name}.{plugin-version}.reporter'
-    smoke-test-name: 'gcs_smoke'
-    bvt-test-name: 'gcs_bvt'
-    regression-test-name: 'gcs_bvt'
+    smoke-test-name: 'mistral_smoke'
+    bvt-test-name: 'mistral_bvt'
+    regression-test-name: 'mistral_bvt'
     admin_node_memory: '4096'
     slave_node_memory: '4096'
     admin_node_cpu: '4'
@@ -62,7 +62,7 @@
     test_timeout: 300
     iso_file: 'MirantisOpenStack-9.0.iso'
     iso_storage: '/storage/downloads'
-    gerrit_repo: 'fuel-plugin-cinder-gcs'
+    gerrit_repo: 'fuel-plugin-mistral'
     gerrit_branch: 'master'
     email_to: 'rkhozinov@mirantis.com okosse@mirantis.com otsvigun@mirantis.com'
     released_plugin_path: ''
@@ -71,10 +71,10 @@
     skip_vote_successfull: false
     skip_vote_failed: false
 
-    testrail_project: "GCS-Cinder plugin"
-    testrail_suite: "[9.0][PCE] Fuel plugin GCS cinder backup v1.0.0"
+    testrail_project: "Mistral plugin"
+    testrail_suite: ""
     testrail_suite_desc: "Suite descriptioni"
-    testrail_milestone: "Fuel Plugin Cinder GCS v1.0.0"
+    testrail_milestone: ""
     testrail_plan: "$TREP_TESTRAIL_SUITE build#${{PKG_JOB_BUILD_NUMBER}}"
     testrail_plan_desc: "Test plan description"
     testrail_run: "$TREP_TESTRAIL_SUITE"
@@ -89,18 +89,8 @@
 
 
     testgroup:
-      - gcs_smoke 
-      - gcs_bvt
-      - gcs_ceph
-      - gcs_cinder_multirole
-      - gcs_cinder_ceph_multirole
-      - gcs_ceilometer
-      - gcs_delete_add_controller
-      - gcs_delete_add_compute
-      - gcs_delete_add_cinder
-      - gcs_delete_add_single_cinder
-      - gcs_add_ceph
-      - gcs_gui_defaults
+      - mistral_smoke 
+      - mistral_bvt
 
     jobs:
       - '{build-name}':
@@ -197,7 +187,7 @@
     parameters:
       - label:
           name: node
-          default: 'gcs'
+          default: 'mistral'
           description: "The node on which to run the job"
       - '{testgroup_parameter_type}':
           name: TEST_GROUP
@@ -237,7 +227,7 @@
 - defaults:
     name: global
     disabled: false
-    node: gcs
+    node: mistral
     <<: *test-parameters
     scm:
       - common-scm:
@@ -261,7 +251,7 @@
           condition-command: |
             [ ! -z ${{PKG_JOB_NAME}}         ] && \
             [   -z ${{PKG_JOB_BUILD_NUMBER}} ] && \
-            [   -z ${{GCS_PLUGIN_PATH}} ]
+            [   -z ${{MISTRAL_PLUGIN_PATH}} ]
           steps:
             - copyartifact:
                 project: ${{PKG_JOB_NAME}}
@@ -271,7 +261,7 @@
           condition-command: |
             [ ! -z ${{PKG_JOB_NAME}}         ] && \
             [ ! -z ${{PKG_JOB_BUILD_NUMBER}} ] && \
-            [   -z ${{GCS_PLUGIN_PATH}} ]
+            [   -z ${{MISTRAL_PLUGIN_PATH}} ]
           steps:
             - copyartifact:
                 project: ${{PKG_JOB_NAME}}
@@ -296,7 +286,7 @@
       - shell:
           !include-raw-escape: ../builders/common.prepare.sh
       - shell:
-          !include-raw-escape: ../builders/gcs.test.sh
+          !include-raw-escape: ../builders/mistral.test.sh
     publishers:
       - runner-publisher:
           properties_name: properties
@@ -348,7 +338,7 @@
           colormap: xterm
     builders:
       - shell:
-          !include-raw-escape: ../builders/build-plugin-gcs.sh
+          !include-raw-escape: ../builders/build-plugin-mistral.sh
       - shell:
           !include-raw-escape: ../builders/rpm-check.sh
     publishers:
@@ -513,4 +503,4 @@
           properties_name: nightly.properties
           email_to: '{email_to}'
     builders:
-      !include: gcs-nigthly.yaml.inc
+      !include: mistral-nigthly.yaml.inc

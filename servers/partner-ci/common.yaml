@@ -183,6 +183,9 @@
       - archive:
           artifacts: '**.log'
           allow-empty: true
+      - archive:
+          artifacts: '**.tar.xz'
+          allow-empty: true
       - conditional-publisher:
           - condition-kind: file-exists
             condition-filename: 'nosetests.xml'
