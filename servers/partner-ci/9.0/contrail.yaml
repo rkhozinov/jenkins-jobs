@@ -433,7 +433,7 @@
             KVM_USE=True
             NODE_VOLUME_SIZE=512
             CONTRAIL_VERSION={plugin-version}
-            PLUGIN_VERSION=${{CONTRAIL_VERSION}}
+            PLUGIN_VERSION={plugin-version}
             VSRX_ORIGINAL_IMAGE_PATH={vsrx_original_image_path}
             VSRX_TARGET_IMAGE_PATH={vsrx_target_image_path}
             VSRX_TEMPLATE_PATH={vsrx_template_path}
