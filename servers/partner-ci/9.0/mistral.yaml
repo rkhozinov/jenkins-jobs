@@ -1,4 +1,24 @@
 ---
+- parameter:
+    name: plugin-specific-parameters
+    parameters:
+      - string:
+          name: PLUGIN_VERSION
+          default: '{plugin-version}'
+          description: 'There is a version of juniper packages stored in common sotrage'
+#      - string:
+#          name: MISTRAL_BUCKET_NAME
+#          default: 'plugin-qa-bucket'
+#      - string:
+#          name: MISTRAL_LOCATION
+#          default: 'EUROPE-WEST1'
+#      - string:
+#          name: MISTRAL_PROJECT_ID
+#          default: 'fuelmistralplugin'
+#      - string:
+#          name: MISTRAL_CERT_URL
+#          default: 'https://www.googleapis.com/robot/v1/metadata/x509/qa-1-218%40fuelmistralplugin.iam.gserviceaccount.com'
+
 - project:
     name: 'predefined_parameters'
     fuel-release: '9.0'
@@ -24,7 +44,7 @@
     pkg_job_name: '{fuel-release}.{plugin-name}.{plugin-version}.build'
     nightly_timer: 'H 21 * * *'
     regression_timer: 'H 18 * * *'
-    nightly_disabled: true
+    nightly_disabled: false
     regression_disabled: true
     force_erase: true
     recreate_venv: true
@@ -52,9 +72,9 @@
     skip_vote_failed: false
 
     testrail_project: "Mistral plugin"
-    testrail_suite: "[9.0][PCE] Fuel Mistral plugin v1.0.0"
+    testrail_suite: ""
     testrail_suite_desc: "Suite descriptioni"
-    testrail_milestone: "Fuel Plugin Mistral v1.0.0"
+    testrail_milestone: ""
     testrail_plan: "$TREP_TESTRAIL_SUITE build#${{PKG_JOB_BUILD_NUMBER}}"
     testrail_plan_desc: "Test plan description"
     testrail_run: "$TREP_TESTRAIL_SUITE"
@@ -74,7 +94,7 @@
 
     jobs:
       - '{build-name}':
-          scm_submodule_disabled: false
+          scm_submodule_disabled: true
           scm_wipe_workspace: true
       - '{flake8-name}':
           scm_submodule_disabled: true
@@ -158,6 +178,8 @@
           kvm_use:              '{kvm_use}'
           iso_storage:          '{iso_storage}'
           snapshots_id:         '{snapshots_id}'
+      - plugin-specific-parameters:
+          plugin-version: '{plugin-version}'
 
 # parameters for jobs created per test-group and custom test job
 - test-parameters: &test-parameters
@@ -199,6 +221,8 @@
           kvm_use:              '{kvm_use}'
           iso_storage:          '{iso_storage}'
           snapshots_id:         '{snapshots_id}'
+      - plugin-specific-parameters:
+          plugin-version: '{plugin-version}'
 
 - defaults:
     name: global
@@ -219,20 +243,9 @@
       - test-property
     builders:
       - inject:
-          properties-content: |
-            ENV_PREFIX={fuel-release}.{plugin-name}
-            OPENSTACK_RELEASE=Ubuntu
-            NODES_COUNT=10
-            DESTROY_ENV_AFTER=0
-            ADMIN_NODE_MEMORY={admin_node_memory}
-            SLAVE_NODE_MEMORY={slave_node_memory}
-            ADMIN_NODE_CPU={admin_node_cpu}
-            SLAVE_NODE_CPU={slave_node_cpu}
-            TREP_TESTRAIL_SUITE={testrail_suite}
-            TREP_TESTRAIL_SUITE_DESCRIPTION={testrail_suite_desc}
-            TREP_TESTRAIL_PLAN={testrail_plan}
-            TREP_TESTRAIL_PLAN_DESCRIPTION={testrail_plan_desc}
-            PLUGIN_VERSION={plugin-version}
+          properties-content: $TESTRAIL_PARAMETERS
+      - inject:
+          properties-content: $ENV_PARAMETERS
       - conditional-step:
           condition-kind: shell
           condition-command: |
@@ -260,19 +273,7 @@
             [[ "${{UPDATE_MASTER}}" == "true" ]]
           steps:
             - inject:
-                properties-content: |
-                  ENABLE_MOS_CENTOS_OS=true
-                  ENABLE_MOS_CENTOS_PROPOSED=true
-                  ENABLE_MOS_CENTOS_UPDATES=true
-                  ENABLE_MOS_CENTOS_HOLDBACK=true
-                  ENABLE_MOS_CENTOS_HOTFIX=false
-                  ENABLE_MOS_CENTOS_SECURITY=true
-                  ENABLE_MOS_UBUNTU_OS=true
-                  ENABLE_MOS_UBUNTU_PROPOSED=true
-                  ENABLE_MOS_UBUNTU_UPDATES=true
-                  ENABLE_MOS_UBUNTU_HOLDBACK=true
-                  ENABLE_MOS_UBUNTU_HOTFIX=false
-                  ENABLE_MOS_UBUNTU_SECURITY=true
+                properties-content: $UPDATE_PARAMETERS
             - shell:
                 !include-raw-escape: ../builders/update.sh
             - inject:
@@ -299,7 +300,7 @@
     concurrent: true
     disabled: false
     triggers:
-      - draft-gerrit-trigger:
+      - draft-patchset-gerrit-trigger:
           gerrit_repo: '{gerrit_repo}'
           gerrit_branch: '{gerrit_branch}'
           skip_vote_successfull: '{skip_vote_successfull}'
@@ -410,7 +411,7 @@
 
 - job-template:
     name: '{smoke-name}'
-    disabled: true
+    disabled: false
     description: 'The Smoke test for {fuel-release}.{plugin-name}.{plugin-version}'
     concurrent: true
     quiet-period: 5
@@ -418,7 +419,7 @@
     node: runner
     <<: *runner-parameters
     triggers:
-      - draft-gerrit-trigger:
+      - draft-patchset-gerrit-trigger:
           gerrit_repo: '{gerrit_repo}'
           gerrit_branch: '{gerrit_branch}'
           skip_vote_successfull: '{skip_vote_successfull}'
@@ -449,7 +450,7 @@
 - job-template:
     name: '{bvt-name}'
     description: 'The BVT test for {fuel-release}.{plugin-name}.{plugin-version}'
-    disabled: true
+    disabled: false
     concurrent: true
     project-type: multijob
     node: runner
