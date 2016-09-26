@@ -94,7 +94,7 @@
 
     jobs:
       - '{build-name}':
-          scm_submodule_disabled: true
+          scm_submodule_disabled: false
           scm_wipe_workspace: true
       - '{flake8-name}':
           scm_submodule_disabled: true
