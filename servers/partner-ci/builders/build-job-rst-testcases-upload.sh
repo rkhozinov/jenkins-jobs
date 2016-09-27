@@ -1,31 +1,11 @@
 #!/bin/bash -e
 export TESTRAIL_USER=$TREP_TESTRAIL_USER
-export TESTRAIL_API_key=$TREP_TESTRAIL_PASSWORD
-HOME="/home/jenkins"
-RST2TR_HOME="/home/jenkins/rst2tr"
-CONTRAIL_HOME="/home/jenkins/contrail-repo/fuel-plugin-contrail"
-PATH_TO_DOCS="$CONTRAIL_HOME/doc/testing/"
-if [ "$(ls -A /home/jenkins/contrail-repo/fuel-plugin-contrail)" ]; then
-  echo "fuel-plugin-repo exists"
-  cd $CONTRAIL_HOME
-  git pull
-else
-  echo "need to upload repo"
-  cd $HOME
-  git clone https://github.com/openstack/fuel-plugin-contrail.git
-fi
-if [ "$(ls -A /home/jenkins/rst2tr)" ]; then
-  echo "program exists"
-  cd $RST2TR_HOME
-  git pull
-else
-  echo "need to upload repo"
-  cd $HOME
-  git clone https://github.com/ehles/rst2tr.git
-fi
+export TESTRAIL_API_KEY=$TREP_TESTRAIL_PASSWORD
+RST2TR_HOME="${WORKSPACE}/rst2tr"
+PATH_TO_DOCS="${WORKSPACE}/fuel-plugin-contrail/doc/testing/"
 cd $RST2TR_HOME
 if [ "${MODERN_MODEL}" == "true" ] && MODEL="$RST2TR_HOME/formats/modern_model.yaml" || MODEL="$RST2TR_HOME/formats/classic_model.yaml"
-if [[ "${CHECK_ONLY}" == "true" ]]; then	
+if [[ "${CHECK_ONLY}" == "true" ]]; then
   python $RST2TR_HOME/rst2tr/rst2tr.py -f $MODEL -v -s -n ${PATH_TO_DOCS}
 else
   python $RST2TR_HOME/rst2tr/rst2tr.py -f $MODEL -v -s ${PATH_TO_DOCS}

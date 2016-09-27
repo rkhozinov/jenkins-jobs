@@ -685,6 +685,15 @@
           clean:
             before: false
           wipe-workspace: false
+      - git:
+          url: 'https://github.com/ehles/rst2tr.git'
+          branches:
+            - 'origin/master'
+          # choosing-strategy: default
+          skip-tag: true
+          clean:
+            before: false
+          wipe-workspace: false
     builders:
       - copyartifact:
           project: ${{TEST_JOB_NAME}}
