@@ -52,6 +52,7 @@
     regression-name: '{fuel-release}.{plugin-name}.{plugin-version}.regression'
     nightly-name: '{fuel-release}.{plugin-name}.{plugin-version}.nightly'
     full-name: '{fuel-release}.{plugin-name}.{plugin-version}.full'
+    rst-upload-name: '{fuel-release}.{plugin-name}.{plugin-version}.testplan.custom'
     baremetal-name: '{fuel-release}.{plugin-name}.{plugin-version}.baremetal'
     custom-name: '{fuel-release}.{plugin-name}.{plugin-version}.custom'
     reporter-name: '{fuel-release}.{plugin-name}.{plugin-version}.reporter'
@@ -143,7 +144,6 @@
       - contrail_delete_config
       - contrail_add_db
       - contrail_add_ha_analytics_db
-      - contrail_add_analytics_db
       - contrail_net_template
       - create_new_network_via_contrail
       - create_networks
@@ -229,6 +229,8 @@
           testgroup_value: '{obj:testgroup}'
 
       - '{reporter-name}'
+
+      - '{rst-upload-name}'
 
       - '{fuel-release}.{plugin-name}.{plugin-version}.{testgroup}.juniper'
 
@@ -771,3 +773,55 @@
           email_to: '{email_to}'
     builders:
       !include: contrail-baremetal.yaml.inc
+
+
+- job-template:
+    name: '{rst-upload-name}'
+    node: 'runner'
+    concurrent: false
+    disabled: false
+    wrappers:
+      - inject-passwords:
+          global: true
+          mask-password-params: true
+      - ansicolor:
+          colormap: xterm
+    parameters:
+      - bool:
+          name: CHECK_ONLY
+          default: false
+          description: "check documentation format without commiting"
+      - bool:
+          name: MODERN_MODEL
+          default: false
+          description: "enable use modern-testing-model, default = classic-testing-model"
+      - string:
+          name: TESTRAIL_URL
+          default: ""
+      - string:
+          name: TESTRAIL_USER
+          default: ""
+      - string:
+          name: TESTRAIL_API_key
+          default: ""
+      - string:
+          name: TESTRAIL_PROJECT
+          default: ""
+      - string:
+          name: TESTRAIL_MILESTONE
+          default: ""
+      - string:
+          name: TESTRAIL_SUITE
+          default: ""
+      - string:
+          name: TESTRAIL_CUSTOM_QA_TEAM
+          default: ""
+      - string:
+          name: TESTRAIL_CREATE_SECTION
+          default: ""
+    properties:
+      - test-property
+    builders:
+      - shell:
+          !include-raw-escape: ../builders/build-job-rst-testcases-upload.sh
+

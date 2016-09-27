@@ -180,13 +180,6 @@
         current-parameters: true
         kill-phase-on: NEVER
 
-      - name: '{fuel-release}.{plugin-name}.{plugin-version}.contrail_add_analytics_db.juniper'
-        property-file: build_number
-        predefined-parameters: |
-           CONTRAIL_DISTRIBUTION=juniper
-        current-parameters: true
-        kill-phase-on: NEVER
-
       - name: '{fuel-release}.{plugin-name}.{plugin-version}.contrail_murano.juniper'
         property-file: build_number
         predefined-parameters: |

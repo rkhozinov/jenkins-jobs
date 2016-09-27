@@ -510,7 +510,11 @@
       - shell: |
           #!/bin/bash -xe
           set -o pipefail
-          shellcheck ${{ARGS}} $(find . -name '*.sh' -not -path "*/fuel-qa/*" -not -path "*/deployment_scripts/puppet/modules/contrail/files/cassandra-env.sh") | tee -i shellcheck.log
+          if find . -name '*.sh' | grep sh; then
+            shellcheck ${{ARGS}} $(find . -name '*.sh' -not -path "*/fuel-qa/*" -not -path "*/deployment_scripts/puppet/modules/contrail/files/cassandra-env.sh") | tee -i shellcheck.log
+          else
+            echo 'there are no shell files'
+          fi
     publishers:
       - checker-publisher
 
