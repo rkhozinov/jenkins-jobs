@@ -5,6 +5,7 @@
     sync_jira_with_launchpad: 'sync_jira_with_launchpad'
     clean_envs: 'clean_envs'
     puppet_run: 'puppet_run'
+    rst_testcases_upload: 'rst_testcases_upload' 
     jobs:
       - '{download_iso}'
 
@@ -13,6 +14,8 @@
       - '{clean_envs}'
 
       - '{puppet_run}'
+      
+      - '{rst_testcases_upload}'
 
 - job-template:
     name: '{download_iso}'
@@ -135,3 +138,56 @@
                 echo "result in acceptable limits ( exit code = $ref )"
               fi
           fi 
+
+- job-template:
+    name: '{rst_testcases_upload}'
+    concurrent: false
+    disabled: false
+    wrappers:
+      - inject-passwords:
+          global: true
+          mask-password-params: true
+      - ansicolor:
+          colormap: xterm
+    parameters:
+      - label:
+          name: node
+          description: "set plugin-label, PAY ATTENTION, checker Run on all 'nodes matching the label' must be enabled in configure tab"
+      - bool:
+          name: CHECK_ONLY
+          default: false
+          description: "checking documentation formatting before commit"
+      - bool:
+          name: MODERN_MODEL
+          default: false
+          description: "enable use modern-testing-model, default = classic-testing-model"
+      - string:
+          name: TESTRAIL_URL
+          default: ""
+      - string:
+          name: TESTRAIL_USER
+          default: ""
+      - string:
+          name: TESTRAIL_PROJECT
+          default: ""
+      - string:
+          name: TESTRAIL_MILESTONE
+          default: ""
+      - string:
+          name: TESTRAIL_SUITE
+          default: ""
+      - string:
+          name: TESTRAIL_CUSTOM_QA_TEAM
+          default: ""
+      - string:
+          name: TESTRAIL_CREATE_SECTION
+          default: ""
+      - string:
+          name: PATH_TO_TESTS
+          default: ""
+           
+    properties:
+      - test-property
+    builders:
+      - shell:
+          !include-raw-escape: ../builders/build-job-rst-testcases-upload.sh
