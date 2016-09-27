@@ -1,3 +1,5 @@
+- inject:
+    properties-content: $ADDITIONAL_PARAMETERS
 - runner-condition
 - multijob:
     name: >
@@ -52,6 +54,13 @@
         current-parameters: true
         kill-phase-on: NEVER
 
+      - name: '{fuel-release}.{plugin-name}.{plugin-version}.contrail_add_all_contrail.juniper'
+        property-file: build_number
+        predefined-parameters: |
+           CONTRAIL_DISTRIBUTION=juniper
+        current-parameters: true
+        kill-phase-on: NEVER
+
       - name: '{fuel-release}.{plugin-name}.{plugin-version}.contrail_ceilometer.juniper'
         property-file: build_number
         predefined-parameters: |
@@ -94,7 +103,14 @@
         current-parameters: true
         kill-phase-on: NEVER
 
-      - name: '{fuel-release}.{plugin-name}.{plugin-version}.contrail_add_controller.juniper'
+      - name: '{fuel-release}.{plugin-name}.{plugin-version}.contrail_delete_control.juniper'
+        property-file: build_number
+        predefined-parameters: |
+           CONTRAIL_DISTRIBUTION=juniper
+        current-parameters: true
+        kill-phase-on: NEVER
+
+      - name: '{fuel-release}.{plugin-name}.{plugin-version}.contrail_delete_config.juniper'
         property-file: build_number
         predefined-parameters: |
            CONTRAIL_DISTRIBUTION=juniper
@@ -102,13 +118,6 @@
         kill-phase-on: NEVER
 
       - name: '{fuel-release}.{plugin-name}.{plugin-version}.contrail_no_default.juniper'
-        property-file: build_number
-        predefined-parameters: |
-           CONTRAIL_DISTRIBUTION=juniper
-        current-parameters: true
-        kill-phase-on: NEVER
-
-      - name: '{fuel-release}.{plugin-name}.{plugin-version}.contrail_add_ha_analytics_db.juniper'
         property-file: build_number
         predefined-parameters: |
            CONTRAIL_DISTRIBUTION=juniper

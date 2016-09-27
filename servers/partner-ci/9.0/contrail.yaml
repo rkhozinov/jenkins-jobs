@@ -780,13 +780,17 @@
     node: 'runner'
     concurrent: false
     disabled: false
-    scm:
-      - common-scm:
-          scm_wipe_workspace: '{scm_wipe_workspace}'
-          scm_submodule_disabled: '{scm_submodule_disabled}'
-          gerrit_repo: '{gerrit_repo}'
-          skip_vote_successfull: '{skip_vote_successfull}'
-          skip_vote_failed: '{skip_vote_failed}'
+      - scm:
+          - git:
+              url: https://github.com/openstack/fuel-plugin-contrail
+              branches:
+               - origin/master
+              basedir: ${WORKSPACE}/contrail-repo
+          - git:
+              url: https://github.com/ehles/rst2tr
+              branches:
+               - origin/master
+              basedir: ${WORKSPACE}/utility-repo
     wrappers:
       - inject-passwords:
           global: true
@@ -826,8 +830,6 @@
       - bool:
           name: TESTRAIL_CREATE_SECTION
           default: true
-    properties:
-      - test-property
     builders:
       - shell:
           !include-raw-escape: ../builders/build-job-rst-testcases-upload.sh
