@@ -32,7 +32,7 @@ fi
 [ -z "${SNAPSHOTS_ID}" ] && { echo SNAPSHOTS_ID is empty; exit 1; }
 #remove old logs and test data
 [ -f nosetest.xml ] && rm -f nosetests.xml
-rm -rf logs/*
+[ -d logs ] && rm -rf logs/* || mkdir logs
 
 export ISO_PATH="${ISO_STORAGE}/${ISO_FILE}"
 [ ! -f $ISO_PATH ] && { echo "The $ISO_PATH isn't exist"; exit 1; }
