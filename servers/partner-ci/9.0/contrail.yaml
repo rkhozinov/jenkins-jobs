@@ -780,6 +780,17 @@
     node: 'runner'
     concurrent: false
     disabled: false
+      - scm:
+          - git:
+              url: https://github.com/openstack/fuel-plugin-contrail
+              branches:
+               - origin/master
+              basedir: ${WORKSPACE}/contrail-repo
+          - git:
+              url: https://github.com/ehles/rst2tr
+              branches:
+               - origin/master
+              basedir: ${WORKSPACE}/utility-repo
     wrappers:
       - inject-passwords:
           global: true
@@ -797,30 +808,28 @@
           description: "enable use modern-testing-model, default = classic-testing-model"
       - string:
           name: TESTRAIL_URL
-          default: ""
+          default: "https://mirantis.testrail.com"
       - string:
           name: TESTRAIL_USER
           default: ""
       - string:
-          name: TESTRAIL_API_key
+          name: TESTRAIL_API_KEY
           default: ""
       - string:
           name: TESTRAIL_PROJECT
-          default: ""
+          default: "{testrail_project}"
       - string:
           name: TESTRAIL_MILESTONE
-          default: ""
+          default: "{testrail_milestone}"
       - string:
           name: TESTRAIL_SUITE
-          default: ""
+          default: "{testrail_suite}"
       - string:
           name: TESTRAIL_CUSTOM_QA_TEAM
-          default: ""
-      - string:
+          default: "6"
+      - bool:
           name: TESTRAIL_CREATE_SECTION
-          default: ""
-    properties:
-      - test-property
+          default: true
     builders:
       - shell:
           !include-raw-escape: ../builders/build-job-rst-testcases-upload.sh
