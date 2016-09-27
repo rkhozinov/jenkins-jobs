@@ -230,6 +230,8 @@
 
       - '{reporter-name}'
 
+      - '{rst-upload-name}'
+
       - '{fuel-release}.{plugin-name}.{plugin-version}.{testgroup}.juniper'
 
       - '{smoke-name}':
