@@ -781,7 +781,18 @@
     concurrent: false
     disabled: false
     scm:
-      - contrail-utility
+      - common-scm:
+          scm_submodule_disabled: '{scm_submodule_disabled}'
+          scm_wipe_workspace: '{scm_wipe_workspace}'
+          gerrit_repo: '{gerrit_repo}'
+          skip_vote_successfull: '{skip_vote_successfull}'
+          skip_vote_failed: '{skip_vote_failed}'
+    triggers:
+      - merge-gerrit-trigger:
+          gerrit_repo: '{gerrit_repo}'
+          gerrit_branch: '{gerrit_branch}'
+          skip_vote_successfull: '{skip_vote_successfull}'
+          skip_vote_failed: '{skip_vote_failed}'
     wrappers:
       - inject-passwords:
           global: true
@@ -791,8 +802,17 @@
     parameters:
       - bool:
           name: CHECK_ONLY
-          default: false
+          default: true
           description: "check documentation format without commiting"
+      - string:
+          name: GERRIT_BRANCH
+          default: 'origin/{gerrit_branch}'
+      - string:
+          name: GERRIT_REFSPEC
+          default: 'refs/heads/{gerrit_branch}'
+      - bool:
+          name: DEBUG
+          default: '{build_debug}'
       - bool:
           name: MODERN_MODEL
           default: false

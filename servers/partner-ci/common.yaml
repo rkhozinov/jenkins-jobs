@@ -296,28 +296,7 @@
             tracking: true
             recursive: true
           wipe-workspace: '{obj:scm_wipe_workspace}'
-#- scm:
-#    name: contrail-repo-scm
-#    scm:
-#      - git:
-#         url: https://github.com/openstack/fuel-plugin-contrail
-#         branches:
-#          - origin/master
-#         basedir: ${WORKSPACE}/contrail-repo
-#
-#- scm:
-#    name: contrail-utility-scm
-#    scm:
-#      - git:
-#         url: https://github.com/ehles/rst2tr
-#         branches:
-#          - origin/master
-#         basedir: ${WORKSPACE}/utility-repo
-#- scm:
-#    name: contrail-utility
-#    scm:
-#      - contrail-repo-scm
-#      - contrail-utility-scm
+
 - trigger:
     name: generic-gerrit-trigger
     triggers:
