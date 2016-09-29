@@ -20,7 +20,18 @@
        current-parameters: true
        kill-phase-on: NEVER
        property-file: build_number
-     - name: '{fuel-release}.{plugin-name}.manila_integration'
+
+     - name: '{fuel-release}.{plugin-name}.manila_data_ha'
+       current-parameters: true
+       kill-phase-on: NEVER
+       property-file: build_number
+
+     - name: '{fuel-release}.{plugin-name}.manila_share_ha'
+       current-parameters: true
+       kill-phase-on: NEVER
+       property-file: build_number
+
+     - name: '{fuel-release}.{plugin-name}.manila_with_ceilometer'
        current-parameters: true
        kill-phase-on: NEVER
        property-file: build_number
