@@ -5,6 +5,8 @@
     sync_jira_with_launchpad: 'sync_jira_with_launchpad'
     clean_envs: 'clean_envs'
     puppet_run: 'puppet_run'
+    contrail_rst_upload_name: 'contrail_rst_upload'
+#    contrail-tempest: 'contrail-tempest'
     jobs:
       - '{download_iso}'
 
@@ -13,6 +15,10 @@
       - '{clean_envs}'
 
       - '{puppet_run}'
+
+      - '{contrail_rst_upload_name}'
+
+        #      - '{contrail-tempest}'
       
 - job-template:
     name: '{download_iso}'
@@ -136,3 +142,143 @@
               fi
           fi 
 
+- scm:
+    name: contrail-repo-scm
+    scm:
+      - git:
+         url: https://github.com/openstack/fuel-plugin-contrail
+         branches:
+          - origin/master
+         basedir: ${WORKSPACE}/contrail-repo
+
+- scm:
+    name: contrail-utility-scm
+    scm:
+      - git:
+         url: https://github.com/ehles/rst2tr
+         branches:
+          - origin/master
+         basedir: ${WORKSPACE}/utility-repo
+- scm:
+    name: contrail-utility
+    scm:
+      - contrail-repo-scm
+      - contrail-utility-scm
+
+- defaults:
+    name: global
+    disabled: false
+    node: runner
+    scm:
+      - contrail-utility
+- job-template:
+    name: '{contrail_rst_upload_name}'
+    node: 'runner'
+    concurrent: false
+    disabled: false
+    scm:
+      - contrail-utility
+    wrappers:
+      - inject-passwords:
+          global: true
+          mask-password-params: true
+      - ansicolor:
+          colormap: xterm
+    triggers:
+      - pollscm:
+          cron: ""
+    parameters:
+      - bool:
+          name: CHECK_ONLY
+          default: true
+          description: "check documentation format without commiting"
+      - bool:
+          name: MODERN_MODEL
+          default: false
+          description: "enable use modern-testing-model, default = classic-testing-model"
+      - string:
+          name: TESTRAIL_URL
+          default: "https://mirantis.testrail.com"
+      - string:
+          name: TESTRAIL_USER
+          default: ""
+      - string:
+          name: TESTRAIL_API_KEY
+          default: ""
+      - string: 
+          name: TESTRAIL_PROJECT
+          default: "Contrail plugin"
+      - string:
+          name: TESTRAIL_MILESTONE
+          default: "Fuel Contrail Plugin v5.0.0"
+      - string:
+          name: TESTRAIL_SUITE
+          default: "[9.0][PCE] Fuel plugin contrail v5.0.0 nightly"
+      - string:
+          name: TESTRAIL_CUSTOM_QA_TEAM
+          default: "6"
+      - bool:
+          name: TESTRAIL_CREATE_SECTION
+          default: true
+    builders:
+      - shell:
+          !include-raw-escape: ../builders/build-job-rst-testcases-upload.sh
+
+
+                  
+#- job-template:
+#    name: '{contrail-tempest}'
+#    node: 'contrail'
+#    concurrent: false
+#    disabled: false
+#    scm:
+#      - contrail-repo-scm:
+#          reponame: https://github.com/openstack/fuel-plugin-contrail
+#          repobranch: origin/master
+#          basedir: ${{WORKSPACE}}/contrail-repo
+#      - contrail-repo-scm:
+#          reponame: https://github.com/ehles/rst2tr
+#          repobranch: origin/master
+#          basedir: ${{WORKSPACE}}/utility-repo
+#    wrappers:
+#      - inject-passwords:
+#          global: true
+#          mask-password-params: true
+#      - ansicolor:
+#          colormap: xterm
+#    parameters:
+#      - bool:
+#          name: CHECK_ONLY
+#          default: true
+#          description: "check ntation format without commiting"
+#      - bool:
+#          name: MODERN_MODEL
+#          default: false
+#          description: "enable use modern-testing-model, default = classic-testing-model"
+#      - string:
+#          name: TESTRAIL_URL
+#          default: "https://mirantis.testrail.com"
+#      - string:
+#          name: TESTRAIL_USER
+#          default: ""
+#      - string:
+#          name: TESTRAIL_API_KEY
+#          default: ""
+#      - string: 
+#          name: TESTRAIL_PROJECT
+#          default: "Contrail plugin"
+#      - string:
+#          name: TESTRAIL_MILESTONE
+#          default: "Fuel Contrail Plugin v5.0.0"
+#      - string:
+#          name: TESTRAIL_SUITE
+#          default: "[9.0][PCE] Fuel plugin contrail v5.0.0 nightly"
+#      - string:
+#          name: TESTRAIL_CUSTOM_QA_TEAM
+#          default: "6"
+#      - bool:
+#          name: TESTRAIL_CREATE_SECTION
+#          default: true
+#    builders:
+#      - shell:
+#          !include-raw-escape: ../builders/build-job-rst-testcases-upload.sh

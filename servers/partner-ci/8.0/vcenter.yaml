@@ -1,56 +1,4 @@
 ---
-- parameter:
-    name: plugin-specific-parameters
-    parameters:
-      - bool:
-          name: UPDATE_MASTER
-          default: '{update_master}'
-          description: 'turns on update fuel master node to maintenance update'
-      - string:
-          name: WORKSTATION_SNAPSHOT
-          default: 'vcenterha'
-      - string:
-          name: WORKSTATION_NODES
-          default: 'esxi1 esxi2 esxi3 vcenter trusty'
-      - string:
-          name: POOL_PUBLIC
-          default: '172.16.0.0/24:24'
-          description: 'Snapshot name for vsphere lab'
-      - string:
-          name: VCENTER_IP
-          default: '172.16.0.145'
-      - string:
-          name: VCENTER_USERNAME
-          default: 'openstack'
-      - string:
-          name: VCENTER_PASSWORD
-          default: 'vmware'
-      - string:
-          name: DVS_PLUGIN_PATH 
-      - string:
-          name: PLUGIN_VERSION
-      - string:
-          name: TEST_GROUP_PREFIX
-          default: 'system_test.vcenter.deploy_vcenter_dvs_run_ostf'
-          description: 'Snapshot name for vsphere lab'
-      - string:
-          name: TEST_GROUP_CONFIG
-          default: '${TEST_GROUP}'
-          description: 'Snapshot name for vsphere lab'
-      - string:
-          name: MIRROR
-          default: 'http://mirror.seed-cz1.fuel-infra.org'
-          description: 'mirror for package repositories. this mirror is optimized for CZ'
-      - string:
-          name: MIRROR_UBUNTU
-          default: >
-             deb ${{MIRROR}}/pkgs/ubuntu/ trusty main universe multiverse |
-             deb ${{MIRROR}}/pkgs/ubuntu/ trusty-updates main universe multiverse
-          description: 'proposed repositories to update ubuntu cluster'
-      - string:
-          name: ISO_STORAGE
-          default: '{iso_storage}'
-
 - project:
     name: 'predefined_parameters'
     fuel-release: '8.0'
@@ -58,35 +6,35 @@
     plugin-name: 'vcenter'
     build-name: '{fuel-release}.dvs.build'
     regression-name: '{fuel-release}.{plugin-name}.regression'
-    download-iso-name: 'download_iso'
     nightly-name: '{fuel-release}.{plugin-name}.nightly'
     custom-name: '{fuel-release}.{plugin-name}.custom'
     reporter-name: '{fuel-release}.{plugin-name}.reporter'
-
     admin_node_memory: '8192'
     slave_node_memory: '8192'
     admin_node_cpu: '4'
     slave_node_cpu: '4'
     pkg_job_name: '{fuel-release}.dvs.build'
-    iso_job_name: '{fuel-release}.dvs.canary'
     nightly_timer: 'H 22 * * *'
     regression_timer: 'H 18 * * *'
     nightly_disabled: true
     regression_disabled: true
-    use_snapshots: false
     force_erase: true
     recreate_venv: false
+    ws_norevert: false
+    nfs_clean: true
     disable_ssl: true
     kvm_use: false
     update_master: true
+    enable_proposed: false
     debug: true
     publish_results: true
     multijob_build_pkg: true
     testjob_build_pkg: false
     runner_timeout: 600
     test_timeout: 300
-    iso_file: 'fuel-8.0-570.iso'
-    iso_storage: '/storage/downloads'        
+    iso_file: 'MirantisOpenStack-8.0.iso'
+    iso_storage: '/storage/downloads'
+    snapshots_id: 'released'
     gerrit_repo: 'fuel-qa'
     gerrit_branch: 'stable/8.0'
     email_to: 'rkhozinov@mirantis.com ibumarskov@mirantis.com'
@@ -100,7 +48,7 @@
     testrail_milestone: "{fuel-release}"
     testrail_suite: "[8.0][PCE] vCenter"
     testrail_suite_desc: "Suite description"
-    testrail_plan: "$TREP_TESTRAIL_MILESTONE iso #${{ISO_VERSION}}"
+    testrail_plan: "$TREP_TESTRAIL_MILESTONE snapshot #${{SNAPSHOTS_ID}}"
     testrail_plan_desc: "Test plan description"
     testrail_run: "$TREP_TESTRAIL_SUITE"
     testrail_run_desc: "Test run description"
@@ -181,12 +129,12 @@
           disable_ssl:          '{disable_ssl}'
           force_erase:          '{force_erase}'
           recreate_venv:        '{recreate_venv}'
-          use_snapshots:        '{use_snapshots}'
+          ws_norevert:          '{ws_norevert}'
+          nfs_clean:            '{nfs_clean}'
           iso_file:             '{iso_file}'
           gerrit_branch:        '{gerrit_branch}'
           env_prefix:           '{fuel-release}.{plugin-name}'
           pkg_job_name:         '{pkg_job_name}'
-          iso_job_name:         '{iso_job_name}'
           admin_node_memory:    '{admin_node_memory}'
           slave_node_memory:    '{slave_node_memory}'
           admin_node_cpu:       '{admin_node_cpu}'
@@ -197,9 +145,11 @@
           testrail_plan_desc:   '{testrail_plan_desc}'
           skip_vote_successfull: '{skip_vote_successfull}'
           skip_vote_failed:     '{skip_vote_failed}'
-          kvm_use:              '{kvm_use}'
+          enable_proposed:      '{enable_proposed}'
           update_master:        '{update_master}'
-      - plugin-specific-parameters
+          kvm_use:              '{kvm_use}'
+          iso_storage:          '{iso_storage}'
+          snapshots_id:         '{snapshots_id}'
 
 # parameters for jobs created per test-group and custom test job
 - test-parameters: &test-parameters
@@ -217,18 +167,26 @@
           name: TEST_GROUP
           '{testgroup_value_type}': '{obj:testgroup_value}'
           description: "test-group name"
+      - string:
+          name: TEST_GROUP_PREFIX
+          default: system_test.vcenter.deploy_vcenter_dvs_run_ostf
+      - string:
+          name: PROGRESS_TO_STOP
+      - string:
+          name: TEST_GROUP_CONFIG
+          default: '${{TEST_GROUP}}'
       - common-parameters:
           publish_results: '{publish_results}'
           debug:           '{debug}'
           disable_ssl:     '{disable_ssl}'
           force_erase:     '{force_erase}'
           recreate_venv:   '{recreate_venv}'
-          use_snapshots:   '{use_snapshots}'
+          ws_norevert:     '{ws_norevert}'
+          nfs_clean:       '{nfs_clean}'
           iso_file:        '{iso_file}'
           gerrit_branch:   '{gerrit_branch}'
           env_prefix:      '{fuel-release}.{plugin-name}'
           pkg_job_name:    '{pkg_job_name}'
-          iso_job_name:    '{iso_job_name}'
           admin_node_memory:    '{admin_node_memory}'
           slave_node_memory:    '{slave_node_memory}'
           admin_node_cpu:       '{admin_node_cpu}'
@@ -239,9 +197,12 @@
           testrail_plan_desc:   '{testrail_plan_desc}'
           skip_vote_successfull: '{skip_vote_successfull}'
           skip_vote_failed:     '{skip_vote_failed}'
+          enable_proposed:      '{enable_proposed}'
           update_master:        '{update_master}'
           kvm_use:              '{kvm_use}'
-      - plugin-specific-parameters
+          iso_storage:          '{iso_storage}'
+          snapshots_id:         '{snapshots_id}'
+
 - defaults:
     name: global
     disabled: false
@@ -259,12 +220,54 @@
           test_timeout: '{test_timeout}'
     properties:
       - test-property
-      - build-discarder:
-          days-to-keep: 30
-          num-to-keep: 100
-          artifact-days-to-keep: 30
-          artifact-num-to-keep: 100
     builders:
+      - inject:
+          properties-content: |
+            ENV_PREFIX={fuel-release}.{plugin-name}
+            OPENSTACK_RELEASE=Ubuntu
+            NODES_COUNT=10
+            DESTROY_ENV_AFTER=0
+            ADMIN_NODE_MEMORY={admin_node_memory}
+            SLAVE_NODE_MEMORY={slave_node_memory}
+            ADMIN_NODE_CPU={admin_node_cpu}
+            SLAVE_NODE_CPU={slave_node_cpu}
+            TREP_TESTRAIL_SUITE={testrail_suite}
+            TREP_TESTRAIL_SUITE_DESCRIPTION={testrail_suite_desc}
+            TREP_TESTRAIL_PLAN={testrail_plan}
+            TREP_TESTRAIL_PLAN_DESCRIPTION={testrail_plan_desc}
+            SNAPSHOT_OUTPUT_FILE=extra_repos.sh
+            SNAPSHOT_ARTIFACTS_FILE=snapshots.params
+            ESXI_PASSWORD=swordfish
+            ESXI_USER=root
+            ESXI_HOSTS=172.16.0.250 172.16.0.252 172.16.0.253
+            NFS_SERVER=172.16.0.1
+            NFS_SHARES=nfs nfs2
+            VSPHERE_VERSION=5.5
+            WORKSTATION_SNAPSHOT=doubledvs
+            WORKSTATION_IFS=vmnet2,vmnet3,vmnet4
+            WORKSTATION_NODES=esxi1 esxi2 esxi3 vcenter
+            VCENTER_IP=172.16.0.145
+            VCENTER_USERNAME=openstack
+            VCENTER_PASSWORD=vmware
+            VCENTER_GLANCE_IP=172.16.0.145
+            VCENTER_GLANCE_USERNAME=openstack
+            VCENTER_GLANCE_PASSWORD=vmware
+            VCENTER_DATACENTER=Datacenter
+            VCENTER_DATASTORE=nfs
+            VCENTER_CLUSTERS=Cluster1,Cluster2
+            #DVS_NAME=Cluster1:Cluster1;Cluster2:Cluster2
+            VCENTER_USE=true
+            VC_IMAGE_DIR=openstack_glance
+            VMWARE_IMG_NAME=shaker.vmdk
+            VMWARE_IMG_URL="http://pce-storage.bud.mirantis.net:5000/distr/$VMWARE_IMG_NAME"
+            VMWARE_IMG_LOGIN=root
+            VMWARE_IMG_PASSWORD=r00tme
+            CLEAN_IPTABLES=true
+            DISABLE_STP=true
+            VCENTER_GLANCE_CERT_URL="http://tpi-s2.bud.mirantis.net:5000/downloads/certs/server.pem"
+            VCENTER_GLANCE_CERT_BYPASS=True
+            VCENTER_CERT_URL="http://tpi-s2.bud.mirantis.net:5000/downloads/certs/server.pem"
+            VCENTER_CERT_BYPASS=True
       - conditional-step:
           condition-kind: shell
           condition-command: |
@@ -286,18 +289,10 @@
                 project: ${{PKG_JOB_NAME}}
                 which-build: specific-build
                 build-number: ${{PKG_JOB_BUILD_NUMBER}}
-      - conditional-step:
-          condition-kind: shell
-          condition-command: |
-            [ ! -z ${{ISO_JOB_NAME}} ] && \
-            [   -z ${{ISO_FILE}}     ]
-          steps:
-            - copyartifact:
-                project: "${{ISO_JOB_NAME}}"
-                filter: "iso_file"
-                which-build: last-successful
       - shell:
           !include-raw-escape: ../builders/common.prepare.sh
+      - shell:
+          !include-raw-escape: ../builders/workstation.sh
       - shell:
           !include-raw-escape: ../builders/vcenter.test.sh
     publishers:
