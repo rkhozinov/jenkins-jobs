@@ -72,9 +72,9 @@
     skip_vote_failed: false
 
     testrail_project: "Mistral plugin"
-    testrail_suite: ""
+    testrail_suite: "[9.0][PCE] Fuel Mistral plugin v1.0.0"
     testrail_suite_desc: "Suite descriptioni"
-    testrail_milestone: ""
+    testrail_milestone: "Fuel Plugin Mistral v1.0.0"
     testrail_plan: "$TREP_TESTRAIL_SUITE build#${{PKG_JOB_BUILD_NUMBER}}"
     testrail_plan_desc: "Test plan description"
     testrail_run: "$TREP_TESTRAIL_SUITE"
