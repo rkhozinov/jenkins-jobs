@@ -243,9 +243,19 @@
       - test-property
     builders:
       - inject:
-          properties-content: $TESTRAIL_PARAMETERS
-      - inject:
-          properties-content: $ENV_PARAMETERS
+          properties-content: |
+            ENV_PREFIX={fuel-release}.{plugin-name}
+            OPENSTACK_RELEASE=Ubuntu
+            NODES_COUNT=10
+            DESTROY_ENV_AFTER=0
+            ADMIN_NODE_MEMORY={admin_node_memory}
+            SLAVE_NODE_MEMORY={slave_node_memory}
+            ADMIN_NODE_CPU={admin_node_cpu}
+            SLAVE_NODE_CPU={slave_node_cpu}
+            TREP_TESTRAIL_SUITE={testrail_suite}
+            TREP_TESTRAIL_SUITE_DESCRIPTION={testrail_suite_desc}
+            TREP_TESTRAIL_PLAN={testrail_plan}
+            TREP_TESTRAIL_PLAN_DESCRIPTION={testrail_plan_desc}
       - conditional-step:
           condition-kind: shell
           condition-command: |

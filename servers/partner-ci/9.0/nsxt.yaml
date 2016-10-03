@@ -289,6 +289,7 @@
             VCENTER_IP=172.16.0.254
             VCENTER_CLUSTERS=Cluster1,Cluster2
             NSXT_PASSWORD=Qwer!1234
+            VCENTER_USE=False
       - conditional-step:
            condition-kind: shell
            condition-command: |
