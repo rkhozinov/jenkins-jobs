@@ -245,3 +245,13 @@
           TEST_GROUP_CONFIG=dvs_multiple_uplinks_teaming_fallback
         current-parameters: true
         kill-phase-on: NEVER
+
+      - name: '{fuel-release}.{plugin-name}.dvs_secure'
+        property-file: build_number
+        predefined-parameters: |
+          TEST_GROUP=dvs_secure
+          TEST_GROUP_CONFIG=dvs_secure
+          VCENTER_CERT_BYPASS=false
+          VCENTER_CERT_URL="http://tpi-s2.bud.mirantis.net:5000/downloads/certs/server.pem"
+        current-parameters: true
+        kill-phase-on: NEVER
