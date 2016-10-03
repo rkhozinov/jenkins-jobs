@@ -1,24 +1,4 @@
 ---
-- parameter:
-    name: plugin-specific-parameters
-    parameters:
-      - string:
-          name: PLUGIN_VERSION
-          default: '{plugin-version}'
-          description: 'There is a version of juniper packages stored in common sotrage'
-      - string:
-          name: GCS_BUCKET_NAME
-          default: 'plugin-qa-bucket'
-      - string:
-          name: GCS_LOCATION
-          default: 'EUROPE-WEST1'
-      - string:
-          name: GCS_PROJECT_ID
-          default: 'fuelgcsplugin'
-      - string:
-          name: GCS_CERT_URL
-          default: 'https://www.googleapis.com/robot/v1/metadata/x509/qa-1-218%40fuelgcsplugin.iam.gserviceaccount.com'
-
 - project:
     name: 'predefined_parameters'
     fuel-release: '9.0'
@@ -188,8 +168,6 @@
           kvm_use:              '{kvm_use}'
           iso_storage:          '{iso_storage}'
           snapshots_id:         '{snapshots_id}'
-      - plugin-specific-parameters:
-          plugin-version: '{plugin-version}'
 
 # parameters for jobs created per test-group and custom test job
 - test-parameters: &test-parameters
@@ -231,8 +209,6 @@
           kvm_use:              '{kvm_use}'
           iso_storage:          '{iso_storage}'
           snapshots_id:         '{snapshots_id}'
-      - plugin-specific-parameters:
-          plugin-version: '{plugin-version}'
 
 - defaults:
     name: global
@@ -253,9 +229,24 @@
       - test-property
     builders:
       - inject:
-          properties-content: $TESTRAIL_PARAMETERS
-      - inject:
-          properties-content: $ENV_PARAMETERS
+          properties-content: |
+            ENV_PREFIX={fuel-release}.{plugin-name}
+            OPENSTACK_RELEASE=Ubuntu
+            NODES_COUNT=10
+            DESTROY_ENV_AFTER=0
+            ADMIN_NODE_MEMORY={admin_node_memory}
+            SLAVE_NODE_MEMORY={slave_node_memory}
+            ADMIN_NODE_CPU={admin_node_cpu}
+            SLAVE_NODE_CPU={slave_node_cpu}
+            TREP_TESTRAIL_SUITE={testrail_suite}
+            TREP_TESTRAIL_SUITE_DESCRIPTION={testrail_suite_desc}
+            TREP_TESTRAIL_PLAN={testrail_plan}
+            TREP_TESTRAIL_PLAN_DESCRIPTION={testrail_plan_desc}
+            PLUGIN_VERSION={plugin-version}
+            GCS_BUCKET_NAME=plugin-qa-bucket
+            GCS_LOCATION=EUROPE-WEST1
+            GCS_PROJECT_ID=fuelgcsplugin
+            GCS_CERT_URL=https://www.googleapis.com/robot/v1/metadata/x509/qa-1-218%40fuelgcsplugin.iam.gserviceaccount.com
       - conditional-step:
           condition-kind: shell
           condition-command: |

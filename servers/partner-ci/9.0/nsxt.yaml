@@ -3,22 +3,6 @@
     name: plugin-specific-parameters
     parameters:
       - string:
-          name: WORKSTATION_SNAPSHOT
-          default: 'nsx-t-1.0.1'
-          description: 'Snapshot name for vcenter lab'
-      - string:
-          name: WORKSTATION_NODES
-          default: 'esxi1 esxi2 esxi3 vcenter nsx-edge trusty'
-          description: "List of workstation's nodes"
-      - string:
-          name: VCENTER_IP
-          default: '172.16.0.254'
-          description: "IP address of the vCenter server"
-      - string:
-          name: VCENTER_CLUSTERS
-          default: 'Cluster1,Cluster2'
-          description: "List of vCenter's clusters"
-      - string:
           name: PLUGIN_VERSION
       - string:
           name: NSXT_PLUGIN_PATH
@@ -288,8 +272,24 @@
     builders:
       - inject:
           properties-content: |
-            $TESTRAIL_PARAMETERS
-            $ENV_PARAMETERS
+            TREP_TESTRAIL_SUITE={testrail_suite}
+            TREP_TESTRAIL_SUITE_DESCRIPTION={testrail_suite_desc}
+            TREP_TESTRAIL_PLAN={testrail_plan}
+            TREP_TESTRAIL_PLAN_DESCRIPTION={testrail_plan_desc}
+            ENV_PREFIX={fuel-release}.{plugin-name}
+            OPENSTACK_RELEASE=Ubuntu
+            NODES_COUNT=10
+            DESTROY_ENV_AFTER=0
+            ADMIN_NODE_MEMORY={admin_node_memory}
+            SLAVE_NODE_MEMORY={slave_node_memory}
+            ADMIN_NODE_CPU={admin_node_cpu}
+            SLAVE_NODE_CPU={slave_node_cpu}
+            WORKSTATION_SNAPSHOT=nsx-t-1.0.1
+            WORKSTATION_NODES=esxi1 esxi2 esxi3 vcenter nsx-edge trusty
+            VCENTER_IP=172.16.0.254
+            VCENTER_CLUSTERS=Cluster1,Cluster2
+            NSXT_PASSWORD=Qwer!1234
+            VCENTER_USE=False
       - conditional-step:
            condition-kind: shell
            condition-command: |
