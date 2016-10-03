@@ -52,7 +52,8 @@
     regression-name: '{fuel-release}.{plugin-name}.{plugin-version}.regression'
     nightly-name: '{fuel-release}.{plugin-name}.{plugin-version}.nightly'
     full-name: '{fuel-release}.{plugin-name}.{plugin-version}.full'
-    rst-upload-name: '{fuel-release}.{plugin-name}.{plugin-version}.testplan.custom'
+    doc-check-name: '{fuel-release}.{plugin-name}.{plugin-version}.doc.check'
+    doc-update-name: '{fuel-release}.{plugin-name}.{plugin-version}.doc.update'
     baremetal-name: '{fuel-release}.{plugin-name}.{plugin-version}.baremetal'
     custom-name: '{fuel-release}.{plugin-name}.{plugin-version}.custom'
     reporter-name: '{fuel-release}.{plugin-name}.{plugin-version}.reporter'
@@ -119,6 +120,10 @@
     testgroup_parameter_type: string
     testgroup_value_type: default
     testgroup_value: '{testgroup}'
+
+    doc_modern_model: false
+    testrail_custom_qa_team: '6'
+    testrail_create_section: true
 
     testgroup:
       - contrail_bvt
@@ -230,7 +235,19 @@
 
       - '{reporter-name}'
 
-      - '{rst-upload-name}'
+      - '{doc-check-name}':
+          scm_submodule_disabled: true
+          scm_wipe_workspace: true
+          doc_check_only: true
+          skip_vote_successfull: false
+          skip_vote_failed: false
+
+      - '{doc-update-name}':
+          scm_submodule_disabled: true
+          scm_wipe_workspace: true
+          doc_check_only: false
+          skip_vote_successfull: false
+          skip_vote_failed: false
 
       - '{fuel-release}.{plugin-name}.{plugin-version}.{testgroup}.juniper'
 
@@ -630,6 +647,88 @@
               kill-phase-on: NEVER
 
 - job-template:
+    name: '{doc-check-name}'
+    node: 'runner'
+    concurrent: true
+    disabled: false
+    parameters:
+     - doc-parameters:
+          gerrit_repo: '{gerrit_repo}'
+          gerrit_branch: '{gerrit_branch}'
+          build_debug: '{build_debug}'
+          doc_check_only: '{doc_check_only}'
+          doc_modern_model: '{doc_modern_model}'
+    properties:
+      - doc-properties:
+          testrail_project: '{testrail_project}'
+          testrail_suite: '{testrail_suite}'
+          testrail_milestone: '{testrail_milestone}'
+          testrail_custom_qa_team: '{testrail_custom_qa_team}'
+          testrail_create_section: '{testrail_create_section}'
+    scm:
+      - doc-scm:
+          scm_submodule_disabled: '{scm_submodule_disabled}'
+          scm_wipe_workspace: '{scm_wipe_workspace}'
+          gerrit_repo: '{gerrit_repo}'
+          skip_vote_successfull: '{skip_vote_successfull}'
+          skip_vote_failed: '{skip_vote_failed}'
+    triggers:
+      - draft-doc-trigger:
+          gerrit_repo: '{gerrit_repo}'
+          gerrit_branch: '{gerrit_branch}'
+          skip_vote_successfull: '{skip_vote_successfull}'
+          skip_vote_failed: '{skip_vote_failed}'
+    wrappers:
+      - test-wrapper
+    builders:
+      - shell:
+          !include-raw-escape: builders/doc.sh
+    publishers:
+      - doc-publisher:
+          email_to: '{email_to}'
+
+- job-template:
+    name: '{doc-update-name}'
+    node: 'runner'
+    concurrent: true
+    disabled: false
+    parameters:
+     - doc-parameters:
+          gerrit_repo: '{gerrit_repo}'
+          gerrit_branch: '{gerrit_branch}'
+          build_debug: '{build_debug}'
+          doc_check_only: '{doc_check_only}'
+          doc_modern_model: '{doc_modern_model}'
+    properties:
+      - doc-properties:
+          testrail_project: '{testrail_project}'
+          testrail_suite: '{testrail_suite}'
+          testrail_milestone: '{testrail_milestone}'
+          testrail_custom_qa_team: '{testrail_custom_qa_team}'
+          testrail_create_section: '{testrail_create_section}'
+    scm:
+      - doc-scm:
+          scm_submodule_disabled: '{scm_submodule_disabled}'
+          scm_wipe_workspace: '{scm_wipe_workspace}'
+          gerrit_repo: '{gerrit_repo}'
+          skip_vote_successfull: '{skip_vote_successfull}'
+          skip_vote_failed: '{skip_vote_failed}'
+    triggers:
+      - merge-doc-trigger:
+          gerrit_repo: '{gerrit_repo}'
+          gerrit_branch: '{gerrit_branch}'
+          skip_vote_successfull: '{skip_vote_successfull}'
+          skip_vote_failed: '{skip_vote_failed}'
+    wrappers:
+      - test-wrapper
+    builders:
+      - shell:
+          !include-raw-escape: builders/doc.sh
+    publishers:
+      - doc-publisher:
+          email_to: '{email_to}'
+
+- job-template:
     name: '{smoke-name}'
     disabled: false
     description: 'The Smoke test for {fuel-release}.{plugin-name}.{plugin-version}'
@@ -773,75 +872,4 @@
           email_to: '{email_to}'
     builders:
       !include: contrail-baremetal.yaml.inc
-
-
-- job-template:
-    name: '{rst-upload-name}'
-    node: 'runner'
-    concurrent: false
-    disabled: false
-    scm:
-      - common-scm:
-          scm_submodule_disabled: '{scm_submodule_disabled}'
-          scm_wipe_workspace: '{scm_wipe_workspace}'
-          gerrit_repo: '{gerrit_repo}'
-          skip_vote_successfull: '{skip_vote_successfull}'
-          skip_vote_failed: '{skip_vote_failed}'
-    triggers:
-      - merge-gerrit-trigger:
-          gerrit_repo: '{gerrit_repo}'
-          gerrit_branch: '{gerrit_branch}'
-          skip_vote_successfull: '{skip_vote_successfull}'
-          skip_vote_failed: '{skip_vote_failed}'
-    wrappers:
-      - inject-passwords:
-          global: true
-          mask-password-params: true
-      - ansicolor:
-          colormap: xterm
-    parameters:
-      - bool:
-          name: CHECK_ONLY
-          default: true
-          description: "check documentation format without commiting"
-      - string:
-          name: GERRIT_BRANCH
-          default: 'origin/{gerrit_branch}'
-      - string:
-          name: GERRIT_REFSPEC
-          default: 'refs/heads/{gerrit_branch}'
-      - bool:
-          name: DEBUG
-          default: '{build_debug}'
-      - bool:
-          name: MODERN_MODEL
-          default: false
-          description: "enable use modern-testing-model, default = classic-testing-model"
-      - string:
-          name: TESTRAIL_URL
-          default: "https://mirantis.testrail.com"
-      - string:
-          name: TESTRAIL_USER
-          default: ""
-      - string:
-          name: TESTRAIL_API_KEY
-          default: ""
-      - string:
-          name: TESTRAIL_PROJECT
-          default: "{testrail_project}"
-      - string:
-          name: TESTRAIL_MILESTONE
-          default: "{testrail_milestone}"
-      - string:
-          name: TESTRAIL_SUITE
-          default: "{testrail_suite}"
-      - string:
-          name: TESTRAIL_CUSTOM_QA_TEAM
-          default: "6"
-      - bool:
-          name: TESTRAIL_CREATE_SECTION
-          default: true
-    builders:
-      - shell:
-          !include-raw-escape: ../builders/build-job-rst-testcases-upload.sh
 

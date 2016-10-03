@@ -173,6 +173,14 @@
           recipients: '{email_to}'
 
 - publisher:
+    name: doc-publisher
+    publishers:
+      - description-setter:
+          regexp-for-failed: '^Exception:.*'
+      - email:
+          recipients: '{email_to}'
+
+- publisher:
     name: test-publisher
     publishers:
       - description-setter:
@@ -297,6 +305,7 @@
             recursive: true
           wipe-workspace: '{obj:scm_wipe_workspace}'
 
+
 - trigger:
     name: generic-gerrit-trigger
     triggers:
@@ -310,9 +319,39 @@
                  branch-pattern: '{gerrit_branch}'
              forbidden-file-paths:
                - compare-type: 'ANT'
+                 pattern: 'doc/**'
+               - compare-type: 'ANT'
                  pattern: 'docs/**'
                - compare-type: 'ANT'
                  pattern: 'specs/**'
+         silent: false
+         override-votes: true
+         server-name: 'review.openstack.org'
+         custom-url: '* $JOB_NAME $BUILD_URL'
+         escape-quotes: true
+         readable-message: true
+         skip-vote:
+           successfull: '{skip_vote_successfull}'
+           failed: '{skip_vote_failed}'
+           unstable: true
+           notbuilt: true
+
+- trigger:
+    name: doc-gerrit-trigger
+    triggers:
+      - gerrit:
+         trigger-on: '{obj:trigger_on}'
+         projects:
+           - project-compare-type: 'PLAIN'
+             project-pattern: 'openstack/{gerrit_repo}'
+             branches:
+               - branch-compare-type: 'ANT'
+                 branch-pattern: '{gerrit_branch}'
+             file-paths:
+               - compare-type: 'ANT'
+                 pattern: 'doc/**'
+               - compare-type: 'ANT'
+                 pattern: 'docs/**'
          silent: false
          override-votes: true
          server-name: 'review.openstack.org'
@@ -336,6 +375,8 @@
           skip_vote_failed: '{skip_vote_failed}'
           trigger_on:
             - draft-published-event
+            - comment-added-contains-event:
+                comment-contains-value: 'recheck'
             - patchset-created-event:
                 exclude-trivial-rebase: false
                 exclude-no-code-change: true
@@ -345,6 +386,35 @@
     name: merge-gerrit-trigger
     triggers:
       - generic-gerrit-trigger:
+          gerrit_repo: '{gerrit_repo}'
+          gerrit_branch: '{gerrit_branch}'
+          skip_vote_successfull: '{skip_vote_successfull}'
+          skip_vote_failed: '{skip_vote_failed}'
+          trigger_on:
+            - change-merged-event
+
+# doc checks should trigger on patchset event
+- trigger:
+    name: draft-doc-trigger
+    triggers:
+      - doc-gerrit-trigger:
+          gerrit_repo: '{gerrit_repo}'
+          gerrit_branch: '{gerrit_branch}'
+          skip_vote_successfull: '{skip_vote_successfull}'
+          skip_vote_failed: '{skip_vote_failed}'
+          trigger_on:
+            - draft-published-event
+            - comment-added-contains-event:
+                comment-contains-value: 'recheck'
+            - patchset-created-event:
+                exclude-trivial-rebase: false
+                exclude-no-code-change: true
+
+# doc checks and update should trigger on merge event
+- trigger:
+    name: merge-doc-trigger
+    triggers:
+      - doc-gerrit-trigger:
           gerrit_repo: '{gerrit_repo}'
           gerrit_branch: '{gerrit_branch}'
           skip_vote_successfull: '{skip_vote_successfull}'
@@ -685,15 +755,6 @@
           clean:
             before: false
           wipe-workspace: false
-      - git:
-          url: 'https://github.com/ehles/rst2tr.git'
-          branches:
-            - 'origin/master'
-          # choosing-strategy: default
-          skip-tag: true
-          clean:
-            before: false
-          wipe-workspace: false
     builders:
       - copyartifact:
           project: ${{TEST_JOB_NAME}}
@@ -712,3 +773,59 @@
           regexp-for-failed: '"error":(.*)'
           description: '<a href="\1">TestRail Report URL</a>'
           description-for-failed: '\1'
+
+- parameter:
+    name: doc-parameters
+    parameters:
+      - bool:
+          name: CHECK_ONLY
+          default: '{doc_check_only}'
+          description: "check documentation format without commiting"
+      - string:
+          name: GERRIT_BRANCH
+          default: 'origin/{gerrit_branch}'
+      - string:
+          name: GERRIT_REFSPEC
+          default: 'refs/heads/{gerrit_branch}'
+      - bool:
+          name: DEBUG
+          default: '{build_debug}'
+      - bool:
+          name: MODERN_MODEL
+          default: '{doc_modern_model}'
+          description: "enable use modern-testing-model, default = classic-testing-model"
+- property:
+    name: doc-properties
+    properties:
+      - build-discarder:
+          days-to-keep: 40
+          num-to-keep: 40
+          artifact-days-to-keep: 30
+          artifact-num-to-keep: 20
+      - heavy-job:
+          weight: 1
+      - inject:
+          properties-content: |
+            TESTRAIL_URL=https://mirantis.testrail.com
+            TESTRAIL_PROJECT={testrail_project}
+            TESTRAIL_MILESTONE={testrail_milestone}
+            TESTRAIL_SUITE={testrail_suite}
+            TESTRAIL_CUSTOM_QA_TEAM={testrail_custom_qa_team}
+            TESTRAIL_CREATE_SECTION={testrail_create_section}
+
+- scm:
+    name: doc-scm
+    scm:
+      - common-scm:
+          scm_submodule_disabled: '{scm_submodule_disabled}'
+          scm_wipe_workspace: '{scm_wipe_workspace}'
+          gerrit_repo: '{gerrit_repo}'
+          skip_vote_successfull: '{skip_vote_successfull}'
+          skip_vote_failed: '{skip_vote_failed}'
+
+      - git:
+          wipe-workspace: 'false'
+          url: 'https://github.com/ehles/rst2tr'
+          branches:
+             - origin/master
+          basedir: utility-repo
