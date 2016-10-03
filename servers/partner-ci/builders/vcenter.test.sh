@@ -27,12 +27,14 @@ fi
 
 [ -z "${SNAPSHOTS_ID}" ] && { echo SNAPSHOTS_ID is empty; exit 1; }
 
-if [ -f build.plugin_version ]; then
-  export DVS_PLUGIN_VERSION=$(grep "PLUGIN_VERSION" < build.plugin_version | cut -d= -f2 )
-else
-  echo "build.properties file is not available so a test couldn't be runned"
-  exit 1
-fi
+if [[ $SNAPSHOTS_ID != *"released"* ]]; then
+  if [ -f build.plugin_version ]; then
+    export DVS_PLUGIN_VERSION=$(grep "PLUGIN_VERSION" < build.plugin_version | cut -d= -f2 )
+  else
+    echo "build.properties file is not available so a test couldn't be runned"
+    exit 1
+  fi
+ fi
 
 [ -z $DVS_PLUGIN_VERSION ] && { echo "DVS_PLUGIN_VERSION is empty"; exit 1; }
 

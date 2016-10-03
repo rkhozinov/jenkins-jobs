@@ -780,17 +780,8 @@
     node: 'runner'
     concurrent: false
     disabled: false
-      - scm:
-          - git:
-              url: https://github.com/openstack/fuel-plugin-contrail
-              branches:
-               - origin/master
-              basedir: ${WORKSPACE}/contrail-repo
-          - git:
-              url: https://github.com/ehles/rst2tr
-              branches:
-               - origin/master
-              basedir: ${WORKSPACE}/utility-repo
+    scm:
+      - contrail-utility
     wrappers:
       - inject-passwords:
           global: true
