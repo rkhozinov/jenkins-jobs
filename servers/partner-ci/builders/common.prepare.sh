@@ -85,19 +85,13 @@ function get_venv_requirements {
 }
 
 function prepare_venv {
-    check_ec() {
-      if [[ $1 -ne 0 ]]; then
-        echo "Exiting with: $1"
-        exit $1
-      fi
-    } 
     source "${VENV_PATH}/bin/activate"
     easy_install -U pip
     export redirected_output='pip.properties'
     [[ "${DEBUG}" == "true" ]] && export redirected_output='/dev/null'
-    pip install -r "${REQS_PATH}" --upgrade &> $redirected_output; check_ec $?
-    pip install -r "${REQS_PATH_DEVOPS}" --upgrade &> $redirected_output; check_ec $?
-    [ -e $SPEC_REQS_PATH ] && pip install -r "${SPEC_REQS_PATH}" --upgrade &> $redirected_output; check_ec $?
+    pip install -r "${REQS_PATH}" --upgrade > $redirected_output || { echo "Exiting with: $?"; exit 1; }
+    pip install -r "${REQS_PATH_DEVOPS}" --upgrade > $redirected_output || { echo "Exiting with: $?"; exit 1; }
+    [ -e $SPEC_REQS_PATH ] && pip install -r "${SPEC_REQS_PATH}" --upgrade > $redirected_output || { echo "Exiting with: $?"; exit 1; }
     django-admin.py syncdb --settings=devops.settings --noinput
     django-admin.py migrate devops --settings=devops.settings --noinput
     deactivate
@@ -128,19 +122,19 @@ source "$VENV_PATH/bin/activate"
 [ -z $VIRTUAL_ENV ] && { echo "VIRTUAL_ENV is empty"; exit 1; }
 
 if [[ "${FORCE_ERASE}" == "true" ]]; then
-  for env in $(dospy_list); do 
+  for env in $(dospy_list); do
     dos.py erase $env
-  done 
+  done
 else
   # determine free space before run the cleaner
   free_space=$(df -h | grep '/$' | awk '{print $4}' | tr -d G)
 
-  if (( $free_space < $REQUIRED_FREE_SPACE )); then 
-    for env in $(dospy_list $ENV_NAME); do 
+  if (( $free_space < $REQUIRED_FREE_SPACE )); then
+    for env in $(dospy_list $ENV_NAME); do
       if [[ $env  != *"released"* ]]; then
         dos.py erase $env
       fi
-    done 
+    done
   fi
 fi
 ###############################################################
@@ -151,7 +145,7 @@ for env in $(dospy_list $ENV_NAME); do
   if [[ $env  == $ENV_NAME ]]; then
     if dos.py snapshot-list $env | grep empty; then
       snap_date=$(dos.py snapshot-list $env | grep empty | awk '{print $2}')
-      mod_snap_date=$(date -d $snap_date +"%Y%m%d")      
+      mod_snap_date=$(date -d $snap_date +"%Y%m%d")
       if [[ $mod_snap_date -eq $mod_current_date ]]; then
         echo "$env is suitable for test, it will be reused"
         USEFUL_ENV=$env
@@ -172,11 +166,11 @@ for env in $(dospy_list); do
   if [[ $env  != $USEFUL_ENV ]] && [[ $env  != *"released"* ]]; then
     dos.py erase $env
   fi
-done  
+done
   ###############################################################
   # poweroff all envs
-for env in $(dospy_list); do 
+for env in $(dospy_list); do
   if [[ $env  != $USEFUL_ENV ]]; then
   dos.py destroy $env
   fi
-done 
+done
