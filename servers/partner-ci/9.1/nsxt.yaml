@@ -102,6 +102,7 @@
       - dvs_heat
       - dvs_multiple_uplinks_teaming
       - dvs_multiple_uplinks_teaming_fallback
+      - dvs_secure
 
     jobs:
       - '{build-name}':
@@ -290,6 +291,8 @@
             VCENTER_CLUSTERS=Cluster1,Cluster2
             DVS_SWITCHES=Cluster1,Cluster2
             DVS_UPLINKS=dvUplink1,dvUplink2,dvUplink3
+            VCENTER_CERT_URL="http://tpi-s2.bud.mirantis.net:5000/downloads/certs/server.pem"
+            VCENTER_CERT_BYPASS=True
             VCENTER_USE=true
             CLEAN_IPTABLES=true
             DISABLE_STP=true
