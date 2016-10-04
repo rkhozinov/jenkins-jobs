@@ -251,7 +251,7 @@
         predefined-parameters: |
           TEST_GROUP=dvs_secure
           TEST_GROUP_CONFIG=dvs_secure
-          VCENTER_CERT_BYPASS=false
+          VCENTER_CERT_BYPASS=False
           VCENTER_CERT_URL=http://tpi-s2.bud.mirantis.net:5000/downloads/certs/server.pem
         current-parameters: true
         kill-phase-on: NEVER
