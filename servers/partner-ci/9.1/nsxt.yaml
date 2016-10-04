@@ -333,7 +333,19 @@
             [[ "${{UPDATE_MASTER}}" == "true" ]]
           steps:
             - inject:
-                properties-content: $UPDATE_PARAMETERS
+                properties-content: |
+                  ENABLE_MOS_CENTOS_OS=true
+                  ENABLE_MOS_CENTOS_PROPOSED=true
+                  ENABLE_MOS_CENTOS_UPDATES=true
+                  ENABLE_MOS_CENTOS_HOLDBACK=true
+                  ENABLE_MOS_CENTOS_HOTFIX=false
+                  ENABLE_MOS_CENTOS_SECURITY=true
+                  ENABLE_MOS_UBUNTU_OS=true
+                  ENABLE_MOS_UBUNTU_PROPOSED=true
+                  ENABLE_MOS_UBUNTU_UPDATES=true
+                  ENABLE_MOS_UBUNTU_HOLDBACK=true
+                  ENABLE_MOS_UBUNTU_HOTFIX=false
+                  ENABLE_MOS_UBUNTU_SECURITY=true
             - shell: |
                 [ ! -n ${{SNAPSHOTS_ID}} ] && {{ echo "SNAPSHOTS_ID is empty"; exit 1; }}
                 wget --no-check-certificate -O ${{SNAPSHOT_ARTIFACTS_FILE}} ${{SNAPSHOTS_URL/SNAPSHOTS_ID/$SNAPSHOTS_ID}}

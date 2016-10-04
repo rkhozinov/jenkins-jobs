@@ -1,19 +1,4 @@
 ---
-- parameter:
-    name: plugin-specific-parameters
-    parameters:
-      - string:
-          name: PLUGIN_VERSION
-          default: '{plugin-version}'
-          description: 'Snapshot name for vcenter lab'
-      - text:
-          name: WORKSTATION_PARAMETERS
-          default: |
-            MANILA_IMAGE_PATH=/storage/manila/manila-service-image.qcow2
-            WORKSTATION_SNAPSHOT=base_image
-            WORKSTATION_IFS=vmnet2:management,vmnet3:private,vmnet4:storage
-            WORKSTATION_NODES=netapp
-
 - project:
     name: 'predefined_parameters'
     fuel-release: '9.0'
@@ -185,8 +170,6 @@
           kvm_use:              '{kvm_use}'
           iso_storage:          '{iso_storage}'
           snapshots_id:         '{snapshots_id}'
-      - plugin-specific-parameters:
-          plugin-version: '{plugin-version}'
 
 # parameters for jobs created per test-group and custom test job
 - test-parameters: &test-parameters
@@ -229,8 +212,6 @@
           kvm_use:              '{kvm_use}'
           iso_storage:          '{iso_storage}'
           snapshots_id:         '{snapshots_id}'
-      - plugin-specific-parameters:
-          plugin-version: '{plugin-version}'
 
 - defaults:
     name: global
@@ -252,9 +233,23 @@
     builders:
       - inject:
           properties-content: |
-            $TESTRAIL_PARAMETERS
-            $ENV_PARAMETERS
-            $WORKSTATION_PARAMETERS
+            ENV_PREFIX={fuel-release}.{plugin-name}
+            OPENSTACK_RELEASE=Ubuntu
+            NODES_COUNT=10
+            DESTROY_ENV_AFTER=0
+            ADMIN_NODE_MEMORY={admin_node_memory}
+            SLAVE_NODE_MEMORY={slave_node_memory}
+            ADMIN_NODE_CPU={admin_node_cpu}
+            SLAVE_NODE_CPU={slave_node_cpu}
+            TREP_TESTRAIL_SUITE={testrail_suite}
+            TREP_TESTRAIL_SUITE_DESCRIPTION={testrail_suite_desc}
+            TREP_TESTRAIL_PLAN={testrail_plan}
+            TREP_TESTRAIL_PLAN_DESCRIPTION={testrail_plan_desc}
+            MANILA_IMAGE_PATH=/storage/manila/manila-service-image.qcow2
+            WORKSTATION_SNAPSHOT=base_image
+            WORKSTATION_IFS=vmnet2:management,vmnet3:private,vmnet4:storage
+            WORKSTATION_NODES=netapp
+            PLUGIN_VERSION={plugin-version}
       - conditional-step:
           condition-kind: shell
           condition-command: |
@@ -282,7 +277,19 @@
             [[ "${{UPDATE_MASTER}}" == "true" ]]
           steps:
             - inject:
-                properties-content: $UPDATE_PARAMETERS
+                properties-content: |
+                  ENABLE_MOS_CENTOS_OS=true
+                  ENABLE_MOS_CENTOS_PROPOSED=true
+                  ENABLE_MOS_CENTOS_UPDATES=true
+                  ENABLE_MOS_CENTOS_HOLDBACK=true
+                  ENABLE_MOS_CENTOS_HOTFIX=false
+                  ENABLE_MOS_CENTOS_SECURITY=true
+                  ENABLE_MOS_UBUNTU_OS=true
+                  ENABLE_MOS_UBUNTU_PROPOSED=true
+                  ENABLE_MOS_UBUNTU_UPDATES=true
+                  ENABLE_MOS_UBUNTU_HOLDBACK=true
+                  ENABLE_MOS_UBUNTU_HOTFIX=false
+                  ENABLE_MOS_UBUNTU_SECURITY=true
             - shell: |
                 [ ! -n ${{SNAPSHOTS_ID}} ] && {{ echo "SNAPSHOTS_ID is empty"; exit 1; }}
                 wget --no-check-certificate -O ${{SNAPSHOT_ARTIFACTS_FILE}} ${{SNAPSHOTS_URL/SNAPSHOTS_ID/$SNAPSHOTS_ID}}
