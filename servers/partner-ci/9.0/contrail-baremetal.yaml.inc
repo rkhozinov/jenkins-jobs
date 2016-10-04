@@ -1,6 +1,12 @@
 - runner-condition
 - inject:
-    properties-content: $BAREMETAL_PARAMETERS
+    properties-content: |
+      BM_IPMI_USER=engineer
+      BM_IPMI_PASSWORD=Ba2Ie23#GHgho
+      BM_IPMI_ADDR=cz7660-kvm.host-telecom.com
+      BM_TARGET_MACS=00:1b:21:87:21:99;00:1b:21:87:21:98
+      BM_HOST_BRIDGE_INTERFACES=eth2:10.109.0.0/24;eth3:10.109.4.0/24
+      KVM_USE=True
 - multijob:
     name: >
       'Baremetal DPDK for {fuel-release}.{plugin-name}.{plugin-version}'

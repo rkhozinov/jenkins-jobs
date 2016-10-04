@@ -85,13 +85,19 @@ function get_venv_requirements {
 }
 
 function prepare_venv {
+    check_ec() {
+      if [[ $1 -ne 0 ]]; then
+        echo "Exiting with: $1"
+        exit $1
+      fi
+    } 
     source "${VENV_PATH}/bin/activate"
     easy_install -U pip
     export redirected_output='pip.properties'
     [[ "${DEBUG}" == "true" ]] && export redirected_output='/dev/null'
-    pip install -r "${REQS_PATH}" --upgrade > $redirected_output
-    pip install -r "${REQS_PATH_DEVOPS}" --upgrade > $redirected_output
-    [ -e $SPEC_REQS_PATH ] && pip install -r "${SPEC_REQS_PATH}" --upgrade > $redirected_output
+    pip install -r "${REQS_PATH}" --upgrade &> $redirected_output; check_ec $?
+    pip install -r "${REQS_PATH_DEVOPS}" --upgrade &> $redirected_output; check_ec $?
+    [ -e $SPEC_REQS_PATH ] && pip install -r "${SPEC_REQS_PATH}" --upgrade &> $redirected_output; check_ec $?
     django-admin.py syncdb --settings=devops.settings --noinput
     django-admin.py migrate devops --settings=devops.settings --noinput
     deactivate
