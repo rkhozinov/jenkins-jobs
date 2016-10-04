@@ -628,15 +628,6 @@
           properties_name: regression.properties
           email_to: '{email_to}'
     builders:
-      - inject:
-          properties-content: |
-            NODE_VOLUME_SIZE=512
-            CONTRAIL_VERSION={plugin-version}
-            PLUGIN_VERSION={plugin-version}
-            VSRX_ORIGINAL_IMAGE_PATH={vsrx_original_image_path}
-            VSRX_TARGET_IMAGE_PATH={vsrx_target_image_path}
-            VSRX_TEMPLATE_PATH={vsrx_template_path}
-            ISO_STORAGE={iso_storage}
       - shell: |
           #!/bin/bash
           echo "TEST_GROUP=contrail_bvt" > property
@@ -757,15 +748,6 @@
       - runner-wrapper
     scm: []
     builders:
-      - inject:
-          properties-content: |
-            NODE_VOLUME_SIZE=512
-            CONTRAIL_VERSION={plugin-version}
-            PLUGIN_VERSION={plugin-version}
-            VSRX_ORIGINAL_IMAGE_PATH={vsrx_original_image_path}
-            VSRX_TARGET_IMAGE_PATH={vsrx_target_image_path}
-            VSRX_TEMPLATE_PATH={vsrx_template_path}
-            ISO_STORAGE={iso_storage}
       - runner-condition
       - multijob:
           name: 'The smoke test for {fuel-release}.{plugin-name}.{plugin-version}'
@@ -804,15 +786,6 @@
     wrappers:
       - runner-wrapper
     builders:
-      - inject:
-          properties-content: |
-            NODE_VOLUME_SIZE=512
-            CONTRAIL_VERSION={plugin-version}
-            PLUGIN_VERSION={plugin-version}
-            VSRX_ORIGINAL_IMAGE_PATH={vsrx_original_image_path}
-            VSRX_TARGET_IMAGE_PATH={vsrx_target_image_path}
-            VSRX_TEMPLATE_PATH={vsrx_template_path}
-            ISO_STORAGE={iso_storage}
       - runner-condition
       - multijob:
           name: 'The BVT test for {fuel-release}.{plugin-name}.{plugin-version}'
