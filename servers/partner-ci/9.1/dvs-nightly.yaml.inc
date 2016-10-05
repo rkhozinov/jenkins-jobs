@@ -230,19 +230,19 @@
         current-parameters: true
         kill-phase-on: NEVER
 
-      - name: '{fuel-release}.{plugin-name}.dvs_multiple_uplinks_teaming'
+      - name: '{fuel-release}.{plugin-name}.dvs_multiple_uplinks_active'
         property-file: build_number
         predefined-parameters: |
-          TEST_GROUP=dvs_multiple_uplinks_teaming
-          TEST_GROUP_CONFIG=dvs_multiple_uplinks_teaming
+          TEST_GROUP=dvs_multiple_uplinks_active
+          TEST_GROUP_CONFIG=dvs_multiple_uplinks_active
         current-parameters: true
         kill-phase-on: NEVER
 
-      - name: '{fuel-release}.{plugin-name}.dvs_multiple_uplinks_teaming_fallback'
+      - name: '{fuel-release}.{plugin-name}.dvs_multiple_uplinks_active_standby'
         property-file: build_number
         predefined-parameters: |
-          TEST_GROUP=dvs_multiple_uplinks_teaming_fallback
-          TEST_GROUP_CONFIG=dvs_multiple_uplinks_teaming_fallback
+          TEST_GROUP=dvs_multiple_uplinks_active_standby
+          TEST_GROUP_CONFIG=dvs_multiple_uplinks_active_standby
         current-parameters: true
         kill-phase-on: NEVER
 
