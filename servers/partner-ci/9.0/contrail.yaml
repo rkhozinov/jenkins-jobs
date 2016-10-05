@@ -312,16 +312,6 @@
           name: MJ_BUILD_PKG
           default: '{multijob_build_pkg}'
           description: "Triggers build of pkg of $PKG_JOB_NAME before run of tests"
-      - text:
-          name: BAREMETAL_PARAMETERS
-          default: |
-            BM_IPMI_USER=engineer
-            BM_IPMI_PASSWORD=Ba2Ie23#GHgho
-            BM_IPMI_ADDR=cz7660-kvm.host-telecom.com
-            BM_TARGET_MACS=00:1b:21:87:21:99;00:1b:21:87:21:98
-            BM_HOST_BRIDGE_INTERFACES=eth2:10.109.0.0/24;eth3:10.109.4.0/24
-            KVM_USE=True
-
       - common-parameters:
           publish_results:      '{publish_results}'
           debug:                '{debug}'
@@ -370,8 +360,6 @@
           description: "Triggers build of pkg from $PKG_JOB_NAME (only for custom)"
       - string:
           name: CONTRAIL_DISTRIBUTION
-      - text:
-          name: BAREMETAL_PARAMETERS
       - '{testgroup_parameter_type}':
           name: TEST_GROUP
           '{testgroup_value_type}': '{obj:testgroup_value}'
