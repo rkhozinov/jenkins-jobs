@@ -100,8 +100,8 @@
       - dvs_vcenter_smoke
       - dvs_vcenter_bvt
       - dvs_heat
-      - dvs_multiple_uplinks_teaming
-      - dvs_multiple_uplinks_teaming_fallback
+      - dvs_multiple_uplinks_active
+      - dvs_multiple_uplinks_active_standby
       - dvs_secure
 
     jobs:
