@@ -385,20 +385,20 @@
           testrail_plan:        '{testrail_plan}'
           testrail_plan_desc:   '{testrail_plan_desc}'
           skip_vote_successfull: '{skip_vote_successfull}'
-          skip_vote_failed: '{skip_vote_failed}'
+          skip_vote_failed:      '{skip_vote_failed}'
           enable_proposed:      '{enable_proposed}'
           kvm_use:              '{kvm_use}'
           update_master:        '{update_master}'
           snapshots_id:         '{snapshots_id}'
 
       - plugin-specific-parameters:
-          bonding:              '{bonding}'
-          plugin-version:       '{plugin-version}'
-          force_vsrx_copy:      '{force_vsrx_copy}'
+          bonding:                  '{bonding}'
+          plugin-version:           '{plugin-version}'
+          force_vsrx_copy:          '{force_vsrx_copy}'
           vsrx_original_image_path: '{vsrx_original_image_path}'
           vsrx_target_image_path:   '{vsrx_target_image_path}'
           vsrx_template_path:       '{vsrx_template_path}'
-          iso_storage:           '{iso_storage}'
+          iso_storage:              '{iso_storage}'
 
 - defaults:
     name: global
@@ -432,11 +432,6 @@
             TREP_TESTRAIL_SUITE_DESCRIPTION={testrail_suite_desc}
             TREP_TESTRAIL_PLAN={testrail_plan}
             TREP_TESTRAIL_PLAN_DESCRIPTION={testrail_plan_desc}
-            BM_IPMI_USER=engineer
-            BM_IPMI_PASSWORD=Ba2Ie23#GHgho
-            BM_IPMI_ADDR=cz7660-kvm.host-telecom.com
-            BM_TARGET_MACS=00:1b:21:87:21:99;00:1b:21:87:21:98
-            BM_HOST_BRIDGE_INTERFACES=eth2:10.109.0.0/24;eth3:10.109.4.0/24
             KVM_USE=True
             NODE_VOLUME_SIZE=512
             CONTRAIL_VERSION={plugin-version}
