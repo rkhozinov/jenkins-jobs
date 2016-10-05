@@ -285,6 +285,7 @@
                  pattern: 'docs/**'
                - compare-type: 'ANT'
                  pattern: 'specs/**'
+             disable-strict-forbidden-file-verification: true
          silent: false
          override-votes: true
          server-name: 'review.openstack.org'
@@ -313,6 +314,7 @@
                  pattern: 'doc/**'
                - compare-type: 'ANT'
                  pattern: 'docs/**'
+             disable-strict-forbidden-file-verification: true
          silent: false
          override-votes: true
          server-name: 'review.openstack.org'
