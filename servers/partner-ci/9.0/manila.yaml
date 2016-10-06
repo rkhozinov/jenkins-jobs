@@ -79,11 +79,17 @@
       - manila_with_murano
       - manila_with_sahara
       - manila_del_add_controller
-      - manila_del_add_сompute
+      - manila_del_add_compute
       - manila_del_add_cinder
       - manila_del_add_share
       - manila_del_add_data
       - manila_add_ceph
+      - manila_shut_reb_controller
+      - manila_shut_reb_compute
+      - manila_shut_reb_share
+      - manila_shut_reb_data
+      - manila_shut_reb_cinder
+      - manila_shut_ceph
     jobs:
       - '{build-name}':
           scm_submodule_disabled: true
