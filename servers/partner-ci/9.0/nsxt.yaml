@@ -278,12 +278,7 @@
             TREP_TESTRAIL_PLAN_DESCRIPTION={testrail_plan_desc}
             ENV_PREFIX={fuel-release}.{plugin-name}
             OPENSTACK_RELEASE=Ubuntu
-            NODES_COUNT=10
             DESTROY_ENV_AFTER=0
-            ADMIN_NODE_MEMORY={admin_node_memory}
-            SLAVE_NODE_MEMORY={slave_node_memory}
-            ADMIN_NODE_CPU={admin_node_cpu}
-            SLAVE_NODE_CPU={slave_node_cpu}
             WORKSTATION_SNAPSHOT=nsx-t-1.0.1
             WORKSTATION_NODES=esxi1 esxi2 esxi3 vcenter nsx-edge trusty
             VCENTER_IP=172.16.0.254
