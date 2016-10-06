@@ -61,7 +61,7 @@
        kill-phase-on: NEVER
        property-file: build_number
 
-     - name: '{fuel-release}.{plugin-name}.manila_del_add_сompute'
+     - name: '{fuel-release}.{plugin-name}.manila_del_add_compute'
        current-parameters: true
        kill-phase-on: NEVER
        property-file: build_number
@@ -77,6 +77,36 @@
        property-file: build_number
 
      - name: '{fuel-release}.{plugin-name}.manila_del_add_data'
+       current-parameters: true
+       kill-phase-on: NEVER
+       property-file: build_number
+
+     - name: '{fuel-release}.{plugin-name}.manila_shut_reb_controller'
+       current-parameters: true
+       kill-phase-on: NEVER
+       property-file: build_number
+
+     - name: '{fuel-release}.{plugin-name}.manila_shut_reb_compute'
+       current-parameters: true
+       kill-phase-on: NEVER
+       property-file: build_number
+
+     - name: '{fuel-release}.{plugin-name}.manila_shut_reb_share'
+       current-parameters: true
+       kill-phase-on: NEVER
+       property-file: build_number
+
+     - name: '{fuel-release}.{plugin-name}.manila_shut_reb_data'
+       current-parameters: true
+       kill-phase-on: NEVER
+       property-file: build_number
+
+     - name: '{fuel-release}.{plugin-name}.manila_shut_reb_cinder'
+       current-parameters: true
+       kill-phase-on: NEVER
+       property-file: build_number
+
+     - name: '{fuel-release}.{plugin-name}.manila_shut_ceph'
        current-parameters: true
        kill-phase-on: NEVER
        property-file: build_number
