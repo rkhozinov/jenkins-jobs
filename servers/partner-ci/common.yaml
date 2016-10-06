@@ -268,7 +268,7 @@
 
 
 - trigger:
-    name: generic-gerrit-trigger
+    name: test-gerrit-trigger
     triggers:
       - gerrit:
          trigger-on: '{obj:trigger_on}'
@@ -278,13 +278,9 @@
              branches:
                - branch-compare-type: 'ANT'
                  branch-pattern: '{gerrit_branch}'
-             forbidden-file-paths:
+             file-paths:
                - compare-type: 'ANT'
-                 pattern: 'doc/**'
-               - compare-type: 'ANT'
-                 pattern: 'docs/**'
-               - compare-type: 'ANT'
-                 pattern: 'specs/**'
+                 pattern: 'plugin_test/**'
              disable-strict-forbidden-file-verification: true
          silent: false
          override-votes: true
@@ -327,11 +323,42 @@
            unstable: true
            notbuilt: true
 
+- trigger:
+    name: generic-gerrit-trigger
+    triggers:
+      - gerrit:
+         trigger-on: '{obj:trigger_on}'
+         projects:
+           - project-compare-type: 'PLAIN'
+             project-pattern: 'openstack/{gerrit_repo}'
+             branches:
+               - branch-compare-type: 'ANT'
+                 branch-pattern: '{gerrit_branch}'
+             forbidden-file-paths:
+               - compare-type: 'ANT'
+                 pattern: 'doc/**'
+               - compare-type: 'ANT'
+                 pattern: 'docs/**'
+               - compare-type: 'ANT'
+                 pattern: 'specs/**'
+             disable-strict-forbidden-file-verification: true
+         silent: false
+         override-votes: true
+         server-name: 'review.openstack.org'
+         custom-url: '* $JOB_NAME $BUILD_URL'
+         escape-quotes: true
+         readable-message: true
+         skip-vote:
+           successfull: '{skip_vote_successfull}'
+           failed: '{skip_vote_failed}'
+           unstable: true
+           notbuilt: true
+
 # build and smoke should trigger on patchset event
 - trigger:
-    name: draft-patchset-gerrit-trigger
+    name: draft-test-gerrit-trigger
     triggers:
-      - generic-gerrit-trigger:
+      - test-gerrit-trigger:
           gerrit_repo: '{gerrit_repo}'
           gerrit_branch: '{gerrit_branch}'
           skip_vote_successfull: '{skip_vote_successfull}'
@@ -354,7 +381,26 @@
           skip_vote_successfull: '{skip_vote_successfull}'
           skip_vote_failed: '{skip_vote_failed}'
           trigger_on:
+            - comment-added-contains-event:
+                comment-contains-value: 'recheck'
             - change-merged-event
+
+# smoke should trigger on draft event
+- trigger:
+    name: draft-gerrit-trigger
+    triggers:
+      - generic-gerrit-trigger:
+          gerrit_repo: '{gerrit_repo}'
+          gerrit_branch: '{gerrit_branch}'
+          skip_vote_successfull: '{skip_vote_successfull}'
+          skip_vote_failed: '{skip_vote_failed}'
+          trigger_on:
+            - draft-published-event
+            - comment-added-contains-event:
+                comment-contains-value: 'recheck'
+            - patchset-created-event:
+                exclude-trivial-rebase: false
+                exclude-no-code-change: true
 
 # doc checks should trigger on patchset event
 - trigger:
@@ -383,6 +429,8 @@
           skip_vote_successfull: '{skip_vote_successfull}'
           skip_vote_failed: '{skip_vote_failed}'
           trigger_on:
+            - comment-added-contains-event:
+                comment-contains-value: 'recheck'
             - change-merged-event
 
 
@@ -481,7 +529,7 @@
           default: '--ignore fuel-qa --max-absolute C --max-modules C --max-average C'
           description: "Default args for checking average code complexity"
     triggers:
-      - draft-patchset-gerrit-trigger:
+      - draft-test-gerrit-trigger:
           gerrit_repo: '{gerrit_repo}'
           gerrit_branch: '{gerrit_branch}'
           skip_vote_successfull: '{skip_vote_successfull}'
@@ -512,7 +560,7 @@
     concurrent: true
     disabled: false
     triggers:
-      - draft-patchset-gerrit-trigger:
+      - draft-gerrit-trigger:
           gerrit_repo: '{gerrit_repo}'
           gerrit_branch: '{gerrit_branch}'
           skip_vote_successfull: '{skip_vote_successfull}'
@@ -558,7 +606,7 @@
     disabled: false
     wrappers: []
     triggers:
-      - draft-patchset-gerrit-trigger:
+      - draft-test-gerrit-trigger:
           gerrit_repo: '{gerrit_repo}'
           gerrit_branch: '{gerrit_branch}'
           skip_vote_successfull: '{skip_vote_successfull}'
