@@ -194,6 +194,16 @@
       - contrail_sahara
       - contrail_add_controller
 
+      - contrail_ha_dpdk_on_vf
+      - contrail_dpdk_on_vf_add_compute
+      - contrail_dpdk_on_vf_delete_compute
+      - contrail_dpdk_on_vf_add_dpdk
+      - contrail_dpdk_on_vf_delete_dpdk
+      - contrail_dpdk_on_vf_add_controller
+      - contrail_dpdk_on_vf_delete_controller
+      - contrail_dpdk_on_vf_disable
+      - contrail_dpdk_on_vf_enable
+
     jobs:
       - '{build-name}':
           scm_submodule_disabled: true
@@ -435,6 +445,12 @@
             VSRX_TARGET_IMAGE_PATH={vsrx_target_image_path}
             VSRX_TEMPLATE_PATH={vsrx_template_path}
             ISO_STORAGE={iso_storage}
+            BM_IPMI_USER=engineer
+            BM_IPMI_PASSWORD=Ba2Ie23#GHgho
+            BM_IPMI_ADDR=cz7660-kvm.host-telecom.com
+            BM_TARGET_MACS=00:1b:21:87:21:99;00:1b:21:87:21:98
+            BM_HOST_BRIDGE_INTERFACES=eth2:10.109.0.0/24;eth3:10.109.4.0/24
+            KVM_USE=True
       - conditional-step:
            condition-kind: shell
            condition-command: |

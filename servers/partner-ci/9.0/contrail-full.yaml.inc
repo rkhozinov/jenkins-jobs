@@ -1,5 +1,3 @@
-- inject:
-    properties-content: $ADDITIONAL_PARAMETERS
 - runner-condition
 - multijob:
     name: >
