@@ -112,6 +112,11 @@
           allow-empty: true
       - email:
           recipients: '{email_to}'
+      - description-setter:
+          regexp: '^\[TestRun URL\] (.*)'
+          regexp-for-failed: '"error":(.*) \1 "AssertionError":(.*) \2'
+          description: '<a href="\1">TestRail Report URL</a>'
+          description-for-failed: '\1'
 
 - publisher:
     name: build-publisher
@@ -137,6 +142,9 @@
           allow-empty: false
       - email:
           recipients: '{email_to}'
+      - description-setter:
+          regexp-for-failed: '"error":(.*) \1 "AssertionError":(.*) \2'
+          description-for-failed: '\1 \2'
 
 - publisher:
     name: doc-publisher
@@ -181,6 +189,9 @@
       - postbuildscript:
           builders:
               - shell: rm -rf *.rpm
+      - description-setter:
+          regexp-for-failed: '"error":(.*) \1 "AssertionError":(.*) \2'
+          description-for-failed: '\1 \2'
       - conditional-publisher:
           - condition-kind: boolean-expression
             condition-expression: "${{PUBLISH_RESULTS}}"
@@ -295,6 +306,29 @@
            notbuilt: true
 
 - trigger:
+    name: default-gerrit-trigger
+    triggers:
+      - gerrit:
+         trigger-on: '{obj:trigger_on}'
+         projects:
+           - project-compare-type: 'PLAIN'
+             project-pattern: 'openstack/{gerrit_repo}'
+             branches:
+               - branch-compare-type: 'ANT'
+                 branch-pattern: '{gerrit_branch}'
+         silent: false
+         override-votes: true
+         server-name: 'review.openstack.org'
+         custom-url: '* $JOB_NAME $BUILD_URL'
+         escape-quotes: true
+         readable-message: true
+         skip-vote:
+           successfull: '{skip_vote_successfull}'
+           failed: '{skip_vote_failed}'
+           unstable: true
+           notbuilt: true
+
+- trigger:
     name: doc-gerrit-trigger
     triggers:
       - gerrit:
@@ -384,6 +418,35 @@
             - comment-added-contains-event:
                 comment-contains-value: 'recheck'
             - change-merged-event
+
+- trigger:
+    name: default-merge-trigger
+    triggers:
+      - default-gerrit-trigger:
+          gerrit_repo: '{gerrit_repo}'
+          gerrit_branch: '{gerrit_branch}'
+          skip_vote_successfull: '{skip_vote_successfull}'
+          skip_vote_failed: '{skip_vote_failed}'
+          trigger_on:
+            - comment-added-contains-event:
+                comment-contains-value: 'recheck'
+            - change-merged-event
+
+- trigger:
+    name: default-draft-trigger
+    triggers:
+      - default-gerrit-trigger:
+          gerrit_repo: '{gerrit_repo}'
+          gerrit_branch: '{gerrit_branch}'
+          skip_vote_successfull: '{skip_vote_successfull}'
+          skip_vote_failed: '{skip_vote_failed}'
+          trigger_on:
+            - draft-published-event
+            - comment-added-contains-event:
+                comment-contains-value: 'recheck'
+            - patchset-created-event:
+                exclude-trivial-rebase: false
+                exclude-no-code-change: true
 
 # smoke should trigger on draft event
 - trigger:
@@ -781,7 +844,7 @@
           email_to: '{email_to}'
       - description-setter:
           regexp: '^\[TestRun URL\] (.*)'
-          regexp-for-failed: '"error":(.*)'
+          regexp-for-failed: '"error":(.*) \1 "AssertionError":(.*) \2'
           description: '<a href="\1">TestRail Report URL</a>'
           description-for-failed: '\1'
 

@@ -358,7 +358,11 @@
     concurrent: true
     disabled: false
     triggers:
-      - draft-patchset-gerrit-trigger
+      - default-draft-trigger:
+          gerrit_repo: '{gerrit_repo}'
+          gerrit_branch: '{gerrit_branch}'
+          skip_vote_successfull: '{skip_vote_successfull}'
+          skip_vote_failed: '{skip_vote_failed}'
     scm:
       - common-scm:
           scm_wipe_workspace: '{scm_wipe_workspace}'
@@ -469,7 +473,11 @@
     node: runner
     <<: *runner-parameters
     triggers:
-      - draft-patchset-gerrit-trigger
+      - default-draft-trigger:
+          gerrit_repo: '{gerrit_repo}'
+          gerrit_branch: '{gerrit_branch}'
+          skip_vote_successfull: '{skip_vote_successfull}'
+          skip_vote_failed: '{skip_vote_failed}'
     properties:
       - runner-property:
           build-name: '{build-name}'
@@ -503,7 +511,11 @@
     <<: *runner-parameters
     scm: []
     triggers:
-      - merge-gerrit-trigger
+      - default-merge-trigger:
+          gerrit_repo: '{gerrit_repo}'
+          gerrit_branch: '{gerrit_branch}'
+          skip_vote_successfull: '{skip_vote_successfull}'
+          skip_vote_failed: '{skip_vote_failed}'
     properties:
       - runner-property:
           build-name: '{build-name}'
