@@ -684,7 +684,7 @@
     name: '{doc-update-name}'
     node: 'runner'
     concurrent: true
-    disabled: false
+    disabled: true
     parameters:
      - doc-parameters:
           gerrit_repo: '{gerrit_repo}'
