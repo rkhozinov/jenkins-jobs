@@ -276,7 +276,7 @@
             TREP_TESTRAIL_SUITE_DESCRIPTION={testrail_suite_desc}
             TREP_TESTRAIL_PLAN={testrail_plan}
             TREP_TESTRAIL_PLAN_DESCRIPTION={testrail_plan_desc}
-            DEVOPS_SETTINGS_TEMPLATE=plugin_test/test_templates/default.yaml
+            DEVOPS_SETTINGS_TEMPLATE=${{WORKSPACE}}/plugin_test/test_templates/default.yaml
             ENV_PREFIX={fuel-release}.{plugin-name}
             OPENSTACK_RELEASE=Ubuntu
             DESTROY_ENV_AFTER=0
@@ -286,7 +286,7 @@
             VCENTER_CLUSTERS=Cluster1,Cluster2
             NSXT_PASSWORD=Qwer!1234
             VCENTER_USE=False
-            
+
       - conditional-step:
            condition-kind: shell
            condition-command: |
