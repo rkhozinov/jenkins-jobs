@@ -24,7 +24,7 @@
     pkg_job_name: '{fuel-release}.{plugin-name}.{plugin-version}.build'
     nightly_timer: 'H 21 * * *'
     regression_timer: 'H 18 * * *'
-    nightly_disabled: false
+    nightly_disabled: true
     regression_disabled: true
     force_erase: true
     recreate_venv: true
@@ -313,7 +313,7 @@
     concurrent: true
     disabled: false
     triggers:
-      - draft-patchset-gerrit-trigger:
+      - draft-gerrit-trigger:
           gerrit_repo: '{gerrit_repo}'
           gerrit_branch: '{gerrit_branch}'
           skip_vote_successfull: '{skip_vote_successfull}'
@@ -424,7 +424,7 @@
 
 - job-template:
     name: '{smoke-name}'
-    disabled: false
+    disabled: true
     description: 'The Smoke test for {fuel-release}.{plugin-name}.{plugin-version}'
     concurrent: true
     quiet-period: 5
@@ -432,7 +432,7 @@
     node: runner
     <<: *runner-parameters
     triggers:
-      - draft-patchset-gerrit-trigger:
+      - draft-gerrit-trigger:
           gerrit_repo: '{gerrit_repo}'
           gerrit_branch: '{gerrit_branch}'
           skip_vote_successfull: '{skip_vote_successfull}'
@@ -463,7 +463,7 @@
 - job-template:
     name: '{bvt-name}'
     description: 'The BVT test for {fuel-release}.{plugin-name}.{plugin-version}'
-    disabled: false
+    disabled: true
     concurrent: true
     project-type: multijob
     node: runner
