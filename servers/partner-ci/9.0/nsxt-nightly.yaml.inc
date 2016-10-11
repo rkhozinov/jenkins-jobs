@@ -6,10 +6,15 @@
      - name: '{fuel-release}.{plugin-name}.nsxt_smoke'
        current-parameters: true
        kill-phase-on: NEVER
+       predefined-parameters: |
+         TEST_GROUP=nsxt_smoke_scenarios
+         VCENTER_USE=False
        property-file: build_number
      - name: '{fuel-release}.{plugin-name}.nsxt_bvt'
        current-parameters: true
        kill-phase-on: NEVER
+       predefined-parameters: |
+         VCENTER_USE=True
        property-file: build_number
 
 #- multijob:
