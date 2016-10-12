@@ -34,7 +34,9 @@ if [[ $SNAPSHOTS_ID != *"released"* ]]; then
     echo "build.properties file is not available so a test couldn't be runned"
     exit 1
   fi
- fi
+else
+  export DVS_PLUGIN_VERSION=${PLUGIN_VERSION}
+fi
 
 [ -z $DVS_PLUGIN_VERSION ] && { echo "DVS_PLUGIN_VERSION is empty"; exit 1; }
 
