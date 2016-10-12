@@ -201,8 +201,6 @@
       - contrail_dpdk_on_vf_delete_dpdk
       - contrail_dpdk_on_vf_add_controller
       - contrail_dpdk_on_vf_delete_controller
-      - contrail_dpdk_on_vf_disable
-      - contrail_dpdk_on_vf_enable
 
     jobs:
       - '{build-name}':
