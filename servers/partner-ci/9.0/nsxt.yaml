@@ -9,7 +9,7 @@
 
 - project:
     name: 'predefined_parameters'
-    fuel-release: '9.0'
+    fuel-release: '9.1'
     plugin-version: '1.0.0'
     plugin-name: 'nsxt'
     build-name: '{fuel-release}.{plugin-name}.build'
@@ -39,8 +39,8 @@
     nfs_clean: false
     disable_ssl: true
     kvm_use: false
-    update_master: false
-    enable_proposed: false
+    update_master: true
+    enable_proposed: true
     debug: true
     build_debug: true
     publish_results: true
@@ -50,7 +50,7 @@
     test_timeout: 300
     iso_file: 'MirantisOpenStack-9.0.iso'
     iso_storage: '/storage/downloads'
-    snapshots_id: 'released'
+    snapshots_id: 'lastSuccessfulBuild'
     gerrit_repo: 'fuel-plugin-nsx-t'
     gerrit_branch: 'master'
     email_to: 'rkhozinov@mirantis.com'
@@ -287,6 +287,8 @@
             VCENTER_IP=172.16.0.254
             VCENTER_CLUSTERS=Cluster1,Cluster2
             NSXT_PASSWORD=Qwer!1234
+            SNAPSHOT_OUTPUT_FILE=extra_repos.sh
+            SNAPSHOT_ARTIFACTS_FILE=snapshots.params
 
       - conditional-step:
            condition-kind: shell
