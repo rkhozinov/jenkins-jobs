@@ -1,7 +1,7 @@
 ---
 - project:
     name: 'predefined_parameters'
-    fuel-release: '9.0'
+    fuel-release: '9.1'
     plugin-version: '1.0.0'
     plugin-name: 'manila'
     build-name: '{fuel-release}.{plugin-name}.build'
@@ -30,8 +30,8 @@
     recreate_venv: false
     disable_ssl: true
     kvm_use: false
-    update_master: false
-    enable_proposed: false
+    update_master: true
+    enable_proposed: true
     debug: true
     build_debug: true
     publish_results: true
@@ -41,7 +41,7 @@
     test_timeout: 300
     iso_file: 'MirantisOpenStack-9.0.iso'
     iso_storage: '/storage/downloads'
-    snapshots_id: 'released'
+    snapshots_id: '343'
     gerrit_repo: 'fuel-plugin-manila'
     gerrit_branch: 'master'
     email_to: 'rkhozinov@mirantis.com vnaumov@mirantis.com vrozhanskyy@mirantis.com'
@@ -256,6 +256,8 @@
             WORKSTATION_IFS=vmnet2:management,vmnet3:private,vmnet4:storage
             WORKSTATION_NODES=netapp
             PLUGIN_VERSION={plugin-version}
+            SNAPSHOT_OUTPUT_FILE=extra_repos.sh
+            SNAPSHOT_ARTIFACTS_FILE=snapshots.params
       - conditional-step:
           condition-kind: shell
           condition-command: |
@@ -319,7 +321,7 @@
     concurrent: true
     disabled: false
     triggers:
-      - draft-patchset-gerrit-trigger:
+      - draft-gerrit-trigger:
           gerrit_repo: '{gerrit_repo}'
           gerrit_branch: '{gerrit_branch}'
           skip_vote_successfull: '{skip_vote_successfull}'
@@ -440,7 +442,7 @@
     node: runner
     <<: *runner-parameters
     triggers:
-      - draft-patchset-gerrit-trigger:
+      - draft-gerrit-trigger:
           gerrit_repo: '{gerrit_repo}'
           gerrit_branch: '{gerrit_branch}'
           skip_vote_successfull: '{skip_vote_successfull}'
