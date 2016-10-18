@@ -291,7 +291,7 @@
             VCENTER_PASSWORD=Qwer!1234
             VCENTER_IP=172.16.0.254
             VCENTER_CLUSTERS=Cluster1,Cluster2
-            NSXT_PASSWORD=Qwer!1234
+            NSXV_PASSWORD=Qwer!1234
             SNAPSHOT_OUTPUT_FILE=extra_repos.sh
             SNAPSHOT_ARTIFACTS_FILE=snapshots.params
       - conditional-step:
