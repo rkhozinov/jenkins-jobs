@@ -285,6 +285,8 @@
             WORKSTATION_SNAPSHOT=nsx-t-1.0.1
             WORKSTATION_NODES=esxi1 esxi2 esxi3 vcenter nsx-edge trusty
             VCENTER_IP=administrator@vsphere.local
+            WORKSTATION_PASSWORD=VMware01
+            WORKSTATION_USERNAME=vmware
             VCENTER_PASSWORD=Qwer!1234
             VCENTER_IP=172.16.0.254
             VCENTER_CLUSTERS=Cluster1,Cluster2
@@ -345,8 +347,10 @@
                   ENABLE_MOS_UBUNTU_HOTFIX=false
                   ENABLE_MOS_UBUNTU_SECURITY=true
             - shell: |
-                [ ! -n ${{SNAPSHOTS_ID}} ] && {{ echo "SNAPSHOTS_ID is empty"; exit 1; }}
-                wget --no-check-certificate -O ${{SNAPSHOT_ARTIFACTS_FILE}} ${{SNAPSHOTS_URL/SNAPSHOTS_ID/$SNAPSHOTS_ID}}
+                [ ! -n ${{SNAPSHOTS_ID}} ] && \
+                  {{ echo "SNAPSHOTS_ID is empty"; exit 1; }}
+                wget --no-check-certificate -O ${{SNAPSHOT_ARTIFACTS_FILE}} \
+                ${{SNAPSHOTS_URL/SNAPSHOTS_ID/$SNAPSHOTS_ID}}
                 python plugin_test/fuel-qa/utils/jenkins/conv_snapshot_file.py
       - shell:
           !include-raw-escape: ../builders/common.prepare.sh
