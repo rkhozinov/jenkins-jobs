@@ -387,7 +387,7 @@
     concurrent: true
     disabled: false
     triggers:
-      - draft-patchset-gerrit-trigger:
+      - draft-gerrit-trigger:
           gerrit_repo: '{gerrit_repo}'
           gerrit_branch: '{gerrit_branch}'
           skip_vote_successfull: '{skip_vote_successfull}'
@@ -508,7 +508,7 @@
     node: runner
     <<: *runner-parameters
     triggers:
-      - draft-patchset-gerrit-trigger:
+      - draft-gerrit-trigger:
           gerrit_repo: '{gerrit_repo}'
           gerrit_branch: '{gerrit_branch}'
           skip_vote_successfull: '{skip_vote_successfull}'
