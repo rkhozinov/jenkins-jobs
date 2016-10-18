@@ -1,7 +1,7 @@
 ---
 - project:
     name: 'predefined_parameters'
-    fuel-release: '9.1'
+    fuel-release: '9.x'
     plugin-version: '3.1.0'
     plugin-name: 'vcenter'
     build-name: '{fuel-release}.dvs.build'

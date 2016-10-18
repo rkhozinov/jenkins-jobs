@@ -9,7 +9,7 @@
 
 - project:
     name: 'predefined_parameters'
-    fuel-release: '9.1'
+    fuel-release: '9.x'
     plugin-version: '1.0.0'
     plugin-name: 'nsxt'
     build-name: '{fuel-release}.{plugin-name}.build'
@@ -61,10 +61,10 @@
     skip_vote_failed: false
 
     testrail_project: "VMware NSX-T plugin"
-    testrail_suite: "[9.0][PCE] VMware NSX-t plugin v1.0.0"
+    testrail_suite: "[{fuel-release}][PCE] VMware NSX-t plugin v{fuel-release}"
     testrail_suite_desc: "Suite description"
-    testrail_milestone: "1.0.0"
-    testrail_plan: "[9.0][PCE] NSX-t plugin v1.0.0 build#${{PKG_JOB_BUILD_NUMBER}} snapshot#${{SNAPSHOTS_ID}}"
+    testrail_milestone: "{plugin-version}"
+    testrail_plan: "[{fuel-release}][PCE] NSX-t plugin v{fuel-release} build#${{PKG_JOB_BUILD_NUMBER}} snapshot#${{SNAPSHOTS_ID}}"
     testrail_plan_desc: "Test plan description"
     testrail_run: "$TREP_TESTRAIL_SUITE"
     testrail_run_desc: "Test run description"
@@ -158,15 +158,15 @@
 
       - '{fuel-release}.{plugin-name}.bvt.test'
 
-      - '{regression-name}'
-          #testrail_suite: "[9.0][PCE] VMware NSX-t plugin v1.0.0 Smoke/BVT"
-          #testrail_suite_desc: "Suite description"
-          #testrail_plan: "$TREP_TESTRAIL_SUITE #${{DATE}}"
-          #testrail_plan_desc: "Test plan description"
-          #testrail_run: "$TREP_TESTRAIL_SUITE"
-          #testrail_run_desc: "Test run description"
-          #pkg_job_name: ''
-          #multijob_build_pkg: false
+      - '{regression-name}':
+          testrail_suite: "[{fuel-release}][PCE] VMware NSXv plugin v{fuel-release} Regression"
+          testrail_suite_desc: "Suite description"
+          testrail_plan: "$TREP_TESTRAIL_SUITE #${{DATE}}"
+          testrail_plan_desc: "Test plan description"
+          testrail_run: "$TREP_TESTRAIL_SUITE"
+          testrail_run_desc: "Test run description"
+          pkg_job_name: ''
+          multijob_build_pkg: false
 
       - '{fuel-release}.{plugin-name}.regression.test'
 
@@ -376,7 +376,7 @@
           scm_submodule_disabled: '{scm_submodule_disabled}'
           gerrit_repo: '{gerrit_repo}'
           skip_vote_successfull: '{skip_vote_successfull}'
-          skip_vote_failed:     '{skip_vote_failed}'
+          skip_vote_failed: '{skip_vote_failed}'
     wrapper:
       - runner-wrapper
     parameters:

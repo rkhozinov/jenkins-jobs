@@ -1,10 +1,18 @@
 ---
+- parameter:
+    name: plugin-specific-parameters
+    parameters:
+      - string:
+          name: PLUGIN_VERSION
+      - string:
+          name: NSXV_PLUGIN_PATH
 - project:
     name: 'predefined_parameters'
-    fuel-release: '9.1'
-    plugin-version: '3.1.0'
-    plugin-name: 'dvs'
+    fuel-release: '9.x'
+    plugin-version: '3.0'
+    plugin-name: 'nsxv'
     build-name: '{fuel-release}.{plugin-name}.build'
+    build-driver-name: '{fuel-release}.{plugin-name}.build.neutron.plugin'
     flake8-name: '{fuel-release}.{plugin-name}.flake8'
     radon-name: '{fuel-release}.{plugin-name}.radon'
     shellcheck-name: '{fuel-release}.{plugin-name}.shellcheck'
@@ -14,9 +22,8 @@
     nightly-name: '{fuel-release}.{plugin-name}.nightly'
     custom-name: '{fuel-release}.{plugin-name}.custom'
     reporter-name: '{fuel-release}.{plugin-name}.reporter'
-    smoke-test-name: 'dvs_vcenter_smoke'
-    bvt-test-name: 'dvs_vcenter_bvt'
-    regression-test-name: 'dvs_regression'
+    smoke-test-name: 'nsxv_smoke'
+    bvt-test-name: 'nsxv_bvt'
     admin_node_memory: '8192'
     slave_node_memory: '8192'
     admin_node_cpu: '4'
@@ -33,7 +40,7 @@
     disable_ssl: true
     kvm_use: false
     update_master: true
-    enable_proposed: false
+    enable_proposed: true
     debug: true
     build_debug: true
     publish_results: true
@@ -44,70 +51,79 @@
     iso_file: 'MirantisOpenStack-9.0.iso'
     iso_storage: '/storage/downloads'
     snapshots_id: 'lastSuccessfulBuild'
-    gerrit_repo: 'fuel-plugin-vmware-dvs'
+    gerrit_repo: 'fuel-plugin-nsxv'
     gerrit_branch: 'master'
-    email_to: 'rkhozinov@mirantis.com vgorin@mirantis.com vnaumov@mirantis.com ibumarskov@mirantis.com'
+    email_to: 'rkhozinov@mirantis.com vnaumov@mirantis.com ibumarskov@mirantis.com'
     released_plugin_path: ''
     scm_submodule_disabled: false
-    scm_wipe_workspace: false
+    scm_wipe_workspace: true
     skip_vote_successfull: false
     skip_vote_failed: false
 
-    testrail_project: "VMware DVS plugin"
-    testrail_suite: "[{fuel-release}][PCE] VMware DVS plugin v{plugin-version}"
+    testrail_project: "VMware NSX-v plugin"
+    testrail_suite: "[{fuel-release}]][PCE] VMware NSXv plugin v3.0.0"
     testrail_suite_desc: "Suite description"
-    testrail_milestone: "{plugin-version}"
-    testrail_plan: "$TREP_TESTRAIL_SUITE build#${{PKG_JOB_BUILD_NUMBER}} snapshot#${{SNAPSHOTS_ID}}"
+    testrail_milestone: "3.0.0"
+    testrail_plan: "$TREP_TESTRAIL_SUITE build#${{PKG_JOB_BUILD_NUMBER}}"
     testrail_plan_desc: "Test plan description"
     testrail_run: "$TREP_TESTRAIL_SUITE"
     testrail_run_desc: "Test run description"
     testrail_item_case: "$TEST_GROUP"
     trep_results_source: "xunit"
-    trep_debug_level: "DEBUG"
+    trep_debug_level: "INFO"
 
     testgroup_parameter_type: string
     testgroup_value_type: default
     testgroup_value: '{testgroup}'
 
     testgroup:
-      - dvs_vcenter_networks
-      - dvs_vcenter_ping_public
-      - dvs_instances_one_group
-      - dvs_vcenter_security
-      - dvs_vcenter_tenants_isolation
-      - dvs_vcenter_same_ip
-      - dvs_vcenter_uninstall
-      - dvs_vcenter_bind_port
-      - dvs_vcenter_add_delete_controller
-      - dvs_vcenter_add_delete_nodes
-      - dvs_vcenter_reset_controller
-      - dvs_vcenter_net_template
-      - dvs_vcenter_shutdown_controller
-      - dvs_vcenter_multiple_nics
-      - dvs_update_network
-      - dvs_port_security_group
-      - dvs_attached_ports
-      - dvs_instances_batch_mix_sg
-      - dvs_different_networks
-      - dvs_remote_sg_simple
-      - dvs_remote_ip_prefix
-      - dvs_connect_default_net
-      - dvs_connect_nodefault_net
-      - dvs_ping_without_fip
-      - dvs_reboot_vcenter_1
-      - dvs_reboot_vcenter_2
-      - dvs_volume
-      - dvs_vcenter_smoke
-      - dvs_vcenter_bvt
-      - dvs_heat
-      - dvs_multiple_uplinks_active
-      - dvs_multiple_uplinks_active_standby
-      - dvs_secure
+      - nsxv_add_delete_nodes
+      - nsxv_add_delete_controller
+
+      - nsxv_ceilometer
+      - nsxv_ha_mode
+
+      - nsxv_smoke
+      - nsxv_bvt
+
+      - nsxv_floating_ip_to_public
+      - nsxv_create_and_delete_vms
+      - nsxv_smoke_add_compute
+      - nsxv_public_network_availability
+      - nsxv_connectivity_via_shared_router
+      - nsxv_connectivity_via_distributed_router
+      - nsxv_connectivity_via_exclusive_router
+      - nsxv_create_terminate_networks
+      - nsxv_public_network_to_all_nodes
+      - nsxv_kvm_deploy
+      - nsxv_specified_router_type
+      - nsxv_metadata_mgt_disabled
+      - nsxv_metadata_listen_public
+      - nsxv_metadata_listen_management
+      - nsxv_create_and_delete_secgroups
+      - nsxv_multi_vnic
+      - nsxv_install
+      - nsxv_uninstall
+      - nsxv_uninstall_negative
+      - nsxv_connectivity_diff_networks
+      - nsxv_different_tenants
+      - nsxv_same_ip_different_tenants
+      - nsxv_disable_hosts
+
+      - nsxv_ha_edges
+
+      - nsxv_ability_to_bind_port
+      - nsxv_insecure_false
+
+      - nsxv_config_ok_metadata_self_signed_certificate
 
     jobs:
       - '{build-name}':
           scm_submodule_disabled: true
           scm_wipe_workspace: true
+
+      - '{build-driver-name}'
+
       - '{flake8-name}':
           scm_submodule_disabled: true
       - '{radon-name}':
@@ -146,7 +162,7 @@
       - '{fuel-release}.{plugin-name}.bvt.test'
 
       - '{regression-name}':
-          testrail_suite: "[{fuel-release}][PCE] VMware DVS plugin v{plugin-version} Regression"
+          testrail_suite: "[{fuel-release}][PCE] VMware NSXv plugin v3.0.0 Regression"
           testrail_suite_desc: "Suite description"
           testrail_plan: "$TREP_TESTRAIL_SUITE #${{DATE}}"
           testrail_plan_desc: "Test plan description"
@@ -192,6 +208,7 @@
           kvm_use:              '{kvm_use}'
           iso_storage:          '{iso_storage}'
           snapshots_id:         '{snapshots_id}'
+      - plugin-specific-parameters
 
 # parameters for jobs created per test-group and custom test job
 - test-parameters: &test-parameters
@@ -199,21 +216,18 @@
     parameters:
       - label:
           name: node
-          default: 'dvs'
+          default: 'nsxv'
           description: "The node on which to run the job"
       - bool:
           name: BUILD_PKG
           default: '{testjob_build_pkg}'
           description: "Triggers build of pkg from $PKG_JOB_NAME (only for custom)"
       - bool:
-          name: VCENTER_CERT_BYPASS
+          name: VCENTER_USE
       - '{testgroup_parameter_type}':
           name: TEST_GROUP
           '{testgroup_value_type}': '{obj:testgroup_value}'
           description: "test-group name"
-      - string:
-          name: TEST_GROUP_CONFIG
-          default: '${{TEST_GROUP}}'
       - common-parameters:
           publish_results: '{publish_results}'
           debug:           '{debug}'
@@ -241,11 +255,12 @@
           kvm_use:              '{kvm_use}'
           iso_storage:          '{iso_storage}'
           snapshots_id:         '{snapshots_id}'
+      - plugin-specific-parameters
 
 - defaults:
     name: global
     disabled: false
-    node: dvs
+    node: nsxv
     <<: *test-parameters
     scm:
       - common-scm:
@@ -253,7 +268,7 @@
           scm_wipe_workspace: '{scm_wipe_workspace}'
           gerrit_repo: '{gerrit_repo}'
           skip_vote_successfull: '{skip_vote_successfull}'
-          skip_vote_failed: '{skip_vote_failed}'
+          skip_vote_failed:     '{skip_vote_failed}'
     wrappers:
       - test-wrapper:
           test_timeout: '{test_timeout}'
@@ -262,42 +277,23 @@
     builders:
       - inject:
           properties-content: |
-            ENV_PREFIX={fuel-release}.{plugin-name}
-            OPENSTACK_RELEASE=Ubuntu
-            NODES_COUNT=10
-            DESTROY_ENV_AFTER=0
-            ADMIN_NODE_MEMORY={admin_node_memory}
-            SLAVE_NODE_MEMORY={slave_node_memory}
-            ADMIN_NODE_CPU={admin_node_cpu}
-            SLAVE_NODE_CPU={slave_node_cpu}
             TREP_TESTRAIL_SUITE={testrail_suite}
             TREP_TESTRAIL_SUITE_DESCRIPTION={testrail_suite_desc}
             TREP_TESTRAIL_PLAN={testrail_plan}
             TREP_TESTRAIL_PLAN_DESCRIPTION={testrail_plan_desc}
+            DEVOPS_SETTINGS_TEMPLATE=${{WORKSPACE}}/plugin_test/test_templates/default.yaml
+            ENV_PREFIX={fuel-release}.{plugin-name}
+            OPENSTACK_RELEASE=Ubuntu
+            DESTROY_ENV_AFTER=0
+            WORKSTATION_SNAPSHOT=nsxv_6.2.0
+            WORKSTATION_NODES=esxi1 esxi2 esxi3 vcenter trusty
+            VCENTER_IP=administrator@vsphere.local
+            VCENTER_PASSWORD=Qwer!1234
+            VCENTER_IP=172.16.0.254
+            VCENTER_CLUSTERS=Cluster1,Cluster2
+            NSXT_PASSWORD=Qwer!1234
             SNAPSHOT_OUTPUT_FILE=extra_repos.sh
             SNAPSHOT_ARTIFACTS_FILE=snapshots.params
-            ESXI_PASSWORD=swordfish
-            ESXI_USER=root
-            ESXI_HOSTS=172.16.0.250 172.16.0.252 172.16.0.253
-            NFS_SERVER=172.16.0.1
-            NFS_SHARES=nfs nfs2
-            VSPHERE_VERSION=5.5
-            WORKSTATION_SNAPSHOT=doubledvs
-            WORKSTATION_IFS=vmnet2,vmnet3,vmnet4
-            WORKSTATION_NODES=esxi1 esxi2 esxi3 vcenter
-            VCENTER_IP=172.16.0.145
-            VCENTER_USERNAME=openstack
-            VCENTER_PASSWORD=vmware
-            VC_DATACENTER=Datacenter
-            VCENTER_DATASTORE=nfs
-            VCENTER_CLUSTERS=Cluster1,Cluster2
-            DVS_SWITCHES=Cluster1,Cluster2
-            DVS_UPLINKS=dvUplink1,dvUplink2,dvUplink3
-            VCENTER_CERT_URL=http://tpi-s2.bud.mirantis.net:5000/downloads/certs/server.pem
-            VCENTER_CERT_BYPASS=True
-            VCENTER_USE=true
-            CLEAN_IPTABLES=true
-            DISABLE_STP=true
       - conditional-step:
            condition-kind: shell
            condition-command: |
@@ -311,9 +307,9 @@
       - conditional-step:
           condition-kind: shell
           condition-command: |
-            [ ! -z ${{PKG_JOB_NAME}}         ] && \
-            [   -z ${{PKG_JOB_BUILD_NUMBER}} ] && \
-            [   -z ${{DVS_PLUGIN_PATH}}      ]
+            [ ! -z ${{PKG_JOB_NAME}}          ] && \
+            [   -z ${{PKG_JOB_BUILD_NUMBER}}  ] && \
+            [   -z ${{NSXV_PLUGIN_PATH}}      ]
           steps:
             - copyartifact:
                 project: ${{PKG_JOB_NAME}}
@@ -321,9 +317,9 @@
       - conditional-step:
           condition-kind: shell
           condition-command: |
-            [ ! -z ${{PKG_JOB_NAME}}         ] && \
-            [ ! -z ${{PKG_JOB_BUILD_NUMBER}} ] && \
-            [   -z ${{DVS_PLUGIN_PATH}}      ]
+            [ ! -z ${{PKG_JOB_NAME}}          ] && \
+            [ ! -z ${{PKG_JOB_BUILD_NUMBER}}  ] && \
+            [   -z ${{NSXV_PLUGIN_PATH}}      ]
           steps:
             - copyartifact:
                 project: ${{PKG_JOB_NAME}}
@@ -332,7 +328,9 @@
       - conditional-step:
           condition-kind: shell
           condition-command: |
-            [[ "${{UPDATE_MASTER}}" == "true" ]]
+            [[ "${{UPDATE_MASTER}}" == 'true'     ]] && \
+            [[ "${{SNAPSHOTS_ID}}" -ne 'released' ]]
+
           steps:
             - inject:
                 properties-content: |
@@ -355,9 +353,7 @@
       - shell:
           !include-raw-escape: ../builders/common.prepare.sh
       - shell:
-          !include-raw-escape: ../builders/workstation.sh
-      - shell:
-          !include-raw-escape: ../builders/dvs.test.sh
+          !include-raw-escape: ../builders/nsxv.test.sh
     publishers:
       - runner-publisher:
           properties_name: properties
@@ -392,12 +388,6 @@
       - string:
           name: GERRIT_REFSPEC
           default: 'refs/heads/{gerrit_branch}'
-      - string:
-          name: PUPPETLINT_PATH
-          default: './deployment_scripts/puppet/manifests ./deployment_scripts/puppet/modules/vmware_dvs'
-      - string:
-          name: PUPPETLINT_IGNORE
-          default: 'l2.pp'
       - bool:
           name: DEBUG
           default: '{build_debug}'
@@ -408,13 +398,58 @@
       - ansicolor:
           colormap: xterm
     builders:
+      - copyartifact:
+          project: "{build-driver-name}"
+          filter: "*.deb"
+          which-build: last-successful
       - shell:
-          !include-raw-escape: ../builders/build-plugin-dvs.sh
+          !include-raw-escape: ../builders/build-plugin-nsxv.sh
       - shell:
           !include-raw-escape: ../builders/rpm-check.sh
     publishers:
       - build-publisher:
           email_to: '{email_to}'
+
+- job-template:
+    name: '{build-driver-name}'
+    node: 'runner'
+    concurrent: false
+    disabled: false
+    scm:
+      - git:
+          url: $URL
+          branches:
+            - $BRANCH
+    wrapper:
+      - runner-wrapper
+    parameters:
+      - string:
+          name: COMMIT
+          description: "Commit from which build neutron plugin"
+      - string:
+          name: URL
+          default: 'https://github.com/openstack/vmware-nsx'
+          description: "url for git repo"
+      - string:
+          name: BRANCH
+          default: 'refs/heads/stable/mitaka'
+          description: "default branch for git repo"
+    properties:
+      - heavy-job:
+          weight: 1
+    wrappers:
+      - ansicolor:
+          colormap: xterm
+    builders:
+      - shell:
+          !include-raw-escape: ../builders/build-plugin-nsxv-neutron.sh
+      - shell: |
+          #!/bin/bash -e
+          echo $(git log -n 1 --pretty=oneline) > build.neutron_plugin_version
+          env > build.neutron.properties
+    publishers:
+      - archive:
+          artifacts: '*.deb , build.neutron_plugin_version, build.neutron.properties'
 
 - job-template:
     name: '{fuel-release}.{plugin-name}.{testgroup}'
@@ -469,8 +504,8 @@
     builders:
       - shell: |
           #!/bin/bash
-          echo "TEST_GROUP=dvs_regression" > property
-          echo "DVS_PLUGIN_PATH={released_plugin_path}" >> property
+          echo "TEST_GROUP={regression-name}" > property
+          echo "NSXV_PLUGIN_PATH={released_plugin_path}" >> property
           echo "PLUGIN_VERSION={plugin-version}" >> property
           echo "PKG_JOB_BUILD_NUMBER=released" >> property
       - multijob:
@@ -576,4 +611,4 @@
           properties_name: nightly.properties
           email_to: '{email_to}'
     builders:
-      !include: dvs-nightly.yaml.inc
+      !include: nsxv-nightly.yaml.inc
