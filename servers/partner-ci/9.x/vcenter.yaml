@@ -1,35 +1,4 @@
 ---
-- parameter:
-    name: plugin-specific-parameters
-    parameters:
-      - string:
-          name: PLUGIN_VERSION
-      - string:
-          name: MULTI_REFS
-      - string:
-          name: SPECIFIC_VAR
-          description: "use form : VAR=value"
-      - bool:
-          name: FORCE_DISABLE_UPDATES
-          default: False
-      - bool:
-          name: DRIVER_ENABLE_ACPI
-          default: False
-      - bool:
-          name: MAKE_SNAPSHOT
-          default: False
-      - bool:
-          name: FUEL_STATS_ENABLED
-          default: False
-      - bool:
-          name: ALWAYS_CREATE_DIAGNOSTIC_SNAPSHOT
-          default: False
-      - bool:
-          name: DEBUG_MODE
-          default: True
-      - bool:
-          name: GIT_CURL_VERBOSE
-          default: False
 - project:
     name: 'predefined_parameters'
     fuel-release: '9.x'
@@ -56,7 +25,7 @@
     disable_ssl: true
     kvm_use: false
     update_master: true
-    enable_proposed: true
+    enable_proposed: false
     debug: true
     publish_results: true
     multijob_build_pkg: true
@@ -76,9 +45,9 @@
     skip_vote_failed: false
 
     testrail_project: "Mirantis OpenStack"
-    testrail_suite: "[9.1][PCE] vCenter"
+    testrail_suite: "[{fuel-release}][PCE] vCenter"
     testrail_suite_desc: "Suite description"
-    testrail_milestone: "9.2"
+    testrail_milestone: "{fuel-release}"
     testrail_plan: "$TREP_TESTRAIL_MILESTONE snapshot #${{SNAPSHOTS_ID}}"
     testrail_plan_desc: "Test plan description"
     testrail_run: "$TREP_TESTRAIL_SUITE"
@@ -204,7 +173,6 @@
           kvm_use:              '{kvm_use}'
           iso_storage:          '{iso_storage}'
           snapshots_id:         '{snapshots_id}'
-      - plugin-specific-parameters
 
 # parameters for jobs created per test-group and custom test job
 - test-parameters: &test-parameters
@@ -253,7 +221,6 @@
           kvm_use:              '{kvm_use}'
           iso_storage:          '{iso_storage}'
           snapshots_id:         '{snapshots_id}'
-      - plugin-specific-parameters
 
 - defaults:
     name: global
@@ -273,14 +240,6 @@
     properties:
      - test-property
     builders:
-      - shell: |
-          if [[ "${{MULTI_REFS}}" != "none" ]]; then
-            cd ${{WORKSPACE}}
-            for refspec in ${{MULTI_REFS}}; do
-              git fetch ${{GIT_URL}} "$refspec" && git cherry-pick FETCH_HEAD || git status
-              git log --pretty=format:'%h %ad | %s%d [%an]' --graph --date=short
-            done
-          fi
       - inject:
           properties-content: |
             ENV_PREFIX={fuel-release}.{plugin-name}
@@ -304,8 +263,6 @@
             NFS_SHARES=nfs nfs2
             VSPHERE_VERSION=5.5
             WORKSTATION_SNAPSHOT=doubledvs
-            WORKSTATION_USERNAME=vmware
-            WORKSTATION_PASSWORD=VMware01
             WORKSTATION_IFS=vmnet2,vmnet3,vmnet4
             WORKSTATION_NODES=esxi1 esxi2 esxi3 vcenter
             VCENTER_IP=172.16.0.145
@@ -330,7 +287,6 @@
             VCENTER_GLANCE_CERT_BYPASS=True
             VCENTER_CERT_URL="http://tpi-s2.bud.mirantis.net:5000/downloads/certs/server.pem"
             VCENTER_CERT_BYPASS=True
-            $SPECIFIC_VAR
       - conditional-step:
           condition-kind: shell
           condition-command: |

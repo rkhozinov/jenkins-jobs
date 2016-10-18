@@ -4,12 +4,8 @@
     parameters:
       - string:
           name: PLUGIN_VERSION
-          default: '{plugin-version}'
       - string:
           name: NSXV_PLUGIN_PATH
-      - bool:
-          name: DISCONNECT_ON_FAILURE
-          default: False
 - project:
     name: 'predefined_parameters'
     fuel-release: '9.x'
@@ -35,17 +31,16 @@
     pkg_job_name: '{fuel-release}.{plugin-name}.build'
     nightly_timer: 'H 22 * * *'
     regression_timer: 'H 18 * * *'
-    nightly_disabled: true
-    regression_disabled: false
+    nightly_disabled: false
+    regression_disabled: true
     force_erase: false
     recreate_venv: false
     ws_norevert: false
-    vcenter_use: true
     nfs_clean: false
     disable_ssl: true
     kvm_use: false
     update_master: true
-    enable_proposed: false
+    enable_proposed: true
     debug: true
     build_debug: true
     publish_results: true
@@ -59,7 +54,7 @@
     gerrit_repo: 'fuel-plugin-nsxv'
     gerrit_branch: 'master'
     email_to: 'rkhozinov@mirantis.com vnaumov@mirantis.com ibumarskov@mirantis.com'
-    released_plugin_path: '/storage/nsxv/released/nsxv-3.0-3.0.1-1-43.noarch.rpm'
+    released_plugin_path: ''
     scm_submodule_disabled: false
     scm_wipe_workspace: true
     skip_vote_successfull: false
@@ -213,7 +208,6 @@
           kvm_use:              '{kvm_use}'
           iso_storage:          '{iso_storage}'
           snapshots_id:         '{snapshots_id}'
-          vcenter_use:         '{vcenter_use}'
       - plugin-specific-parameters
 
 # parameters for jobs created per test-group and custom test job
@@ -230,7 +224,6 @@
           description: "Triggers build of pkg from $PKG_JOB_NAME (only for custom)"
       - bool:
           name: VCENTER_USE
-          default: '{vcenter_use}'
       - '{testgroup_parameter_type}':
           name: TEST_GROUP
           '{testgroup_value_type}': '{obj:testgroup_value}'
@@ -262,7 +255,6 @@
           kvm_use:              '{kvm_use}'
           iso_storage:          '{iso_storage}'
           snapshots_id:         '{snapshots_id}'
-          vcenter_use:         '{vcenter_use}'
       - plugin-specific-parameters
 
 - defaults:
@@ -283,14 +275,6 @@
     properties:
       - test-property
     builders:
-      - shell: |
-          if [[ "${{MULTI_REFS}}" != "none" ]]; then
-            cd ${{WORKSPACE}}
-            for refspec in ${{MULTI_REFS}}; do
-              git fetch ${{GIT_URL}} "$refspec" && git cherry-pick FETCH_HEAD || git status
-              git log --pretty=format:'%h %ad | %s%d [%an]' --graph --date=short
-            done
-          fi
       - inject:
           properties-content: |
             TREP_TESTRAIL_SUITE={testrail_suite}
@@ -301,15 +285,13 @@
             ENV_PREFIX={fuel-release}.{plugin-name}
             OPENSTACK_RELEASE=Ubuntu
             DESTROY_ENV_AFTER=0
-            WORKSTATION_SNAPSHOT=nsxv_6.2
+            WORKSTATION_SNAPSHOT=nsxv_6.2.0
             WORKSTATION_NODES=esxi1 esxi2 esxi3 vcenter trusty
             VCENTER_IP=administrator@vsphere.local
-            WORKSTATION_PASSWORD=VMware01
-            WORKSTATION_USERNAME=vmware
             VCENTER_PASSWORD=Qwer!1234
             VCENTER_IP=172.16.0.254
             VCENTER_CLUSTERS=Cluster1,Cluster2
-            NSXV_PASSWORD=Qwer!1234
+            NSXT_PASSWORD=Qwer!1234
             SNAPSHOT_OUTPUT_FILE=extra_repos.sh
             SNAPSHOT_ARTIFACTS_FILE=snapshots.params
       - conditional-step:
@@ -346,7 +328,9 @@
       - conditional-step:
           condition-kind: shell
           condition-command: |
-            [[ "${{UPDATE_MASTER}}" == 'true'     ]]
+            [[ "${{UPDATE_MASTER}}" == 'true'     ]] && \
+            [[ "${{SNAPSHOTS_ID}}" -ne 'released' ]]
+
           steps:
             - inject:
                 properties-content: |
@@ -362,11 +346,6 @@
                   ENABLE_MOS_UBUNTU_HOLDBACK=true
                   ENABLE_MOS_UBUNTU_HOTFIX=false
                   ENABLE_MOS_UBUNTU_SECURITY=true
-      - conditional-step:
-          condition-kind: shell
-          condition-command: |
-            [[ "${{SNAPSHOTS_ID}}" != *"released"*     ]]
-          steps:
             - shell: |
                 [ ! -n ${{SNAPSHOTS_ID}} ] && {{ echo "SNAPSHOTS_ID is empty"; exit 1; }}
                 wget --no-check-certificate -O ${{SNAPSHOT_ARTIFACTS_FILE}} ${{SNAPSHOTS_URL/SNAPSHOTS_ID/$SNAPSHOTS_ID}}
@@ -525,9 +504,9 @@
     builders:
       - shell: |
           #!/bin/bash
-          echo "TEST_GROUP=nsxv_smoke" > property
+          echo "TEST_GROUP={regression-name}" > property
           echo "NSXV_PLUGIN_PATH={released_plugin_path}" >> property
-          echo "PLUGIN_VERSION=3.0.0" >> property
+          echo "PLUGIN_VERSION={plugin-version}" >> property
           echo "PKG_JOB_BUILD_NUMBER=released" >> property
       - multijob:
           name: '1st phase - regression test'
