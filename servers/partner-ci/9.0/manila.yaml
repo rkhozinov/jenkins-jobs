@@ -255,6 +255,8 @@
             WORKSTATION_SNAPSHOT=base_image
             WORKSTATION_IFS=vmnet2:management,vmnet3:private,vmnet4:storage
             WORKSTATION_NODES=netapp
+            WORKSTATION_PASSWORD=VMware01
+            WORKSTATION_USERNAME=vmware
             PLUGIN_VERSION={plugin-version}
             SNAPSHOT_OUTPUT_FILE=extra_repos.sh
             SNAPSHOT_ARTIFACTS_FILE=snapshots.params
