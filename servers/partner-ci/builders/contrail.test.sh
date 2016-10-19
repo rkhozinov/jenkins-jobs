@@ -4,8 +4,7 @@
 [[ "${DEBUG}" == "true" ]] && set -x || set +x
 
 [[ "${FORCE_VSRX_COPY}" == "true" ]] && sudo rm -rf $VSRX_TARGET_IMAGE_PATH
-[ ! -f $VSRX_TARGET_IMAGE_PATH ] && sudo cp $VSRX_ORIGINAL_IMAGE_PATH $VSRX_TARGET_IMAGE_PATH
-[ ! -f $VSRX_TARGET_IMAGE_PATH ] && { echo "ERROR: $VSRX_TARGET_IMAGE_PATH is not found"; exit 1; }
+sudo cp $VSRX_ORIGINAL_IMAGE_PATH $VSRX_TARGET_IMAGE_PATH
 
 [ $CONTRAIL_VERSION ] && echo "contrail version is $CONTRAIL_VERSION" \
                       || { echo "CONTRAIL_VERSION is not defined";  exit 1; }
