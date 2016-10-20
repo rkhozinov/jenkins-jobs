@@ -6,7 +6,8 @@
           name: PLUGIN_VERSION
       - string:
           name: NSXT_PLUGIN_PATH
-
+      - string:
+          name: MULTI_REFS
 - project:
     name: 'predefined_parameters'
     fuel-release: '9.x'
@@ -61,7 +62,7 @@
     skip_vote_failed: false
 
     testrail_project: "VMware NSX-T plugin"
-    testrail_suite: "[{fuel-release}][PCE] VMware NSX-t plugin v{plugin-version}"
+    testrail_suite: "[{fuel-release}][PCE] VMware NSX-T plugin v{plugin-version}"
     testrail_suite_desc: "Suite description"
     testrail_milestone: "{plugin-version}"
     testrail_plan: "[{fuel-release}][PCE] NSX-t plugin v{fuel-release} build#${{PKG_JOB_BUILD_NUMBER}} snapshot#${{SNAPSHOTS_ID}}"

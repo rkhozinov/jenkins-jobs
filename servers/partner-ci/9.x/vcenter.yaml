@@ -45,9 +45,9 @@
     skip_vote_failed: false
 
     testrail_project: "Mirantis OpenStack"
-    testrail_suite: "[{fuel-release}][PCE] vCenter"
+    testrail_suite: "[9.2][PCE] vCenter"
     testrail_suite_desc: "Suite description"
-    testrail_milestone: "{fuel-release}"
+    testrail_milestone: "9.2"
     testrail_plan: "$TREP_TESTRAIL_MILESTONE snapshot #${{SNAPSHOTS_ID}}"
     testrail_plan_desc: "Test plan description"
     testrail_run: "$TREP_TESTRAIL_SUITE"
