@@ -154,7 +154,7 @@ for env in $(dospy_list $ENV_NAME); do
           dos.py erase $env
         fi
       else
-        echo "there is no date-metadate, $env will be erased"
+        echo "there is no date-metadata, $env will be erased"
         dos.py erase $env
       fi
     else
