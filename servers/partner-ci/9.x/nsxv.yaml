@@ -288,6 +288,8 @@
             WORKSTATION_SNAPSHOT=nsxv_6.2.0
             WORKSTATION_NODES=esxi1 esxi2 esxi3 vcenter trusty
             VCENTER_IP=administrator@vsphere.local
+            WORKSTATION_PASSWORD=VMware01
+            WORKSTATION_USERNAME=vmware
             VCENTER_PASSWORD=Qwer!1234
             VCENTER_IP=172.16.0.254
             VCENTER_CLUSTERS=Cluster1,Cluster2
