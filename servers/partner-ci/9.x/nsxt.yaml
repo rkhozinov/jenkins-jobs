@@ -332,6 +332,8 @@
           email_to: '{email_to}'
       - test-publisher:
           reporter_name: '{reporter-name}'
+      - naginator:
+          max-failed-builds: 3
 
 - job-template:
     name: '{build-name}'
@@ -481,6 +483,8 @@
       - runner-publisher:
           properties_name: smoke.properties
           email_to: '{email_to}'
+      - naginator:
+          max-failed-builds: 3
 
 - job-template:
     name: '{bvt-name}'
@@ -518,6 +522,8 @@
       - runner-publisher:
           properties_name: bvt.properties
           email_to: '{email_to}'
+      - naginator:
+          max-failed-builds: 3
 
 - job-template:
     name: '{nightly-name}'
@@ -537,5 +543,7 @@
       - runner-publisher:
           properties_name: nightly.properties
           email_to: '{email_to}'
+      - naginator:
+          max-failed-builds: 3
     builders:
       !include: nsxt-nightly.yaml.inc
