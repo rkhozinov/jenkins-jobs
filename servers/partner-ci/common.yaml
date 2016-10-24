@@ -842,11 +842,6 @@
       - reporter-publisher:
           properties_name: reporter.properties
           email_to: '{email_to}'
-      - description-setter:
-          regexp: '^\[TestRun URL\] (.*)'
-          regexp-for-failed: '"error":(.*) \1 "AssertionError":(.*) \2'
-          description: '<a href="\1">TestRail Report URL</a>'
-          description-for-failed: '\1'
 
 - parameter:
     name: doc-parameters
