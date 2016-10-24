@@ -35,7 +35,7 @@
     nightly_disabled: false
     regression_disabled: true
     force_erase: true
-    recreate_venv: false
+    recreate_venv: true
     ws_norevert: false
     nfs_clean: false
     disable_ssl: true
@@ -78,45 +78,14 @@
     testgroup_value: '{testgroup}'
 
     testgroup:
-      - nsxt_add_delete_nodes
-      - nsxt_add_delete_controller
-
-      - nsxt_ceilometer
-      - nsxt_ha_mode
-
       - nsxt_smoke
       - nsxt_bvt
-
-      - nsxt_floating_ip_to_public
-      - nsxt_create_and_delete_vms
-      - nsxt_smoke_add_compute
-      - nsxt_public_network_availability
-      - nsxt_connectivity_via_shared_router
-      - nsxt_connectivity_via_distributed_router
-      - nsxt_connectivity_via_exclusive_router
-      - nsxt_create_terminate_networks
-      - nsxt_public_network_to_all_nodes
-      - nsxt_kvm_deploy
-      - nsxt_specified_router_type
-      - nsxt_metadata_mgt_disabled
-      - nsxt_metadata_listen_public
-      - nsxt_metadata_listen_management
-      - nsxt_create_and_delete_secgroups
-      - nsxt_multi_vnic
-      - nsxt_install
-      - nsxt_uninstall
-      - nsxt_uninstall_negative
-      - nsxt_connectivity_diff_networks
-      - nsxt_different_tenants
-      - nsxt_same_ip_different_tenants
-      - nsxt_disable_hosts
-
-      - nsxt_ha_edges
-
-      - nsxt_ability_to_bind_port
-      - nsxt_insecure_false
-
-      - nsxt_config_ok_metadata_self_signed_certificate
+      - nsxt_ceilometer
+      - nsxt_ceph
+      - nsxt_add_delete_controller
+      - nsxt_add_delete_compute_node
+      - nsxt_add_delete_compute_vmware_node
+   
 
     jobs:
       - '{build-name}':
