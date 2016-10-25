@@ -1,4 +1,9 @@
 ---
+- parameter:
+    name: plugin-specific-parameters
+    parameters:
+      - string:
+          name: PLUGIN_VERSION
 - project:
     name: 'predefined_parameters'
     fuel-release: '9.x'
@@ -192,6 +197,7 @@
           kvm_use:              '{kvm_use}'
           iso_storage:          '{iso_storage}'
           snapshots_id:         '{snapshots_id}'
+      - plugin-specific-parameters
 
 # parameters for jobs created per test-group and custom test job
 - test-parameters: &test-parameters
@@ -241,6 +247,7 @@
           kvm_use:              '{kvm_use}'
           iso_storage:          '{iso_storage}'
           snapshots_id:         '{snapshots_id}'
+      - plugin-specific-parameters
 
 - defaults:
     name: global
@@ -335,6 +342,8 @@
           condition-kind: shell
           condition-command: |
             [[ "${{UPDATE_MASTER}}" == "true" ]]
+            [[ "${{SNAPSHOTS_ID}}" -ne 'released' ]]
+
           steps:
             - inject:
                 properties-content: |
@@ -351,8 +360,10 @@
                   ENABLE_MOS_UBUNTU_HOTFIX=false
                   ENABLE_MOS_UBUNTU_SECURITY=true
             - shell: |
-                [ ! -n ${{SNAPSHOTS_ID}} ] && {{ echo "SNAPSHOTS_ID is empty"; exit 1; }}
-                wget --no-check-certificate -O ${{SNAPSHOT_ARTIFACTS_FILE}} ${{SNAPSHOTS_URL/SNAPSHOTS_ID/$SNAPSHOTS_ID}}
+                [ ! -n ${{SNAPSHOTS_ID}} ] && \
+                  {{ echo "SNAPSHOTS_ID is empty"; exit 1; }}
+                wget --no-check-certificate -O ${{SNAPSHOT_ARTIFACTS_FILE}} \
+                ${{SNAPSHOTS_URL/SNAPSHOTS_ID/$SNAPSHOTS_ID}}
                 python plugin_test/fuel-qa/utils/jenkins/conv_snapshot_file.py
       - shell:
           !include-raw-escape: ../builders/common.prepare.sh
