@@ -85,7 +85,8 @@
       - nsxt_add_delete_controller
       - nsxt_add_delete_compute_node
       - nsxt_add_delete_compute_vmware_node
-   
+      - nsxt_uninstall_negative
+      - nsxt_shutdown_controller
 
     jobs:
       - '{build-name}':

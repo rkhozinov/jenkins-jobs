@@ -51,3 +51,15 @@
        predefined-parameters: |
          VCENTER_USE=True
        property-file: build_number
+     - name: '{fuel-release}.{plugin-name}.nsxt_uninstall_negative'
+       current-parameters: true
+       kill-phase-on: NEVER
+       predefined-parameters: |
+         VCENTER_USE=False
+       property-file: build_number
+     - name: '{fuel-release}.{plugin-name}.nsxt_shutdown_controller'
+       current-parameters: true
+       kill-phase-on: NEVER
+       predefined-parameters: |
+         VCENTER_USE=True
+       property-file: build_number
