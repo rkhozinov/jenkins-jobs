@@ -6,18 +6,20 @@ export ISO_PATH="${ISO_STORAGE}/${ISO_FILE}"
 
 export FUEL_RELEASE=$(echo $ISO_FILE | cut -d- -f2 | tr -d '.iso')
 
-if [[ "${UPDATE_MASTER}" == "true" ]] && [[ ${FUEL_RELEASE} != *"80"* ]]; then
-  if [ -f $SNAPSHOT_OUTPUT_FILE ]; then
-    . $SNAPSHOT_OUTPUT_FILE
-    export EXTRA_RPM_REPOS
-    export UPDATE_FUEL_MIRROR
-    export EXTRA_DEB_REPOS
+if [ "${SNAPSHOTS_ID}" != "released" ]; then
+  if [[ "${UPDATE_MASTER}" == "true" ]] && [[ ${FUEL_RELEASE} != *"80"* ]]; then
+    if [ -f $SNAPSHOT_OUTPUT_FILE ]; then
+      . $SNAPSHOT_OUTPUT_FILE
+      export EXTRA_RPM_REPOS
+      export UPDATE_FUEL_MIRROR
+      export EXTRA_DEB_REPOS
+    else
+      echo "SNAPSHOT_OUTPUT_FILE is empty or doesn't exist"
+      exit 1
+    fi
   else
-    echo "SNAPSHOT_OUTPUT_FILE is empty or doesn't exist"
-    exit 1
+    export SNAPSHOTS_ID="released"
   fi
-else
-  export SNAPSHOTS_ID="released"
 fi
 
 if [[ $SNAPSHOTS_ID == *"lastSuccessfulBuild"* ]]; then
