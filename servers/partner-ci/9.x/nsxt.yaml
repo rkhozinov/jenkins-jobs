@@ -30,7 +30,7 @@
     admin_node_cpu: '4'
     slave_node_cpu: '4'
     pkg_job_name: '{fuel-release}.{plugin-name}.build'
-    nightly_timer: 'H 22 * * *'
+    nightly_timer: 'H 18 * * *'
     regression_timer: 'H 18 * * *'
     nightly_disabled: false
     regression_disabled: true
