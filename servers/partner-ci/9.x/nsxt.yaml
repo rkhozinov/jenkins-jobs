@@ -106,7 +106,10 @@
 
       - '{custom-name}.qa':
           publish_results: false
-
+          parameters:
+            - bool:
+                name: VCENTER_USE
+                default: true
       - '{custom-name}.dev':
           publish_results: false
           testgroup_parameter_type: choice
