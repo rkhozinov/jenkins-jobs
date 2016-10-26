@@ -97,9 +97,16 @@ function prepare_venv {
 }
 
 function smart_erase {
+  virsh list --all
   env=$1
   vms=$(virsh list --all --name | grep $env )
   for vm in $vms; do
+    if virsh destroy $vm; then
+      echo "domains destroyed succesfully"
+    else
+      ref=$?
+      echo "there are some troubles with virsh arch, please check ( exit code = $ref )"
+    fi
     virsh undefine --remove-all-storage --snapshots-metadata --wipe-storage $vm
   done
   dos.py sync
@@ -117,6 +124,10 @@ function dospy_list {
 }
 
 ##################################################################
+wait_ws() {
+  while [ $(pgrep vmrun | wc -l) -ne 0 ] ; do sleep 5; done
+}
+
 [[ "${RECREATE_VENV}" == "true" ]] && recreate_venv
 
 get_venv_requirements
@@ -127,6 +138,22 @@ get_venv_requirements
 source "$VENV_PATH/bin/activate"
 
 [ -z $VIRTUAL_ENV ] && { echo "VIRTUAL_ENV is empty"; exit 1; }
+
+set +x
+
+cmd="vmrun -T ws-shared -h https://localhost:443/sdk \
+-u ${WORKSTATION_USERNAME} -p ${WORKSTATION_PASSWORD}"
+nodes=${WORKSTATION_NODES}
+snapshot="${WORKSTATION_SNAPSHOT}"
+
+# start from saved state
+for node in $nodes; do
+  echo "Stopping $node"
+  $cmd stop "[standard] $node/$node.vmx" || \
+    echo "Error: $node failed to stop" &
+done
+wait_ws
+set -x
 
 if [[ "${FORCE_ERASE}" == "true" ]]; then
   for env in $(dospy_list); do
@@ -172,9 +199,11 @@ for env in $(dospy_list $ENV_NAME); do
 done
 
 for env in $(dospy_list); do
-  if [[ $env  != $USEFUL_ENV ]] && [[ $env  != *"released"* ]]; then
-    smart_erase $env
-  fi
+  [[ $env  != $USEFUL_ENV ]] && [[ $env  != *"released"* ]] && smart_erase $env
 done
-  ##########################################################
+
+##########################################################
 for env in $(dospy_list); do [[ $env != $USEFUL_ENV ]] && smart_erase $env; done
+
+[[ "${DEBUG}" == "true" ]] && virsh list --all
+sudo cp /var/log/libvirt/libvirtd.log ${WORKSPACE}/libvirtd_before_test.log

@@ -166,9 +166,6 @@
           artifacts: '**.log'
           allow-empty: true
       - archive:
-          artifacts: '/var/log/libvirt/**.log'
-          allow-empty: true
-      - archive:
           artifacts: '**.tar.xz'
           allow-empty: true
       - archive:
