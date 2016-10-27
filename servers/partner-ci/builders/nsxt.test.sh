@@ -103,3 +103,5 @@ source "${VENV_PATH}/bin/activate"
 sudo service libvirt-bin restart
 
 ./plugin_test/utils/jenkins/system_tests.sh -t test ${systest_parameters} -i ${ISO_PATH} -j ${JOB_NAME} -o --group=${TEST_GROUP} 2>&1
+sudo cp /var/log/libvirt/libvirtd.log ${WORKSPACE}/libvirtd_after_test.log
+sudo chown jenkins:jenkins ${WORKSPACE}/libvirtd_after_test.log
