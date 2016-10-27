@@ -96,6 +96,14 @@ function prepare_venv {
     deactivate
 }
 
+function smart_erase {
+  env=$1
+  vms=$(virsh list --all --name | grep $env )
+  for vm in $vms; do
+    virsh undefine --remove-all-storage --snapshots-metadata --wipe-storage $vm
+  done
+  dos.py sync
+}
 
 #################################################################
 ## Gets dospy environments
@@ -122,7 +130,7 @@ source "$VENV_PATH/bin/activate"
 
 if [[ "${FORCE_ERASE}" == "true" ]]; then
   for env in $(dospy_list); do
-    dos.py erase $env
+    smart_erase $env
   done
 else
   # determine free space before run the cleaner
@@ -131,7 +139,7 @@ else
   if (( $free_space < $REQUIRED_FREE_SPACE )); then
     for env in $(dospy_list $ENV_NAME); do
       if [[ $env  != *"released"* ]]; then
-        dos.py erase $env
+        smart_erase $env
       fi
     done
   fi
@@ -151,11 +159,11 @@ for env in $(dospy_list $ENV_NAME); do
           USEFUL_ENV=$env
         else
           echo "$env is not suitable for test, it will be erased"
-          dos.py erase $env
+          smart_erase $env
         fi
       else
         echo "there is no date-metadata, $env will be erased"
-        dos.py erase $env
+        smart_erase $env
       fi
     else
       echo "there're no snapshots to reuse"
@@ -165,13 +173,8 @@ done
 
 for env in $(dospy_list); do
   if [[ $env  != $USEFUL_ENV ]] && [[ $env  != *"released"* ]]; then
-    dos.py erase $env
+    smart_erase $env
   fi
 done
-  ###############################################################
-  # poweroff all envs
-for env in $(dospy_list); do
-  if [[ $env  != $USEFUL_ENV ]]; then
-  dos.py destroy $env
-  fi
-done
+  ##########################################################
+for env in $(dospy_list); do [[ $env != $USEFUL_ENV ]] && smart_erase $env; done
