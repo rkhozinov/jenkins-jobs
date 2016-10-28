@@ -207,3 +207,4 @@ for env in $(dospy_list); do [[ $env != $USEFUL_ENV ]] && smart_erase $env; done
 
 [[ "${DEBUG}" == "true" ]] && virsh list --all
 sudo cp /var/log/libvirt/libvirtd.log ${WORKSPACE}/libvirtd_before_test.log
+sudo chown jenkins:jenkins ${WORKSPACE}/libvirtd_before_test.log
