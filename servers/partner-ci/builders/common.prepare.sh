@@ -85,10 +85,8 @@ function get_venv_requirements {
   wget --no-check-certificate -O requirements-devops-source.txt $REQS_PATH_DEVOPS
   export REQS_PATH_DEVOPS="$(pwd)/requirements-devops-source.txt"
   export SPEC_REQS_PATH="${WORKSPACE}/plugin_test/requirement.txt"
-  #if [[ "${TRY_NEWEST_DEVOPS}" == "true" ]]; then
-  #  sed -i 's/2.9.23/3.0.3/g' $REQS_PATH_DEVOPS
-  #  echo "psycopg2==2.6.2" >> $REQS_PATH
-  #fi
+  [[ "${TRY_NEWEST_DEVOPS}" == "true" ]] && sed -i 's/2.9.23/3.0.3/g' $REQS_PATH_DEVOPS
+
 }
 
 function prepare_venv {
@@ -98,7 +96,12 @@ function prepare_venv {
     pip install -r "${REQS_PATH}" --upgrade > $redirected_output
     pip install -r "${REQS_PATH_DEVOPS}" --upgrade > $redirected_output
     [ -e $SPEC_REQS_PATH ] && pip install -r "${SPEC_REQS_PATH}" --upgrade > $redirected_output
-    django-admin.py syncdb --settings=devops.settings --noinput
+    if [[ "${TRY_NEWEST_DEVOPS}" == "false" ]]; then
+      django-admin.py syncdb --settings=devops.settings --noinput
+    else
+      sudo -u postgres dropdb fuel_devops
+      sudo -u postgres createdb fuel_devops -O fuel_devops
+    fi
     django-admin.py migrate devops --settings=devops.settings --noinput
     deactivate
 }
@@ -107,9 +110,20 @@ function smart_erase {
   virsh list --all
   env=$1
   vms=$(virsh list --all --name | grep $env )
+  networks="_admin _management _private _public _storage"
+  virsh net-list --all
+  for net in $networks; do
+    if virsh net-destroy "$env$net"; then
+      echo "network destroyed succesfully"
+    else
+      ref=$?
+      echo "there are some troubles with virsh-networks arch, please check ( exit code = $ref )"
+    fi
+    virsh net-undefine "$env$net"
+  done
   for vm in $vms; do
     if virsh destroy $vm; then
-      echo "domains destroyed succesfully"
+      echo "domain destroyed succesfully"
     else
       ref=$?
       echo "there are some troubles with virsh arch, please check ( exit code = $ref )"

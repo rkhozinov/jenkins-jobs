@@ -8,6 +8,12 @@
           name: NSXT_PLUGIN_PATH
       - string:
           name: MULTI_REFS
+      - string:
+          name: DEVOPS_SETTINGS_TEMPLATE
+          default: '${{WORKSPACE}}/plugin_test/test_templates/default.yaml'
+      - string:
+          name: TRY_NEWEST_DEVOPS
+          default: False
 - project:
     name: 'predefined_parameters'
     fuel-release: '9.x'
@@ -255,7 +261,6 @@
             TREP_TESTRAIL_SUITE_DESCRIPTION={testrail_suite_desc}
             TREP_TESTRAIL_PLAN={testrail_plan}
             TREP_TESTRAIL_PLAN_DESCRIPTION={testrail_plan_desc}
-            DEVOPS_SETTINGS_TEMPLATE=${{WORKSPACE}}/plugin_test/test_templates/default.yaml
             ENV_PREFIX={fuel-release}.{plugin-name}
             OPENSTACK_RELEASE=Ubuntu
             DESTROY_ENV_AFTER=0
