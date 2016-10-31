@@ -11,7 +11,7 @@
       - string:
           name: DEVOPS_SETTINGS_TEMPLATE
           default: '$WORKSPACE/plugin_test/test_templates/default.yaml'
-      - string:
+      - bool:
           name: TRY_NEWEST_DEVOPS
           default: False
 - project:

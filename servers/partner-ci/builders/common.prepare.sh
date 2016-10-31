@@ -85,7 +85,7 @@ function get_venv_requirements {
   wget --no-check-certificate -O requirements-devops-source.txt $REQS_PATH_DEVOPS
   export REQS_PATH_DEVOPS="$(pwd)/requirements-devops-source.txt"
   export SPEC_REQS_PATH="${WORKSPACE}/plugin_test/requirement.txt"
-  [[ "${TRY_NEWEST_DEVOPS}" == "true" ]] && sed -i 's/2.9.23/3.0.3/g' $REQS_PATH_DEVOPS
+  [[ "${TRY_NEWEST_DEVOPS}" == "true" ]] && sed -i 's/2.9.23/3.0.3/g' $REQS_PATH_DEVOPS || echo "default devops settings"
 
 }
 
@@ -111,16 +111,16 @@ function smart_erase {
   virsh list --all
   env=$1
   vms=$(virsh list --all --name | grep $env )
-  networks="_admin _management _private _public _storage"
+  networks=$(virsh net-list | tail -n +3 | cut -d' ' -f2-2 + grep $ENV_NAME)
   virsh net-list --all
   for net in $networks; do
-    if virsh net-destroy "$env$net"; then
+    if virsh net-destroy $net; then
       echo "network destroyed succesfully"
     else
       ref=$?
       echo "there are some troubles with virsh-networks arch, please check ( exit code = $ref )"
     fi
-    virsh net-undefine "$env$net"
+    virsh net-undefine $net
   done
   for vm in $vms; do
     if virsh destroy $vm; then
