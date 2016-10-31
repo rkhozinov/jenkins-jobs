@@ -130,8 +130,11 @@
           publish_results: false
           multijob_build_pkg: true
 
-      - '{fuel-release}.{plugin-name}.bvt.test'
-
+      - '{fuel-release}.{plugin-name}.bvt.test':
+          parameters:
+            - bool:
+                name: VCENTER_USE
+                default: true
       - '{regression-name}':
           testrail_suite: "[{fuel-release}][PCE] VMware NSXv plugin v{fuel-release} Regression"
           testrail_suite_desc: "Suite description"
