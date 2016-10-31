@@ -82,8 +82,10 @@ function get_venv_requirements {
   wget --no-check-certificate -O requirements-devops-source.txt $REQS_PATH_DEVOPS
   export REQS_PATH_DEVOPS="$(pwd)/requirements-devops-source.txt"
   export SPEC_REQS_PATH="${WORKSPACE}/plugin_test/requirement.txt"
-  [[ "${TRY_NEWEST_DEVOPS}" == "true" ]] && sed -i 's/2.9.23/3.0.3/g' $REQS_PATH_DEVOPS || echo "default devops settings"
-	  
+  if [[ "${TRY_NEWEST_DEVOPS}" == "true" ]]; then
+    sed -i 's/2.9.23/3.0.3/g' $REQS_PATH_DEVOPS
+    echo "psycopg2==2.6.2" >> $REQS_PATH
+  fi
 }
 
 function prepare_venv {
