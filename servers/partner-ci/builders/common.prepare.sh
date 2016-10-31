@@ -95,11 +95,12 @@ function prepare_venv {
     [ -e $SPEC_REQS_PATH ] && pip install -r "${SPEC_REQS_PATH}" --upgrade > $redirected_output
     if [[ "${TRY_NEWEST_DEVOPS}" == "false" ]]; then
       django-admin.py syncdb --settings=devops.settings --noinput
+      django-admin.py migrate devops --settings=devops.settings --noinput
     else
       sudo -u postgres dropdb fuel_devops
       sudo -u postgres createdb fuel_devops -O fuel_devops
+      dos-manage.py migrate
     fi
-    django-admin.py migrate devops --settings=devops.settings --noinput
     deactivate
 }
 
