@@ -43,6 +43,7 @@
     force_erase: true
     recreate_venv: true
     ws_norevert: false
+    vcenter_use: false
     nfs_clean: false
     disable_ssl: true
     kvm_use: false
@@ -115,10 +116,8 @@
 
       - '{custom-name}.qa':
           publish_results: false
-          parameters:
-            - bool:
-                name: VCENTER_USE
-                default: true
+          vcenter_use: true
+                  
       - '{custom-name}.dev':
           publish_results: false
           testgroup_parameter_type: choice
@@ -140,10 +139,8 @@
           multijob_build_pkg: true
 
       - '{fuel-release}.{plugin-name}.bvt.test':
-          parameters:
-            - bool:
-                name: VCENTER_USE
-                default: true
+          vcenter_use: true
+
       - '{regression-name}':
           testrail_suite: "[{fuel-release}][PCE] VMware NSXv plugin v{fuel-release} Regression"
           testrail_suite_desc: "Suite description"
@@ -191,6 +188,7 @@
           kvm_use:              '{kvm_use}'
           iso_storage:          '{iso_storage}'
           snapshots_id:         '{snapshots_id}'
+          vcenter_use:         '{vcenter_use}'
       - plugin-specific-parameters
 
 # parameters for jobs created per test-group and custom test job
@@ -207,6 +205,7 @@
           description: "Triggers build of pkg from $PKG_JOB_NAME (only for custom)"
       - bool:
           name: VCENTER_USE
+          default: '{vcenter_use}'
       - '{testgroup_parameter_type}':
           name: TEST_GROUP
           '{testgroup_value_type}': '{obj:testgroup_value}'
@@ -238,6 +237,7 @@
           kvm_use:              '{kvm_use}'
           iso_storage:          '{iso_storage}'
           snapshots_id:         '{snapshots_id}'
+          vcenter_use:         '{vcenter_use}'
       - plugin-specific-parameters
 
 - defaults:
