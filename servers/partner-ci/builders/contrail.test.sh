@@ -10,10 +10,49 @@ sudo cp $VSRX_ORIGINAL_IMAGE_PATH $VSRX_TARGET_IMAGE_PATH
                       || { echo "CONTRAIL_VERSION is not defined";  exit 1; }
 
 export ISO_PATH="${ISO_STORAGE}/${ISO_FILE}"
+[ -z $ISO_PATH  ] && { echo "ISO_PATH is empty or doesn't exist"; exit 1; }
+
+export FUEL_RELEASE=$(echo $ISO_FILE | cut -d- -f2 | tr -d '.iso')
+
+if [ "${SNAPSHOTS_ID}" != "released" ]; then
+  if [[ "${UPDATE_MASTER}" == "true" ]] && [[ ${FUEL_RELEASE} != *"80"* ]]; then
+    if [ -f $SNAPSHOT_OUTPUT_FILE ]; then
+      . $SNAPSHOT_OUTPUT_FILE
+      export EXTRA_RPM_REPOS
+      export UPDATE_FUEL_MIRROR
+      export EXTRA_DEB_REPOS
+    else
+      echo "SNAPSHOT_OUTPUT_FILE is empty or doesn't exist"
+      exit 1
+    fi
+  else
+    export SNAPSHOTS_ID="released"
+  fi
+fi
+
+if [[ $SNAPSHOTS_ID == *"lastSuccessfulBuild"* ]]; then
+  export SNAPSHOTS_ID=$(cat snapshots.params | grep -Po '#\K[^ ]+')
+fi
+
+[ -z "${SNAPSHOTS_ID}" ] && { echo SNAPSHOTS_ID is empty; exit 1; }
+
+
+if [ -z "${PKG_JOB_BUILD_NUMBER}" ]; then
+    if [ -f build.properties ]; then
+        export PKG_JOB_BUILD_NUMBER=$(grep "BUILD_NUMBER" < build.properties | cut -d= -f2 )
+    else
+        echo "build.properties file is not available so the results couldn't be publihsed"
+        echo "$PKG_JOB_BUILD_NUMBER is empty, but it's needed for reporter. Exit."
+        exit 1
+    fi
+fi
+
+#remove old logs and test data
+[ -f nosetest.xml ] && sudo rm -f nosetests.xml
+sudo rm -rf logs/*
 
 if [[ $ISO_FILE == *"Mirantis"* ]]; then
   export FUEL_RELEASE=$(echo $ISO_FILE | cut -d- -f2 | tr -d '.iso')
-  [[ "${UPDATE_MASTER}" -eq "true" ]] && export ISO_VERSION='released' || export ISO_VERSION='mos'
 fi
 
 export ENV_NAME="${ENV_PREFIX}.${ISO_VERSION}"
@@ -107,9 +146,8 @@ source $VENV_PATH/bin/activate
 export PYTHONPATH="${PYTHONPATH:+${PYTHONPATH}:}${WORKSPACE}"
 echo ${PYTHONPATH}
 python plugin_test/run_tests.py -q --nologcapture --with-xunit --group=${TEST_GROUP} &
-
 export SYSTEST_PID=$!
-
+	
 if [[ $VCENTER_USE == "true"  ]]; then
   #Wait before environment is created
   while [ true ]; do

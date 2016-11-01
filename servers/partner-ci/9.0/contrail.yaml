@@ -67,10 +67,10 @@
     nightly_timer: 'H 21 * * *'
     full_timer: 'H 21 * * *'
     regression_timer: 'H 18 * * *'
-    nightly_disabled: false
-    full_disabled: false
+    nightly_disabled: true
+    full_disabled: true
     baremetal_disabled: false
-    regression_disabled: true
+    regression_disabled: false
     force_erase: true
     force_vsrx_copy: false
     recreate_venv: true
@@ -90,7 +90,7 @@
     test_timeout: 300
     iso_file: 'MirantisOpenStack-9.0.iso'
     iso_storage: '/storage/downloads'
-    snapshots_id: '343'
+    snapshots_id: 'lastSuccessfulBuild'
     gerrit_repo: 'fuel-plugin-contrail'
     gerrit_branch: 'master'
     email_to: 'rkhozinov@mirantis.com okosse@mirantis.com otsvigun@mirantis.com'
@@ -266,6 +266,21 @@
 
       - '{fuel-release}.{plugin-name}.{plugin-version}.bvt.test.juniper'
 
+      - '{regression-name}':
+          testrail_suite: "[9.x][PCE] Fuel plugin contrail v5.0 regression"
+          testrail_suite_desc: "Suite description"
+          testrail_milestone: "Fuel Contrail Plugin v5.0"
+          testrail_plan: "$TREP_TESTRAIL_SUITE iso #${{ISO_VERSION}} pkg#${{JUNIPER_PKG_VERSION}} build#${{PKG_JOB_BUILD_NUMBER}}"
+          testrail_plan_desc: "Test plan description"
+          testrail_run: "$TREP_TESTRAIL_SUITE"
+          testrail_run_desc: "Test run description"
+          pkg_job_name: ''
+          iso_job_name: ''
+          multijob_build_pkg: false
+
+      - '{fuel-release}.{plugin-name}.{plugin-version}.regression.test.juniper'
+
+# parameters for smoke, bvt and nightly multijobs
 - runner-parameters: &runner-parameters
     name: 'runner-parameters'
     parameters:
@@ -298,7 +313,7 @@
           enable_proposed:      '{enable_proposed}'
           kvm_use:              '{kvm_use}'
           update_master:        '{update_master}'
-
+          snapshots_id:         '{snapshots_id}'
       - plugin-specific-parameters:
           bonding:              '{bonding}'
           plugin-version:       '{plugin-version}'
@@ -336,9 +351,9 @@
           skip_vote_successfull: '{skip_vote_successfull}'
           skip_vote_failed:     '{skip_vote_failed}'
           kvm_use:              '{kvm_use}'
-          update_master:        '{update_master}'
+          iso_storage:          '{iso_storage}'
           snapshots_id:         '{snapshots_id}'
-
+          update_master:        '{update_master}'
       - plugin-specific-parameters:
           bonding:              '{bonding}'
           plugin-version:       '{plugin-version}'
@@ -346,7 +361,6 @@
           vsrx_original_image_path: '{vsrx_original_image_path}'
           vsrx_target_image_path:   '{vsrx_target_image_path}'
           vsrx_template_path:       '{vsrx_template_path}'
-          iso_storage:           '{iso_storage}'
 
 
 # parameters for jobs created per test-group and custom test job
@@ -390,10 +404,10 @@
           skip_vote_successfull: '{skip_vote_successfull}'
           skip_vote_failed:      '{skip_vote_failed}'
           enable_proposed:      '{enable_proposed}'
-          kvm_use:              '{kvm_use}'
           update_master:        '{update_master}'
+          kvm_use:              '{kvm_use}'
+          iso_storage:          '{iso_storage}'
           snapshots_id:         '{snapshots_id}'
-
       - plugin-specific-parameters:
           bonding:                  '{bonding}'
           plugin-version:           '{plugin-version}'
@@ -401,7 +415,6 @@
           vsrx_original_image_path: '{vsrx_original_image_path}'
           vsrx_target_image_path:   '{vsrx_target_image_path}'
           vsrx_template_path:       '{vsrx_template_path}'
-          iso_storage:              '{iso_storage}'
 
 - defaults:
     name: global
@@ -508,6 +521,32 @@
                 project: ${{PKG_JOB_NAME}}
                 which-build: specific-build
                 build-number: ${{PKG_JOB_BUILD_NUMBER}}
+      - conditional-step:
+          condition-kind: shell
+          condition-command: |
+            [[ "${{UPDATE_MASTER}}" == "true" ]] &&
+            [[ "${{SNAPSHOTS_ID}}" != *"released"* ]]
+          steps:
+            - inject:
+                properties-content: |
+                  ENABLE_MOS_CENTOS_OS=true
+                  ENABLE_MOS_CENTOS_PROPOSED=true
+                  ENABLE_MOS_CENTOS_UPDATES=true
+                  ENABLE_MOS_CENTOS_HOLDBACK=true
+                  ENABLE_MOS_CENTOS_HOTFIX=false
+                  ENABLE_MOS_CENTOS_SECURITY=true
+                  ENABLE_MOS_UBUNTU_OS=true
+                  ENABLE_MOS_UBUNTU_PROPOSED=true
+                  ENABLE_MOS_UBUNTU_UPDATES=true
+                  ENABLE_MOS_UBUNTU_HOLDBACK=true
+                  ENABLE_MOS_UBUNTU_HOTFIX=false
+                  ENABLE_MOS_UBUNTU_SECURITY=true
+            - shell: |
+                [ ! -n ${{SNAPSHOTS_ID}} ] && \
+                  {{ echo "SNAPSHOTS_ID is empty"; exit 1; }}
+                wget --no-check-certificate -O ${{SNAPSHOT_ARTIFACTS_FILE}} \
+                ${{SNAPSHOTS_URL/SNAPSHOTS_ID/$SNAPSHOTS_ID}}
+                python plugin_test/fuel-qa/utils/jenkins/conv_snapshot_file.py
       - shell:
           !include-raw-escape: ../builders/common.prepare.sh
       - conditional-step:
@@ -557,8 +596,7 @@
           name: DEBUG
           default: '{build_debug}'
     properties:
-      - heavy-job:
-          weight: 1
+      - test-property
     wrappers:
       - ansicolor:
           colormap: xterm
@@ -629,6 +667,25 @@
           echo "CONTRAIL_PLUGIN_PATH={released_plugin_path}" >> property
           echo "PLUGIN_VERSION={plugin-version}" >> property
           echo "PKG_JOB_BUILD_NUMBER=released" >> property
+      #      - conditional-step:
+      #          condition-kind: file-exists
+      #          condition-filename: "build.properties"
+      #          steps:
+      #            - shell: |
+      #                #!/bin/bash
+      #                build_number=$(grep "^BUILD_NUMBER=" < build.properties | cut -d= -f2)
+      #                echo "PKG_JOB_BUILD_NUMBER=$build_number" > build_number
+      #      - conditional-step:
+      #          condition-kind: shell
+      #          condition-command: |
+      #            [[ "${{UPDATE_MASTER}}" == "true" ]] && [[ "${{SNAPSHOTS_ID}}" != *"released"* ]]
+      #          steps:
+      #            - shell: |
+      #                #!/bin/bash
+      #                SNAPSHOTS_ID=${SNAPSHOTS_ID:=lastSuccessfulBuild}
+      #                wget --no-check-certificate -O snapshots.params ${SNAPSHOTS_URL/SNAPSHOTS_ID/$SNAPSHOTS_ID}
+      #                snapshots_id=$(grep "^CUSTOM_VERSION=" < snapshots.params | cut -d= -f2 | cut -d'#' -f2)
+      #                echo "SNAPSHOTS_ID=${snapshots_id}" >> build_number
       - multijob:
           name: '1st phase - regression test'
           condition: COMPLETED

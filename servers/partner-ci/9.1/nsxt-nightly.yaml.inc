@@ -63,3 +63,21 @@
        predefined-parameters: |
          VCENTER_USE=True
        property-file: build_number
+     - name: '{fuel-release}.{plugin-name}.nsxt_setup_system'
+       current-parameters: true
+       kill-phase-on: NEVER
+       predefined-parameters: |
+         VCENTER_USE=True
+       property-file: build_number
+     - name: '{fuel-release}.{plugin-name}.nsxt_manage_ports'
+       current-parameters: true
+       kill-phase-on: NEVER
+       predefined-parameters: |
+         VCENTER_USE=True
+       property-file: build_number
+     - name: '{fuel-release}.{plugin-name}.nsxt_hot'
+       current-parameters: true
+       kill-phase-on: NEVER
+       predefined-parameters: |
+         VCENTER_USE=True
+       property-file: build_number

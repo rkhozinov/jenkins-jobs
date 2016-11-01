@@ -14,6 +14,9 @@
       - bool:
           name: TRY_NEWEST_DEVOPS
           default: False
+      - string:
+          name: WORKSTATION_SNAPSHOT
+          default: 'nsx-t-1.0.1'
 - project:
     name: 'predefined_parameters'
     fuel-release: '9.x'
@@ -41,8 +44,10 @@
     nightly_disabled: false
     regression_disabled: true
     force_erase: true
+    force_reuse: false
     recreate_venv: true
     ws_norevert: false
+    vcenter_use: false
     nfs_clean: false
     disable_ssl: true
     kvm_use: false
@@ -93,6 +98,9 @@
       - nsxt_add_delete_compute_vmware_node
       - nsxt_uninstall_negative
       - nsxt_shutdown_controller
+      - nsxt_setup_system
+      - nsxt_manage_ports
+      - nsxt_hot
 
     jobs:
       - '{build-name}':
@@ -112,10 +120,8 @@
 
       - '{custom-name}.qa':
           publish_results: false
-          parameters:
-            - bool:
-                name: VCENTER_USE
-                default: true
+          vcenter_use: true
+                  
       - '{custom-name}.dev':
           publish_results: false
           testgroup_parameter_type: choice
@@ -137,10 +143,8 @@
           multijob_build_pkg: true
 
       - '{fuel-release}.{plugin-name}.bvt.test':
-          parameters:
-            - bool:
-                name: VCENTER_USE
-                default: true
+          vcenter_use: true
+
       - '{regression-name}':
           testrail_suite: "[{fuel-release}][PCE] VMware NSXv plugin v{fuel-release} Regression"
           testrail_suite_desc: "Suite description"
@@ -166,6 +170,7 @@
           debug:                '{debug}'
           disable_ssl:          '{disable_ssl}'
           force_erase:          '{force_erase}'
+          force_reuse:          '{force_reuse}'
           recreate_venv:        '{recreate_venv}'
           ws_norevert:          '{ws_norevert}'
           nfs_clean:            '{nfs_clean}'
@@ -188,6 +193,7 @@
           kvm_use:              '{kvm_use}'
           iso_storage:          '{iso_storage}'
           snapshots_id:         '{snapshots_id}'
+          vcenter_use:         '{vcenter_use}'
       - plugin-specific-parameters
 
 # parameters for jobs created per test-group and custom test job
@@ -204,6 +210,7 @@
           description: "Triggers build of pkg from $PKG_JOB_NAME (only for custom)"
       - bool:
           name: VCENTER_USE
+          default: '{vcenter_use}'
       - '{testgroup_parameter_type}':
           name: TEST_GROUP
           '{testgroup_value_type}': '{obj:testgroup_value}'
@@ -213,6 +220,7 @@
           debug:           '{debug}'
           disable_ssl:     '{disable_ssl}'
           force_erase:     '{force_erase}'
+          force_reuse:     '{force_reuse}'
           recreate_venv:   '{recreate_venv}'
           ws_norevert:     '{ws_norevert}'
           nfs_clean:       '{nfs_clean}'
@@ -235,6 +243,7 @@
           kvm_use:              '{kvm_use}'
           iso_storage:          '{iso_storage}'
           snapshots_id:         '{snapshots_id}'
+          vcenter_use:         '{vcenter_use}'
       - plugin-specific-parameters
 
 - defaults:
@@ -264,7 +273,6 @@
             ENV_PREFIX={fuel-release}.{plugin-name}
             OPENSTACK_RELEASE=Ubuntu
             DESTROY_ENV_AFTER=0
-            WORKSTATION_SNAPSHOT=nsx-t-1.0.1
             WORKSTATION_NODES=esxi1 esxi2 esxi3 vcenter nsx-edge trusty
             VCENTER_IP=administrator@vsphere.local
             WORKSTATION_PASSWORD=VMware01
@@ -344,8 +352,6 @@
           email_to: '{email_to}'
       - test-publisher:
           reporter_name: '{reporter-name}'
-      - naginator:
-          max-failed-builds: 3
 
 - job-template:
     name: '{build-name}'
@@ -495,8 +501,6 @@
       - runner-publisher:
           properties_name: smoke.properties
           email_to: '{email_to}'
-      - naginator:
-          max-failed-builds: 3
 
 - job-template:
     name: '{bvt-name}'
@@ -534,8 +538,6 @@
       - runner-publisher:
           properties_name: bvt.properties
           email_to: '{email_to}'
-      - naginator:
-          max-failed-builds: 3
 
 - job-template:
     name: '{nightly-name}'
@@ -555,7 +557,5 @@
       - runner-publisher:
           properties_name: nightly.properties
           email_to: '{email_to}'
-      - naginator:
-          max-failed-builds: 3
     builders:
       !include: nsxt-nightly.yaml.inc

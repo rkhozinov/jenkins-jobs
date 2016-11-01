@@ -85,10 +85,10 @@ function get_venv_requirements {
   wget --no-check-certificate -O requirements-devops-source.txt $REQS_PATH_DEVOPS
   export REQS_PATH_DEVOPS="$(pwd)/requirements-devops-source.txt"
   export SPEC_REQS_PATH="${WORKSPACE}/plugin_test/requirement.txt"
-  if [[ "${TRY_NEWEST_DEVOPS}" == "true" ]]; then
-    sed -i 's/2.9.23/3.0.3/g' $REQS_PATH_DEVOPS
-    echo "psycopg2==2.6.2" >> $REQS_PATH
-  fi
+  #if [[ "${TRY_NEWEST_DEVOPS}" == "true" ]]; then
+  #  sed -i 's/2.9.23/3.0.3/g' $REQS_PATH_DEVOPS
+  #  echo "psycopg2==2.6.2" >> $REQS_PATH
+  #fi
 }
 
 function prepare_venv {
@@ -98,40 +98,40 @@ function prepare_venv {
     pip install -r "${REQS_PATH}" --upgrade > $redirected_output
     pip install -r "${REQS_PATH_DEVOPS}" --upgrade > $redirected_output
     [ -e $SPEC_REQS_PATH ] && pip install -r "${SPEC_REQS_PATH}" --upgrade > $redirected_output
-    if [[ "${TRY_NEWEST_DEVOPS}" == "false" ]]; then
-      django-admin.py syncdb --settings=devops.settings --noinput
-      django-admin.py migrate devops --settings=devops.settings --noinput
-    else
-      sudo -u postgres dropdb fuel_devops
-      sudo -u postgres createdb fuel_devops -O fuel_devops
-      dos-manage.py migrate
-    fi
+    django-admin.py syncdb --settings=devops.settings --noinput
+    django-admin.py migrate devops --settings=devops.settings --noinput
     deactivate
 }
 
 function smart_erase {
-  virsh list --all
   env=$1
-  vms=$(virsh list --all --name | grep $env )
-  networks=$(virsh net-list | tail -n +3 | cut -d' ' -f2-2 + grep $ENV_NAME)
-  virsh net-list --all
-  for net in $networks; do
-    if virsh net-destroy $net; then
-      echo "network destroyed succesfully"
-    else
-      ref=$?
-      echo "there are some troubles with virsh-networks arch, please check ( exit code = $ref )"
-    fi
-    virsh net-undefine $net
-  done
+
+  virsh list --all --name | grep $env && vms=$(virsh list --all --name | grep $env) || echo "there is no vms"
+
+  virsh net-list | tail -n +3 | cut -d' ' -f2-2 | grep $env && networks=$(virsh net-list | tail -n +3 | cut -d' ' -f2-2 | grep $env) \
+  || echo "there is no networks"
+  if [ ! -z "$networks" ]; then
+    for net in $networks; do
+      if virsh net-destroy $net; then
+        echo "network destroyed succesfully"
+      else
+        ref=$?
+        echo "there are some troubles with virsh-networks arch, please check ( exit code = $ref )"
+      fi
+      virsh net-undefine $net
+    done
+  fi
   for vm in $vms; do
-    if virsh destroy $vm; then
-      echo "domain destroyed succesfully"
-    else
-      ref=$?
-      echo "there are some troubles with virsh arch, please check ( exit code = $ref )"
+    domstat=$(virsh domstate $vm)
+    if [[ $domstat != *"shut"* ]]; then
+      if virsh destroy $vm; then
+        echo "domain destroyed succesfully"
+      else
+        ref=$?
+        echo "there are some troubles with virsh arch, please check ( exit code = $ref )"
+      fi
     fi
-    virsh undefine --remove-all-storage --snapshots-metadata --wipe-storage $vm
+    virsh undefine --remove-all-storage --snapshots-metadata $vm
   done
   dos.py sync
 }
@@ -180,28 +180,6 @@ snapshot="${WORKSTATION_SNAPSHOT}"
 
 # start from saved state
 for node in $nodes; do
-  echo "Stopping $node"
-  $cmd stop "[standard] $node/$node.vmx" || \
-    echo "Error: $node failed to stop" &
-done
-wait_ws
-set -x
-
-if [[ "${FORCE_ERASE}" == "true" ]]; then
-  for env in $(dospy_list); do
-    smart_erase $env
-  done
-else
-  # determine free space before run the cleaner
-  free_space=$(df -h | grep '/$' | awk '{print $4}' | tr -d G)
-
-cmd="vmrun -T ws-shared -h https://localhost:443/sdk \
--u ${WORKSTATION_USERNAME} -p ${WORKSTATION_PASSWORD}"
-nodes=${WORKSTATION_NODES}
-snapshot="${WORKSTATION_SNAPSHOT}"
-
-# start from saved state
-for node in $nodes; do
   if [[ $(pgrep vmrun | wc -l) -ne 0 ]]; then
     echo "Stopping $node"
     $cmd stop "[standard] $node/$node.vmx" || \
@@ -210,7 +188,6 @@ for node in $nodes; do
 done
 wait_ws
 set -x
-
 if [[ "${FORCE_REUSE}" == "false" ]]; then
   if [[ "${FORCE_ERASE}" == "true" ]]; then
     for env in $(dospy_list); do
@@ -260,8 +237,6 @@ if [[ "${FORCE_REUSE}" == "false" ]]; then
   done
 fi
 ##########################################################
-for env in $(dospy_list); do [[ $env != $USEFUL_ENV ]] && smart_erase $env; done
-
 [[ "${DEBUG}" == "true" ]] && virsh list --all
 sudo cp /var/log/libvirt/libvirtd.log ${WORKSPACE}/libvirtd_before_test.log
 sudo chown jenkins:jenkins ${WORKSPACE}/libvirtd_before_test.log

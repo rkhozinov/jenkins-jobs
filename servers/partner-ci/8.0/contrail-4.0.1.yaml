@@ -3,17 +3,9 @@
     name: plugin-specific-parameters
     parameters:
       - bool:
-          name: UPDATE_MASTER
-          default: '{update_master}'
-          description: 'turns on update fuel master node to maintenance update'
-      - bool:
           name: BONDING
           default: '{obj:bonding}'
           description: 'turns on bonding'
-      - bool:
-          name: KVM_USE
-          default: '{obj:kvm_use}'
-          description: 'turns on kvm_mode for an openstack cluster'
       - bool:
           name: FORCE_VSRX_COPY
           default: '{obj:force_vsrx_copy}'
@@ -41,17 +33,6 @@
              deb ${{MIRROR}}/pkgs/ubuntu/ trusty main universe multiverse |
              deb ${{MIRROR}}/pkgs/ubuntu/ trusty-updates main universe multiverse |
              deb ${{MIRROR}}/pkgs/ubuntu/ trusty-security main universe multiverse
-          description: 'proposed repositories to update ubuntu cluster'
-      - text:
-          name: ADDITIONAL_PARAMETERS
-          default: |
-            NODE_VOLUME_SIZE=512
-            CONTRAIL_VERSION={plugin-version}
-            PLUGIN_VERSION=${{CONTRAIL_VERSION}}
-            VSRX_ORIGINAL_IMAGE_PATH={vsrx_original_image_path}
-            VSRX_TARGET_IMAGE_PATH={vsrx_target_image_path}
-            VSRX_TEMPLATE_PATH={vsrx_template_path}
-            ISO_STORAGE={iso_storage}
 
 - project:
     name: 'predefined_parameters'
@@ -77,7 +58,6 @@
     admin_node_cpu: '4'
     slave_node_cpu: '4'
     pkg_job_name: '{fuel-release}.{plugin-name}.{plugin-version}.build'
-    iso_job_name: ''
     nightly_timer: 'H 21 * * *'
     full_timer: 'H 21 * * *'
     regression_timer: 'H 18 * * *'
@@ -85,14 +65,16 @@
     full_disabled: true
     baremetal_disabled: false
     regression_disabled: false
-    use_snapshots: false
     force_erase: true
     force_vsrx_copy: false
-    recreate_venv: false
+    recreate_venv: true
     disable_ssl: false
+    ws_norevert: false
+    nfs_clean: false
     bonding: false
     kvm_use: false
     update_master: true
+    enable_proposed: true
     debug: true
     build_debug: true
     publish_results: true
@@ -102,6 +84,7 @@
     test_timeout: 300
     iso_file: 'MirantisOpenStack-8.0.iso'
     iso_storage: '/storage/downloads'
+    snapshots_id: 'released'
     gerrit_repo: 'fuel-plugin-contrail'
     gerrit_branch: 'stable/4.0.1'
     email_to: 'rkhozinov@mirantis.com okosse@mirantis.com otsvigun@mirantis.com'
@@ -114,7 +97,7 @@
     vsrx_original_image_path: '/storage/contrail/vSRX.400.img'
     vsrx_target_image_path: '/var/lib/libvirt/images/vSRX.400.img'
     vsrx_template_path: '/storage/contrail/vSRX_400.template'
-    
+
 
     testrail_project: "Contrail plugin"
     testrail_suite: "[8.0][PCE] Fuel plugin contrail v4.0.1 nightly"
@@ -273,12 +256,12 @@
           disable_ssl:          '{disable_ssl}'
           force_erase:          '{force_erase}'
           recreate_venv:        '{recreate_venv}'
-          use_snapshots:        '{use_snapshots}'
+          ws_norevert:          '{ws_norevert}'
+          nfs_clean:            '{nfs_clean}'
           iso_file:             '{iso_file}'
           gerrit_branch:        '{gerrit_branch}'
           env_prefix:           '{fuel-release}.{plugin-name}'
           pkg_job_name:         '{pkg_job_name}'
-          iso_job_name:         '{iso_job_name}'
           admin_node_memory:    '{admin_node_memory}'
           slave_node_memory:    '{slave_node_memory}'
           admin_node_cpu:       '{admin_node_cpu}'
@@ -289,12 +272,12 @@
           testrail_plan_desc:   '{testrail_plan_desc}'
           skip_vote_successfull: '{skip_vote_successfull}'
           skip_vote_failed:     '{skip_vote_failed}'
+          enable_proposed:      '{enable_proposed}'
           kvm_use:              '{kvm_use}'
+          update_master:        '{update_master}'
 
       - plugin-specific-parameters:
           bonding:              '{bonding}'
-          kvm_use:              '{kvm_use}'
-          update_master:        '{update_master}'
           plugin-version:       '{plugin-version}'
           force_vsrx_copy:      '{force_vsrx_copy}'
           vsrx_original_image_path: '{vsrx_original_image_path}'
@@ -309,28 +292,16 @@
           name: MJ_BUILD_PKG
           default: '{multijob_build_pkg}'
           description: "Triggers build of pkg of $PKG_JOB_NAME before run of tests"
-      - text:
-          name: BAREMETAL_PARAMETERS
-          default: |
-            BM_IPMI_USER=engineer
-            BM_IPMI_PASSWORD=Ba2Ie23#GHgho
-            BM_IPMI_ADDR=cz7660-kvm.host-telecom.com
-            BM_TARGET_MACS=00:1b:21:87:21:99;00:1b:21:87:21:98
-            BM_HOST_BRIDGE_INTERFACES=eth2:10.109.0.0/24;eth3:10.109.4.0/24
-            KVM_USE=True
-
       - common-parameters:
           publish_results:      '{publish_results}'
           debug:                '{debug}'
           disable_ssl:          '{disable_ssl}'
           force_erase:          '{force_erase}'
           recreate_venv:        '{recreate_venv}'
-          use_snapshots:        '{use_snapshots}'
           iso_file:             '{iso_file}'
           gerrit_branch:        '{gerrit_branch}'
           env_prefix:           '{fuel-release}.{plugin-name}'
           pkg_job_name:         '{pkg_job_name}'
-          iso_job_name:         '{iso_job_name}'
           admin_node_memory:    '{admin_node_memory}'
           slave_node_memory:    '{slave_node_memory}'
           admin_node_cpu:       '{admin_node_cpu}'
@@ -342,19 +313,19 @@
           skip_vote_successfull: '{skip_vote_successfull}'
           skip_vote_failed:     '{skip_vote_failed}'
           kvm_use:              '{kvm_use}'
+          update_master:        '{update_master}'
+          snapshots_id:         '{snapshots_id}'
 
       - plugin-specific-parameters:
           bonding:              '{bonding}'
-          kvm_use:              '{kvm_use}'
-          update_master:        '{update_master}'
           plugin-version:       '{plugin-version}'
           force_vsrx_copy:      '{force_vsrx_copy}'
           vsrx_original_image_path: '{vsrx_original_image_path}'
           vsrx_target_image_path:   '{vsrx_target_image_path}'
           vsrx_template_path:       '{vsrx_template_path}'
           iso_storage:           '{iso_storage}'
-    
-            
+
+
 # parameters for jobs created per test-group and custom test job
 - test-parameters: &test-parameters
     name: 'test-parameters'
@@ -369,8 +340,6 @@
           description: "Triggers build of pkg from $PKG_JOB_NAME (only for custom)"
       - string:
           name: CONTRAIL_DISTRIBUTION
-      - text:
-          name: BAREMETAL_PARAMETERS
       - '{testgroup_parameter_type}':
           name: TEST_GROUP
           '{testgroup_value_type}': '{obj:testgroup_value}'
@@ -381,12 +350,12 @@
           disable_ssl:          '{disable_ssl}'
           force_erase:          '{force_erase}'
           recreate_venv:        '{recreate_venv}'
-          use_snapshots:        '{use_snapshots}'
+          ws_norevert:          '{ws_norevert}'
+          nfs_clean:            '{nfs_clean}'
           iso_file:             '{iso_file}'
           gerrit_branch:        '{gerrit_branch}'
           env_prefix:           '{fuel-release}.{plugin-name}'
           pkg_job_name:         '{pkg_job_name}'
-          iso_job_name:         '{iso_job_name}'
           admin_node_memory:    '{admin_node_memory}'
           slave_node_memory:    '{slave_node_memory}'
           admin_node_cpu:       '{admin_node_cpu}'
@@ -396,18 +365,20 @@
           testrail_plan:        '{testrail_plan}'
           testrail_plan_desc:   '{testrail_plan_desc}'
           skip_vote_successfull: '{skip_vote_successfull}'
-          skip_vote_failed:     '{skip_vote_failed}'
+          skip_vote_failed:      '{skip_vote_failed}'
+          enable_proposed:      '{enable_proposed}'
           kvm_use:              '{kvm_use}'
-      - plugin-specific-parameters:
           update_master:        '{update_master}'
-          bonding:              '{bonding}'
-          kvm_use:              '{kvm_use}'
-          plugin-version:       '{plugin-version}'
-          force_vsrx_copy:      '{force_vsrx_copy}'
+          snapshots_id:         '{snapshots_id}'
+
+      - plugin-specific-parameters:
+          bonding:                  '{bonding}'
+          plugin-version:           '{plugin-version}'
+          force_vsrx_copy:          '{force_vsrx_copy}'
           vsrx_original_image_path: '{vsrx_original_image_path}'
           vsrx_target_image_path:   '{vsrx_target_image_path}'
           vsrx_template_path:       '{vsrx_template_path}'
-          iso_storage:           '{iso_storage}'
+          iso_storage:              '{iso_storage}'
 
 - defaults:
     name: global
@@ -428,9 +399,35 @@
       - test-property
     builders:
       - inject:
-          properties-content: $ADDITIONAL_PARAMETERS
-      - inject:
-          properties-content: $BAREMETAL_PARAMETERS
+          properties-content: |
+            ENV_PREFIX={fuel-release}.{plugin-name}
+            OPENSTACK_RELEASE=Ubuntu
+            NODES_COUNT=10
+            DESTROY_ENV_AFTER=0
+            ADMIN_NODE_MEMORY={admin_node_memory}
+            SLAVE_NODE_MEMORY={slave_node_memory}
+            ADMIN_NODE_CPU={admin_node_cpu}
+            SLAVE_NODE_CPU={slave_node_cpu}
+            TREP_TESTRAIL_SUITE={testrail_suite}
+            TREP_TESTRAIL_SUITE_DESCRIPTION={testrail_suite_desc}
+            TREP_TESTRAIL_PLAN={testrail_plan}
+            TREP_TESTRAIL_PLAN_DESCRIPTION={testrail_plan_desc}
+            KVM_USE=True
+            NODE_VOLUME_SIZE=512
+            CONTRAIL_VERSION={plugin-version}
+            PLUGIN_VERSION={plugin-version}
+            VSRX_ORIGINAL_IMAGE_PATH={vsrx_original_image_path}
+            VSRX_TARGET_IMAGE_PATH={vsrx_target_image_path}
+            VSRX_TEMPLATE_PATH={vsrx_template_path}
+            ISO_STORAGE={iso_storage}
+            BM_IPMI_USER=engineer
+            BM_IPMI_PASSWORD=Ba2Ie23#GHgho
+            BM_IPMI_ADDR=cz7660-kvm.host-telecom.com
+            BM_TARGET_MACS=00:1b:21:87:21:99;00:1b:21:87:21:98
+            BM_HOST_BRIDGE_INTERFACES=eth2:10.109.0.0/24;eth3:10.109.4.0/24
+            KVM_USE=True
+            SNAPSHOT_OUTPUT_FILE=extra_repos.sh
+            SNAPSHOT_ARTIFACTS_FILE=snapshots.params
       - conditional-step:
            condition-kind: shell
            condition-command: |
@@ -440,7 +437,7 @@
                  - project: ${{PKG_JOB_NAME}}
                    current-parameters: false
                    git-revision: false
-                   block: true      
+                   block: true
       - conditional-step:
           condition-kind: shell
           condition-command: |
@@ -478,7 +475,7 @@
     concurrent: true
     disabled: false
     triggers:
-      - draft-patchset-gerrit-trigger:
+      - draft-gerrit-trigger:
           gerrit_repo: '{gerrit_repo}'
           gerrit_branch: '{gerrit_branch}'
           skip_vote_successfull: '{skip_vote_successfull}'
@@ -590,8 +587,6 @@
           properties_name: regression.properties
           email_to: '{email_to}'
     builders:
-      - inject:
-          properties-content: $ADDITIONAL_PARAMETERS
       - multijob:
           name: '1st phase - regression test'
           condition: COMPLETED
@@ -615,7 +610,7 @@
     node: runner
     <<: *runner-parameters
     triggers:
-      - draft-patchset-gerrit-trigger:
+      - draft-gerrit-trigger:
           gerrit_repo: '{gerrit_repo}'
           gerrit_branch: '{gerrit_branch}'
           skip_vote_successfull: '{skip_vote_successfull}'
@@ -627,8 +622,6 @@
       - runner-wrapper
     scm: []
     builders:
-      - inject:
-          properties-content: $ADDITIONAL_PARAMETERS
       - runner-condition
       - multijob:
           name: 'The smoke test for {fuel-release}.{plugin-name}.{plugin-version}'
@@ -667,8 +660,6 @@
     wrappers:
       - runner-wrapper
     builders:
-      - inject:
-          properties-content: $ADDITIONAL_PARAMETERS
       - runner-condition
       - multijob:
           name: 'The BVT test for {fuel-release}.{plugin-name}.{plugin-version}'
@@ -707,7 +698,7 @@
     builders:
       !include: contrail-nightly-4.0.1.yaml.inc
 
-              
+
 - job-template:
     name: '{full-name}'
     project-type: multijob

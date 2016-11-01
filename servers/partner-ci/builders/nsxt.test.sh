@@ -69,7 +69,7 @@ export VENV_PATH="${HOME}/${FUEL_RELEASE}-venv"
 [ -z "${PLUGIN_PATH}"       ] && export PLUGIN_PATH=$NSXT_PLUGIN_PATH
 
 systest_parameters=''
-[[ $USE_SNAPSHOTS == "true"  ]] && systest_parameters+=' -k' || echo "new env will be created"
+[[ $FORCE_REUSE == "true"  ]] && systest_parameters+=' -k' || echo "new env will be created"
 [[ $ERASE_AFTER   == "true"  ]] && echo "the env will be erased after test" || systest_parameters+=' -K'
 
 echo "test-group: ${TEST_GROUP}"
