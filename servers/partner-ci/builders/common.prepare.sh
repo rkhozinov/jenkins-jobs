@@ -110,7 +110,7 @@ function smart_erase {
   virsh list --all
   env=$1
   vms=$(virsh list --all --name | grep $env )
-  networks=$(virsh net-list | tail -n +3 | cut -d' ' -f2-2 + grep $ENV_NAME)
+  networks=$(virsh net-list | tail -n +3 | cut -d' ' -f2-2 | grep $env)
   virsh net-list --all
   for net in $networks; do
     if virsh net-destroy $net; then
@@ -122,13 +122,19 @@ function smart_erase {
     virsh net-undefine $net
   done
   for vm in $vms; do
-    if virsh destroy $vm; then
-      echo "domain destroyed succesfully"
+    domstat=$(virsh domstate $vm)
+    if [[ $domstat == *"shut"* ]]; then
+      if virsh destroy $vm; then
+        echo "domain destroyed succesfully"
+      else
+        ref=$?
+        echo "there are some troubles with virsh arch, please check ( exit code = $ref )"
+      fi
+      virsh undefine --remove-all-storage --snapshots-metadata --wipe-storage $vm
     else
-      ref=$?
-      echo "there are some troubles with virsh arch, please check ( exit code = $ref )"
+      echo "there is no running domains"
+      virsh undefine --remove-all-storage --snapshots-metadata --wipe-storage $vm
     fi
-    virsh undefine --remove-all-storage --snapshots-metadata --wipe-storage $vm
   done
   dos.py sync
 }

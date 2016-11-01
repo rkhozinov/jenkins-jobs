@@ -93,6 +93,9 @@
       - nsxt_add_delete_compute_vmware_node
       - nsxt_uninstall_negative
       - nsxt_shutdown_controller
+      - nsxt_setup_system
+      - nsxt_manage_ports
+      - nsxt_hot
 
     jobs:
       - '{build-name}':
