@@ -107,34 +107,34 @@ function prepare_venv {
 }
 
 function smart_erase {
-  virsh list --all
   env=$1
-  vms=$(virsh list --all --name | grep $env )
-  networks=$(virsh net-list | tail -n +3 | cut -d' ' -f2-2 | grep $env)
-  virsh net-list --all
-  for net in $networks; do
-    if virsh net-destroy $net; then
-      echo "network destroyed succesfully"
-    else
-      ref=$?
-      echo "there are some troubles with virsh-networks arch, please check ( exit code = $ref )"
-    fi
-    virsh net-undefine $net
-  done
+  
+  virsh list --all --name | grep $env && vms=$(virsh list --all --name | grep $env) || echo "there is no vms"
+  
+  virsh net-list | tail -n +3 | cut -d' ' -f2-2 | grep $env && networks=$(virsh net-list | tail -n +3 | cut -d' ' -f2-2 | grep $env) \
+  || echo "there is no networks"
+  if [ ! -z "$networks" ]; then
+    for net in $networks; do
+      if virsh net-destroy $net; then
+        echo "network destroyed succesfully"
+      else
+        ref=$?
+        echo "there are some troubles with virsh-networks arch, please check ( exit code = $ref )"
+      fi
+      virsh net-undefine $net
+    done
+  fi
   for vm in $vms; do
     domstat=$(virsh domstate $vm)
-    if [[ $domstat == *"shut"* ]]; then
+    if [[ $domstat != *"shut"* ]]; then
       if virsh destroy $vm; then
         echo "domain destroyed succesfully"
       else
         ref=$?
         echo "there are some troubles with virsh arch, please check ( exit code = $ref )"
       fi
-      virsh undefine --remove-all-storage --snapshots-metadata --wipe-storage $vm
-    else
-      echo "there is no running domains"
-      virsh undefine --remove-all-storage --snapshots-metadata --wipe-storage $vm
     fi
+    virsh undefine --remove-all-storage --snapshots-metadata --wipe-storage $vm
   done
   dos.py sync
 }
@@ -175,9 +175,11 @@ snapshot="${WORKSTATION_SNAPSHOT}"
 
 # start from saved state
 for node in $nodes; do
-  echo "Stopping $node"
-  $cmd stop "[standard] $node/$node.vmx" || \
-    echo "Error: $node failed to stop" &
+  if [[ $(pgrep vmrun | wc -l) -ne 0 ]]; then
+    echo "Stopping $node"
+    $cmd stop "[standard] $node/$node.vmx" || \
+      echo "Error: $node failed to stop" &
+  fi
 done
 wait_ws
 set -x
