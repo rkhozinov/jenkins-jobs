@@ -26,6 +26,10 @@
           default: '{force_erase}'
           description: "Erase all envs before test"
       - bool:
+          name: FORCE_REUSE
+          default: '{force_reuse}'
+          description: "enable reuse-only mode for envs, disable force-erasing/snap-reverting"
+      - bool:
           name: RECREATE_VENV
           default: '{recreate_venv}'
           description: "Recreate virtual environemnt before tests"
@@ -213,10 +217,10 @@
                 echo "Plugin will be built"
                 exit 0
               fi
+            else
+              echo "Plugin won't be built"
+              exit 1
             fi
-
-            echo "Plugin won't be built"
-            exit 1
           steps:
             - trigger-builds:
                 - project: ${PKG_JOB_NAME}
@@ -226,7 +230,7 @@
       - conditional-step:
           condition-kind: shell
           condition-command: >
-            [ -z  ${PKG_JOB_BUILD_NUMBER} ]
+            [ -z  ${PKG_JOB_BUILD_NUMBER} ] && [ "${MJ_BUILD_PKG}" == "true" ]
           steps:
             - copyartifact:
                 project: ${PKG_JOB_NAME}
@@ -235,7 +239,7 @@
       - conditional-step:
           condition-kind: shell
           condition-command: >
-            [ ! -z ${PKG_JOB_BUILD_NUMBER} ]
+            [ ! -z ${PKG_JOB_BUILD_NUMBER} ] && [ "${MJ_BUILD_PKG}" == "true" ]
           steps:
             - copyartifact:
                 project: ${PKG_JOB_NAME}

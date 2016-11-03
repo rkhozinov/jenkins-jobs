@@ -14,6 +14,9 @@
       - bool:
           name: TRY_NEWEST_DEVOPS
           default: False
+      - string:
+          name: WORKSTATION_SNAPSHOT
+          default: 'nsx-t-1.0.1'
 - project:
     name: 'predefined_parameters'
     fuel-release: '9.x'
@@ -41,6 +44,7 @@
     nightly_disabled: false
     regression_disabled: true
     force_erase: true
+    force_reuse: false
     recreate_venv: true
     ws_norevert: false
     vcenter_use: false
@@ -166,6 +170,7 @@
           debug:                '{debug}'
           disable_ssl:          '{disable_ssl}'
           force_erase:          '{force_erase}'
+          force_reuse:          '{force_reuse}'
           recreate_venv:        '{recreate_venv}'
           ws_norevert:          '{ws_norevert}'
           nfs_clean:            '{nfs_clean}'
@@ -215,6 +220,7 @@
           debug:           '{debug}'
           disable_ssl:     '{disable_ssl}'
           force_erase:     '{force_erase}'
+          force_reuse:     '{force_reuse}'
           recreate_venv:   '{recreate_venv}'
           ws_norevert:     '{ws_norevert}'
           nfs_clean:       '{nfs_clean}'
@@ -267,7 +273,6 @@
             ENV_PREFIX={fuel-release}.{plugin-name}
             OPENSTACK_RELEASE=Ubuntu
             DESTROY_ENV_AFTER=0
-            WORKSTATION_SNAPSHOT=nsx-t-1.0.1
             WORKSTATION_NODES=esxi1 esxi2 esxi3 vcenter nsx-edge trusty
             VCENTER_IP=administrator@vsphere.local
             WORKSTATION_PASSWORD=VMware01
@@ -347,8 +352,6 @@
           email_to: '{email_to}'
       - test-publisher:
           reporter_name: '{reporter-name}'
-      - naginator:
-          max-failed-builds: 3
 
 - job-template:
     name: '{build-name}'
@@ -498,8 +501,6 @@
       - runner-publisher:
           properties_name: smoke.properties
           email_to: '{email_to}'
-      - naginator:
-          max-failed-builds: 3
 
 - job-template:
     name: '{bvt-name}'
@@ -537,8 +538,6 @@
       - runner-publisher:
           properties_name: bvt.properties
           email_to: '{email_to}'
-      - naginator:
-          max-failed-builds: 3
 
 - job-template:
     name: '{nightly-name}'
@@ -558,7 +557,5 @@
       - runner-publisher:
           properties_name: nightly.properties
           email_to: '{email_to}'
-      - naginator:
-          max-failed-builds: 3
     builders:
       !include: nsxt-nightly.yaml.inc
