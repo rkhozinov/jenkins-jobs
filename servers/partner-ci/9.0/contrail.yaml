@@ -267,7 +267,7 @@
       - '{fuel-release}.{plugin-name}.{plugin-version}.bvt.test.juniper'
 
       - '{regression-name}':
-          testrail_suite: "[9.x][PCE] Fuel plugin contrail v5.0 regression"
+          testrail_suite: "[9.x][PCE] Fuel plugin contrail v5.0.0 Regression"
           testrail_suite_desc: "Suite description"
           testrail_milestone: "Fuel Contrail Plugin v5.0"
           testrail_plan: "$TREP_TESTRAIL_SUITE iso #${{ISO_VERSION}} pkg#${{JUNIPER_PKG_VERSION}} build#${{PKG_JOB_BUILD_NUMBER}}"
