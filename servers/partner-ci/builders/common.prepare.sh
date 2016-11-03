@@ -225,3 +225,11 @@ if [[ "${FORCE_REUSE}" == "false" ]]; then
     fi
   done
   
+  for env in $(dospy_list); do
+    [[ $env  != $USEFUL_ENV ]] && [[ $env  != *"released"* ]] && smart_erase $env
+  done
+fi
+##########################################################
+[[ "${DEBUG}" == "true" ]] && virsh list --all
+sudo cp /var/log/libvirt/libvirtd.log ${WORKSPACE}/libvirtd_before_test.log
+sudo chown jenkins:jenkins ${WORKSPACE}/libvirtd_before_test.log
