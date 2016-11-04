@@ -16,7 +16,7 @@
           default: False
       - string:
           name: WORKSTATION_SNAPSHOT
-          default: 'nsx-t-1.0.1'
+          default: 'nsxt'
 - project:
     name: 'predefined_parameters'
     fuel-release: '9.x'
