@@ -72,6 +72,7 @@
     baremetal_disabled: false
     regression_disabled: false
     force_erase: true
+    force_reuse: false
     force_vsrx_copy: false
     recreate_venv: true
     disable_ssl: false
@@ -293,6 +294,7 @@
           debug:                '{debug}'
           disable_ssl:          '{disable_ssl}'
           force_erase:          '{force_erase}'
+          force_reuse:          '{force_reuse}'
           recreate_venv:        '{recreate_venv}'
           ws_norevert:          '{ws_norevert}'
           nfs_clean:            '{nfs_clean}'
@@ -386,6 +388,7 @@
           debug:                '{debug}'
           disable_ssl:          '{disable_ssl}'
           force_erase:          '{force_erase}'
+          force_reuse:     '{force_reuse}'
           recreate_venv:        '{recreate_venv}'
           ws_norevert:          '{ws_norevert}'
           nfs_clean:            '{nfs_clean}'
