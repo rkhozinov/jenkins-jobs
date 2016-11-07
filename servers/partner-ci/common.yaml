@@ -191,8 +191,13 @@
                   artifacts: 'nosetests.xml'
                   allow-empty: false
       - postbuildscript:
+          script-only-if-succeeded: False
+          script-only-if-failed: False
           builders:
-              - shell: rm -rf *.rpm
+              - shell: |
+                  rm -rf *.rpm
+                  sudo cp /var/log/libvirt/libvirtd.log ${{WORKSPACE}}/libvirtd_total.log
+                  sudo chown jenkins:jenkins ${{WORKSPACE}}/libvirtd_total.log
       - description-setter:
           regexp-for-failed: '"error":(.*) \1 "AssertionError":(.*) \2'
           description-for-failed: '\1 \2'
