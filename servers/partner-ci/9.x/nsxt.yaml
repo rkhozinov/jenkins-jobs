@@ -352,7 +352,10 @@
           email_to: '{email_to}'
       - test-publisher:
           reporter_name: '{reporter-name}'
-
+      - slack:
+          notify-success: True
+          notify-failure: True
+          commit-info-choice: 'AUTHORS_AND_TITLES'
 - job-template:
     name: '{build-name}'
     node: 'runner'
