@@ -307,6 +307,7 @@
             VCENTER_USE=true
             CLEAN_IPTABLES=true
             DISABLE_STP=true
+            FORCE_DISABLE_UPDATES=True
       - conditional-step:
            condition-kind: shell
            condition-command: |
