@@ -357,6 +357,7 @@
           notify-failure: True
           commit-info-choice: 'AUTHORS_AND_TITLES'
           include-test-summary: True
+          build-server-url: 'http://jenkins-tpi.bud.mirantis.net:8080/'
 - job-template:
     name: '{build-name}'
     node: 'runner'
