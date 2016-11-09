@@ -478,12 +478,12 @@
     project-type: multijob
     node: runner
     <<: *runner-parameters
-    triggers:
-      - default-draft-trigger:
-          gerrit_repo: '{gerrit_repo}'
-          gerrit_branch: '{gerrit_branch}'
-          skip_vote_successfull: '{skip_vote_successfull}'
-          skip_vote_failed: '{skip_vote_failed}'
+    #triggers:
+    #  - default-draft-trigger:
+    #      gerrit_repo: '{gerrit_repo}'
+    #      gerrit_branch: '{gerrit_branch}'
+    #      skip_vote_successfull: '{skip_vote_successfull}'
+    #      skip_vote_failed: '{skip_vote_failed}'
     properties:
       - runner-property:
           build-name: '{build-name}'
