@@ -19,7 +19,13 @@ fi
 
 [ -z $ISO_FILE ] && (echo "ISO_FILE variable is empty"; exit 1)
 
-export FUEL_RELEASE=$(echo $ISO_FILE | cut -d- -f2 | tr -d '.iso')
+
+if [[ $ISO_FILE == *"Mirantis"* ]]; then
+  export FUEL_RELEASE=$(echo $ISO_FILE | cut -d- -f2 | tr -d '.iso')
+fi
+if [[ $ISO_FILE == *"custom"* ]]; then
+  export FUEL_RELEASE=90
+fi
 
 if [[ "${UPDATE_MASTER}" == "true" ]] && [[ ${FUEL_RELEASE} != *"80"* ]]; then
   [ ${SNAPSHOTS_ID} ] && export SNAPSHOTS_ID=${SNAPSHOTS_ID} || export SNAPSHOTS_ID=${CUSTOM_VERSION:10}
@@ -42,6 +48,10 @@ export ISO_PATH="${ISO_STORAGE}/${ISO_FILE}"
 
 if [[ $ISO_FILE == *"Mirantis"* ]]; then
   export FUEL_RELEASE=$(echo $ISO_FILE | cut -d- -f2 | tr -d '.iso')
+fi
+
+if [[ $ISO_FILE == *"custom"* ]]; then
+  export FUEL_RELEASE=90
 fi
 
 export REQUIRED_FREE_SPACE=200

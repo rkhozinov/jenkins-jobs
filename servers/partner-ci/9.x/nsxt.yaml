@@ -356,6 +356,7 @@
           notify-success: True
           notify-failure: True
           commit-info-choice: 'AUTHORS_AND_TITLES'
+          include-test-summary: True
 - job-template:
     name: '{build-name}'
     node: 'runner'
