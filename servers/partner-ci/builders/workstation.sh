@@ -4,8 +4,11 @@
 [[ "${DEBUG}" == "true" ]] && set -x || set +x
 if [[ $ISO_FILE == *"Mirantis"* ]]; then
   export FUEL_RELEASE=$(echo $ISO_FILE | cut -d- -f2 | tr -d '.iso')
-  [[ "${UPDATE_MASTER}" -eq "true" ]] && export ISO_VERSION='mos-mu' || export ISO_VERSION='mos'
 fi
+if [[ $ISO_FILE == *"custom"* ]]; then
+  export FUEL_RELEASE=90
+fi
+[[ "${UPDATE_MASTER}" -eq "true" ]] && export ISO_VERSION='mos-mu' || export ISO_VERSION='mos'
 export VENV_PATH="${HOME}/${FUEL_RELEASE}-venv"
 export SSH_ENDPOINT="ssh_connect.py"
 main(){

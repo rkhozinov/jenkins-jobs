@@ -343,7 +343,6 @@
           condition-command: |
             [[ "${{UPDATE_MASTER}}" == "true" ]]
             [[ "${{SNAPSHOTS_ID}}" -ne 'released' ]]
-
           steps:
             - inject:
                 properties-content: |

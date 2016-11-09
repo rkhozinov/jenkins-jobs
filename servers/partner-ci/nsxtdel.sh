@@ -1,0 +1,29 @@
+jenkins-jobs --ignore-cache --conf ~/repo/jenkins-jobs/jenkins_jobs.ini delete \
+9.x.nsxt.nsxt_ability_to_bind_port \
+9.x.nsxt.nsxt_add_delete_nodes \
+9.x.nsxt.nsxt_config_ok_metadata_self_signed_certificate \
+9.x.nsxt.nsxt_connectivity_diff_networks \
+9.x.nsxt.nsxt_connectivity_via_distributed_router \
+9.x.nsxt.nsxt_connectivity_via_exclusive_router \
+9.x.nsxt.nsxt_connectivity_via_shared_router \
+9.x.nsxt.nsxt_create_and_delete_secgroups \
+9.x.nsxt.nsxt_create_and_delete_vms \
+9.x.nsxt.nsxt_create_terminate_networks \
+9.x.nsxt.nsxt_different_tenants \
+9.x.nsxt.nsxt_disable_hosts \
+9.x.nsxt.nsxt_floating_ip_to_public \
+9.x.nsxt.nsxt_ha_edges \
+9.x.nsxt.nsxt_ha_mode \
+9.x.nsxt.nsxt_insecure_false \
+9.x.nsxt.nsxt_install \
+9.x.nsxt.nsxt_kvm_deploy \
+9.x.nsxt.nsxt_metadata_listen_management \
+9.x.nsxt.nsxt_metadata_listen_public \
+9.x.nsxt.nsxt_metadata_mgt_disabled \
+9.x.nsxt.nsxt_multi_vnic \
+9.x.nsxt.nsxt_public_network_availability \
+9.x.nsxt.nsxt_public_network_to_all_nodes \
+9.x.nsxt.nsxt_same_ip_different_tenants \
+9.x.nsxt.nsxt_smoke_add_compute \
+9.x.nsxt.nsxt_specified_router_type \
+9.x.nsxt.nsxt_uninstall
