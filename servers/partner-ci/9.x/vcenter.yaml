@@ -1,4 +1,27 @@
 ---
+- parameter:
+    name: plugin-specific-parameters
+    parameters:
+      - string:
+          name: PLUGIN_VERSION
+      - bool:
+          name: FORCE_DISABLE_UPDATES
+          default: False
+      - bool:
+          name: DRIVER_ENABLE_ACPI
+          default: False
+      - bool:
+          name: MAKE_SNAPSHOT
+          default: False
+      - bool:
+          name: FUEL_STATS_ENABLED
+          default: False
+      - bool:
+          name: ALWAYS_CREATE_DIAGNOSTIC_SNAPSHOT
+          default: False
+      - bool:
+          name: DEBUG_MODE
+          default: True
 - project:
     name: 'predefined_parameters'
     fuel-release: '9.x'
@@ -173,6 +196,7 @@
           kvm_use:              '{kvm_use}'
           iso_storage:          '{iso_storage}'
           snapshots_id:         '{snapshots_id}'
+      - plugin-specific-parameters
 
 # parameters for jobs created per test-group and custom test job
 - test-parameters: &test-parameters
@@ -221,6 +245,7 @@
           kvm_use:              '{kvm_use}'
           iso_storage:          '{iso_storage}'
           snapshots_id:         '{snapshots_id}'
+      - plugin-specific-parameters
 
 - defaults:
     name: global
