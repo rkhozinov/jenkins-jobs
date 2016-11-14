@@ -4,6 +4,9 @@
     parameters:
       - string:
           name: PLUGIN_VERSION
+      - bool:
+          name: FORCE_DISABLE_UPDATES
+          default: False
 - project:
     name: 'predefined_parameters'
     fuel-release: '9.x'
@@ -307,7 +310,6 @@
             VCENTER_USE=true
             CLEAN_IPTABLES=true
             DISABLE_STP=true
-            FORCE_DISABLE_UPDATES=True
       - conditional-step:
            condition-kind: shell
            condition-command: |
