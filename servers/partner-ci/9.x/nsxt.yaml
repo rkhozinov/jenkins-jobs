@@ -30,6 +30,9 @@
           name: FUEL_STATS_ENABLED
           default: False
       - bool:
+          name: ALWAYS_CREATE_DIAGNOSTIC_SNAPSHOT
+          default: False
+      - bool:
           name: DEBUG_MODE
           default: True                  
 - project:
