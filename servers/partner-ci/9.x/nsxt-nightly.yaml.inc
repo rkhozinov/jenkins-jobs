@@ -81,3 +81,51 @@
        predefined-parameters: |
          VCENTER_USE=True
        property-file: build_number
+     - name: '{fuel-release}.{plugin-name}.nsxt_manage_networks'
+       current-parameters: true
+       kill-phase-on: NEVER
+       predefined-parameters: |
+         VCENTER_USE=True
+       property-file: build_number
+     - name: '{fuel-release}.{plugin-name}.nsxt_public_network_availability'
+       current-parameters: true
+       kill-phase-on: NEVER
+       predefined-parameters: |
+         VCENTER_USE=True
+       property-file: build_number
+     - name: '{fuel-release}.{plugin-name}.nsxt_connectivity_diff_networks'
+       current-parameters: true
+       kill-phase-on: NEVER
+       predefined-parameters: |
+         VCENTER_USE=True
+       property-file: build_number
+     - name: '{fuel-release}.{plugin-name}.nsxt_batch_instance_creation'
+       current-parameters: true
+       kill-phase-on: NEVER
+       predefined-parameters: |
+         VCENTER_USE=True
+       property-file: build_number
+     - name: '{fuel-release}.{plugin-name}.nsxt_manage_secgroups'
+       current-parameters: true
+       kill-phase-on: NEVER
+       predefined-parameters: |
+         VCENTER_USE=True
+       property-file: build_number
+     - name: '{fuel-release}.{plugin-name}.nsxt_manage_compute_hosts'
+       current-parameters: true
+       kill-phase-on: NEVER
+       predefined-parameters: |
+         VCENTER_USE=True
+       property-file: build_number
+     - name: '{fuel-release}.{plugin-name}.nsxt_different_tenants'
+       current-parameters: true
+       kill-phase-on: NEVER
+       predefined-parameters: |
+         VCENTER_USE=True
+       property-file: build_number
+     - name: '{fuel-release}.{plugin-name}.nsxt_same_ip_different_tenants'
+       current-parameters: true
+       kill-phase-on: NEVER
+       predefined-parameters: |
+         VCENTER_USE=True
+       property-file: build_number

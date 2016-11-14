@@ -101,6 +101,14 @@
       - nsxt_setup_system
       - nsxt_manage_ports
       - nsxt_hot
+      - nsxt_manage_networks
+      - nsxt_public_network_availability
+      - nsxt_connectivity_diff_networks
+      - nsxt_batch_instance_creation
+      - nsxt_manage_secgroups
+      - nsxt_manage_compute_hosts
+      - nsxt_different_tenants
+      - nsxt_same_ip_different_tenants
 
     jobs:
       - '{build-name}':
