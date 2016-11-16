@@ -12,7 +12,11 @@ sudo cp $VSRX_ORIGINAL_IMAGE_PATH $VSRX_TARGET_IMAGE_PATH
 export ISO_PATH="${ISO_STORAGE}/${ISO_FILE}"
 [ -z $ISO_PATH  ] && { echo "ISO_PATH is empty or doesn't exist"; exit 1; }
 
-export FUEL_RELEASE=$(echo $ISO_FILE | cut -d- -f2 | tr -d '.iso')
+if [[ $ISO_FILE == *"custom"* ]]; then
+  export FUEL_RELEASE=90
+else
+  export FUEL_RELEASE=$(echo $ISO_FILE | cut -d- -f2 | tr -d '.iso')
+fi
 
 if [ "${SNAPSHOTS_ID}" != "released" ]; then
   if [[ "${UPDATE_MASTER}" == "true" ]] && [[ ${FUEL_RELEASE} != *"80"* ]]; then
@@ -55,7 +59,7 @@ if [[ $ISO_FILE == *"Mirantis"* ]]; then
   export FUEL_RELEASE=$(echo $ISO_FILE | cut -d- -f2 | tr -d '.iso')
 fi
 
-export ENV_NAME="${ENV_PREFIX}.${ISO_VERSION}"
+export ENV_NAME="${ENV_PREFIX}.${SNAPSHOTS_ID}"
 export VENV_PATH="${HOME}/${FUEL_RELEASE}-venv"
 
 [[ -z ${CONTRAIL_PLUGIN_PATH} ]] && export CONTRAIL_PLUGIN_PATH=$(ls -t ${WORKSPACE}/contrail*.rpm | head -n 1) \

@@ -4,6 +4,9 @@
     parameters:
       - string:
           name: PLUGIN_VERSION
+      - string:
+          name: SPECIFIC_VAR
+          description: "use form : VAR=value"
       - bool:
           name: FORCE_DISABLE_UPDATES
           default: False
@@ -314,6 +317,7 @@
             VCENTER_GLANCE_CERT_BYPASS=True
             VCENTER_CERT_URL="http://tpi-s2.bud.mirantis.net:5000/downloads/certs/server.pem"
             VCENTER_CERT_BYPASS=True
+            $SPECIFIC_VAR
       - conditional-step:
           condition-kind: shell
           condition-command: |
