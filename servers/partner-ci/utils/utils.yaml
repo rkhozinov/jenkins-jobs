@@ -50,7 +50,7 @@
     name: '{sync_jira_with_launchpad}'
     node: 'runner'
     concurrent: false
-    disabled: false
+    disabled: true
     triggers:
       - timed: "H 5-18/3 * * 1-5"
     scm:
