@@ -126,7 +126,7 @@ function smart_erase {
         echo "network destroyed succesfully"
       else
         ref=$?
-        echo "there are some troubles with virsh-networks arch, please check ( exit code = $ref )"
+        echo "there are some troubles with virsh-networks stack, please check ( exit code = $ref )"
       fi
       virsh net-undefine $net
     done
@@ -139,14 +139,14 @@ function smart_erase {
         virsh undefine --remove-all-storage --snapshots-metadata $vm
       else
         ref=$?
-        echo "there are some troubles with virsh arch,restart services and recheck"
+        echo "there are some troubles with virsh stack, restart services and recheck"
 	sudo service libvirt-bin restart
         if virsh destroy $vm; then
           echo "domain destroyed succesfully"
           virsh undefine --remove-all-storage --snapshots-metadata $vm
         else
           ref=$?
-          echo "there are some troubles with virsh arch,please check it manually "
+          echo "there are some troubles with virsh stack, please check it manually "
         fi
       fi
     fi
