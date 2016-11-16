@@ -22,7 +22,7 @@
           default: False
       - bool:
           name: DRIVER_ENABLE_ACPI
-          default: False
+          default: True
       - bool:
           name: MAKE_SNAPSHOT
           default: False
