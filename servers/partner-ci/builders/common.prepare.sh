@@ -136,12 +136,20 @@ function smart_erase {
     if [[ $domstat != *"shut"* ]]; then
       if virsh destroy $vm; then
         echo "domain destroyed succesfully"
+        virsh undefine --remove-all-storage --snapshots-metadata $vm
       else
         ref=$?
-        echo "there are some troubles with virsh arch, please check ( exit code = $ref )"
+        echo "there are some troubles with virsh arch,restart services and recheck"
+	sudo service libvirt-bin restart
+        if virsh destroy $vm; then
+          echo "domain destroyed succesfully"
+          virsh undefine --remove-all-storage --snapshots-metadata $vm
+        else
+          ref=$?
+          echo "there are some troubles with virsh arch,please check it manually "
+        fi
       fi
     fi
-    virsh undefine --remove-all-storage --snapshots-metadata $vm
   done
   dos.py sync
 }
