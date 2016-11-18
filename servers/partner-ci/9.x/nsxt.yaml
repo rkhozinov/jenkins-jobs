@@ -35,6 +35,9 @@
       - bool:
           name: DEBUG_MODE
           default: True                  
+      - bool:
+          name: GIT_CURL_VERBOSE
+          default: True                  
 - project:
     name: 'predefined_parameters'
     fuel-release: '9.x'
@@ -143,16 +146,19 @@
 
       - '{nightly-name}':
           multijob_build_pkg: true
+          scm_wipe_workspace: true
 
       - '{custom-name}.qa':
           publish_results: false
           vcenter_use: true
+          scm_wipe_workspace: true
                   
       - '{custom-name}.dev':
           publish_results: false
           testgroup_parameter_type: choice
           testgroup_value_type: choices
           testgroup_value: '{obj:testgroup}'
+          scm_wipe_workspace: true
 
       - '{reporter-name}'
 
@@ -161,15 +167,18 @@
       - '{smoke-name}':
           publish_results: false
           multijob_build_pkg: false
+          scm_wipe_workspace: true
 
       - '{fuel-release}.{plugin-name}.smoke.test'
 
       - '{bvt-name}':
           publish_results: false
           multijob_build_pkg: true
+          scm_wipe_workspace: true
 
       - '{fuel-release}.{plugin-name}.bvt.test':
           vcenter_use: true
+          scm_wipe_workspace: true
 
       - '{regression-name}':
           testrail_suite: "[{fuel-release}][PCE] VMware NSXv plugin v{fuel-release} Regression"
