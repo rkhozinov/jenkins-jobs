@@ -32,11 +32,11 @@ if [[ "${UPDATE_MASTER}" == "true" ]] && [[ ${FUEL_RELEASE} != *"80"* ]]; then
 else
   export SNAPSHOTS_ID="released"
 fi
-if [[ $SNAPSHOTS_ID == *"lastSuccessfulBuild"* ]]; then
+#if [[ $SNAPSHOTS_ID == *"lastSuccessfulBuild"* ]]; then
  # wget --no-check-certificate -O snapshots.params ${SNAPSHOTS_URL/SNAPSHOTS_ID/$SNAPSHOTS_ID}
  # export SNAPSHOTS_ID=$(grep "^CUSTOM_VERSION=" < snapshots.params | cut -d= -f2 | cut -d'#' -f2)
- export SNAPSHOTS_ID=$(cat snapshots.params | grep -Po '#\K[^ ]+')
-fi
+# export SNAPSHOTS_ID=$(cat snapshots.params | grep -Po '#\K[^ ]+')
+#fi
 
 [ -z "${SNAPSHOTS_ID}" ] && { echo SNAPSHOTS_ID is empty; exit 1; }
 #remove old logs and test data
@@ -128,7 +128,12 @@ function smart_erase {
         ref=$?
         echo "there are some troubles with virt-networks stack, please check ( exit code = $ref )"
       fi
-      virsh net-undefine $net
+      if virsh net-undefine $net; then
+        echo "network destroyed succesfully"
+      else
+        ref=$?
+        echo "there are some troubles with virt-networks stack, please check ( exit code = $ref )"
+      fi
     done
   fi
   for vm in $vms; do
@@ -149,6 +154,8 @@ function smart_erase {
           echo "there are some troubles with virt stack, please check it manually "
         fi
       fi
+    else
+      virsh undefine --remove-all-storage --snapshots-metadata $vm
     fi
   done
   dos.py sync
