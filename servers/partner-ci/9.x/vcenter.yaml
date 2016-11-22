@@ -29,7 +29,7 @@
           default: True
       - bool:
           name: GIT_CURL_VERBOSE
-          default: True
+          default: False
 - project:
     name: 'predefined_parameters'
     fuel-release: '9.x'

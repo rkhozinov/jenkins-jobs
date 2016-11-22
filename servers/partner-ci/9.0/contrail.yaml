@@ -18,7 +18,7 @@
           description: 'force copying of vsrx image'
       - bool:
           name: GIT_CURL_VERBOSE
-          default: True
+          default: False
       - string:
           description: 'mirror for package repositories. this mirror is optimized for CZ'
           name: MIRROR
