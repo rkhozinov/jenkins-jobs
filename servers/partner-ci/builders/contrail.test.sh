@@ -1,6 +1,13 @@
 #!/bin/bash -e
 
 # activate bash xtrace for script
+if [[ "${MULTI_REFS}" != "none" ]]; then
+  cd ${WORKSPACE}
+  for refspec in ${MULTI_REFS}; do
+    git fetch ${GIT_URL} "${refspec}" && git cherry-pick FETCH_HEAD || git status
+  done
+fi
+
 [[ "${DEBUG}" == "true" ]] && set -x || set +x
 
 [[ "${FORCE_VSRX_COPY}" == "true" ]] && sudo rm -rf $VSRX_TARGET_IMAGE_PATH
@@ -147,9 +154,12 @@ source $VENV_PATH/bin/activate
 #./plugin_test/utils/jenkins/system_tests.sh -t test ${systest_parameters} -i ${ISO_PATH} -j ${JOB_NAME} -o --group=${TEST_GROUP}
 
 # run python test set to create environments, deploy and test product
-export PYTHONPATH="${PYTHONPATH:+${PYTHONPATH}:}${WORKSPACE}"
-echo ${PYTHONPATH}
-python plugin_test/run_tests.py -q --nologcapture --with-xunit --group=${TEST_GROUP} &
+# WORKAROUND for https://bugs.launchpad.net/fuel/+bug/1642991
+export WORKSPACE="${WORKSPACE}/plugin_test/fuel-qa"
+export PLUGIN_WORKSPACE="${WORKSPACE/\/fuel-qa}"
+export PYTHONPATH="${PYTHONPATH:+${PYTHONPATH}:}${WORKSPACE}:${PLUGIN_WORKSPACE}"
+[[ "${DEBUG}" == "true" ]] && echo "PYTHONPATH:${PYTHONPATH} PATH:${PATH} WORKSPACE:${WORKSPACE}"
+python $PLUGIN_WORKSPACE/run_tests.py -q --nologcapture --with-xunit --group=${TEST_GROUP} &
 export SYSTEST_PID=$!
 	
 if [[ $VCENTER_USE == "true"  ]]; then
