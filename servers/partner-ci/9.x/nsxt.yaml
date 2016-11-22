@@ -84,7 +84,7 @@
     test_timeout: 300
     iso_file: 'MirantisOpenStack-9.0.iso'
     iso_storage: '/storage/downloads'
-    snapshots_id: 'released'
+    snapshots_id: 'lastSuccessfulBuild'
     gerrit_repo: 'fuel-plugin-nsx-t'
     gerrit_branch: 'master'
     email_to: 'rkhozinov@mirantis.com'
