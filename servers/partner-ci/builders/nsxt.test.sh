@@ -12,7 +12,11 @@ fi
 export ISO_PATH="${ISO_STORAGE}/${ISO_FILE}"
 [ -z $ISO_PATH  ] && { echo "ISO_PATH is empty or doesn't exist"; exit 1; }
 
-export FUEL_RELEASE=$(echo $ISO_FILE | cut -d- -f2 | tr -d '.iso')
+if [[ $ISO_FILE == *"custom"* ]]; then
+  export FUEL_RELEASE=90
+else
+  export FUEL_RELEASE=$(echo $ISO_FILE | cut -d- -f2 | tr -d '.iso')
+fi
 
 if [ "${SNAPSHOTS_ID}" != "released" ]; then
   if [[ "${UPDATE_MASTER}" == "true" ]] && [[ ${FUEL_RELEASE} != *"80"* ]]; then
@@ -37,8 +41,10 @@ fi
 if [ -f build.plugin_version ]; then
   export PLUGIN_VERSION=$(grep "PLUGIN_VERSION" < build.plugin_version | cut -d= -f2 )
 else
-  echo "build.properties file is not available so a test couldn't be runned"
-  exit 1
+  if [ -z $PLUGIN_VERSION ]; then
+    echo "build.properties file is not available so a test couldn't be runned"
+    exit 1
+  fi  
 fi
 
 [ -z $PLUGIN_VERSION  ] && \
@@ -100,6 +106,6 @@ REPORTER_PROPERTIES
 
 source "${VENV_PATH}/bin/activate"
 
-./plugin_test/utils/jenkins/system_tests.sh -t test ${systest_parameters} -i ${ISO_PATH} -j ${JOB_NAME} -o --group=${TEST_GROUP} 2>&1
+bash plugin_test/utils/jenkins/system_tests.sh -t test ${systest_parameters} -i ${ISO_PATH} -j ${JOB_NAME} -o --group=${TEST_GROUP} 2>&1
 sudo cp /var/log/libvirt/libvirtd.log ${WORKSPACE}/libvirtd_after_test.log
 sudo chown jenkins:jenkins ${WORKSPACE}/libvirtd_after_test.log

@@ -5,6 +5,8 @@
       - string:
           name: PLUGIN_VERSION
       - string:
+          name: MULTI_REFS
+      - string:
           name: SPECIFIC_VAR
           description: "use form : VAR=value"
       - bool:
@@ -24,6 +26,9 @@
           default: False
       - bool:
           name: DEBUG_MODE
+          default: True
+      - bool:
+          name: GIT_CURL_VERBOSE
           default: True
 - project:
     name: 'predefined_parameters'
@@ -51,7 +56,7 @@
     disable_ssl: true
     kvm_use: false
     update_master: true
-    enable_proposed: false
+    enable_proposed: true
     debug: true
     publish_results: true
     multijob_build_pkg: true

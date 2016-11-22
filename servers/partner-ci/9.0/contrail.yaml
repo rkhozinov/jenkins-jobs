@@ -2,6 +2,8 @@
 - parameter:
     name: plugin-specific-parameters
     parameters:
+      - string:
+          name: MULTI_REFS
       - bool:
           name: BONDING
           default: '{obj:bonding}'
@@ -14,6 +16,9 @@
           name: FORCE_VSRX_COPY
           default: '{obj:force_vsrx_copy}'
           description: 'force copying of vsrx image'
+      - bool:
+          name: GIT_CURL_VERBOSE
+          default: True
       - string:
           description: 'mirror for package repositories. this mirror is optimized for CZ'
           name: MIRROR

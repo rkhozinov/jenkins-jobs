@@ -4,6 +4,8 @@
     parameters:
       - string:
           name: PLUGIN_VERSION
+      - string:
+          name: MULTI_REFS
       - bool:
           name: FORCE_DISABLE_UPDATES
           default: False
@@ -21,6 +23,9 @@
           default: False
       - bool:
           name: DEBUG_MODE
+          default: True
+      - bool:
+          name: GIT_CURL_VERBOSE
           default: True
 - project:
     name: 'predefined_parameters'
@@ -47,8 +52,8 @@
     pkg_job_name: '{fuel-release}.{plugin-name}.build'
     nightly_timer: 'H 22 * * *'
     regression_timer: 'H 18 * * *'
-    nightly_disabled: false
-    regression_disabled: true
+    nightly_disabled: true
+    regression_disabled: false
     force_erase: false
     recreate_venv: false
     ws_norevert: false
@@ -56,7 +61,7 @@
     disable_ssl: true
     kvm_use: false
     update_master: true
-    enable_proposed: false
+    enable_proposed: true
     debug: true
     build_debug: true
     publish_results: true
@@ -66,11 +71,11 @@
     test_timeout: 300
     iso_file: 'MirantisOpenStack-9.0.iso'
     iso_storage: '/storage/downloads'
-    snapshots_id: 'lastSuccessfulBuild'
+    snapshots_id: 'released'
     gerrit_repo: 'fuel-plugin-vmware-dvs'
     gerrit_branch: 'master'
     email_to: 'rkhozinov@mirantis.com vnaumov@mirantis.com ibumarskov@mirantis.com'
-    released_plugin_path: ''
+    released_plugin_path: '/storage/dvs/released/fuel-plugin-vmware-dvs-3.1-3.1.0-1.noarch.rpm'
     scm_submodule_disabled: false
     scm_wipe_workspace: true
     skip_vote_successfull: false
@@ -299,6 +304,7 @@
             TREP_TESTRAIL_SUITE_DESCRIPTION={testrail_suite_desc}
             TREP_TESTRAIL_PLAN={testrail_plan}
             TREP_TESTRAIL_PLAN_DESCRIPTION={testrail_plan_desc}
+            PLUGIN_VERSION={plugin-version}
             SNAPSHOT_OUTPUT_FILE=extra_repos.sh
             SNAPSHOT_ARTIFACTS_FILE=snapshots.params
             ESXI_PASSWORD=swordfish
