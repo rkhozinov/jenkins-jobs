@@ -399,7 +399,7 @@
     name: '{build-name}'
     node: 'runner'
     concurrent: true
-    disabled: false
+    disabled: true
     triggers:
       - default-draft-trigger:
           gerrit_repo: '{gerrit_repo}'
