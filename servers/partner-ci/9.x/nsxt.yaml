@@ -356,8 +356,7 @@
       - conditional-step:
           condition-kind: shell
           condition-command: |
-            [[ "${{UPDATE_MASTER}}" == 'true'     ]] && \
-            [[ "${{SNAPSHOTS_ID}}" -ne 'released' ]]
+            [[ "${{UPDATE_MASTER}}" == 'true'     ]]
           steps:
             - inject:
                 properties-content: |
