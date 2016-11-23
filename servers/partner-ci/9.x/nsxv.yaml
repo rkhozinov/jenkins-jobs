@@ -4,6 +4,7 @@
     parameters:
       - string:
           name: PLUGIN_VERSION
+          default: '{plugin-version}'
       - string:
           name: NSXV_PLUGIN_PATH
 - project:
@@ -31,8 +32,8 @@
     pkg_job_name: '{fuel-release}.{plugin-name}.build'
     nightly_timer: 'H 22 * * *'
     regression_timer: 'H 18 * * *'
-    nightly_disabled: false
-    regression_disabled: true
+    nightly_disabled: true
+    regression_disabled: false
     force_erase: false
     recreate_venv: false
     ws_norevert: false
@@ -40,7 +41,7 @@
     disable_ssl: true
     kvm_use: false
     update_master: true
-    enable_proposed: true
+    enable_proposed: false
     debug: true
     build_debug: true
     publish_results: true
@@ -50,11 +51,11 @@
     test_timeout: 300
     iso_file: 'MirantisOpenStack-9.0.iso'
     iso_storage: '/storage/downloads'
-    snapshots_id: 'lastSuccessfulBuild'
+    snapshots_id: 'released'
     gerrit_repo: 'fuel-plugin-nsxv'
     gerrit_branch: 'master'
     email_to: 'rkhozinov@mirantis.com vnaumov@mirantis.com ibumarskov@mirantis.com'
-    released_plugin_path: ''
+    released_plugin_path: '/storage/nsxv/released/nsxv-3.0-3.0.1-1-43.noarch.rpm'
     scm_submodule_disabled: false
     scm_wipe_workspace: true
     skip_vote_successfull: false
@@ -275,6 +276,13 @@
     properties:
       - test-property
     builders:
+      - shell: |
+          if [[ "${{MULTI_REFS}}" != "none" ]]; then
+            cd ${{WORKSPACE}}
+            for refspec in ${{MULTI_REFS}}; do
+              git fetch ${{GIT_URL}} "$refspec" && git cherry-pick FETCH_HEAD || git status
+            done
+          fi
       - inject:
           properties-content: |
             TREP_TESTRAIL_SUITE={testrail_suite}
@@ -285,7 +293,7 @@
             ENV_PREFIX={fuel-release}.{plugin-name}
             OPENSTACK_RELEASE=Ubuntu
             DESTROY_ENV_AFTER=0
-            WORKSTATION_SNAPSHOT=nsxv_6.2.0
+            WORKSTATION_SNAPSHOT=nsxv_6.2
             WORKSTATION_NODES=esxi1 esxi2 esxi3 vcenter trusty
             VCENTER_IP=administrator@vsphere.local
             WORKSTATION_PASSWORD=VMware01
@@ -330,9 +338,7 @@
       - conditional-step:
           condition-kind: shell
           condition-command: |
-            [[ "${{UPDATE_MASTER}}" == 'true'     ]] && \
-            [[ "${{SNAPSHOTS_ID}}" -ne 'released' ]]
-
+            [[ "${{UPDATE_MASTER}}" == 'true'     ]]
           steps:
             - inject:
                 properties-content: |
@@ -348,6 +354,11 @@
                   ENABLE_MOS_UBUNTU_HOLDBACK=true
                   ENABLE_MOS_UBUNTU_HOTFIX=false
                   ENABLE_MOS_UBUNTU_SECURITY=true
+      - conditional-step:
+          condition-kind: shell
+          condition-command: |
+            [[ "${{SNAPSHOTS_ID}}" != *"released"*     ]]
+          steps:
             - shell: |
                 [ ! -n ${{SNAPSHOTS_ID}} ] && {{ echo "SNAPSHOTS_ID is empty"; exit 1; }}
                 wget --no-check-certificate -O ${{SNAPSHOT_ARTIFACTS_FILE}} ${{SNAPSHOTS_URL/SNAPSHOTS_ID/$SNAPSHOTS_ID}}
@@ -506,9 +517,9 @@
     builders:
       - shell: |
           #!/bin/bash
-          echo "TEST_GROUP={regression-name}" > property
+          echo "TEST_GROUP=nsxv_smoke" > property
           echo "NSXV_PLUGIN_PATH={released_plugin_path}" >> property
-          echo "PLUGIN_VERSION={plugin-version}" >> property
+          echo "PLUGIN_VERSION=3.0.0" >> property
           echo "PKG_JOB_BUILD_NUMBER=released" >> property
       - multijob:
           name: '1st phase - regression test'

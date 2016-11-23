@@ -1,13 +1,6 @@
 #!/bin/bash -e
 
 # activate bash xtrace for script
-if [[ "${MULTI_REFS}" != "none" ]]; then
-  cd ${WORKSPACE}
-  for refspec in ${MULTI_REFS}; do
-    git fetch ${GIT_URL} "${refspec}" && git cherry-pick FETCH_HEAD || git status
-  done
-fi
-
 [[ "${DEBUG}" == "true" ]] && set -x || set +x
 
 [[ "${FORCE_VSRX_COPY}" == "true" ]] && sudo rm -rf $VSRX_TARGET_IMAGE_PATH
