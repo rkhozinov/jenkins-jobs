@@ -302,6 +302,13 @@
     properties:
       - test-property
     builders:
+      - shell: |
+          if [[ "${{MULTI_REFS}}" != "none" ]]; then
+            cd ${{WORKSPACE}}
+            for refspec in ${{MULTI_REFS}}; do
+              git fetch ${{GIT_URL}} "$refspec" && git cherry-pick FETCH_HEAD || git status
+            done
+          fi
       - inject:
           properties-content: |
             TREP_TESTRAIL_SUITE={testrail_suite}
