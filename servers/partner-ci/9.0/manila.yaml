@@ -16,7 +16,7 @@
     reporter-name: '{fuel-release}.{plugin-name}.reporter'
     smoke-test-name: 'manila_smoke'
     bvt-test-name: 'manila_bvt'
-    regression-test-name: 'manila_regression'
+    regression-test-name: 'manila_bvt'
     admin_node_memory: '4096'
     slave_node_memory: '4096'
     admin_node_cpu: '4'
@@ -24,8 +24,8 @@
     pkg_job_name: '{fuel-release}.{plugin-name}.build'
     nightly_timer: 'H 22 * * *'
     regression_timer: 'H 16 * * *'
-    nightly_disabled: false
-    regression_disabled: true
+    nightly_disabled: true
+    regression_disabled: false
     force_erase: false
     recreate_venv: false
     disable_ssl: true
@@ -41,11 +41,11 @@
     test_timeout: 300
     iso_file: 'MirantisOpenStack-9.0.iso'
     iso_storage: '/storage/downloads'
-    snapshots_id: '343'
+    snapshots_id: 'lastSuccessfulBuild'
     gerrit_repo: 'fuel-plugin-manila'
     gerrit_branch: 'master'
     email_to: 'rkhozinov@mirantis.com vnaumov@mirantis.com vrozhanskyy@mirantis.com'
-    released_plugin_path: ''
+    released_plugin_path: '/storage/manila/released/fuel-plugin-manila-1.0-1.0.0-1-67.noarch.rpm'
     scm_submodule_disabled: false
     scm_wipe_workspace: false
     skip_vote_successfull: false
@@ -237,6 +237,13 @@
     properties:
       - test-property
     builders:
+      - shell: |
+          if [[ "${{MULTI_REFS}}" != "none" ]]; then
+            cd ${{WORKSPACE}}
+            for refspec in ${{MULTI_REFS}}; do
+              git fetch ${{GIT_URL}} "$refspec" && git cherry-pick FETCH_HEAD || git status
+            done
+          fi
       - inject:
           properties-content: |
             ENV_PREFIX={fuel-release}.{plugin-name}
