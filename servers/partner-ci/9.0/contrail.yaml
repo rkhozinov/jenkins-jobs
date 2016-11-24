@@ -17,6 +17,9 @@
           default: '{obj:force_vsrx_copy}'
           description: 'force copying of vsrx image'
       - bool:
+          name: ALWAYS_CREATE_DIAGNOSTIC_SNAPSHOT
+          default: True
+      - bool:
           name: GIT_CURL_VERBOSE
           default: False
       - string:
