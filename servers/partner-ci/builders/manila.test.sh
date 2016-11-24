@@ -4,20 +4,26 @@
 export ISO_PATH="${ISO_STORAGE}/${ISO_FILE}"
 [ -z $ISO_PATH  ] && { echo "ISO_PATH is empty or doesn't exist"; exit 1; }
 
-export FUEL_RELEASE=$(echo $ISO_FILE | cut -d- -f2 | tr -d '.iso')
-
-if [[ "${UPDATE_MASTER}" == "true" ]] && [[ ${FUEL_RELEASE} != *"80"* ]]; then
-  if [ -f $SNAPSHOT_OUTPUT_FILE ]; then
-    . $SNAPSHOT_OUTPUT_FILE
-    export EXTRA_RPM_REPOS
-    export UPDATE_FUEL_MIRROR
-    export EXTRA_DEB_REPOS
-  else
-    echo "SNAPSHOT_OUTPUT_FILE is empty or doesn't exist"
-    exit 1
-  fi
+if [[ $ISO_FILE == *"custom"* ]]; then
+  export FUEL_RELEASE=90
 else
-  export SNAPSHOTS_ID="released"
+  export FUEL_RELEASE=$(echo $ISO_FILE | cut -d- -f2 | tr -d '.iso')
+fi
+
+if [ "${SNAPSHOTS_ID}" != "released" ]; then
+  if [[ "${UPDATE_MASTER}" == "true" ]] && [[ ${FUEL_RELEASE} != *"80"* ]]; then
+    if [ -f $SNAPSHOT_OUTPUT_FILE ]; then
+      . $SNAPSHOT_OUTPUT_FILE
+      export EXTRA_RPM_REPOS
+      export UPDATE_FUEL_MIRROR
+      export EXTRA_DEB_REPOS
+    else
+      echo "SNAPSHOT_OUTPUT_FILE is empty or doesn't exist"
+      exit 1
+    fi
+  else
+    export SNAPSHOTS_ID="released"
+  fi
 fi
 
 if [[ $SNAPSHOTS_ID == *"lastSuccessfulBuild"* ]]; then
@@ -29,8 +35,12 @@ fi
 if [ -f build.plugin_version ]; then
   export MANILA_PLUGIN_VERSION=$(grep "PLUGIN_VERSION" < build.plugin_version | cut -d= -f2 )
 else
-  echo "build.properties file is not available so a test couldn't be runned"
-  exit 1
+  if [ -z $PLUGIN_VERSION ]; then
+    echo "build.properties file is not available so a test couldn't be runned"
+    exit 1
+  else
+    export MANILA_PLUGIN_VERSION=$PLUGIN_VERSION
+  fi
 fi
 
 [ -z $MANILA_PLUGIN_VERSION ] && { echo "MANILA_PLUGIN_VERSION is empty"; exit 1; }
@@ -54,6 +64,10 @@ sudo rm -rf logs/*
 
 if [[ $ISO_FILE == *"Mirantis"* ]]; then
   export FUEL_RELEASE=$(echo $ISO_FILE | cut -d- -f2 | tr -d '.iso')
+fi
+
+if [[ $ISO_FILE == *"custom"* ]]; then
+  export FUEL_RELEASE=90
 fi
 
 export ENV_NAME="${ENV_PREFIX}.${SNAPSHOTS_ID}"

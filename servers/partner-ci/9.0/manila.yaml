@@ -430,6 +430,7 @@
       - shell: |
           #!/bin/bash
           echo "TEST_GROUP={regression-test-name}" > property
+          echo "MANILA_PLUGIN_PATH={released_plugin_path}" >> property
           echo "MANILA_IMAGE_PATH={released_plugin_path}" >> property
           echo "PLUGIN_VERSION={plugin-version}" >> property
           echo "PKG_JOB_BUILD_NUMBER=released" >> property
