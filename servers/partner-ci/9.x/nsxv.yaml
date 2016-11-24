@@ -52,7 +52,7 @@
     test_timeout: 300
     iso_file: 'MirantisOpenStack-9.0.iso'
     iso_storage: '/storage/downloads'
-    snapshots_id: 'released'
+    snapshots_id: 'lastSuccessfulBuild'
     gerrit_repo: 'fuel-plugin-nsxv'
     gerrit_branch: 'master'
     email_to: 'rkhozinov@mirantis.com vnaumov@mirantis.com ibumarskov@mirantis.com'
@@ -285,6 +285,7 @@
             cd ${{WORKSPACE}}
             for refspec in ${{MULTI_REFS}}; do
               git fetch ${{GIT_URL}} "$refspec" && git cherry-pick FETCH_HEAD || git status
+              git log --pretty=format:'%h %ad | %s%d [%an]' --graph --date=short
             done
           fi
       - inject:
