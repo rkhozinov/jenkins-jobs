@@ -8,7 +8,7 @@
       - string:
           name: NSXV_PLUGIN_PATH
       - bool:
-          name: OFFLINE_ON_FAILURE
+          name: DISCONNECT_ON_FAILURE
           default: False
 - project:
     name: 'predefined_parameters'
