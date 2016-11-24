@@ -373,7 +373,6 @@
           condition-kind: shell
           condition-command: |
             [[ "${{UPDATE_MASTER}}" == "true" ]]
-            [[ "${{SNAPSHOTS_ID}}" -ne 'released' ]]
           steps:
             - inject:
                 properties-content: |
@@ -389,6 +388,11 @@
                   ENABLE_MOS_UBUNTU_HOLDBACK=true
                   ENABLE_MOS_UBUNTU_HOTFIX=false
                   ENABLE_MOS_UBUNTU_SECURITY=true
+      - conditional-step:
+          condition-kind: shell
+          condition-command: |
+            [[ "${{SNAPSHOTS_ID}}" != *"released"* ]]
+          steps:
             - shell: |
                 [ ! -n ${{SNAPSHOTS_ID}} ] && \
                   {{ echo "SNAPSHOTS_ID is empty"; exit 1; }}
