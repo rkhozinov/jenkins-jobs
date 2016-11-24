@@ -210,6 +210,12 @@
                     property-file: reporter.properties
                     fail-on-missing: true
                     condition: FAILED_OR_BETTER
+      - conditional-publisher:
+          - condition-kind: boolean-expression
+            condition-expression: "${{DISCONNECT_ON_FAILURE}}"
+            action:
+              - shell: |
+                  python -c "import jenkins; jenkins.Jenkins('http://172.16.177.5:8080', username='rkhozinov', password='7d0afaf10fe8866eed8c2f43cac83fbf').disable_node('${{NODE_NAME}}')"
 - builder:
     name: runner-condition
     builders:

@@ -7,6 +7,9 @@
           default: '{plugin-version}'
       - string:
           name: NSXV_PLUGIN_PATH
+      - bool:
+          name: DISCONNECT_ON_FAILURE
+          default: False
 - project:
     name: 'predefined_parameters'
     fuel-release: '9.x'
