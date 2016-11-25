@@ -9,7 +9,9 @@
           name: NSXV_PLUGIN_PATH
       - bool:
           name: DISCONNECT_ON_FAILURE
-          default: False
+          default: True
+      - string:
+          name: MULTI_REFS
 - project:
     name: 'predefined_parameters'
     fuel-release: '9.x'

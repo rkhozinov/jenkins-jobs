@@ -278,7 +278,7 @@
             cd ${{WORKSPACE}}
             for refspec in ${{MULTI_REFS}}; do
               git fetch ${{GIT_URL}} "$refspec" && git cherry-pick FETCH_HEAD || git status
-              git log --pretty=format:'%h %ad | %s%d [%an]' --graph --date=short
+              git log --pretty=format:%h %ad | %s%d [%an]  --graph --date=short
             done
           fi
       - inject:
@@ -330,7 +330,7 @@
             VCENTER_GLANCE_CERT_BYPASS=True
             VCENTER_CERT_URL="http://tpi-s2.bud.mirantis.net:5000/downloads/certs/server.pem"
             VCENTER_CERT_BYPASS=True
-            $SPECIFIC_VAR
+
       - conditional-step:
           condition-kind: shell
           condition-command: |
@@ -371,6 +371,11 @@
                   ENABLE_MOS_UBUNTU_HOLDBACK=true
                   ENABLE_MOS_UBUNTU_HOTFIX=false
                   ENABLE_MOS_UBUNTU_SECURITY=true
+      - conditional-step:
+          condition-kind: shell
+          condition-command: |
+            [[ "${{SNAPSHOTS_ID}}" != *"released"* ]]
+          steps:
             - shell: |
                 [ ! -n ${{SNAPSHOTS_ID}} ] && {{ echo "SNAPSHOTS_ID is empty"; exit 1; }}
                 wget --no-check-certificate -O ${{SNAPSHOT_ARTIFACTS_FILE}} ${{SNAPSHOTS_URL/SNAPSHOTS_ID/$SNAPSHOTS_ID}}
