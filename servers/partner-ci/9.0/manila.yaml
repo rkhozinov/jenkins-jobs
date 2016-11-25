@@ -92,7 +92,7 @@
       - manila_shut_ceph
     jobs:
       - '{build-name}':
-          scm_submodule_disabled: true
+          scm_submodule_disabled: false
           scm_wipe_workspace: true
       - '{flake8-name}':
           scm_submodule_disabled: true
@@ -242,7 +242,7 @@
             cd ${{WORKSPACE}}
             for refspec in ${{MULTI_REFS}}; do
               git fetch ${{GIT_URL}} "$refspec" && git cherry-pick FETCH_HEAD || git status
-              git log  --graph --date=short --pretty=format:%h %ad | %s%d [%an]
+              git log  --graph --date=short --pretty=format:%h %ad | %s%d [%an] | head
             done
           fi
       - inject:
@@ -429,11 +429,13 @@
     builders:
       - shell: |
           #!/bin/bash
-          echo "TEST_GROUP={regression-test-name}" > property
-          echo "MANILA_PLUGIN_PATH={released_plugin_path}" >> property
-          echo "MANILA_IMAGE_PATH=/storage/manila/manila-service-image.qcow2" >> property
-          echo "PLUGIN_VERSION={plugin-version}" >> property
-          echo "PKG_JOB_BUILD_NUMBER=released" >> property
+          cat <<EOF > property
+          MANILA_PLUGIN_PATH={released_plugin_path}
+          MANILA_IMAGE_PATH={released_plugin_path}
+          MANILA_IMAGE_PATH=/storage/manila/manila-service-image.qcow2
+          PLUGIN_VERSION={plugin-version}
+          PKG_JOB_BUILD_NUMBER=released
+          EOF
       - multijob:
           name: '1st phase - regression test'
           condition: COMPLETED

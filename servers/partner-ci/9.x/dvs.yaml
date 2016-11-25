@@ -517,10 +517,12 @@
     builders:
       - shell: |
           #!/bin/bash
-          echo "TEST_GROUP=dvs_regression" > property
-          echo "DVS_PLUGIN_PATH={released_plugin_path}" >> property
-          echo "PLUGIN_VERSION={plugin-version}" >> property
-          echo "PKG_JOB_BUILD_NUMBER=released" >> property
+          cat <<EOF > property
+          TEST_GROUP=dvs_regression
+          DVS_PLUGIN_PATH={released_plugin_path}
+          PLUGIN_VERSION={plugin-version}
+          PKG_JOB_BUILD_NUMBER=released
+          EOF
       - multijob:
           name: '1st phase - regression test'
           condition: COMPLETED
