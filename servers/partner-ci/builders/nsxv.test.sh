@@ -40,7 +40,9 @@ else
   fi
 fi
 
-[ -z $PLUGIN_VERSION  ] && { echo "PLUGIN_VERSION variable is empty"; exit 1; } || export NSXV_PLUGIN_VERSION=$PLUGIN_VERSION
+[ -z $PLUGIN_VERSION  ] && \
+  { echo "PLUGIN_VERSION variable is empty"; exit 1; } || \
+    export NSXV_PLUGIN_VERSION=$PLUGIN_VERSION
 
 if [ -z "${PKG_JOB_BUILD_NUMBER}" ]; then
     if [ -f build.properties ]; then
@@ -97,8 +99,12 @@ REPORTER_PROPERTIES
 
 source "${VENV_PATH}/bin/activate"
 
-./plugin_test/utils/jenkins/system_tests.sh -t test ${systest_parameters} -i ${ISO_PATH} -j ${JOB_NAME} -o --group=${TEST_GROUP} 2>&1
-if [[ "${DEBUG}" == "true" ]]; then	
+bash plugin_test/utils/jenkins/system_tests.sh \
+  -t test ${systest_parameters} \
+	-i ${ISO_PATH} -j ${JOB_NAME} \
+	-o --group=${TEST_GROUP} 2>&1
+
+if [[ "${DEBUG}" == "true" ]]; then
   sudo cp /var/log/libvirt/libvirtd.log ${WORKSPACE}/libvirtd_after_test.log
   sudo chown jenkins:jenkins ${WORKSPACE}/libvirtd_after_test.log
 fi
