@@ -242,7 +242,7 @@
             cd ${{WORKSPACE}}
             for refspec in ${{MULTI_REFS}}; do
               git fetch ${{GIT_URL}} "$refspec" && git cherry-pick FETCH_HEAD || git status
-              git log --pretty=format:'%h %ad | %s%d [%an]' --graph --date=short
+              git log  --graph --date=short --pretty=format:%h %ad | %s%d [%an]
             done
           fi
       - inject:
@@ -431,7 +431,7 @@
           #!/bin/bash
           echo "TEST_GROUP={regression-test-name}" > property
           echo "MANILA_PLUGIN_PATH={released_plugin_path}" >> property
-          echo "MANILA_IMAGE_PATH={released_plugin_path}" >> property
+          echo "MANILA_IMAGE_PATH=/storage/manila/manila-service-image.qcow2" >> property
           echo "PLUGIN_VERSION={plugin-version}" >> property
           echo "PKG_JOB_BUILD_NUMBER=released" >> property
       - multijob:
