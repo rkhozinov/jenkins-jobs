@@ -198,6 +198,13 @@
                   rm -rf *.rpm
                   sudo cp /var/log/libvirt/libvirtd.log ${{WORKSPACE}}/libvirtd_total.log
                   sudo chown jenkins:jenkins ${{WORKSPACE}}/libvirtd_total.log
+      - postbuildscript:
+          script-only-if-succeeded: False
+          script-only-if-failed: True
+          builders:
+              - shell: |
+                  [[ ${{DISCONNECT_ON_FAILURE}} ]] && \
+                  python -c "import jenkins; jenkins.Jenkins('http://172.16.177.5:8080', username='rkhozinov', password='7d0afaf10fe8866eed8c2f43cac83fbf').disable_node('${{NODE_NAME}}')"
       - description-setter:
           regexp-for-failed: '"error":(.*) \1 "AssertionError":(.*) \2'
           description-for-failed: '\1 \2'
@@ -210,12 +217,6 @@
                     property-file: reporter.properties
                     fail-on-missing: true
                     condition: FAILED_OR_BETTER
-      - conditional-publisher:
-          - condition-kind: boolean-expression
-            condition-expression: "${{DISCONNECT_ON_FAILURE}}"
-            action:
-              - shell: |
-                  python -c "import jenkins; jenkins.Jenkins('http://172.16.177.5:8080', username='rkhozinov', password='7d0afaf10fe8866eed8c2f43cac83fbf').disable_node('${{NODE_NAME}}')"
 - builder:
     name: runner-condition
     builders:
