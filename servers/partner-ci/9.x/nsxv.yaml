@@ -10,7 +10,10 @@
       - bool:
           name: DISCONNECT_ON_FAILURE
           default: True
-
+      - string:
+          name: MULTI_REFS
+      - string:
+          name: FUEL_QA_REFS
 - project:
     name: 'predefined_parameters'
     fuel-release: '9.x'
@@ -520,10 +523,12 @@
     builders:
       - shell: |
           #!/bin/bash
-          echo "TEST_GROUP=nsxv_smoke" > property
-          echo "NSXV_PLUGIN_PATH={released_plugin_path}" >> property
-          echo "PLUGIN_VERSION=3.0.0" >> property
-          echo "PKG_JOB_BUILD_NUMBER=released" >> property
+          cat <<EOF > property
+          TEST_GROUP=nsxv_smoke
+          NSXV_PLUGIN_PATH={released_plugin_path}
+          PLUGIN_VERSION=3.0.1
+          PKG_JOB_BUILD_NUMBER=released
+          EOF
       - multijob:
           name: '1st phase - regression test'
           condition: COMPLETED

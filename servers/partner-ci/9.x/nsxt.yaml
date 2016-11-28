@@ -8,6 +8,10 @@
       - string:
           name: NSXT_PLUGIN_PATH
       - string:
+          name: MULTI_REFS
+      - string:
+          name: FUEL_QA_REFS
+      - string:
           name: DEVOPS_SETTINGS_TEMPLATE
           default: '$WORKSPACE/plugin_test/test_templates/default.yaml'
       - bool:
@@ -151,7 +155,7 @@
           publish_results: false
           vcenter_use: true
           scm_wipe_workspace: true
-                  
+
       - '{custom-name}.dev':
           publish_results: false
           testgroup_parameter_type: choice
@@ -491,10 +495,12 @@
     builders:
       - shell: |
           #!/bin/bash
-          echo "TEST_GROUP=nsxt_bvt" > property
-          echo "NSXT_PLUGIN_PATH={released_plugin_path}" >> property
-          echo "PLUGIN_VERSION={plugin-version}" >> property
-          echo "PKG_JOB_BUILD_NUMBER=released" >> property
+          cat <<EOF > property
+          TEST_GROUP=nsxt_bvt
+          NSXT_PLUGIN_PATH={released_plugin_path}
+          PLUGIN_VERSION={plugin-version}
+          PKG_JOB_BUILD_NUMBER=released
+          EOF
       - multijob:
           name: '1st phase - regression test'
           condition: COMPLETED

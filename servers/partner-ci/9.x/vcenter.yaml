@@ -6,6 +6,8 @@
           name: PLUGIN_VERSION
           default: '{plugin-version}'
       - string:
+          name: FUEL_QA_REFS
+      - string:
           name: SPECIFIC_VAR
           description: "use form : VAR=value"
       - bool:

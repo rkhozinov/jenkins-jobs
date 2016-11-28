@@ -1,4 +1,32 @@
 ---
+- parameter:
+    name: plugin-specific-parameters
+    parameters:
+      - text:
+          name: DEFAULT_PARAMETERS
+            default: |
+            ENV_PREFIX=${{fuel-release}}.${{plugin-name}}
+            SNAPSHOT_ARTIFACTS_FILE=snapshots.params
+            OPENSTACK_RELEASE=Ubuntu
+            NODES_COUNT=10
+            DESTROY_ENV_AFTER=0
+            ADMIN_NODE_MEMORY=4096
+            SLAVE_NODE_MEMORY=4096
+            ADMIN_NODE_CPU=4
+            SLAVE_NODE_CPU=4
+            TREP_TESTRAIL_SUITE=${{testrail_suite}}
+            TREP_TESTRAIL_SUITE_DESCRIPTION=${{testrail_suite_desc}}
+            TREP_TESTRAIL_PLAN=${{testrail_plan}}
+            TREP_TESTRAIL_PLAN_DESCRIPTION=${{testrail_plan_desc}}
+            MANILA_IMAGE_PATH=/storage/manila/manila-service-image.qcow2
+            WORKSTATION_SNAPSHOT=base_image
+            WORKSTATION_IFS=vmnet2:management,vmnet3:private,vmnet4:storage
+            WORKSTATION_NODES=netapp
+            WORKSTATION_PASSWORD=VMware01
+            WORKSTATION_USERNAME=vmware
+            PLUGIN_VERSION=${{plugin-version}}
+            SNAPSHOT_OUTPUT_FILE=extra_repos.sh
+            SNAPSHOT_ARTIFACTS_FILE=snapshots.params
 - project:
     name: 'predefined_parameters'
     fuel-release: '9.1'
@@ -176,6 +204,7 @@
           kvm_use:              '{kvm_use}'
           iso_storage:          '{iso_storage}'
           snapshots_id:         '{snapshots_id}'
+      - plugin-specific-parameters
 
 # parameters for jobs created per test-group and custom test job
 - test-parameters: &test-parameters
@@ -194,30 +223,38 @@
           '{testgroup_value_type}': '{obj:testgroup_value}'
           description: "test-group name"
       - common-parameters:
-          publish_results: '{publish_results}'
-          debug:           '{debug}'
-          disable_ssl:     '{disable_ssl}'
-          force_erase:     '{force_erase}'
-          recreate_venv:   '{recreate_venv}'
-          iso_file:        '{iso_file}'
-          gerrit_branch:   '{gerrit_branch}'
-          env_prefix:      '{fuel-release}.{plugin-name}'
-          pkg_job_name:    '{pkg_job_name}'
-          admin_node_memory:    '{admin_node_memory}'
-          slave_node_memory:    '{slave_node_memory}'
-          admin_node_cpu:       '{admin_node_cpu}'
-          slave_node_cpu:       '{slave_node_cpu}'
-          testrail_suite:       '{testrail_suite}'
-          testrail_suite_desc:  '{testrail_suite_desc}'
-          testrail_plan:        '{testrail_plan}'
-          testrail_plan_desc:   '{testrail_plan_desc}'
+          publish_results:       '{publish_results}'
+          debug:                 '{debug}'
+          disable_ssl:           '{disable_ssl}'
+          force_erase:           '{force_erase}'
+          recreate_venv:         '{recreate_venv}'
+          iso_file:              '{iso_file}'
+          gerrit_branch:         '{gerrit_branch}'
+          env_prefix:            '{fuel-release}.{plugin-name}'
+          pkg_job_name:          '{pkg_job_name}'
+          admin_node_memory:     '{admin_node_memory}'
+          slave_node_memory:     '{slave_node_memory}'
+          admin_node_cpu:        '{admin_node_cpu}'
+          slave_node_cpu:        '{slave_node_cpu}'
+          testrail_suite:        '{testrail_suite}'
+          testrail_suite_desc:   '{testrail_suite_desc}'
+          testrail_plan:         '{testrail_plan}'
+          testrail_plan_desc:    '{testrail_plan_desc}'
           skip_vote_successfull: '{skip_vote_successfull}'
-          skip_vote_failed:     '{skip_vote_failed}'
-          enable_proposed:      '{enable_proposed}'
-          update_master:        '{update_master}'
-          kvm_use:              '{kvm_use}'
-          iso_storage:          '{iso_storage}'
-          snapshots_id:         '{snapshots_id}'
+          skip_vote_failed:      '{skip_vote_failed}'
+          enable_proposed:       '{enable_proposed}'
+          update_master:         '{update_master}'
+          kvm_use:               '{kvm_use}'
+          iso_storage:           '{iso_storage}'
+          snapshots_id:          '{snapshots_id}'
+
+      - plugin-specific-parameters:
+           plugin_version:       '{plugin-version}'
+           env_prefix:           '{fuel-release}.{plugin-name}'
+           testrail_suite:       '{testrail_suite}'
+           testrail_suite_desc:  '{testrail_suite_desc}'
+           testrail_plan:        '{testrail_plan}'
+           testrail_plan_desc:   '{testrail_plan_desc}'
 
 - defaults:
     name: global
@@ -239,28 +276,7 @@
     builders:
       - get-refs
       - inject:
-          properties-content: |
-            ENV_PREFIX={fuel-release}.{plugin-name}
-            OPENSTACK_RELEASE=Ubuntu
-            NODES_COUNT=10
-            DESTROY_ENV_AFTER=0
-            ADMIN_NODE_MEMORY={admin_node_memory}
-            SLAVE_NODE_MEMORY={slave_node_memory}
-            ADMIN_NODE_CPU={admin_node_cpu}
-            SLAVE_NODE_CPU={slave_node_cpu}
-            TREP_TESTRAIL_SUITE={testrail_suite}
-            TREP_TESTRAIL_SUITE_DESCRIPTION={testrail_suite_desc}
-            TREP_TESTRAIL_PLAN={testrail_plan}
-            TREP_TESTRAIL_PLAN_DESCRIPTION={testrail_plan_desc}
-            MANILA_IMAGE_PATH=/storage/manila/manila-service-image.qcow2
-            WORKSTATION_SNAPSHOT=base_image
-            WORKSTATION_IFS=vmnet2:management,vmnet3:private,vmnet4:storage
-            WORKSTATION_NODES=netapp
-            WORKSTATION_PASSWORD=VMware01
-            WORKSTATION_USERNAME=vmware
-            PLUGIN_VERSION={plugin-version}
-            SNAPSHOT_OUTPUT_FILE=extra_repos.sh
-            SNAPSHOT_ARTIFACTS_FILE=snapshots.params
+          properties-file: defaults.prop
       - conditional-step:
           condition-kind: shell
           condition-command: |
@@ -307,8 +323,10 @@
             [[ "${{SNAPSHOTS_ID}}" != *"released"* ]]
           steps:
             - shell: |
-                [ ! -n ${{SNAPSHOTS_ID}} ] && {{ echo "SNAPSHOTS_ID is empty"; exit 1; }}
-                wget --no-check-certificate -O ${{SNAPSHOT_ARTIFACTS_FILE}} ${{SNAPSHOTS_URL/SNAPSHOTS_ID/$SNAPSHOTS_ID}}
+                [ ! -n ${{SNAPSHOTS_ID}} ] && \
+                  {{ echo "SNAPSHOTS_ID is empty"; exit 1; }}
+                wget --no-check-certificate -O ${{SNAPSHOT_ARTIFACTS_FILE}} \
+                ${{SNAPSHOTS_URL/SNAPSHOTS_ID/$SNAPSHOTS_ID}}
                 python plugin_test/fuel-qa/utils/jenkins/conv_snapshot_file.py
       - shell:
           !include-raw-escape: ../builders/common.prepare.sh

@@ -2,6 +2,10 @@
 - parameter:
     name: plugin-specific-parameters
     parameters:
+      - string:
+          name: MULTI_REFS
+      - string:
+          name: FUEL_QA_REFS
       - bool:
           name: BONDING
           default: '{obj:bonding}'
@@ -672,30 +676,13 @@
     builders:
       - shell: |
           #!/bin/bash
-          echo "TEST_GROUP=contrail_bvt" > property
-          echo "CONTRAIL_DISTRIBUTION=juniper" >> property
-          echo "CONTRAIL_PLUGIN_PATH={released_plugin_path}" >> property
-          echo "PLUGIN_VERSION={plugin-version}" >> property
-          echo "PKG_JOB_BUILD_NUMBER=released" >> property
-      #      - conditional-step:
-      #          condition-kind: file-exists
-      #          condition-filename: "build.properties"
-      #          steps:
-      #            - shell: |
-      #                #!/bin/bash
-      #                build_number=$(grep "^BUILD_NUMBER=" < build.properties | cut -d= -f2)
-      #                echo "PKG_JOB_BUILD_NUMBER=$build_number" > build_number
-      #      - conditional-step:
-      #          condition-kind: shell
-      #          condition-command: |
-      #            [[ "${{UPDATE_MASTER}}" == "true" ]] && [[ "${{SNAPSHOTS_ID}}" != *"released"* ]]
-      #          steps:
-      #            - shell: |
-      #                #!/bin/bash
-      #                SNAPSHOTS_ID=${SNAPSHOTS_ID:=lastSuccessfulBuild}
-      #                wget --no-check-certificate -O snapshots.params ${SNAPSHOTS_URL/SNAPSHOTS_ID/$SNAPSHOTS_ID}
-      #                snapshots_id=$(grep "^CUSTOM_VERSION=" < snapshots.params | cut -d= -f2 | cut -d'#' -f2)
-      #                echo "SNAPSHOTS_ID=${snapshots_id}" >> build_number
+          cat <<EOF > property
+          TEST_GROUP=contrail_bvt
+          CONTRAIL_DISTRIBUTION=juniper
+          CONTRAIL_PLUGIN_PATH={released_plugin_path}
+          PLUGIN_VERSION={plugin-version}
+          PKG_JOB_BUILD_NUMBER=released
+          EOF
       - multijob:
           name: '1st phase - regression test'
           condition: COMPLETED
