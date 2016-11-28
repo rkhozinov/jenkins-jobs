@@ -117,6 +117,9 @@
     wrappers:
       - ansicolor:
           colormap: xterm
+      - inject-passwords:
+          global: true
+          mask-password-params: true
     parameters:
       - label:
           name: node
@@ -126,7 +129,7 @@
     builders:
       - shell: |
           sudo pkill vmx || echo  'virtual machines are killed'
-          if sudo puppet agent -tdv --server tpi-puppet.vm.mirantis.net --waitforcert 30;  then
+          if sudo puppet agent -tdv --server ${{PUPPET_MASTER_ADDR}} --waitforcert 30; then
               echo "Command succeeded"
           else
               ref=$?
