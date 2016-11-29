@@ -6,11 +6,7 @@
           name: PLUGIN_VERSION
           default: '{plugin-version}'
       - string:
-          name: FUEL_QA_REFS
-      - string:
           name: NSXT_PLUGIN_PATH
-      - string:
-          name: MULTI_REFS
       - string:
           name: DEVOPS_SETTINGS_TEMPLATE
           default: '$WORKSPACE/plugin_test/test_templates/default.yaml'

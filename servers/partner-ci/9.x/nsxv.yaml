@@ -6,14 +6,11 @@
           name: PLUGIN_VERSION
           default: '{plugin-version}'
       - string:
-          name: FUEL_QA_REFS
-      - string:
           name: NSXV_PLUGIN_PATH
       - bool:
           name: DISCONNECT_ON_FAILURE
           default: True
-      - string:
-          name: MULTI_REFS
+
 - project:
     name: 'predefined_parameters'
     fuel-release: '9.x'

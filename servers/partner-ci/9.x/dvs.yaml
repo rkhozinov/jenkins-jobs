@@ -4,10 +4,6 @@
     parameters:
       - string:
           name: PLUGIN_VERSION
-      - string:
-          name: MULTI_REFS
-      - string:
-          name: FUEL_QA_REFS
       - bool:
           name: FORCE_DISABLE_UPDATES
           default: False

@@ -2,10 +2,6 @@
 - parameter:
     name: plugin-specific-parameters
     parameters:
-      - string:
-          name: MULTI_REFS
-      - string:
-          name: FUEL_QA_REFS
       - bool:
           name: BONDING
           default: '{obj:bonding}'

@@ -4,10 +4,7 @@
     parameters:
       - string:
           name: PLUGIN_VERSION
-      - string:
-          name: MULTI_REFS
-      - string:
-          name: FUEL_QA_REFS
+          default: '{plugin-version}'
       - string:
           name: SPECIFIC_VAR
           description: "use form : VAR=value"

@@ -46,6 +46,10 @@
           default: '{skip_vote_failed}'
           description: "configure gerrit voting"
       - string:
+          name: FUEL_QA_REFS
+      - string:
+          name: MULTI_REFS
+      - string:
           name: MIRROR_HOST
           default: 'mirror.seed-cz1.fuel-infra.org'
           description: 'mirror for package repositories. this mirror is optimized for CZ'
