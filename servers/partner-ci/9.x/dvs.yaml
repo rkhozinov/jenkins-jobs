@@ -288,23 +288,7 @@
     properties:
       - test-property
     builders:
-      - shell: |
-          if [[ "${{FUEL_QA_REFS}}" != "none" ]]; then
-            cd ${{WORKSPACE}}/plugin_test/fuel-qa
-            FUEL_QA_GIT_URL=$(git config --get remote.origin.url)
-            for refspec in ${{FUEL_QA_REFS}}; do
-              git fetch ${{FUEL_QA_GIT_URL}} "$refspec" && git cherry-pick FETCH_HEAD || { git status; exit 1; }
-              git log --pretty=format:"%h %ad | %s%d [%an]" --graph --date=short | head
-            done
-          fi
-      - shell: |
-          if [[ "${{MULTI_REFS}}" != "none" ]]; then
-            cd ${{WORKSPACE}}
-            for refspec in ${{MULTI_REFS}}; do
-              git fetch ${{GIT_URL}} "$refspec" && git cherry-pick FETCH_HEAD ||  { git status; exit 1; }
-              git log --pretty=format:"%h %ad | %s%d [%an]" --graph --date=short | head
-            done
-          fi
+      - get-refs
       - inject:
           properties-content: |
             ENV_PREFIX={fuel-release}.{plugin-name}
