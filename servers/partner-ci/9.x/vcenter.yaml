@@ -5,32 +5,6 @@
       - string:
           name: PLUGIN_VERSION
           default: '{plugin-version}'
-      - string:
-          name: FUEL_QA_REFS
-      - string:
-          name: SPECIFIC_VAR
-          description: "use form : VAR=value"
-      - bool:
-          name: FORCE_DISABLE_UPDATES
-          default: False
-      - bool:
-          name: DRIVER_ENABLE_ACPI
-          default: False
-      - bool:
-          name: MAKE_SNAPSHOT
-          default: False
-      - bool:
-          name: FUEL_STATS_ENABLED
-          default: False
-      - bool:
-          name: ALWAYS_CREATE_DIAGNOSTIC_SNAPSHOT
-          default: False
-      - bool:
-          name: DEBUG_MODE
-          default: True
-      - bool:
-          name: GIT_CURL_VERBOSE
-          default: False
 - project:
     name: 'predefined_parameters'
     fuel-release: '9.x'

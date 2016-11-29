@@ -90,6 +90,30 @@
           name: KVM_USE
           default: '{obj:kvm_use}'
           description: 'turns on kvm_mode for an openstack cluster'
+      - bool:
+          name: FORCE_DISABLE_UPDATES
+          default: False
+      - bool:
+          name: DRIVER_ENABLE_ACPI
+          default: False
+      - bool:
+          name: MAKE_SNAPSHOT
+          default: False
+      - bool:
+          name: FUEL_STATS_ENABLED
+          default: False
+      - bool:
+          name: ALWAYS_CREATE_DIAGNOSTIC_SNAPSHOT
+          default: False
+      - bool:
+          name: DEBUG_MODE
+          default: True
+      - bool:
+          name: GIT_CURL_VERBOSE
+          default: False
+      - bool:
+          name: DISCONNECT_ON_FAILURE
+          default: True
 
 - publisher:
     name: runner-publisher
