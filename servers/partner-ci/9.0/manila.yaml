@@ -2,6 +2,10 @@
 - parameter:
     name: plugin-specific-parameters
     parameters:
+      - string:
+          name: MULTI_REFS
+      - string:
+          name: FUEL_QA_REFS
       - text:
           name: DEFAULT_PARAMETERS
             default: |
@@ -223,38 +227,32 @@
           '{testgroup_value_type}': '{obj:testgroup_value}'
           description: "test-group name"
       - common-parameters:
-          publish_results:       '{publish_results}'
-          debug:                 '{debug}'
-          disable_ssl:           '{disable_ssl}'
-          force_erase:           '{force_erase}'
-          recreate_venv:         '{recreate_venv}'
-          iso_file:              '{iso_file}'
-          gerrit_branch:         '{gerrit_branch}'
-          env_prefix:            '{fuel-release}.{plugin-name}'
-          pkg_job_name:          '{pkg_job_name}'
-          admin_node_memory:     '{admin_node_memory}'
-          slave_node_memory:     '{slave_node_memory}'
-          admin_node_cpu:        '{admin_node_cpu}'
-          slave_node_cpu:        '{slave_node_cpu}'
-          testrail_suite:        '{testrail_suite}'
-          testrail_suite_desc:   '{testrail_suite_desc}'
-          testrail_plan:         '{testrail_plan}'
-          testrail_plan_desc:    '{testrail_plan_desc}'
+          publish_results: '{publish_results}'
+          debug:           '{debug}'
+          disable_ssl:     '{disable_ssl}'
+          force_erase:     '{force_erase}'
+          recreate_venv:   '{recreate_venv}'
+          iso_file:        '{iso_file}'
+          gerrit_branch:   '{gerrit_branch}'
+          env_prefix:      '{fuel-release}.{plugin-name}'
+          pkg_job_name:    '{pkg_job_name}'
+          admin_node_memory:    '{admin_node_memory}'
+          slave_node_memory:    '{slave_node_memory}'
+          admin_node_cpu:       '{admin_node_cpu}'
+          slave_node_cpu:       '{slave_node_cpu}'
+          testrail_suite:       '{testrail_suite}'
+          testrail_suite_desc:  '{testrail_suite_desc}'
+          testrail_plan:        '{testrail_plan}'
+          testrail_plan_desc:   '{testrail_plan_desc}'
           skip_vote_successfull: '{skip_vote_successfull}'
-          skip_vote_failed:      '{skip_vote_failed}'
-          enable_proposed:       '{enable_proposed}'
-          update_master:         '{update_master}'
-          kvm_use:               '{kvm_use}'
-          iso_storage:           '{iso_storage}'
-          snapshots_id:          '{snapshots_id}'
-
+          skip_vote_failed:     '{skip_vote_failed}'
+          enable_proposed:      '{enable_proposed}'
+          update_master:        '{update_master}'
+          kvm_use:              '{kvm_use}'
+          iso_storage:          '{iso_storage}'
+          snapshots_id:         '{snapshots_id}'
       - plugin-specific-parameters:
-           plugin_version:       '{plugin-version}'
-           env_prefix:           '{fuel-release}.{plugin-name}'
-           testrail_suite:       '{testrail_suite}'
-           testrail_suite_desc:  '{testrail_suite_desc}'
-           testrail_plan:        '{testrail_plan}'
-           testrail_plan_desc:   '{testrail_plan_desc}'
+           env_prefix:      '{fuel-release}.{plugin-name}'
 
 - defaults:
     name: global
