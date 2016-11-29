@@ -580,4 +580,4 @@
           properties_name: nightly.properties
           email_to: '{email_to}'
     builders:
-      !include: contrail-nightly.yaml.inc
+      !include: contrail-nightly.yaml

@@ -392,4 +392,4 @@
           properties_name: nightly.properties
           email_to: '{email_to}'
     builders:
-      !include: vcenter-nightly.yaml.inc
+      !include: vcenter-nightly.yaml

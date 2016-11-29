@@ -553,4 +553,4 @@
           properties_name: nightly.properties
           email_to: '{email_to}'
     builders:
-      !include: manila-nightly.yaml.inc
+      !include: manila-nightly.yaml

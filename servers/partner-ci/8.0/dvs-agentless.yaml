@@ -541,4 +541,4 @@
           properties_name: nightly.properties
           email_to: '{email_to}'
     builders:
-      !include: dvs-agentless-nightly.yaml.inc
+      !include: dvs-agentless-nightly.yaml

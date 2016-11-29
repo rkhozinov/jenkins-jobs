@@ -576,4 +576,4 @@
           properties_name: nightly.properties
           email_to: '{email_to}'
     builders:
-      !include: nsxt-nightly.yaml.inc
+      !include: nsxt-nightly.yaml

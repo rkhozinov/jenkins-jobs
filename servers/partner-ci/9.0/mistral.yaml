@@ -502,4 +502,4 @@
           properties_name: nightly.properties
           email_to: '{email_to}'
     builders:
-      !include: mistral-nigthly.yaml.inc
+      !include: mistral-nigthly.yaml

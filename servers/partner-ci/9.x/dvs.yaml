@@ -617,4 +617,4 @@
           properties_name: nightly.properties
           email_to: '{email_to}'
     builders:
-      !include: dvs-nightly.yaml.inc
+      !include: dvs-nightly.yaml

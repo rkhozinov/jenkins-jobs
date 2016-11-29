@@ -516,4 +516,4 @@
           properties_name: nightly.properties
           email_to: '{email_to}'
     builders:
-      !include: gcs-nigthly.yaml.inc
+      !include: gcs-nigthly.yaml
