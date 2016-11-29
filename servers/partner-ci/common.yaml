@@ -120,9 +120,9 @@
             ESXI_USER=root
             FORCE_DISABLE_UPDATES=false
             DRIVER_ENABLE_ACPI=true
-            MAKE_SNAPSHOT=false
+            MAKE_SNAPSHOT=true
             FUEL_STATS_ENABLED=false
-            ALWAYS_CREATE_DIAGNOSTIC_SNAPSHOT=false
+            ALWAYS_CREATE_DIAGNOSTIC_SNAPSHOT=true
             DEBUG_MODE=true
             GIT_CURL_VERBOSE=false
 - publisher:
