@@ -119,7 +119,7 @@
             ESXI_PASSWORD=swordfish
             ESXI_USER=root
             FORCE_DISABLE_UPDATES=false
-            DRIVER_ENABLE_ACPI=false
+            DRIVER_ENABLE_ACPI=true
             MAKE_SNAPSHOT=false
             FUEL_STATS_ENABLED=false
             ALWAYS_CREATE_DIAGNOSTIC_SNAPSHOT=false
