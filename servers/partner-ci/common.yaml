@@ -50,33 +50,9 @@
           default: '{obj:kvm_use}'
           description: 'turns on kvm_mode for an openstack cluster'
       - bool:
-          name: FORCE_DISABLE_UPDATES
-          default: False
-      - bool:
-          name: DRIVER_ENABLE_ACPI
-          default: False
-      - bool:
-          name: MAKE_SNAPSHOT
-          default: False
-      - bool:
-          name: FUEL_STATS_ENABLED
-          default: False
-      - bool:
-          name: ALWAYS_CREATE_DIAGNOSTIC_SNAPSHOT
-          default: False
-      - bool:
-          name: DEBUG_MODE
-          default: True
-      - bool:
-          name: GIT_CURL_VERBOSE
-          default: False
-      - bool:
           name: DISCONNECT_ON_FAILURE
-          default: True
-      - bool:
-          name: SPECIFIC_DEVOPS_TEMPLATE
           default: False
-          description: "Using specific template, please fill in var DEVOPS_SETTINGS_TEMPLATE"
+          description: "disconnect node after failure"
       - string:
           name: FUEL_QA_REFS
           description: "Multiple Refspecs for commits in fuel-qa gerrit separated with spaces"
@@ -142,6 +118,13 @@
             SNAPSHOT_ARTIFACTS_FILE=snapshots.params
             ESXI_PASSWORD=swordfish
             ESXI_USER=root
+            FORCE_DISABLE_UPDATES=false
+            DRIVER_ENABLE_ACPI=false
+            MAKE_SNAPSHOT=false
+            FUEL_STATS_ENABLED=false
+            ALWAYS_CREATE_DIAGNOSTIC_SNAPSHOT=false
+            DEBUG_MODE=true
+            GIT_CURL_VERBOSE=false
 - publisher:
     name: runner-publisher
     publishers:

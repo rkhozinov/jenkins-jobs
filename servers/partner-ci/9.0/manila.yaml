@@ -270,17 +270,6 @@
       - conditional-step:
           condition-kind: shell
           condition-command: |
-            [[ "${{SPECIFIC_DEVOPS_TEMPLATE}}" == "true" ]]
-          steps:
-            - inject:
-                properties-content: |
-                  ADMIN_NODE_MEMORY=
-                  SLAVE_NODE_MEMORY=
-                  ADMIN_NODE_CPU=
-                  SLAVE_NODE_CPU=
-      - conditional-step:
-          condition-kind: shell
-          condition-command: |
             [ ! -z ${{PKG_JOB_NAME}}         ] && \
             [   -z ${{PKG_JOB_BUILD_NUMBER}} ] && \
             [   -z ${{MANILA_PLUGIN_PATH}}   ]
@@ -307,26 +296,17 @@
             - inject:
                 properties-content: |
                   ENABLE_MOS_CENTOS_OS=true
-                  ENABLE_MOS_CENTOS_PROPOSED=false
+                  ENABLE_MOS_CENTOS_PROPOSED=$ENABLE_PROPOSED
                   ENABLE_MOS_CENTOS_UPDATES=true
                   ENABLE_MOS_CENTOS_HOLDBACK=true
                   ENABLE_MOS_CENTOS_HOTFIX=false
                   ENABLE_MOS_CENTOS_SECURITY=true
                   ENABLE_MOS_UBUNTU_OS=true
-                  ENABLE_MOS_UBUNTU_PROPOSED=false
+                  ENABLE_MOS_UBUNTU_PROPOSED=$ENABLE_PROPOSED
                   ENABLE_MOS_UBUNTU_UPDATES=true
                   ENABLE_MOS_UBUNTU_HOLDBACK=true
                   ENABLE_MOS_UBUNTU_HOTFIX=false
                   ENABLE_MOS_UBUNTU_SECURITY=true
-      - conditional-step:
-          condition-kind: shell
-          condition-command: |
-            [[ "${{ENABLE_PROPOSED}}" == "true" ]]
-          steps:
-            - inject:
-                properties-content: |
-                  ENABLE_MOS_UBUNTU_PROPOSED=true
-                  ENABLE_MOS_CENTOS_PROPOSED=true
       - conditional-step:
           condition-kind: shell
           condition-command: |
