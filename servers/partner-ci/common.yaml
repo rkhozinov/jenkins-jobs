@@ -74,7 +74,7 @@
       - string:
           name: GERRIT_REFSPEC
           default: 'refs/heads/{gerrit_branch}'
-          description: 'Single Refspec for commits in fuel-qa gerrit'
+          description: 'Single Refspec for commits in plugin repo gerrit'
       - string:
           name: GERRIT_BRANCH
           default: 'origin/{gerrit_branch}'
