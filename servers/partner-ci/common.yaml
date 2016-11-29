@@ -58,7 +58,7 @@
       - string:
           name: SNAPSHOTS_ID
           default: '{snapshots_id}'
-          description: 'snapshots number or lastSuccessfulBuild'
+          description: 'snapshots number, "lastSuccessfulBuild" or "released"'
       - string:
           name: SNAPSHOTS_URL
           default: 'https://product-ci.infra.mirantis.net/job/9.x.snapshot/SNAPSHOTS_ID/artifact/snapshots.params'
