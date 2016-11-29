@@ -7,30 +7,12 @@
       - string:
           name: FUEL_QA_REFS
       - text:
-          name: DEFAULT_PARAMETERS
+          name: SPECIFIC_PROPS
             default: |
-            ENV_PREFIX=${{fuel-release}}.${{plugin-name}}
-            SNAPSHOT_ARTIFACTS_FILE=snapshots.params
-            OPENSTACK_RELEASE=Ubuntu
-            NODES_COUNT=10
-            DESTROY_ENV_AFTER=0
-            ADMIN_NODE_MEMORY=4096
-            SLAVE_NODE_MEMORY=4096
-            ADMIN_NODE_CPU=4
-            SLAVE_NODE_CPU=4
-            TREP_TESTRAIL_SUITE=${{testrail_suite}}
-            TREP_TESTRAIL_SUITE_DESCRIPTION=${{testrail_suite_desc}}
-            TREP_TESTRAIL_PLAN=${{testrail_plan}}
-            TREP_TESTRAIL_PLAN_DESCRIPTION=${{testrail_plan_desc}}
             MANILA_IMAGE_PATH=/storage/manila/manila-service-image.qcow2
             WORKSTATION_SNAPSHOT=base_image
             WORKSTATION_IFS=vmnet2:management,vmnet3:private,vmnet4:storage
             WORKSTATION_NODES=netapp
-            WORKSTATION_PASSWORD=VMware01
-            WORKSTATION_USERNAME=vmware
-            PLUGIN_VERSION=${{plugin-version}}
-            SNAPSHOT_OUTPUT_FILE=extra_repos.sh
-            SNAPSHOT_ARTIFACTS_FILE=snapshots.params
 - project:
     name: 'predefined_parameters'
     fuel-release: '9.1'
@@ -273,8 +255,18 @@
       - test-property
     builders:
       - get-refs
+      - shell:
+          if [ ! z ${SPECIFIC_PROPS} ]; then
+            > specific.prop
+            for param in ${SPECIFIC_PROPS}; do echo $param >> specific.prop; done
+      - shell:
+          if [ ! z ${{COMMON_PROPS}} ]; then
+            > common.prop
+            for param in ${COMMON_PROPS}; do echo $param >> common.prop; done
       - inject:
-          properties-file: defaults.prop
+          properties-file: specific.prop
+      - inject:
+          properties-file: common.prop
       - conditional-step:
           condition-kind: shell
           condition-command: |

@@ -279,24 +279,14 @@
       - get-refs
       - inject:
           properties-content: |
-            TREP_TESTRAIL_SUITE={testrail_suite}
-            TREP_TESTRAIL_SUITE_DESCRIPTION={testrail_suite_desc}
-            TREP_TESTRAIL_PLAN={testrail_plan}
-            TREP_TESTRAIL_PLAN_DESCRIPTION={testrail_plan_desc}
-            PLUGIN_VERSION={plugin-version}
-            ENV_PREFIX={fuel-release}.{plugin-name}
-            OPENSTACK_RELEASE=Ubuntu
-            DESTROY_ENV_AFTER=0
             WORKSTATION_NODES=esxi1 esxi2 esxi3 vcenter nsx-edge trusty
-            VCENTER_IP=administrator@vsphere.local
+            VCENTER_USERNAME=administrator@vsphere.local
             WORKSTATION_PASSWORD=VMware01
             WORKSTATION_USERNAME=vmware
             VCENTER_PASSWORD=Qwer!1234
             VCENTER_IP=172.16.0.254
             VCENTER_CLUSTERS=Cluster1,Cluster2
             NSXT_PASSWORD=Qwer!1234
-            SNAPSHOT_OUTPUT_FILE=extra_repos.sh
-            SNAPSHOT_ARTIFACTS_FILE=snapshots.params
       - conditional-step:
            condition-kind: shell
            condition-command: |

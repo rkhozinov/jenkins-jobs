@@ -283,14 +283,7 @@
       - get-refs
       - inject:
           properties-content: |
-            TREP_TESTRAIL_SUITE={testrail_suite}
-            TREP_TESTRAIL_SUITE_DESCRIPTION={testrail_suite_desc}
-            TREP_TESTRAIL_PLAN={testrail_plan}
-            TREP_TESTRAIL_PLAN_DESCRIPTION={testrail_plan_desc}
             DEVOPS_SETTINGS_TEMPLATE=${{WORKSPACE}}/plugin_test/test_templates/default.yaml
-            ENV_PREFIX={fuel-release}.{plugin-name}
-            OPENSTACK_RELEASE=Ubuntu
-            DESTROY_ENV_AFTER=0
             WORKSTATION_SNAPSHOT=nsxv_6.2
             WORKSTATION_NODES=esxi1 esxi2 esxi3 vcenter trusty
             WORKSTATION_PASSWORD=VMware01
@@ -301,8 +294,6 @@
             VCENTER_CLUSTERS=Cluster1,Cluster2
             NSXV_USER=administrator@vsphere.local
             NSXV_PASSWORD=Qwer!1234
-            SNAPSHOT_OUTPUT_FILE=extra_repos.sh
-            SNAPSHOT_ARTIFACTS_FILE=snapshots.params
       - conditional-step:
            condition-kind: shell
            condition-command: |
