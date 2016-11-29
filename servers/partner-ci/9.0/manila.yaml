@@ -256,17 +256,28 @@
     builders:
       - get-refs
       - shell:
-          if [ ! z ${SPECIFIC_PROPS} ]; then
-            > specific.prop
-            for param in ${SPECIFIC_PROPS}; do echo $param >> specific.prop; done
-      - shell:
+          #!/bin/bash
           if [ ! z ${{COMMON_PROPS}} ]; then
-            > common.prop
-            for param in ${COMMON_PROPS}; do echo $param >> common.prop; done
+            echo > common.properties
+            for param in ${COMMON_PROPS}; do echo $param >> common.properties; done
+          if [ ! z ${SPECIFIC_PROPS} ]; then
+            echo > specific.properties
+            for param in ${SPECIFIC_PROPS}; do echo $param >> specific.properties; done
       - inject:
-          properties-file: specific.prop
+          properties-file: common.properties
       - inject:
-          properties-file: common.prop
+          properties-file: specific.properties
+      - conditional-step:
+          condition-kind: shell
+          condition-command: |
+            [[ "${{SPECIFIC_DEVOPS_TEMPLATE}}" == "true" ]]
+          steps:
+            - inject:
+                properties-content: |
+                  ADMIN_NODE_MEMORY=
+                  SLAVE_NODE_MEMORY=
+                  ADMIN_NODE_CPU=
+                  SLAVE_NODE_CPU=
       - conditional-step:
           condition-kind: shell
           condition-command: |
@@ -296,17 +307,26 @@
             - inject:
                 properties-content: |
                   ENABLE_MOS_CENTOS_OS=true
-                  ENABLE_MOS_CENTOS_PROPOSED=true
+                  ENABLE_MOS_CENTOS_PROPOSED=false
                   ENABLE_MOS_CENTOS_UPDATES=true
                   ENABLE_MOS_CENTOS_HOLDBACK=true
                   ENABLE_MOS_CENTOS_HOTFIX=false
                   ENABLE_MOS_CENTOS_SECURITY=true
                   ENABLE_MOS_UBUNTU_OS=true
-                  ENABLE_MOS_UBUNTU_PROPOSED=true
+                  ENABLE_MOS_UBUNTU_PROPOSED=false
                   ENABLE_MOS_UBUNTU_UPDATES=true
                   ENABLE_MOS_UBUNTU_HOLDBACK=true
                   ENABLE_MOS_UBUNTU_HOTFIX=false
                   ENABLE_MOS_UBUNTU_SECURITY=true
+      - conditional-step:
+          condition-kind: shell
+          condition-command: |
+            [[ "${{ENABLE_PROPOSED}}" == "true" ]]
+          steps:
+            - inject:
+                properties-content: |
+                  ENABLE_MOS_UBUNTU_PROPOSED=true
+                  ENABLE_MOS_CENTOS_PROPOSED=true
       - conditional-step:
           condition-kind: shell
           condition-command: |

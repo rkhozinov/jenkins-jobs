@@ -73,6 +73,10 @@
       - bool:
           name: DISCONNECT_ON_FAILURE
           default: True
+      - bool:
+          name: SPECIFIC_DEVOPS_TEMPLATE
+          default: False
+          description: "Using specific template, please fill in var DEVOPS_SETTINGS_TEMPLATE"
       - string:
           name: FUEL_QA_REFS
           description: "Multiple Refspecs for commits in fuel-qa gerrit separated with spaces"
