@@ -239,8 +239,8 @@
                   sudo cp /var/log/libvirt/libvirtd.log ${{WORKSPACE}}/libvirtd_total.log
                   sudo chown jenkins:jenkins ${{WORKSPACE}}/libvirtd_total.log
       - postbuildscript:
-          script-only-if-succeeded: False
-          script-only-if-failed: True
+          script-only-if-succeeded: True
+          script-only-if-failed: False
           builders:
               - shell: |
                   [[ ${{DISCONNECT_ON_FAILURE}} ]] && \
@@ -313,7 +313,7 @@
       - conditional-step:
           condition-kind: shell
           condition-command: |
-            [[ "${{UPDATE_MASTER}}" == "true" ]]
+            [[ "${UPDATE_MASTER}" == "true" ]]
           steps:
             - inject:
                 properties-content: |
@@ -332,13 +332,14 @@
       - conditional-step:
           condition-kind: shell
           condition-command: |
-            [[ "${{SNAPSHOTS_ID}}" != *"released"* ]]
+            [[ "${SNAPSHOTS_ID}" != *"released"* ]]
           steps:
             - shell: |
-                [ ! -n ${{SNAPSHOTS_ID}} ] && \
-                  {{ echo "SNAPSHOTS_ID is empty"; exit 1; }}
-                wget --no-check-certificate -O ${{SNAPSHOT_ARTIFACTS_FILE}} \
-                ${{SNAPSHOTS_URL/SNAPSHOTS_ID/$SNAPSHOTS_ID}}
+                [[ -z "${SNAPSHOTS_ID}" ]] && { echo "SNAPSHOTS_ID is empty"; exit 1; }
+                wget --no-check-certificate -O ${SNAPSHOT_ARTIFACTS_FILE} \
+                ${SNAPSHOTS_URL/SNAPSHOTS_ID/$SNAPSHOTS_ID}
+                snapshots_id=$(grep "^CUSTOM_VERSION=" < snapshots.params | cut -d= -f2 | cut -d'#' -f2)
+                echo "snapshot_id_number=" $snapshots_id
                 python plugin_test/fuel-qa/utils/jenkins/conv_snapshot_file.py
 
 - builder:
@@ -400,6 +401,7 @@
                 SNAPSHOTS_ID=${SNAPSHOTS_ID:=lastSuccessfulBuild}
                 wget --no-check-certificate -O snapshots.params ${SNAPSHOTS_URL/SNAPSHOTS_ID/$SNAPSHOTS_ID}
                 snapshots_id=$(grep "^CUSTOM_VERSION=" < snapshots.params | cut -d= -f2 | cut -d'#' -f2)
+                echo "snapshot_id_number=" $snapshots_id
                 echo "SNAPSHOTS_ID=${snapshots_id}" >> build_number
 
 - scm:
