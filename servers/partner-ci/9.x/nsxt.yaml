@@ -173,7 +173,6 @@
       - '{fuel-release}.{plugin-name}.regression.test':
           vcenter_use: true
 
-# parameters for smoke, bvt and nightly multijobs
 - runner-parameters: &runner-parameters
     name: 'runner-parameters'
     parameters:
@@ -212,7 +211,6 @@
           vcenter_use:         '{vcenter_use}'
       - plugin-specific-parameters
 
-# parameters for jobs created per test-group and custom test job
 - test-parameters: &test-parameters
     name: 'test-parameters'
     parameters:
@@ -281,23 +279,7 @@
       - test-property
     builders:
       - get-refs
-      - shell: |
-          if [ ! -z "${{COMMON_PROPS}}" ]; then
-            echo > common.properties
-            for param in ${{COMMON_PROPS}}; do
-              echo $param >> common.properties
-            done
-          fi
-          if [ ! -z "${{SPECIFIC_PROPS}}" ]; then
-            echo > specific.properties
-            for param in ${{SPECIFIC_PROPS}}; do
-              echo $param >> specific.properties
-            done
-          fi
-      - inject:
-          properties-file: common.properties
-      - inject:
-          properties-file: specific.properties
+      - get-props
       - conditional-step:
            condition-kind: shell
            condition-command: |
@@ -329,36 +311,7 @@
                 project: ${{PKG_JOB_NAME}}
                 which-build: specific-build
                 build-number: ${{PKG_JOB_BUILD_NUMBER}}
-      - conditional-step:
-          condition-kind: shell
-          condition-command: |
-            [[ "${{UPDATE_MASTER}}" == "true" ]]
-          steps:
-            - inject:
-                properties-content: |
-                  ENABLE_MOS_CENTOS_OS=true
-                  ENABLE_MOS_CENTOS_PROPOSED=$ENABLE_PROPOSED
-                  ENABLE_MOS_CENTOS_UPDATES=true
-                  ENABLE_MOS_CENTOS_HOLDBACK=true
-                  ENABLE_MOS_CENTOS_HOTFIX=false
-                  ENABLE_MOS_CENTOS_SECURITY=true
-                  ENABLE_MOS_UBUNTU_OS=true
-                  ENABLE_MOS_UBUNTU_PROPOSED=$ENABLE_PROPOSED
-                  ENABLE_MOS_UBUNTU_UPDATES=true
-                  ENABLE_MOS_UBUNTU_HOLDBACK=true
-                  ENABLE_MOS_UBUNTU_HOTFIX=false
-                  ENABLE_MOS_UBUNTU_SECURITY=true
-      - conditional-step:
-          condition-kind: shell
-          condition-command: |
-            [[ "${{SNAPSHOTS_ID}}" != *"released"* ]]
-          steps:
-            - shell: |
-                [ ! -n ${{SNAPSHOTS_ID}} ] && \
-                  {{ echo "SNAPSHOTS_ID is empty"; exit 1; }}
-                wget --no-check-certificate -O ${{SNAPSHOT_ARTIFACTS_FILE}} \
-                ${{SNAPSHOTS_URL/SNAPSHOTS_ID/$SNAPSHOTS_ID}}
-                python plugin_test/fuel-qa/utils/jenkins/conv_snapshot_file.py
+      - get-updates
       - shell:
           !include-raw-escape: ../builders/common.prepare.sh
       - shell:
@@ -369,12 +322,7 @@
           email_to: '{email_to}'
       - test-publisher:
           reporter_name: '{reporter-name}'
-      - slack:
-          notify-success: True
-          notify-failure: True
-          commit-info-choice: 'AUTHORS_AND_TITLES'
-          include-test-summary: True
-          build-server-url: 'http://jenkins-tpi.bud.mirantis.net:8080/'
+
 - job-template:
     name: '{build-name}'
     node: 'runner'

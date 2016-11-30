@@ -268,34 +268,7 @@
                 project: ${{PKG_JOB_NAME}}
                 which-build: specific-build
                 build-number: ${{PKG_JOB_BUILD_NUMBER}}
-      - conditional-step:
-          condition-kind: shell
-          condition-command: |
-            [[ "${{UPDATE_MASTER}}" == "true" ]]
-          steps:
-            - inject:
-                properties-content: |
-                  ENABLE_MOS_CENTOS_OS=true
-                  ENABLE_MOS_CENTOS_PROPOSED=true
-                  ENABLE_MOS_CENTOS_UPDATES=true
-                  ENABLE_MOS_CENTOS_HOLDBACK=true
-                  ENABLE_MOS_CENTOS_HOTFIX=false
-                  ENABLE_MOS_CENTOS_SECURITY=true
-                  ENABLE_MOS_UBUNTU_OS=true
-                  ENABLE_MOS_UBUNTU_PROPOSED=true
-                  ENABLE_MOS_UBUNTU_UPDATES=true
-                  ENABLE_MOS_UBUNTU_HOLDBACK=true
-                  ENABLE_MOS_UBUNTU_HOTFIX=false
-                  ENABLE_MOS_UBUNTU_SECURITY=true
-            - shell:
-                !include-raw-escape: ../builders/update.sh
-            - inject:
-                properties-file: update.properties
-            - copyartifact:
-                project: ${{PKG_JOB_NAME}}
-                which-build: specific-build
-                build-number: ${{PKG_JOB_BUILD_NUMBER}}
-
+      - get-updates
       - shell:
           !include-raw-escape: ../builders/common.prepare.sh
       - shell:

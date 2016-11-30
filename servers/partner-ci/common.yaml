@@ -248,6 +248,12 @@
       - description-setter:
           regexp-for-failed: '"error":(.*) \1 "AssertionError":(.*) \2'
           description-for-failed: '\1 \2'
+      - slack:
+          notify-success: True
+          notify-failure: True
+          commit-info-choice: 'AUTHORS_AND_TITLES'
+          include-test-summary: True
+          build-server-url: 'http://jenkins-tpi.bud.mirantis.net:8080/'
       - conditional-publisher:
           - condition-kind: boolean-expression
             condition-expression: "${{PUBLISH_RESULTS}}"
@@ -278,6 +284,62 @@
               git log --pretty=format:"%h %ad | %s%d [%an]" --graph --date=short | head
             done
           fi
+
+- builder:
+    name: get-props
+    builders:
+      - shell: |
+          #!/bin/bash
+          echo > common.properties
+          if [ ! -z "${{COMMON_PROPS}}" ]; then
+            for param in ${{COMMON_PROPS}}; do
+              echo $param >> common.properties
+            done
+          fi
+          echo > specific.properties
+          if [ ! -z "${{SPECIFIC_PROPS}}" ]; then
+            for param in ${{SPECIFIC_PROPS}}; do
+              echo $param >> specific.properties
+            done
+          fi
+      - inject:
+          properties-file: common.properties
+      - inject:
+          properties-file: specific.properties
+
+- builder:
+    name: get-updates
+    builders:
+      - conditional-step:
+          condition-kind: shell
+          condition-command: |
+            [[ "${{UPDATE_MASTER}}" == "true" ]]
+          steps:
+            - inject:
+                properties-content: |
+                  ENABLE_MOS_CENTOS_OS=true
+                  ENABLE_MOS_CENTOS_PROPOSED=$ENABLE_PROPOSED
+                  ENABLE_MOS_CENTOS_UPDATES=true
+                  ENABLE_MOS_CENTOS_HOLDBACK=true
+                  ENABLE_MOS_CENTOS_HOTFIX=false
+                  ENABLE_MOS_CENTOS_SECURITY=true
+                  ENABLE_MOS_UBUNTU_OS=true
+                  ENABLE_MOS_UBUNTU_PROPOSED=$ENABLE_PROPOSED
+                  ENABLE_MOS_UBUNTU_UPDATES=true
+                  ENABLE_MOS_UBUNTU_HOLDBACK=true
+                  ENABLE_MOS_UBUNTU_HOTFIX=false
+                  ENABLE_MOS_UBUNTU_SECURITY=true
+      - conditional-step:
+          condition-kind: shell
+          condition-command: |
+            [[ "${{SNAPSHOTS_ID}}" != *"released"* ]]
+          steps:
+            - shell: |
+                [ ! -n ${{SNAPSHOTS_ID}} ] && \
+                  {{ echo "SNAPSHOTS_ID is empty"; exit 1; }}
+                wget --no-check-certificate -O ${{SNAPSHOT_ARTIFACTS_FILE}} \
+                ${{SNAPSHOTS_URL/SNAPSHOTS_ID/$SNAPSHOTS_ID}}
+                python plugin_test/fuel-qa/utils/jenkins/conv_snapshot_file.py
 
 - builder:
     name: runner-condition
@@ -339,6 +401,7 @@
                 wget --no-check-certificate -O snapshots.params ${SNAPSHOTS_URL/SNAPSHOTS_ID/$SNAPSHOTS_ID}
                 snapshots_id=$(grep "^CUSTOM_VERSION=" < snapshots.params | cut -d= -f2 | cut -d'#' -f2)
                 echo "SNAPSHOTS_ID=${snapshots_id}" >> build_number
+
 - scm:
     name: common-scm
     scm:
@@ -354,7 +417,6 @@
             tracking: true
             recursive: true
           wipe-workspace: '{obj:scm_wipe_workspace}'
-
 
 - trigger:
     name: test-gerrit-trigger
@@ -586,7 +648,6 @@
             - comment-added-contains-event:
                 comment-contains-value: 'recheck'
             - change-merged-event
-
 
 # properties for smoke, bvt and nightly multijobs
 - wrapper:
