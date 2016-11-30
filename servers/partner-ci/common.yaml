@@ -244,7 +244,7 @@
           builders:
               - shell: |
                   [[ ${{DISCONNECT_ON_FAILURE}} ]] && \
-                  python -c "import jenkins; jenkins.Jenkins('${{JENKINS_URL}}', username='${{JENKINS_USERNAME}}', password='${{JENKINS_PASSWORD}}').disable_node('${{NODE_NAME}}')"
+                  python -c "import jenkins; jenkins.Jenkins(\"${{JENKINS_URL}}\", username=\"${{JENKINS_USERNAME}}\", password=\"${{JENKINS_PASSWORD}}\").disable_node(\"${{NODE_NAME}}\")"
       - description-setter:
           regexp-for-failed: '"error":(.*) \1 "AssertionError":(.*) \2'
           description-for-failed: '\1 \2'
