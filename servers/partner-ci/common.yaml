@@ -291,14 +291,14 @@
       - shell: |
           #!/bin/bash
           echo > common.properties
-          if [ ! -z "${{COMMON_PROPS}}" ]; then
-            for param in ${{COMMON_PROPS}}; do
+          if [ ! -z "${COMMON_PROPS}" ]; then
+            for param in ${COMMON_PROPS}; do
               echo $param >> common.properties
             done
           fi
           echo > specific.properties
-          if [ ! -z "${{SPECIFIC_PROPS}}" ]; then
-            for param in ${{SPECIFIC_PROPS}}; do
+          if [ ! -z "${SPECIFIC_PROPS}" ]; then
+            for param in ${SPECIFIC_PROPS}; do
               echo $param >> specific.properties
             done
           fi
