@@ -96,14 +96,14 @@
           description: 'The name of job for copying of plugin pkg artefacts'
       - string:
           name: ENV_PREFIX
-          default: '{fuel-release}.{plugin-name}'
+          default: '{env_prefix}'
           description: 'The name of environment'
       - string:
           name: PLUGIN_VERSION
-          default: '{plugin-version}'
+          default: '{plugin_version}'
       - text:
           name: COMMON_PROPS
-            default: |
+          default: |
             SNAPSHOT_ARTIFACTS_FILE=snapshots.params
             OPENSTACK_RELEASE=Ubuntu
             NODES_COUNT=10

@@ -3,10 +3,23 @@
     name: plugin-specific-parameters
     parameters:
       - string:
-          name: PLUGIN_VERSION
-          default: '{plugin-version}'
-      - string:
-          name: NSXV_PLUGIN_PATH
+          name: DEVOPS_SETTINGS_TEMPLATE
+          default: '$WORKSPACE/plugin_test/test_templates/default.yaml'
+      - text:
+          name: SPECIFIC_PROPS
+          default: |
+             MANILA_IMAGE_PATH=/storage/manila/manila-service-image.qcow2
+             WORKSTATION_SNAPSHOT=base_image
+             WORKSTATION_IFS=vmnet2:management,vmnet3:private,vmnet4:storage
+             WORKSTATION_NODES=netapp
+             WORKSTATION_SNAPSHOT=nsxv_6.2
+             WORKSTATION_NODES=esxi1 esxi2 esxi3 vcenter trusty
+             VCENTER_USER=administrator@vsphere.local
+             VCENTER_PASSWORD=Qwer!1234
+             VCENTER_IP=172.16.0.254
+             VCENTER_CLUSTERS=Cluster1,Cluster2
+             NSXV_USER=administrator@vsphere.local
+             NSXV_PASSWORD=Qwer!1234
 - project:
     name: 'predefined_parameters'
     fuel-release: '9.x'
@@ -281,19 +294,23 @@
       - test-property
     builders:
       - get-refs
+      - shell: |
+          if [ ! -z "${{COMMON_PROPS}}" ]; then
+            echo > common.properties
+            for param in ${{COMMON_PROPS}}; do
+              echo $param >> common.properties
+            done
+          fi
+          if [ ! -z "${{SPECIFIC_PROPS}}" ]; then
+            echo > specific.properties
+            for param in ${{SPECIFIC_PROPS}}; do
+              echo $param >> specific.properties
+            done
+          fi
       - inject:
-          properties-content: |
-            DEVOPS_SETTINGS_TEMPLATE=${{WORKSPACE}}/plugin_test/test_templates/default.yaml
-            WORKSTATION_SNAPSHOT=nsxv_6.2
-            WORKSTATION_NODES=esxi1 esxi2 esxi3 vcenter trusty
-            WORKSTATION_PASSWORD=VMware01
-            WORKSTATION_USERNAME=vmware
-            VCENTER_USER=administrator@vsphere.local
-            VCENTER_PASSWORD=Qwer!1234
-            VCENTER_IP=172.16.0.254
-            VCENTER_CLUSTERS=Cluster1,Cluster2
-            NSXV_USER=administrator@vsphere.local
-            NSXV_PASSWORD=Qwer!1234
+          properties-file: common.properties
+      - inject:
+          properties-file: specific.properties
       - conditional-step:
            condition-kind: shell
            condition-command: |
@@ -328,18 +345,18 @@
       - conditional-step:
           condition-kind: shell
           condition-command: |
-            [[ "${{UPDATE_MASTER}}" == 'true'     ]]
+            [[ "${{UPDATE_MASTER}}" == "true" ]]
           steps:
             - inject:
                 properties-content: |
                   ENABLE_MOS_CENTOS_OS=true
-                  ENABLE_MOS_CENTOS_PROPOSED=true
+                  ENABLE_MOS_CENTOS_PROPOSED=$ENABLE_PROPOSED
                   ENABLE_MOS_CENTOS_UPDATES=true
                   ENABLE_MOS_CENTOS_HOLDBACK=true
                   ENABLE_MOS_CENTOS_HOTFIX=false
                   ENABLE_MOS_CENTOS_SECURITY=true
                   ENABLE_MOS_UBUNTU_OS=true
-                  ENABLE_MOS_UBUNTU_PROPOSED=true
+                  ENABLE_MOS_UBUNTU_PROPOSED=$ENABLE_PROPOSED
                   ENABLE_MOS_UBUNTU_UPDATES=true
                   ENABLE_MOS_UBUNTU_HOLDBACK=true
                   ENABLE_MOS_UBUNTU_HOTFIX=false
@@ -347,7 +364,7 @@
       - conditional-step:
           condition-kind: shell
           condition-command: |
-            [[ "${{SNAPSHOTS_ID}}" != *"released"*     ]]
+            [[ "${{SNAPSHOTS_ID}}" != *"released"* ]]
           steps:
             - shell: |
                 [ ! -n ${{SNAPSHOTS_ID}} ] && {{ echo "SNAPSHOTS_ID is empty"; exit 1; }}
@@ -395,8 +412,7 @@
           name: DEBUG
           default: '{build_debug}'
     properties:
-      - heavy-job:
-          weight: 1
+      - test-property
     wrappers:
       - ansicolor:
           colormap: xterm

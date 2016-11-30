@@ -2,29 +2,31 @@
 - parameter:
     name: plugin-specific-parameters
     parameters:
-      - string:
-          name: PLUGIN_VERSION
-      - bool:
-          name: FORCE_DISABLE_UPDATES
-          default: False
-      - bool:
-          name: DRIVER_ENABLE_ACPI
-          default: False
-      - bool:
-          name: MAKE_SNAPSHOT
-          default: False
-      - bool:
-          name: FUEL_STATS_ENABLED
-          default: False
-      - bool:
-          name: ALWAYS_CREATE_DIAGNOSTIC_SNAPSHOT
-          default: False
-      - bool:
-          name: DEBUG_MODE
-          default: True
-      - bool:
-          name: GIT_CURL_VERBOSE
-          default: False
+      - text:
+          name: SPECIFIC_PROPS
+          default: |
+            ESXI_HOSTS=172.16.0.250 172.16.0.252 172.16.0.253
+            NFS_SERVER=172.16.0.1
+            NFS_SHARES=nfs nfs2
+            VSPHERE_VERSION=5.5
+            WORKSTATION_SNAPSHOT=doubledvs
+            WORKSTATION_USERNAME=vmware
+            WORKSTATION_PASSWORD=VMware01
+            WORKSTATION_IFS=vmnet2,vmnet3,vmnet4
+            WORKSTATION_NODES=esxi1 esxi2 esxi3 vcenter
+            VCENTER_IP=172.16.0.145
+            VC_DATACENTER=Datacenter
+            VCENTER_DATASTORE=nfs
+            VCENTER_CLUSTERS=Cluster1,Cluster2
+            DVS_SWITCHES=Cluster1,Cluster2
+            DVS_UPLINKS=dvUplink1,dvUplink2,dvUplink3
+            VCENTER_CERT_URL=http://tpi-s2.bud.mirantis.net:5000/downloads/certs/server.pem
+            VCENTER_CERT_BYPASS=True
+            VCENTER_USE=true
+            CLEAN_IPTABLES=true
+            DISABLE_STP=true
+            VCENTER_USERNAME=openstack
+            VCENTER_PASSWORD=vmware
 - project:
     name: 'predefined_parameters'
     fuel-release: '9.x'
@@ -289,30 +291,23 @@
       - test-property
     builders:
       - get-refs
+      - shell: |
+          if [ ! -z "${{COMMON_PROPS}}" ]; then
+            echo > common.properties
+            for param in ${{COMMON_PROPS}}; do
+              echo $param >> common.properties
+            done
+          fi
+          if [ ! -z "${{SPECIFIC_PROPS}}" ]; then
+            echo > specific.properties
+            for param in ${{SPECIFIC_PROPS}}; do
+              echo $param >> specific.properties
+            done
+          fi
       - inject:
-          properties-content: |
-            ESXI_HOSTS=172.16.0.250 172.16.0.252 172.16.0.253
-            NFS_SERVER=172.16.0.1
-            NFS_SHARES=nfs nfs2
-            VSPHERE_VERSION=5.5
-            WORKSTATION_SNAPSHOT=doubledvs
-            WORKSTATION_USERNAME=vmware
-            WORKSTATION_PASSWORD=VMware01
-            WORKSTATION_IFS=vmnet2,vmnet3,vmnet4
-            WORKSTATION_NODES=esxi1 esxi2 esxi3 vcenter
-            VCENTER_IP=172.16.0.145
-            VC_DATACENTER=Datacenter
-            VCENTER_DATASTORE=nfs
-            VCENTER_CLUSTERS=Cluster1,Cluster2
-            DVS_SWITCHES=Cluster1,Cluster2
-            DVS_UPLINKS=dvUplink1,dvUplink2,dvUplink3
-            VCENTER_CERT_URL=http://tpi-s2.bud.mirantis.net:5000/downloads/certs/server.pem
-            VCENTER_CERT_BYPASS=True
-            VCENTER_USE=true
-            CLEAN_IPTABLES=true
-            DISABLE_STP=true
-            VCENTER_USERNAME=openstack
-            VCENTER_PASSWORD=vmware
+          properties-file: common.properties
+      - inject:
+          properties-file: specific.properties
       - conditional-step:
            condition-kind: shell
            condition-command: |
@@ -352,13 +347,13 @@
             - inject:
                 properties-content: |
                   ENABLE_MOS_CENTOS_OS=true
-                  ENABLE_MOS_CENTOS_PROPOSED=true
+                  ENABLE_MOS_CENTOS_PROPOSED=$ENABLE_PROPOSED
                   ENABLE_MOS_CENTOS_UPDATES=true
                   ENABLE_MOS_CENTOS_HOLDBACK=true
                   ENABLE_MOS_CENTOS_HOTFIX=false
                   ENABLE_MOS_CENTOS_SECURITY=true
                   ENABLE_MOS_UBUNTU_OS=true
-                  ENABLE_MOS_UBUNTU_PROPOSED=true
+                  ENABLE_MOS_UBUNTU_PROPOSED=$ENABLE_PROPOSED
                   ENABLE_MOS_UBUNTU_UPDATES=true
                   ENABLE_MOS_UBUNTU_HOLDBACK=true
                   ENABLE_MOS_UBUNTU_HOTFIX=false
@@ -424,8 +419,7 @@
           name: DEBUG
           default: '{build_debug}'
     properties:
-      - heavy-job:
-          weight: 1
+      - test-property
     wrappers:
       - ansicolor:
           colormap: xterm

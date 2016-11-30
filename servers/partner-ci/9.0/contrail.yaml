@@ -2,32 +2,25 @@
 - parameter:
     name: plugin-specific-parameters
     parameters:
-      - string:
-          name: MULTI_REFS
-      - string:
-          name: FUEL_QA_REFS
-      - bool:
-          name: BONDING
-          default: '{obj:bonding}'
-          description: 'turns on bonding'
-      - bool:
-          name: SPECIFIC_VC
-          default: false
-          description: 'enable inject specific vcenter parameters for testing'
-      - bool:
-          name: FORCE_VSRX_COPY
-          default: '{obj:force_vsrx_copy}'
-          description: 'force copying of vsrx image'
-      - bool:
-          name: ALWAYS_CREATE_DIAGNOSTIC_SNAPSHOT
-          default: True
-      - bool:
-          name: GIT_CURL_VERBOSE
-          default: False
-      - string:
-          description: 'mirror for package repositories. this mirror is optimized for CZ'
-          name: MIRROR
-          default: 'http://mirror.seed-cz1.fuel-infra.org'
+      - text:
+          name: SPECIFIC_PROPS
+          default: |
+            KVM_USE=True
+            NODE_VOLUME_SIZE=512
+            CONTRAIL_VERSION=5.0
+            VSRX_ORIGINAL_IMAGE_PATH=/storage/contrail/vSRX.400.img
+            VSRX_TARGET_IMAGE_PATH=/var/lib/libvirt/images/vSRX.400.img
+            VSRX_TEMPLATE_PATH=/storage/contrail/vSRX_400.template'
+            BM_IPMI_USER=engineer
+            BM_IPMI_PASSWORD=Ba2Ie23#GHgho
+            BM_IPMI_ADDR=cz7660-kvm.host-telecom.com
+            BM_TARGET_MACS=00:1b:21:87:21:99;00:1b:21:87:21:98
+            BM_HOST_BRIDGE_INTERFACES=eth2:10.109.0.0/24;eth3:10.109.4.0/24
+            KVM_USE=True
+            BONDING=False
+            SPECIFIC_VC=False
+            FORCE_VSRX_COPY=False
+            MIRROR=http://mirror.seed-cz1.fuel-infra.org
       - string:
           name: CONTRAIL_PLUGIN_PATH
       - string:
@@ -398,7 +391,7 @@
           debug:                '{debug}'
           disable_ssl:          '{disable_ssl}'
           force_erase:          '{force_erase}'
-          force_reuse:     '{force_reuse}'
+          force_reuse:          '{force_reuse}'
           recreate_venv:        '{recreate_venv}'
           ws_norevert:          '{ws_norevert}'
           nfs_clean:            '{nfs_clean}'
@@ -448,20 +441,23 @@
       - test-property
     builders:
       - get-refs
+      - shell: |
+          if [ ! -z "${{COMMON_PROPS}}" ]; then
+            echo > common.properties
+            for param in ${{COMMON_PROPS}}; do
+              echo $param >> common.properties
+            done
+          fi
+          if [ ! -z "${{SPECIFIC_PROPS}}" ]; then
+            echo > specific.properties
+            for param in ${{SPECIFIC_PROPS}}; do
+              echo $param >> specific.properties
+            done
+          fi
       - inject:
-          properties-content: |
-            KVM_USE=True
-            NODE_VOLUME_SIZE=512
-            CONTRAIL_VERSION={plugin-version}
-            VSRX_ORIGINAL_IMAGE_PATH={vsrx_original_image_path}
-            VSRX_TARGET_IMAGE_PATH={vsrx_target_image_path}
-            VSRX_TEMPLATE_PATH={vsrx_template_path}
-            BM_IPMI_USER=engineer
-            BM_IPMI_PASSWORD=Ba2Ie23#GHgho
-            BM_IPMI_ADDR=cz7660-kvm.host-telecom.com
-            BM_TARGET_MACS=00:1b:21:87:21:99;00:1b:21:87:21:98
-            BM_HOST_BRIDGE_INTERFACES=eth2:10.109.0.0/24;eth3:10.109.4.0/24
-            KVM_USE=True
+          properties-file: common.properties
+      - inject:
+          properties-file: specific.properties
       - conditional-step:
            condition-kind: shell
            condition-command: |
@@ -520,23 +516,27 @@
       - conditional-step:
           condition-kind: shell
           condition-command: |
-            [[ "${{UPDATE_MASTER}}" == "true" ]] &&
-            [[ "${{SNAPSHOTS_ID}}" != *"released"* ]]
+            [[ "${{UPDATE_MASTER}}" == "true" ]]
           steps:
             - inject:
                 properties-content: |
                   ENABLE_MOS_CENTOS_OS=true
-                  ENABLE_MOS_CENTOS_PROPOSED=true
+                  ENABLE_MOS_CENTOS_PROPOSED=$ENABLE_PROPOSED
                   ENABLE_MOS_CENTOS_UPDATES=true
                   ENABLE_MOS_CENTOS_HOLDBACK=true
                   ENABLE_MOS_CENTOS_HOTFIX=false
                   ENABLE_MOS_CENTOS_SECURITY=true
                   ENABLE_MOS_UBUNTU_OS=true
-                  ENABLE_MOS_UBUNTU_PROPOSED=true
+                  ENABLE_MOS_UBUNTU_PROPOSED=$ENABLE_PROPOSED
                   ENABLE_MOS_UBUNTU_UPDATES=true
                   ENABLE_MOS_UBUNTU_HOLDBACK=true
                   ENABLE_MOS_UBUNTU_HOTFIX=false
                   ENABLE_MOS_UBUNTU_SECURITY=true
+      - conditional-step:
+          condition-kind: shell
+          condition-command: |
+            [[ "${{SNAPSHOTS_ID}}" != *"released"* ]]
+          steps:
             - shell: |
                 [ ! -n ${{SNAPSHOTS_ID}} ] && \
                   {{ echo "SNAPSHOTS_ID is empty"; exit 1; }}
