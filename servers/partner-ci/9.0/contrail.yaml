@@ -5,22 +5,21 @@
       - text:
           name: SPECIFIC_PROPS
           default: |
-            KVM_USE=True;
-            NODE_VOLUME_SIZE=512;
+            BM_HOST_BRIDGE_INTERFACES=eth2:10.109.0.0/24;eth3:10.109.4.0/24;
+            BM_IPMI_ADDR=cz7660-kvm.host-telecom.com;
+            BM_IPMI_PASSWORD=Ba2Ie23#GHgho;
+            BM_IPMI_USER=engineer;
+            BM_TARGET_MACS=00:1b:21:87:21:99;00:1b:21:87:21:98;
+            BONDING=False;
             CONTRAIL_VERSION=5.0;
+            FORCE_VSRX_COPY=False;
+            KVM_USE=True;
+            MIRROR=http://mirror.seed-cz1.fuel-infra.org;
+            NODE_VOLUME_SIZE=512;
+            SPECIFIC_VC=False;
             VSRX_ORIGINAL_IMAGE_PATH=/storage/contrail/vSRX.400.img;
             VSRX_TARGET_IMAGE_PATH=/var/lib/libvirt/images/vSRX.400.img;
             VSRX_TEMPLATE_PATH=/storage/contrail/vSRX_400.template;
-            BM_IPMI_USER=engineer;
-            BM_IPMI_PASSWORD=Ba2Ie23#GHgho;
-            BM_IPMI_ADDR=cz7660-kvm.host-telecom.com;
-            BM_TARGET_MACS=00:1b:21:87:21:99;00:1b:21:87:21:98;
-            BM_HOST_BRIDGE_INTERFACES=eth2:10.109.0.0/24;eth3:10.109.4.0/24;
-            KVM_USE=True;
-            BONDING=False;
-            SPECIFIC_VC=False;
-            FORCE_VSRX_COPY=False;
-            MIRROR=http://mirror.seed-cz1.fuel-infra.org;
       - string:
           name: CONTRAIL_PLUGIN_PATH
       - string:
