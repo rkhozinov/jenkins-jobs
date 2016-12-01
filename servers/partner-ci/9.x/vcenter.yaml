@@ -5,36 +5,36 @@
       - text:
           name: SPECIFIC_PROPS
           default: |
-            ESXI_HOSTS=172.16.0.250 172.16.0.252 172.16.0.253
-            NFS_SERVER=172.16.0.1
-            NFS_SHARES=nfs nfs2
-            VSPHERE_VERSION=5.5
-            WORKSTATION_SNAPSHOT=doubledvs
-            WORKSTATION_USERNAME=vmware
-            WORKSTATION_PASSWORD=VMware01
-            WORKSTATION_IFS=vmnet2,vmnet3,vmnet4
-            WORKSTATION_NODES=esxi1 esxi2 esxi3 vcenter
-            VCENTER_IP=172.16.0.145
-            VCENTER_GLANCE_IP=172.16.0.145
-            VCENTER_GLANCE_USERNAME=openstack
-            VCENTER_GLANCE_PASSWORD=vmware
-            VCENTER_DATACENTER=Datacenter
-            VCENTER_DATASTORE=nfs
-            VCENTER_CLUSTERS=Cluster1,Cluster2
-            VCENTER_USE=true
-            VC_IMAGE_DIR=openstack_glance
-            VMWARE_IMG_NAME=shaker.vmdk
-            VMWARE_IMG_URL="http://pce-storage.bud.mirantis.net:5000/distr/$VMWARE_IMG_NAME"
-            VMWARE_IMG_LOGIN=root
-            VMWARE_IMG_PASSWORD=r00tme
-            VCENTER_USERNAME=openstack
-            VCENTER_PASSWORD=vmware
-            CLEAN_IPTABLES=true
-            DISABLE_STP=true
-            VCENTER_GLANCE_CERT_URL="http://tpi-s2.bud.mirantis.net:5000/downloads/certs/server.pem"
-            VCENTER_GLANCE_CERT_BYPASS=True
-            VCENTER_CERT_URL="http://tpi-s2.bud.mirantis.net:5000/downloads/certs/server.pem"
-            VCENTER_CERT_BYPASS=True
+            ESXI_HOSTS=172.16.0.250 172.16.0.252 172.16.0.253;
+            NFS_SERVER=172.16.0.1;
+            NFS_SHARES=nfs nfs2;
+            VSPHERE_VERSION=5.5;
+            WORKSTATION_SNAPSHOT=doubledvs;
+            WORKSTATION_USERNAME=vmware;
+            WORKSTATION_PASSWORD=VMware01;
+            WORKSTATION_IFS=vmnet2,vmnet3,vmnet4;
+            WORKSTATION_NODES=esxi1 esxi2 esxi3 vcenter;
+            VCENTER_IP=172.16.0.145;
+            VCENTER_GLANCE_IP=172.16.0.145;
+            VCENTER_GLANCE_USERNAME=openstack;
+            VCENTER_GLANCE_PASSWORD=vmware;
+            VCENTER_DATACENTER=Datacenter;
+            VCENTER_DATASTORE=nfs;
+            VCENTER_CLUSTERS=Cluster1,Cluster2;
+            VCENTER_USE=true;
+            VC_IMAGE_DIR=openstack_glance;
+            VMWARE_IMG_NAME=shaker.vmdk;
+            VMWARE_IMG_URL="http://pce-storage.bud.mirantis.net:5000/distr/$VMWARE_IMG_NAME";
+            VMWARE_IMG_LOGIN=root;
+            VMWARE_IMG_PASSWORD=r00tme;
+            VCENTER_USERNAME=openstack;
+            VCENTER_PASSWORD=vmware;
+            CLEAN_IPTABLES=true;
+            DISABLE_STP=true;
+            VCENTER_GLANCE_CERT_URL="http://tpi-s2.bud.mirantis.net:5000/downloads/certs/server.pem";
+            VCENTER_GLANCE_CERT_BYPASS=True;
+            VCENTER_CERT_URL="http://tpi-s2.bud.mirantis.net:5000/downloads/certs/server.pem";
+            VCENTER_CERT_BYPASS=True;
 - project:
     name: 'predefined_parameters'
     fuel-release: '9.x'

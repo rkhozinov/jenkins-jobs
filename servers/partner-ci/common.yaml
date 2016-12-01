@@ -104,27 +104,27 @@
       - text:
           name: COMMON_PROPS
           default: |
-            SNAPSHOT_ARTIFACTS_FILE=snapshots.params
-            OPENSTACK_RELEASE=Ubuntu
-            NODES_COUNT=10
-            DESTROY_ENV_AFTER=0
-            ADMIN_NODE_MEMORY=4096
-            SLAVE_NODE_MEMORY=4096
-            ADMIN_NODE_CPU=4
-            SLAVE_NODE_CPU=4
-            WORKSTATION_PASSWORD=VMware01
-            WORKSTATION_USERNAME=vmware
-            SNAPSHOT_OUTPUT_FILE=extra_repos.sh
-            SNAPSHOT_ARTIFACTS_FILE=snapshots.params
-            ESXI_PASSWORD=swordfish
-            ESXI_USER=root
-            FORCE_DISABLE_UPDATES=false
-            DRIVER_ENABLE_ACPI=true
-            MAKE_SNAPSHOT=true
-            FUEL_STATS_ENABLED=false
-            ALWAYS_CREATE_DIAGNOSTIC_SNAPSHOT=true
-            DEBUG_MODE=true
-            GIT_CURL_VERBOSE=false
+            SNAPSHOT_ARTIFACTS_FILE=snapshots.params;
+            OPENSTACK_RELEASE=Ubuntu;
+            NODES_COUNT=10;
+            DESTROY_ENV_AFTER=0;
+            ADMIN_NODE_MEMORY=4096;
+            SLAVE_NODE_MEMORY=4096;
+            ADMIN_NODE_CPU=4;
+            SLAVE_NODE_CPU=4;
+            WORKSTATION_PASSWORD=VMware01;
+            WORKSTATION_USERNAME=vmware;
+            SNAPSHOT_OUTPUT_FILE=extra_repos.sh;
+            SNAPSHOT_ARTIFACTS_FILE=snapshots.params;
+            ESXI_PASSWORD=swordfish;
+            ESXI_USER=root;
+            FORCE_DISABLE_UPDATES=false;
+            DRIVER_ENABLE_ACPI=true;
+            MAKE_SNAPSHOT=true;
+            FUEL_STATS_ENABLED=false;
+            ALWAYS_CREATE_DIAGNOSTIC_SNAPSHOT=true;
+            DEBUG_MODE=true;
+            GIT_CURL_VERBOSE=false;
 - publisher:
     name: runner-publisher
     publishers:
@@ -290,6 +290,7 @@
     builders:
       - shell: |
           #!/bin/bash
+          IFS=';'
           echo > common.properties
           if [ ! -z "${COMMON_PROPS}" ]; then
             for param in ${COMMON_PROPS}; do

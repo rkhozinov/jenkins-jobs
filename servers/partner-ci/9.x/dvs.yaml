@@ -5,28 +5,28 @@
       - text:
           name: SPECIFIC_PROPS
           default: |
-            ESXI_HOSTS=172.16.0.250 172.16.0.252 172.16.0.253
-            NFS_SERVER=172.16.0.1
-            NFS_SHARES=nfs nfs2
-            VSPHERE_VERSION=5.5
-            WORKSTATION_SNAPSHOT=doubledvs
-            WORKSTATION_USERNAME=vmware
-            WORKSTATION_PASSWORD=VMware01
-            WORKSTATION_IFS=vmnet2,vmnet3,vmnet4
-            WORKSTATION_NODES=esxi1 esxi2 esxi3 vcenter
-            VCENTER_IP=172.16.0.145
-            VC_DATACENTER=Datacenter
-            VCENTER_DATASTORE=nfs
-            VCENTER_CLUSTERS=Cluster1,Cluster2
-            DVS_SWITCHES=Cluster1,Cluster2
-            DVS_UPLINKS=dvUplink1,dvUplink2,dvUplink3
-            VCENTER_CERT_URL=http://tpi-s2.bud.mirantis.net:5000/downloads/certs/server.pem
-            VCENTER_CERT_BYPASS=True
-            VCENTER_USE=true
-            CLEAN_IPTABLES=true
-            DISABLE_STP=true
-            VCENTER_USERNAME=openstack
-            VCENTER_PASSWORD=vmware
+            ESXI_HOSTS=172.16.0.250 172.16.0.252 172.16.0.253;
+            NFS_SERVER=172.16.0.1;
+            NFS_SHARES=nfs nfs2;
+            VSPHERE_VERSION=5.5;
+            WORKSTATION_SNAPSHOT=doubledvs;
+            WORKSTATION_USERNAME=vmware;
+            WORKSTATION_PASSWORD=VMware01;
+            WORKSTATION_IFS=vmnet2,vmnet3,vmnet4;
+            WORKSTATION_NODES=esxi1 esxi2 esxi3 vcenter;
+            VCENTER_IP=172.16.0.145;
+            VC_DATACENTER=Datacenter;
+            VCENTER_DATASTORE=nfs;
+            VCENTER_CLUSTERS=Cluster1,Cluster2;
+            DVS_SWITCHES=Cluster1,Cluster2;
+            DVS_UPLINKS=dvUplink1,dvUplink2,dvUplink3;
+            VCENTER_CERT_URL=http://tpi-s2.bud.mirantis.net:5000/downloads/certs/server.pem;
+            VCENTER_CERT_BYPASS=True;
+            VCENTER_USE=true;
+            CLEAN_IPTABLES=true;
+            DISABLE_STP=true;
+            VCENTER_USERNAME=openstack;
+            VCENTER_PASSWORD=vmware;
 - project:
     name: 'predefined_parameters'
     fuel-release: '9.x'

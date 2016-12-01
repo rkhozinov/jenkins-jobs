@@ -5,10 +5,10 @@
       - text:
           name: SPECIFIC_PROPS
           default: |
-             MANILA_IMAGE_PATH=/storage/manila/manila-service-image.qcow2
-             WORKSTATION_SNAPSHOT=base_image
-             WORKSTATION_IFS=vmnet2:management,vmnet3:private,vmnet4:storage
-             WORKSTATION_NODES=netapp
+             MANILA_IMAGE_PATH=/storage/manila/manila-service-image.qcow2;
+             WORKSTATION_SNAPSHOT=base_image;
+             WORKSTATION_IFS=vmnet2:management,vmnet3:private,vmnet4:storage;
+             WORKSTATION_NODES=netapp;
 - project:
     name: 'predefined_parameters'
     fuel-release: '9.1'

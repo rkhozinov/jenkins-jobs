@@ -8,14 +8,14 @@
       - text:
           name: SPECIFIC_PROPS
           default: |
-             WORKSTATION_SNAPSHOT=nsxv_6.2
-             WORKSTATION_NODES=esxi1 esxi2 esxi3 vcenter trusty
-             VCENTER_USER=administrator@vsphere.local
-             VCENTER_PASSWORD=Qwer!1234
-             VCENTER_IP=172.16.0.254
-             VCENTER_CLUSTERS=Cluster1,Cluster2
-             NSXV_USER=administrator@vsphere.local
-             NSXV_PASSWORD=Qwer!1234
+             WORKSTATION_SNAPSHOT=nsxv_6.2;
+             WORKSTATION_NODES=esxi1 esxi2 esxi3 vcenter trusty;
+             VCENTER_USER=administrator@vsphere.local;
+             VCENTER_PASSWORD=Qwer!1234;
+             VCENTER_IP=172.16.0.254;
+             VCENTER_CLUSTERS=Cluster1,Cluster2;
+             NSXV_USER=administrator@vsphere.local;
+             NSXV_PASSWORD=Qwer!1234;
 - project:
     name: 'predefined_parameters'
     fuel-release: '9.x'
