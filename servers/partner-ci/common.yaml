@@ -367,7 +367,7 @@
       - conditional-step:
           condition-kind: shell
           condition-command: >
-            [ -z  ${PKG_JOB_BUILD_NUMBER} ] && [ "${MJ_BUILD_PKG}" == "true" ]
+            [ -z  ${PKG_JOB_BUILD_NUMBER} ]
           steps:
             - copyartifact:
                 project: ${PKG_JOB_NAME}
@@ -376,7 +376,7 @@
       - conditional-step:
           condition-kind: shell
           condition-command: >
-            [ ! -z ${PKG_JOB_BUILD_NUMBER} ] && [ "${MJ_BUILD_PKG}" == "true" ]
+            [ ! -z ${PKG_JOB_BUILD_NUMBER} ]
           steps:
             - copyartifact:
                 project: ${PKG_JOB_NAME}

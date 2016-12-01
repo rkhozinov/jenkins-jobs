@@ -8,10 +8,6 @@
       - text:
           name: SPECIFIC_PROPS
           default: |
-             MANILA_IMAGE_PATH=/storage/manila/manila-service-image.qcow2
-             WORKSTATION_SNAPSHOT=base_image
-             WORKSTATION_IFS=vmnet2:management,vmnet3:private,vmnet4:storage
-             WORKSTATION_NODES=netapp
              WORKSTATION_SNAPSHOT=nsxv_6.2
              WORKSTATION_NODES=esxi1 esxi2 esxi3 vcenter trusty
              VCENTER_USER=administrator@vsphere.local
@@ -47,7 +43,7 @@
     regression_timer: 'H 18 * * *'
     nightly_disabled: true
     regression_disabled: false
-    force_erase: false
+    force_erase: true
     recreate_venv: false
     ws_norevert: false
     vcenter_use: true

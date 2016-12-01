@@ -108,3 +108,5 @@ if [[ "${DEBUG}" == "true" ]]; then
   sudo cp /var/log/libvirt/libvirtd.log ${WORKSPACE}/libvirtd_after_test.log
   sudo chown jenkins:jenkins ${WORKSPACE}/libvirtd_after_test.log
 fi
+echo "ENVIRONMENT NAME is $ENV_NAME"
+dos.py list --ips | grep ${ENV_NAME}
