@@ -41,7 +41,8 @@ else
 fi
 
 [ -z $PLUGIN_VERSION  ] && \
-  { echo "PLUGIN_VERSION variable is empty"; exit 1; } || \
+  { echo "PLUGIN_VERSION variable is empty"; exit 1; }
+[ -z $NSXV_PLUGIN_VERSION  ] && \
     export NSXV_PLUGIN_VERSION=$PLUGIN_VERSION
 
 if [ -z "${PKG_JOB_BUILD_NUMBER}" ]; then
