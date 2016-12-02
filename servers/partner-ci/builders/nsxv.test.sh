@@ -54,25 +54,25 @@ fi
 [ -f nosetest.xml ] && rm -f nosetests.xml
 rm -rf logs/*
 
-export ENV_NAME="${ENV_PREFIX}.${SNAPSHOTS_ID}"
-export VENV_PATH="${HOME}/${FUEL_RELEASE}-venv"
-
+export ENV_NAME="${ENV_PREFIX:?}.${SNAPSHOTS_ID:?}"
+export VENV_PATH="${HOME}/${FUEL_RELEASE:?}-venv"
 export NSXV_PLUGIN_PATH="${NSXV_PLUGIN_PATH:-$(ls -t ${WORKSPACE}/nsxv*.rpm | head -n 1)}"
-export PLUGIN_PATH="${PLUGIN_PATH:-$NSXV_PLUGIN_PATH}"
+plugin_path="${PLUGIN_PATH:-$NSXV_PLUGIN_PATH}"
+export PLUGIN_PATH=${plugin_path:?}
 
 systest_parameters=''
 [[ $FORCE_REUSE == "true"  ]] && systest_parameters+=' -k' || echo "new env will be created"
-[[ $ERASE_AFTER   == "true"  ]] && echo "the env will be erased after test" || systest_parameters+=' -K'
+[[ $ERASE_AFTER == "true"  ]] && echo "the env will be erased after test" || systest_parameters+=' -K'
 
-echo -e "test-group: ${TEST_GROUP}\n \
-env-name: ${ENV_NAME}\n \
-use-snapshots: ${USE_SNAPSHOTS}\n \
-fuel-release: ${FUEL_RELEASE}\n \
-venv-path: ${VENV_PATH}\n \
-env-name: ${ENV_NAME}\n \
-iso-path: ${ISO_PATH}\n \
-plugin-path: ${NSXV_PLUGIN_PATH}\n \
-plugin-checksum: $(md5sum -b ${NSXV_PLUGIN_PATH})\n"
+echo -e "test-group: ${TEST_GROUP}\n\
+env-name: ${ENV_NAME}\n\
+use-snapshots: ${USE_SNAPSHOTS}\n\
+fuel-release: ${FUEL_RELEASE}\n\
+venv-path: ${VENV_PATH}\n\
+env-name: ${ENV_NAME}\n\
+iso-path: ${ISO_PATH}\n\
+plugin-path: ${NSXV_PLUGIN_PATH}\n\
+plugin-checksum: $(md5sum -b ${NSXV_PLUGIN_PATH})"
 
 cat << REPORTER_PROPERTIES > reporter.properties
 ISO_VERSION=$SNAPSHOTS_ID
