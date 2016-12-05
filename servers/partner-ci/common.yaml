@@ -1,10 +1,14 @@
 - parameter:
     name: common-parameters
     parameters:
+      - string:
+          name: FUEL_RELEASE_VERSION
+          default: '{fuel_release}'
+          description: "fuel-qa checks version of fuel, by default fuel-qa sets the value to 9.2"
       - bool:
           name: UPDATE_MASTER
           default: '{update_master}'
-          description: 'turns on update fuel master node to maintenance update'
+          description: "turns on update fuel master node to maintenance update"
       - bool:
           name: ENABLE_PROPOSED
           default: '{enable_proposed}'
@@ -55,6 +59,7 @@
           description: "disconnect node after failure"
       - string:
           name: FUEL_QA_REFS
+          default: '{fuel_qa_refs}'
           description: "Multiple Refspecs for commits in fuel-qa gerrit separated with spaces"
       - string:
           name: MULTI_REFS
