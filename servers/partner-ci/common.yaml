@@ -346,7 +346,7 @@
                 wget --no-check-certificate -O ${SNAPSHOT_ARTIFACTS_FILE} \
                 ${SNAPSHOTS_URL/SNAPSHOTS_ID/$SNAPSHOTS_ID}
                 snapshots_id=$(grep "^CUSTOM_VERSION=" < snapshots.params | cut -d= -f2 | cut -d'#' -f2)
-                echo "snapshot_id_number=" $snapshots_id
+                echo "snapshot_id_number=${snapshots_id}"
                 python "${CONV_SNAP_PATH}"
 - builder:
     name: runner-condition
