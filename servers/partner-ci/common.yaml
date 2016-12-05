@@ -125,7 +125,7 @@
             ALWAYS_CREATE_DIAGNOSTIC_SNAPSHOT=true;
             DEBUG_MODE=true;
             GIT_CURL_VERBOSE=false;
-            CONV_SNAP_PATH=plugin_test/fuel-qa/utils/jenkins;
+            CONV_SNAP_PATH=plugin_test/fuel-qa/utils/jenkins/conv_snapshot_file.py;
 - publisher:
     name: runner-publisher
     publishers:
@@ -342,7 +342,7 @@
                 ${SNAPSHOTS_URL/SNAPSHOTS_ID/$SNAPSHOTS_ID}
                 snapshots_id=$(grep "^CUSTOM_VERSION=" < snapshots.params | cut -d= -f2 | cut -d'#' -f2)
                 echo "snapshot_id_number=" $snapshots_id
-                python "${CONV_SNAP_PATH}/conv_snapshot_file.py"
+                python "${CONV_SNAP_PATH}"
 - builder:
     name: runner-condition
     builders:

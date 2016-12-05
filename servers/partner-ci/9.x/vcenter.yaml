@@ -35,7 +35,7 @@
             VCENTER_GLANCE_CERT_BYPASS=True;
             VCENTER_CERT_URL="http://tpi-s2.bud.mirantis.net:5000/downloads/certs/server.pem";
             VCENTER_CERT_BYPASS=True;
-            CONV_SNAP_PATH=utils/jenkins;
+            CONV_SNAP_PATH=utils/jenkins/conv_snapshot_file.py;
 - project:
     name: 'predefined_parameters'
     fuel-release: '9.x'
