@@ -132,7 +132,6 @@
     jobs:
       - '{build-name}':
           scm_submodule_disabled: true
-          scm_wipe_workspace: true
 
       - '{build-driver-name}'
 
@@ -150,7 +149,6 @@
 
       - '{custom-name}.qa':
           publish_results: false
-          scm_wipe_workspace: true
 
       - '{custom-name}.dev':
           publish_results: false
