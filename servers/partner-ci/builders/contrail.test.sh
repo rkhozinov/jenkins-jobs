@@ -35,11 +35,8 @@ if [ "${SNAPSHOTS_ID}" != "released" ]; then
 fi
 
 if [[ $SNAPSHOTS_ID == *"lastSuccessfulBuild"* ]]; then
-  export SNAPSHOTS_ID=$(cat snapshots.params | grep -Po '#\K[^ ]+')
+  export SNAPSHOTS_ID=$(grep -Po '#\K[^ ]+' < snapshots.params)
 fi
-
-[ -z "${SNAPSHOTS_ID}" ] && { echo SNAPSHOTS_ID is empty; exit 1; }
-
 
 if [ -z "${PKG_JOB_BUILD_NUMBER}" ]; then
     if [ -f build.properties ]; then
@@ -59,7 +56,7 @@ if [[ $ISO_FILE == *"Mirantis"* ]]; then
   export FUEL_RELEASE=$(echo $ISO_FILE | cut -d- -f2 | tr -d '.iso')
 fi
 
-export ENV_NAME="${ENV_PREFIX}.${SNAPSHOTS_ID}"
+export ENV_NAME="${ENV_PREFIX}.${SNAPSHOTS_ID:?}"
 export VENV_PATH="${HOME}/${FUEL_RELEASE}-venv"
 
 [[ -z ${CONTRAIL_PLUGIN_PATH} ]] && export CONTRAIL_PLUGIN_PATH=$(ls -t ${WORKSPACE}/contrail*.rpm | head -n 1) \
@@ -76,7 +73,7 @@ export JUNIPER_PKG_PATH="/storage/contrail/${CONTRAIL_VERSION}/"
                          || { echo "CONTRAIL_PLUGIN_PACK_UB_PATH is not found";  exit 1; }
 export JUNIPER_PKG_VERSION=$(sed 's/[-_~]/-/g' <<< ${CONTRAIL_PLUGIN_PACK_UB_PATH} | cut -d- -f4-5)
 
-if [[ $VCENTER_USE == "true"  ]]; then
+if [[ "$VCENTER_USE" == "true"  ]]; then
 
   add_interface_to_bridge() {
     env=$1
@@ -154,11 +151,11 @@ export PYTHONPATH="${PYTHONPATH:+${PYTHONPATH}:}${WORKSPACE}:${PLUGIN_WORKSPACE}
 [[ "${DEBUG}" == "true" ]] && echo "PYTHONPATH:${PYTHONPATH} PATH:${PATH} WORKSPACE:${WORKSPACE}"
 python $PLUGIN_WORKSPACE/run_tests.py -q --nologcapture --with-xunit --group=${TEST_GROUP} &
 export SYSTEST_PID=$!
-	
-if [[ $VCENTER_USE == "true"  ]]; then
+
+if [[ "$VCENTER_USE" == "true"  ]]; then
   #Wait before environment is created
-  while [ true ]; do
-    [ $(virsh net-list | grep $ENV_NAME | wc -l) -eq 5 ] && break || sleep 10
+  while true ; do
+    [ $(virsh net-list | grep -c "$ENV_NAME" )  -eq 5 ] && break || sleep 10
     [ -e /proc/$SYSTEST_PID ] && continue || \
       { echo System tests exited prematurely, aborting; exit 1; }
   done

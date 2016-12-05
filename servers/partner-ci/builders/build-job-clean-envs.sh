@@ -1,12 +1,4 @@
-#####################################################################
-function dospy_list {
-  prefix=$1
-  dos.py sync
-  [ -z $prefix ] && \
-    echo $(dos.py list | tail -n +3) || \
-    echo $(dos.py list | tail -n +3  | grep  $prefix)
-}
-######################################################################
+#!/bin/bash
 
 export REQUIRED_FREE_SPACE=200
 #export VENV_PATH="${HOME}/${FUEL_RELEASE_NUMBER}-venv"
@@ -17,6 +9,6 @@ else
   source "${HOME}/90-venv/bin/activate"
 fi
 
-for env in $(dospy_list); do
+for env in $(dos.py list | tail -n +3); do
   dos.py erase $env
 done

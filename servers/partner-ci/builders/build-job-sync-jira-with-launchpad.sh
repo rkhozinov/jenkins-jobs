@@ -1,3 +1,5 @@
+#!/bin/bash
+
 # Sync fuel bugs" :
 export LAUNCHPAD_PROJECT='fuel'
 export LAUNCHPAD_MILESTONE='{"9.1": "Core VMware"}'

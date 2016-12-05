@@ -107,9 +107,9 @@ function prepare_venv {
 
 function smart_erase {
   env=$1
-  
+
   virsh list --all --name | grep $env && vms=$(virsh list --all --name | grep $env) || echo "there is no vms"
-  
+
   virsh net-list | tail -n +3 | cut -d' ' -f2-2 | grep $env && networks=$(virsh net-list | tail -n +3 | cut -d' ' -f2-2 | grep $env) \
   || echo "there is no networks"
   if [ ! -z "$networks" ]; then
@@ -160,8 +160,8 @@ function dospy_list {
   prefix=$1
   dos.py sync
   [ -z $prefix ] && \
-    echo $(dos.py list | tail -n +3) || \
-    echo $(dos.py list | tail -n +3  | grep $prefix)
+    dos.py list | tail -n +3 || \
+    dos.py list | tail -n +3 | grep $prefix
 }
 
 ##################################################################
@@ -185,7 +185,7 @@ set +x
 cmd="vmrun -T ws-shared -h https://localhost:443/sdk \
 -u ${WORKSTATION_USERNAME} -p ${WORKSTATION_PASSWORD}"
 nodes=${WORKSTATION_NODES}
-snapshot="${WORKSTATION_SNAPSHOT}"
+export snapshot="${WORKSTATION_SNAPSHOT}"
 
 # start from saved state
 for node in $nodes; do
@@ -206,8 +206,8 @@ if [[ "${FORCE_REUSE}" == "false" ]]; then
   else
     # determine free space before run the cleaner
     free_space=$(df -h | grep '/$' | awk '{print $4}' | tr -d G)
-  
-    if (( $free_space < $REQUIRED_FREE_SPACE )); then
+
+    if (( free_space < REQUIRED_FREE_SPACE )); then
       for env in $(dospy_list $ENV_NAME); do
         if [[ $env  != *"released"* ]]; then
           smart_erase $env
@@ -220,9 +220,9 @@ if [[ "${FORCE_REUSE}" == "false" ]]; then
   current_date=$(date +'%Y-%m-%d')
   mod_current_date=$(date -d $current_date +"%Y%m%d")
   for env in $(dospy_list $ENV_NAME); do
-    if [[ $env  == $ENV_NAME ]] && [[ $env  != *"released"* ]]; then
-      if [[ $env  != *"released"* ]]; then
-        if dos.py snapshot-list $env | grep empty; then
+    if [[ "$env"  == "$ENV_NAME" ]] && [[ "$env"  != *"released"* ]]; then
+      if [[ "$env"  != *"released"* ]]; then
+        if dos.py snapshot-list $env | grep "empty"; then
           snap_date=$(dos.py snapshot-list $env | grep empty | awk '{print $2}')
           mod_snap_date=$(date -d $snap_date +"%Y%m%d")
           if [[ $mod_snap_date -eq $mod_current_date ]]; then
@@ -241,9 +241,9 @@ if [[ "${FORCE_REUSE}" == "false" ]]; then
       fi
     fi
   done
-  
+
   for env in $(dospy_list); do
-    [[ $env  != $USEFUL_ENV ]] && [[ $env  != *"released"* ]] && smart_erase $env
+    [[ "$env"  != "$USEFUL_ENV" ]] && [[ $env  != *"released"* ]] && smart_erase $env
   done
 fi
 ##########################################################

@@ -2,7 +2,7 @@
 # activate bash xtrace for script
 [[ "${DEBUG}" == "true" ]] && set -x || set +x
 
-export ISO_PATH=${ISO_PATH:-${ISO_STORAGE}/${ISO_FILE}}
+export ISO_PATH="${ISO_STORAGE}/${ISO_FILE}"
 
 if [[ $ISO_FILE == *"custom"* ]]; then
   export FUEL_RELEASE=90

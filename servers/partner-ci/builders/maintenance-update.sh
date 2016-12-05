@@ -4,9 +4,9 @@ set -ex
 
 ###################### Get MIRROR HOST ###############
 
-LOCATION=${LOCATION_FACT:-bud}
-CENTOS_UPDATE_HOST="http://pkg-updates.fuel-infra.org/centos7/"
-MIRROR_HOST="http://mirror.seed-cz1.fuel-infra.org"
+export LOCATION=${LOCATION_FACT:-bud}
+export CENTOS_UPDATE_HOST="http://pkg-updates.fuel-infra.org/centos7/"
+export MIRROR_HOST="http://mirror.seed-cz1.fuel-infra.org"
 
 ###################### Get MIRROR_UBUNTU ###############
 

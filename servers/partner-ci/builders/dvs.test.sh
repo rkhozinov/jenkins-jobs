@@ -1,9 +1,7 @@
 #!/bin/bash -e
-# activate bash xtrace for script
 [[ "${DEBUG}" == "true" ]] && set -x || set +x
 
 export ISO_PATH="${ISO_STORAGE}/${ISO_FILE}"
-[ -z $ISO_PATH  ] && { echo "ISO_PATH is empty or doesn't exist"; exit 1; }
 
 if [[ $ISO_FILE == *"custom"* ]]; then
   export FUEL_RELEASE=90
@@ -28,10 +26,8 @@ if [ "${SNAPSHOTS_ID}" != "released" ]; then
 fi
 
 if [[ $SNAPSHOTS_ID == *"lastSuccessfulBuild"* ]]; then
-  export SNAPSHOTS_ID=$(cat snapshots.params | grep -Po '#\K[^ ]+')
+  export SNAPSHOTS_ID=$(grep -Po '#\K[^ ]+' < snapshots.params)
 fi
-
-[ -z "${SNAPSHOTS_ID}" ] && { echo SNAPSHOTS_ID is empty; exit 1; }
 
 if [ -f build.plugin_version ]; then
   export DVS_PLUGIN_VERSION=$(grep "PLUGIN_VERSION" < build.plugin_version | cut -d= -f2 )
@@ -72,18 +68,17 @@ export ENV_NAME="${ENV_PREFIX}.${SNAPSHOTS_ID}"
 export VENV_PATH="${HOME}/${FUEL_RELEASE}-venv"
 
 [ -z "${DVS_PLUGIN_PATH}" ] && export DVS_PLUGIN_PATH=$(ls -t ${WORKSPACE}/fuel-plugin-vmware-dvs*.rpm | head -n 1)
-[ -z "${DVS_PLUGIN_PATH}" ] && { echo "DVS_PLUGIN_PATH is empty"; exit 1; }
-[ -z "${PLUGIN_PATH}"     ] && export PLUGIN_PATH=$DVS_PLUGIN_PATH
+[ -z "${PLUGIN_PATH}"     ] && export PLUGIN_PATH=${DVS_PLUGIN_PATH:?}
 
-echo "test-group: ${TEST_GROUP}"
-echo "env-name: ${ENV_NAME}"
-echo "use-snapshots: ${USE_SNAPSHOTS}"
-echo "fuel-release: ${FUEL_RELEASE}"
-echo "venv-path: ${VENV_PATH}"
-echo "env-name: ${ENV_NAME}"
-echo "iso-path: ${ISO_PATH}"
-echo "plugin-path: ${DVS_PLUGIN_PATH}"
-echo "plugin-checksum: $(md5sum -b ${DVS_PLUGIN_PATH})"
+echo -e "test-group: ${TEST_GROUP}\n \
+env-name: ${ENV_NAME}\n \
+use-snapshots: ${USE_SNAPSHOTS}\n \
+fuel-release: ${FUEL_RELEASE}\n \
+venv-path: ${VENV_PATH}\n \
+env-name: ${ENV_NAME}\n \
+iso-path: ${ISO_PATH}\n \
+plugin-path: ${DVS_PLUGIN_PATH}\n \
+plugin-checksum: $(md5sum -b ${DVS_PLUGIN_PATH})\n"
 
 cat << REPORTER_PROPERTIES > reporter.properties
 ISO_VERSION=$SNAPSHOTS_ID
@@ -155,8 +150,8 @@ python $PLUGIN_WORKSPACE/run_tests.py -q --nologcapture --with-xunit --group=${T
 export SYSTEST_PID=$!
 
 #Wait before environment is created
-while [ true ]; do
-  [ $(virsh net-list | grep $ENV_NAME | wc -l) -eq 5 ] && break || sleep 10
+while true ; do
+  [ $(virsh net-list | grep -c $ENV_NAME) -eq 5 ] && break || sleep 10
   [ -e /proc/$SYSTEST_PID ] && continue || \
     { echo System tests exited prematurely, aborting; exit 1; }
 done

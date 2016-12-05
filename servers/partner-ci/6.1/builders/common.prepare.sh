@@ -91,7 +91,7 @@ function get_venv_requirements {
       sed -i 's/python-novaclient>=2.15.0/python-novaclient==2.35.0/' $REQS_PATH
     fi
 }
-   
+
 function prepare_venv {
     source "${VENV_PATH}/bin/activate"
     pip --version
@@ -127,13 +127,13 @@ fix_logger
 
 source "$VENV_PATH/bin/activate"
 
-if [[ "${FORCE_ERASE}" -eq "true" ]]; then
+if [[ "${FORCE_ERASE}" == "true" ]]; then
   delete_envs
 else
   # determine free space before run the cleaner
   free_space=$(df -h | grep '/$' | awk '{print $4}' | tr -d G)
 
-  (( $free_space < $REQUIRED_FREE_SPACE )) &&  delete_systest_envs || echo free-space: $free_space
+  (( free_space < REQUIRED_FREE_SPACE )) && delete_systest_envs || "echo free-space: $free_space"
 
   # poweroff all envs
   destroy_envs

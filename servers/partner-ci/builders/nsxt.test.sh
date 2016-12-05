@@ -3,7 +3,6 @@
 [[ "${DEBUG}" == "true" ]] && set -x || set +x
 
 export ISO_PATH="${ISO_STORAGE}/${ISO_FILE}"
-[ -z $ISO_PATH  ] && { echo "ISO_PATH is empty or doesn't exist"; exit 1; }
 
 if [[ $ISO_FILE == *"custom"* ]]; then
   export FUEL_RELEASE=90
@@ -27,22 +26,13 @@ if [ "${SNAPSHOTS_ID}" != "released" ]; then
 fi
 
 [[ $SNAPSHOTS_ID == *"lastSuccessfulBuild"* ]] && \
-  export SNAPSHOTS_ID=$(cat snapshots.params | grep -Po '#\K[^ ]+')
+  export SNAPSHOTS_ID=$(grep -Po '#\K[^ ]+' < snapshots.params)
 
-[ -z "${SNAPSHOTS_ID}" ] && { echo SNAPSHOTS_ID is empty; exit 1; }
-
-if [ -f build.plugin_version ]; then
+[ -f build.plugin_version ] && \
   export PLUGIN_VERSION=$(grep "PLUGIN_VERSION" < build.plugin_version | cut -d= -f2 )
-else
-  if [ -z $PLUGIN_VERSION ]; then
-    echo "build.properties file is not available so a test couldn't be runned"
-    exit 1
-  fi
-fi
 
-[ -z $PLUGIN_VERSION  ] && \
-  { echo "PLUGIN_VERSION variable is empty"; exit 1; } || \
-    export NSXT_PLUGIN_VERSION=$PLUGIN_VERSION
+[ -z $NSXV_PLUGIN_VERSION  ] && \
+    export NSXV_PLUGIN_VERSION=${PLUGIN_VERSION:?}
 
 if [ -z "${PKG_JOB_BUILD_NUMBER}" ]; then
     if [ -f build.properties ]; then
@@ -55,31 +45,28 @@ if [ -z "${PKG_JOB_BUILD_NUMBER}" ]; then
 fi
 
 #remove old logs and test data
-[ -f nosetest.xml ] && rm -f nosetests.xml
-rm -rf logs/*
-
-
+[ -f nosetest.xml ] && sudo rm -f nosetests.xml
+sudo rm -rf logs/*
 
 export ENV_NAME="${ENV_PREFIX}.${SNAPSHOTS_ID}"
 export VENV_PATH="${HOME}/${FUEL_RELEASE}-venv"
 
 [ -z "${NSXT_PLUGIN_PATH}"  ] && export NSXT_PLUGIN_PATH=$(ls -t ${WORKSPACE}/nsx-t*.rpm | head -n 1)
-[ -z "${NSXT_PLUGIN_PATH}"  ] && { echo "NSXT_PLUGIN_PATH is empty"; exit 1; }
-[ -z "${PLUGIN_PATH}"       ] && export PLUGIN_PATH=$NSXT_PLUGIN_PATH
+[ -z "${PLUGIN_PATH}"       ] && export PLUGIN_PATH=${NSXT_PLUGIN_PATH:?}
 
 systest_parameters=''
 [[ $FORCE_REUSE == "true"  ]] && systest_parameters+=' -k' || echo "new env will be created"
 [[ $ERASE_AFTER   == "true"  ]] && echo "the env will be erased after test" || systest_parameters+=' -K'
 
-echo "test-group: ${TEST_GROUP}"
-echo "env-name: ${ENV_NAME}"
-echo "use-snapshots: ${USE_SNAPSHOTS}"
-echo "fuel-release: ${FUEL_RELEASE}"
-echo "venv-path: ${VENV_PATH}"
-echo "env-name: ${ENV_NAME}"
-echo "iso-path: ${ISO_PATH}"
-echo "plugin-path: ${NSXT_PLUGIN_PATH}"
-echo "plugin-checksum: $(md5sum -b ${NSXT_PLUGIN_PATH})"
+echo -e "test-group: ${TEST_GROUP}\n \
+env-name: ${ENV_NAME}\n \
+use-snapshots: ${USE_SNAPSHOTS}\n \
+fuel-release: ${FUEL_RELEASE}\n \
+venv-path: ${VENV_PATH}\n \
+env-name: ${ENV_NAME}\n \
+iso-path: ${ISO_PATH}\n \
+plugin-path: ${NSXT_PLUGIN_PATH}\n \
+plugin-checksum: $(md5sum -b ${NSXT_PLUGIN_PATH})"
 
 cat << REPORTER_PROPERTIES > reporter.properties
 ISO_VERSION=$SNAPSHOTS_ID

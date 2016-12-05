@@ -3,19 +3,19 @@ set -e
 
 git log  --pretty=oneline | head
 
-cmd1="find $PUPPETLINT_PATH -name '*.erb' -print0 "
-cmd2="find $PUPPETLINT_PATH -name '*.pp'  -print0 "
-cmd3="find $PUPPETLINT_PATH -name '*.pp'  -print0 "
+cmd1="(find $PUPPETLINT_PATH -name '*.erb' -print0 )"
+cmd2="(find $PUPPETLINT_PATH -name '*.pp'  -print0 )"
+cmd3="(find $PUPPETLINT_PATH -name '*.pp'  -print0 )"
 
 if [ ! -z "${PUPPETLINT_IGNORE}" ]; then
-  cmd1="find $PUPPETLINT_PATH -name '*.erb' ! -name $PUPPETLINT_IGNORE -print0 "
-  cmd2="find $PUPPETLINT_PATH -name '*.pp'  ! -name $PUPPETLINT_IGNORE -print0 "
-  cmd3="find $PUPPETLINT_PATH -name '*.pp'  ! -name $PUPPETLINT_IGNORE -print0 "
+  cmd1="(find $PUPPETLINT_PATH -name '*.erb' ! -name $PUPPETLINT_IGNORE -print0 )"
+  cmd2="(find $PUPPETLINT_PATH -name '*.pp'  ! -name $PUPPETLINT_IGNORE -print0 )"
+  cmd3="(find $PUPPETLINT_PATH -name '*.pp'  ! -name $PUPPETLINT_IGNORE -print0 )"
 fi
 
-$cmd1 | xargs -0 -P1 -L1 -I '%' erb -P -x -T '-' % | ruby -c
-$cmd2 | xargs -0 -P1 -L1 puppet parser validate --verbose
-$cmd3 | xargs -0 -r -P1 -L1 puppet-lint \
+"${cmd1[@]}" | xargs -0 -P1 -L1 -I '%' erb -P -x -T '-' % | ruby -c
+"${cmd2[@]}" | xargs -0 -P1 -L1 puppet parser validate --verbose
+"${cmd3[@]}" | xargs -0 -r -P1 -L1 puppet-lint \
          --fail-on-warnings \
          --with-context \
          --with-filename \
@@ -29,10 +29,6 @@ $cmd3 | xargs -0 -r -P1 -L1 puppet-lint \
 
 
 fpb --check  ./
-if [[ "${DEBUG}" == "true" ]]; then
-  fpb --debug --build  ./
-else
-  fpb --build  ./
-fi
+[[ "${DEBUG}" == "true" ]] && fpb --debug --build  ./ || fpb --build  ./
 pkg_name=$(ls -t *.rpm | head -n1)
 mv $pkg_name $(echo $pkg_name | head -n 1 | sed s/.noarch/-$BUILD_NUMBER.noarch/)

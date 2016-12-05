@@ -2,13 +2,13 @@
 # activate bash xtrace for script
 [[ "${DEBUG}" == "true" ]] && set -x || set +x
 
-export ISO_PATH="${ISO_STORAGE}/${ISO_FILE}"
-[ -z $ISO_PATH  ] && { echo "ISO_PATH is empty or doesn't exist"; exit 1; }
+export ISO_PATH=${ISO_PATH:-"$ISO_STORAGE/$ISO_FILE"}
 
 if [[ $ISO_FILE == *"custom"* ]]; then
   export FUEL_RELEASE=90
 else
-  export FUEL_RELEASE=$(echo $ISO_FILE | cut -d- -f2 | tr -d '.iso')
+  fuel_release=$(echo $ISO_FILE | cut -d- -f2 | tr -d '.iso')
+  export FUEL_RELEASE=$fuel_release
 fi
 
 if [ "${SNAPSHOTS_ID}" != "released" ]; then
@@ -27,14 +27,13 @@ if [ "${SNAPSHOTS_ID}" != "released" ]; then
   fi
 fi
 
-if [[ $SNAPSHOTS_ID == *"lastSuccessfulBuild"* ]]; then
-  export SNAPSHOTS_ID=$(cat snapshots.params | grep -Po '#\K[^ ]+')
-fi
-
-[ -z "${SNAPSHOTS_ID}" ] && { echo SNAPSHOTS_ID is empty; exit 1; }
+[[ $SNAPSHOTS_ID == *"lastSuccessfulBuild"* ]] && \
+  id=$(grep -Po '#\K[^ ]+' < snapshots.params)
+  export SNAPSHOTS_ID=$id
 
 if [ -f build.plugin_version ]; then
-  export DVS_PLUGIN_VERSION=$(grep "PLUGIN_VERSION" < build.plugin_version | cut -d= -f2 )
+  version=$(grep "PLUGIN_VERSION" < build.plugin_version | cut -d= -f2 )
+  export DVS_PLUGIN_VERSION=$version
 else
   if [ -z $PLUGIN_VERSION ]; then
     echo "build.properties file is not available so a test couldn't be runned"
@@ -44,7 +43,6 @@ else
   fi
 fi
 
-[ -z $DVS_PLUGIN_VERSION ] && { echo "DVS_PLUGIN_VERSION is empty"; exit 1; }
 
 if [ -z "${PKG_JOB_BUILD_NUMBER}" ]; then
     if [ -f build.properties ]; then
@@ -64,24 +62,23 @@ if [[ $ISO_FILE == *"Mirantis"* ]]; then
   export FUEL_RELEASE=$(echo $ISO_FILE | cut -d- -f2 | tr -d '.iso')
 fi
 
-export ENV_NAME="${ENV_PREFIX}.${SNAPSHOTS_ID}"
+export ENV_NAME="${ENV_PREFIX}.${SNAPSHOTS_ID:?}"
 export VENV_PATH="${HOME}/${FUEL_RELEASE}-venv"
 
-[ -z "${DVS_PLUGIN_PATH}" ] && export DVS_PLUGIN_PATH=$(ls -t ${WORKSPACE}/fuel-plugin-vmware-dvs*.rpm | head -n 1)
-[ -z "${DVS_PLUGIN_PATH}" ] && { echo "DVS_PLUGIN_PATH is empty"; exit 1; }
-[ -z "${PLUGIN_PATH}"     ] && export PLUGIN_PATH=$DVS_PLUGIN_PATH
+dvs_plugin_path=$(ls -t ${WORKSPACE}/fuel-plugin-vmware-dvs*.rpm | head -n 1)
+export DVS_PLUGIN_PATH=${DVS_PLUGIN_PATH:-$dvs_plugin_path}
+export PLUGIN_PATH=${PLUGIN_PATH:-$DVS_PLUGIN_PATH}
 
-[ -z $TEST_GROUP_PREFIX ] && { echo "testgroup prefix is empty"; exit 1; } || echo test-group-prefix: $TEST_GROUP_PREFIX
-
-echo "test-group: ${TEST_GROUP}"
-echo "env-name: ${ENV_NAME}"
-echo "use-snapshots: ${USE_SNAPSHOTS}"
-echo "fuel-release: ${FUEL_RELEASE}"
-echo "venv-path: ${VENV_PATH}"
-echo "env-name: ${ENV_NAME}"
-echo "iso-path: ${ISO_PATH}"
-echo "plugin-path: ${DVS_PLUGIN_PATH}"
-echo "plugin-checksum: $(md5sum -b ${DVS_PLUGIN_PATH})"
+echo -e "test-group-prefix: ${TEST_GROUP_PREFIX}\n \
+         test-group: ${TEST_GROUP}\n \
+         env-name: ${ENV_NAME}\n \
+         use-snapshots: ${USE_SNAPSHOTS}\n \
+         fuel-release: ${FUEL_RELEASE}\n \
+         venv-path: ${VENV_PATH}\n \
+         env-name: ${ENV_NAME}\n \
+         iso-path: ${ISO_PATH}\n \
+         plugin-path: ${DVS_PLUGIN_PATH}\n \
+         plugin-checksum: $(md5sum -b ${DVS_PLUGIN_PATH})\n"
 
 cat << REPORTER_PROPERTIES > reporter.properties
 ISO_VERSION=$SNAPSHOTS_ID
@@ -93,7 +90,7 @@ TEST_JOB_NAME=$JOB_NAME
 TEST_JOB_BUILD_NUMBER=$BUILD_NUMBER
 PKG_JOB_BUILD_NUMBER=$PKG_JOB_BUILD_NUMBER
 PLUGIN_VERSION=$PLUGIN_VERSION
-DVS_PLUGIN_VERSION=$DVS_PLUGIN_VERSION
+DVS_PLUGIN_VERSION=${DVS_PLUGIN_VERSION}
 TREP_TESTRAIL_SUITE=$TREP_TESTRAIL_SUITE
 TREP_TESTRAIL_SUITE_DESCRIPTION=$TREP_TESTRAIL_SUITE_DESCRIPTION
 TREP_TESTRAIL_PLAN=$TREP_TESTRAIL_PLAN
@@ -101,7 +98,7 @@ TREP_TESTRAIL_PLAN_DESCRIPTION=$TREP_TESTRAIL_PLAN_DESCRIPTION
 DATE=$(date +'%B-%d')
 REPORTER_PROPERTIES
 
-source "${VENV_PATH}/bin/activate"
+. "${VENV_PATH}/bin/activate"
 
 add_interface_to_bridge() {
   env=$1
@@ -126,9 +123,9 @@ setup_bridge() {
   sudo ip link set dev $nic up
   sudo ip link set dev $bridge up
 
-  if sudo /sbin/iptables-save | grep $bridge | grep -i reject | grep -q FORWARD; then
-    sudo /sbin/iptables -D FORWARD -o $bridge -j REJECT --reject-with icmp-port-unreachable
-    sudo /sbin/iptables -D FORWARD -i $bridge -j REJECT --reject-with icmp-port-unreachable
+  if sudo iptables-save | grep $bridge | grep -i reject | grep -q FORWARD; then
+    iptables -D FORWARD -o $bridge -j REJECT --reject-with icmp-port-unreachable
+    iptables -D FORWARD -i $bridge -j REJECT --reject-with icmp-port-unreachable
   fi
 
   if [[ "${DEBUG}" == "true" ]]; then
@@ -139,23 +136,23 @@ setup_bridge() {
 }
 
 clean_iptables() {
-  sudo /sbin/iptables -F
-  sudo /sbin/iptables -t nat -F
-  sudo /sbin/iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE
+  iptables -F
+  iptables -t nat -F
+  iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE
 }
 
 sh -x "utils/jenkins/system_tests.sh" \
     -k \
     -K \
     -t test \
-    -i "${ISO_PATH}" \
+    -i ${ISO_PATH} \
     -o --group="${TEST_GROUP_PREFIX}(${TEST_GROUP_CONFIG})" &
 
 export SYSTEST_PID=$!
 
 #Wait before environment is created
-while [ true ]; do
-  [ $(virsh net-list | grep $ENV_NAME | wc -l) -eq 5 ] && break || sleep 10
+while true ; do
+  [ $(virsh net-list | grep -c $ENV_NAME) -eq 5 ] && break || sleep 10
   [ -e /proc/$SYSTEST_PID ] && continue || \
     { echo System tests exited prematurely, aborting; exit 1; }
 done

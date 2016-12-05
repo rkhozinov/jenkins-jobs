@@ -1,3 +1,5 @@
+#!/bin/bash
+
 #Set statistics job-group properties for tests
 export FUEL_STATS_HOST=${FUEL_STATS_HOST:-"fuel-collect-systest.infra.mirantis.net"}
 export ANALYTICS_IP="${ANALYTICS_IP:-"fuel-stats-systest.infra.mirantis.net"}"
@@ -22,30 +24,30 @@ if [[ "${UPDATE_MASTER}" == "true" ]]; then
       esac
 
       UBUNTU_REPOS="deb ${UBUNTU_MIRROR_URL} trusty main universe multiverse|deb ${UBUNTU_MIRROR_URL} trusty-updates main universe multiverse|deb ${UBUNTU_MIRROR_URL} trusty-security main universe multiverse"
-  
+
       ENABLE_PROPOSED="${ENABLE_PROPOSED:-true}"
-  
+
       if [ "$ENABLE_PROPOSED" = true ]; then
           UBUNTU_PROPOSED="deb ${UBUNTU_MIRROR_URL} trusty-proposed main universe multiverse"
           UBUNTU_REPOS="$UBUNTU_REPOS|$UBUNTU_PROPOSED"
       fi
       export MIRROR_UBUNTU="$UBUNTU_REPOS"
   fi
-  
+
   function join() {
       local __sep="${1}"
       local __head="${2}"
       local __tail="${3}"
       [[ -n "${__head}" ]] && echo "${__head}${__sep}${__tail}" || echo "${__tail}"
   }
-  
+
   function to_uppercase() {
       echo "$1" | awk '{print toupper($0)}'
   }
-  
+
   __space=' '
   __pipe='|'
-  
+
   # Adding MOS rpm repos to
   # - UPDATE_FUEL_MIRROR - will be used for master node
   # - EXTRA_RPM_REPOS - will be used for nodes in cluster
