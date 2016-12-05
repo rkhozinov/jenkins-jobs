@@ -341,8 +341,11 @@
                 ${SNAPSHOTS_URL/SNAPSHOTS_ID/$SNAPSHOTS_ID}
                 snapshots_id=$(grep "^CUSTOM_VERSION=" < snapshots.params | cut -d= -f2 | cut -d'#' -f2)
                 echo "snapshot_id_number=" $snapshots_id
-                python plugin_test/fuel-qa/utils/jenkins/conv_snapshot_file.py
-
+                if [ "${ENV_PREFIX}" == *"vcenter"* ]; then
+                  python utils/jenkins/conv_snapshot_file.py
+                else
+                  python plugin_test/fuel-qa/utils/jenkins/conv_snapshot_file.py
+                fi
 - builder:
     name: runner-condition
     builders:
