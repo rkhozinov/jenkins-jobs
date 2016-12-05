@@ -239,11 +239,11 @@
                   sudo cp /var/log/libvirt/libvirtd.log ${{WORKSPACE}}/libvirtd_total.log
                   sudo chown jenkins:jenkins ${{WORKSPACE}}/libvirtd_total.log
       - postbuildscript:
-          script-only-if-succeeded: True
-          script-only-if-failed: False
+          script-only-if-succeeded: False
+          script-only-if-failed: True
           builders:
               - shell: |
-                  [[ ${{DISCONNECT_ON_FAILURE}} ]] && \
+                  [[ "${DISCONNECT_ON_FAILURE}" == "true" ]] && \
                   python -c "import jenkins; jenkins.Jenkins(\"${{JENKINS_URL}}\", username=\"${{JENKINS_USERNAME}}\", password=\"${{JENKINS_PASSWORD}}\").disable_node(\"${{NODE_NAME}}\")"
       - description-setter:
           regexp-for-failed: '"error":(.*) \1 "AssertionError":(.*) \2'
