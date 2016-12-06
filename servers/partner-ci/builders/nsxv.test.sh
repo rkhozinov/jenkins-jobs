@@ -28,17 +28,17 @@ fi
 [[ $SNAPSHOTS_ID == *"lastSuccessfulBuild"* ]] && \
   export SNAPSHOTS_ID=$(grep -Po '#\K[^ ]+' < snapshots.params )
 
-[ -f build.plugin_version ] && \
-  export PLUGIN_VERSION=$(grep "PLUGIN_VERSION" < build.plugin_version | cut -d= -f2 )
+if [ -f build.plugin_version ]; then
+  version=$(grep "PLUGIN_VERSION" < build.plugin_version | cut -d= -f2 )
+  export PLUGIN_VERSION=$version
+fi
 
-[ -z $NSXV_PLUGIN_VERSION  ] && \
-    export NSXV_PLUGIN_VERSION=${PLUGIN_VERSION:?}
+export NSXV_PLUGIN_VERSION=${PLUGIN_VERSION:?}
 
 if [ -z "${PKG_JOB_BUILD_NUMBER}" ]; then
     if [ -f build.properties ]; then
         export PKG_JOB_BUILD_NUMBER=$(grep "^BUILD_NUMBER" < build.properties | cut -d= -f2 )
     else
-        : ${PKG_JOB_BUILD_NUMBER?}
         echo -e "build.properties file is not available so \
                  the results couldn't be publihsed\n \
                  PKG_JOB_BUILD_NUMBER is empty, but it's needed for reporter."
