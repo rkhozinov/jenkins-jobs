@@ -5,27 +5,27 @@
       - text:
           name: SPECIFIC_PROPS
           default: |
-            NODE_VOLUME_SIZE=512;
+            BM_HOST_BRIDGE_INTERFACES=eth2:10.109.0.0/24;eth3:10.109.4.0/24;
+            BM_IPMI_ADDR=cz7660-kvm.host-telecom.com;
+            BM_IPMI_PASSWORD=Ba2Ie23#GHgho;
+            BM_IPMI_USER=engineer;
+            BM_TARGET_MACS=00:1b:21:87:21:99;00:1b:21:87:21:98;
+            BONDING=False;
+            CONTRAIL_DISTRIBUTION=;
+            CONTRAIL_PLUGIN_PACK_UB_PATH=;
+            CONTRAIL_PLUGIN_PATH=;
             CONTRAIL_VERSION=5.0;
+            FORCE_VSRX_COPY=False;
+            KVM_USE=True;
+            MIRROR=http://mirror.seed-cz1.fuel-infra.org;
+            MULTIPLE_NETWORKS=;
+            MULTIPLE_NETWORKS_TEMPLATE=;
+            NODE_VOLUME_SIZE=512;
+            SPECIFIC_VC=False;
+            VSRX_CONFIG_PATH=;
             VSRX_ORIGINAL_IMAGE_PATH=/storage/contrail/vSRX.400.img;
             VSRX_TARGET_IMAGE_PATH=/var/lib/libvirt/images/vSRX.400.img;
             VSRX_TEMPLATE_PATH=/storage/contrail/vSRX_400.template;
-            BM_IPMI_USER=engineer;
-            BM_IPMI_PASSWORD=Ba2Ie23#GHgho;
-            BM_IPMI_ADDR=cz7660-kvm.host-telecom.com;
-            BM_TARGET_MACS=00:1b:21:87:21:99;00:1b:21:87:21:98;
-            BM_HOST_BRIDGE_INTERFACES=eth2:10.109.0.0/24;eth3:10.109.4.0/24;
-            KVM_USE=True;
-            BONDING=False;
-            SPECIFIC_VC=False;
-            FORCE_VSRX_COPY=False;
-            MIRROR=http://mirror.seed-cz1.fuel-infra.org;
-            CONTRAIL_PLUGIN_PATH=;
-            CONTRAIL_DISTRIBUTION=;
-            CONTRAIL_PLUGIN_PACK_UB_PATH=;
-            MULTIPLE_NETWORKS=;
-            MULTIPLE_NETWORKS_TEMPLATE=;
-            VSRX_CONFIG_PATH=;
 
 - project:
     name: 'predefined_parameters'
@@ -244,29 +244,29 @@
           default: '{multijob_build_pkg}'
           description: "Triggers build of pkg of $PKG_JOB_NAME before run of tests"
       - common-parameters:
-          fuel_qa_refs:          '{fuel_qa_refs}'
-          publish_results:       '{publish_results}'
           debug:                 '{debug}'
           disable_ssl:           '{disable_ssl}'
+          enable_proposed:       '{enable_proposed}'
+          env_prefix:            '{fuel-release}.{plugin-name}'
           force_erase:           '{force_erase}'
           force_reuse:           '{force_reuse}'
-          recreate_venv:         '{recreate_venv}'
-          ws_norevert:           '{ws_norevert}'
-          nfs_clean:             '{nfs_clean}'
-          iso_file:              '{iso_file}'
+          fuel_qa_refs:          '{fuel_qa_refs}'
           gerrit_branch:         '{gerrit_branch}'
-          env_prefix:            '{fuel-release}.{plugin-name}'
+          iso_file:              '{iso_file}'
+          kvm_use:               '{kvm_use}'
+          nfs_clean:             '{nfs_clean}'
           pkg_job_name:          '{pkg_job_name}'
-          testrail_suite:        '{testrail_suite}'
-          testrail_suite_desc:   '{testrail_suite_desc}'
+          publish_results:       '{publish_results}'
+          recreate_venv:         '{recreate_venv}'
+          skip_vote_failed:      '{skip_vote_failed}'
+          skip_vote_successfull: '{skip_vote_successfull}'
+          snapshots_id:          '{snapshots_id}'
           testrail_plan:         '{testrail_plan}'
           testrail_plan_desc:    '{testrail_plan_desc}'
-          skip_vote_successfull: '{skip_vote_successfull}'
-          skip_vote_failed:      '{skip_vote_failed}'
-          enable_proposed:       '{enable_proposed}'
-          kvm_use:               '{kvm_use}'
+          testrail_suite:        '{testrail_suite}'
+          testrail_suite_desc:   '{testrail_suite_desc}'
           update_master:         '{update_master}'
-          snapshots_id:          '{snapshots_id}'
+          ws_norevert:           '{ws_norevert}'
       - plugin-specific-parameters
 
 # parameters for jobs created per test-group and custom test job
@@ -286,30 +286,30 @@
           '{testgroup_value_type}': '{obj:testgroup_value}'
           description: "test-group name"
       - common-parameters:
-          fuel_qa_refs:          '{fuel_qa_refs}'
-          publish_results:       '{publish_results}'
           debug:                 '{debug}'
           disable_ssl:           '{disable_ssl}'
+          enable_proposed:       '{enable_proposed}'
+          env_prefix:            '{fuel-release}.{plugin-name}'
           force_erase:           '{force_erase}'
           force_reuse:           '{force_reuse}'
-          recreate_venv:         '{recreate_venv}'
-          ws_norevert:           '{ws_norevert}'
-          nfs_clean:             '{nfs_clean}'
-          iso_file:              '{iso_file}'
+          fuel_qa_refs:          '{fuel_qa_refs}'
           gerrit_branch:         '{gerrit_branch}'
-          env_prefix:            '{fuel-release}.{plugin-name}'
+          iso_file:              '{iso_file}'
+          iso_storage:           '{iso_storage}'
+          kvm_use:               '{kvm_use}'
+          nfs_clean:             '{nfs_clean}'
           pkg_job_name:          '{pkg_job_name}'
-          testrail_suite:        '{testrail_suite}'
-          testrail_suite_desc:   '{testrail_suite_desc}'
+          publish_results:       '{publish_results}'
+          recreate_venv:         '{recreate_venv}'
+          skip_vote_failed:      '{skip_vote_failed}'
+          skip_vote_successfull: '{skip_vote_successfull}'
+          snapshots_id:          '{snapshots_id}'
           testrail_plan:         '{testrail_plan}'
           testrail_plan_desc:    '{testrail_plan_desc}'
-          skip_vote_successfull: '{skip_vote_successfull}'
-          skip_vote_failed:      '{skip_vote_failed}'
-          enable_proposed:       '{enable_proposed}'
+          testrail_suite:        '{testrail_suite}'
+          testrail_suite_desc:   '{testrail_suite_desc}'
           update_master:         '{update_master}'
-          kvm_use:               '{kvm_use}'
-          iso_storage:           '{iso_storage}'
-          snapshots_id:          '{snapshots_id}'
+          ws_norevert:           '{ws_norevert}'
       - plugin-specific-parameters
 
 - defaults:

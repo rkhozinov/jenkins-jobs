@@ -9,17 +9,17 @@
           name: SPECIFIC_PROPS
           default: |
             ADMIN_NODE_MEMORY=8192;
-            SLAVE_NODE_MEMORY=8192;
-            WORKSTATION_SNAPSHOT=nsxt;
-            WORKSTATION_NODES=esxi1 esxi2 esxi3 vcenter nsx-edge trusty;
-            VCENTER_USERNAME=administrator@vsphere.local;
-            WORKSTATION_PASSWORD=VMware01;
-            WORKSTATION_USERNAME=vmware;
-            VCENTER_PASSWORD=Qwer!1234;
-            VCENTER_IP=172.16.0.254;
-            VCENTER_CLUSTERS=Cluster1,Cluster2;
-            NSXT_PASSWORD=Qwer!1234;
             FORCE_DISABLE_UPDATES=true;
+            NSXT_PASSWORD=Qwer!1234;
+            SLAVE_NODE_MEMORY=8192;
+            VCENTER_CLUSTERS=Cluster1,Cluster2;
+            VCENTER_IP=172.16.0.254;
+            VCENTER_PASSWORD=Qwer!1234;
+            VCENTER_USERNAME=administrator@vsphere.local;
+            WORKSTATION_NODES=esxi1 esxi2 esxi3 vcenter nsx-edge trusty;
+            WORKSTATION_PASSWORD=VMware01;
+            WORKSTATION_SNAPSHOT=nsxt;
+            WORKSTATION_USERNAME=vmware;
 - project:
     name: 'predefined_parameters'
     fuel-release: '9.0'
@@ -181,31 +181,31 @@
           default: '{multijob_build_pkg}'
           description: "Triggers build of pkg of $PKG_JOB_NAME before run of tests"
       - common-parameters:
+          debug:                 '{debug}'
+          disable_ssl:           '{disable_ssl}'
+          enable_proposed:       '{enable_proposed}'
+          env_prefix:            '{fuel-release}.{plugin-name}'
+          force_erase:           '{force_erase}'
+          force_reuse:           '{force_reuse}'
           fuel_qa_refs:          '{fuel_qa_refs}'
-          publish_results:      '{publish_results}'
-          debug:                '{debug}'
-          disable_ssl:          '{disable_ssl}'
-          force_erase:          '{force_erase}'
-          force_reuse:          '{force_reuse}'
-          recreate_venv:        '{recreate_venv}'
-          ws_norevert:          '{ws_norevert}'
-          nfs_clean:            '{nfs_clean}'
-          iso_file:             '{iso_file}'
-          gerrit_branch:        '{gerrit_branch}'
-          env_prefix:           '{fuel-release}.{plugin-name}'
-          pkg_job_name:         '{pkg_job_name}'
-          testrail_suite:       '{testrail_suite}'
-          testrail_suite_desc:  '{testrail_suite_desc}'
-          testrail_plan:        '{testrail_plan}'
-          testrail_plan_desc:   '{testrail_plan_desc}'
+          gerrit_branch:         '{gerrit_branch}'
+          iso_file:              '{iso_file}'
+          iso_storage:           '{iso_storage}'
+          kvm_use:               '{kvm_use}'
+          nfs_clean:             '{nfs_clean}'
+          pkg_job_name:          '{pkg_job_name}'
+          publish_results:       '{publish_results}'
+          recreate_venv:         '{recreate_venv}'
+          skip_vote_failed:      '{skip_vote_failed}'
           skip_vote_successfull: '{skip_vote_successfull}'
-          skip_vote_failed:     '{skip_vote_failed}'
-          enable_proposed:      '{enable_proposed}'
-          update_master:        '{update_master}'
-          kvm_use:              '{kvm_use}'
-          iso_storage:          '{iso_storage}'
-          snapshots_id:         '{snapshots_id}'
-          vcenter_use:         '{vcenter_use}'
+          snapshots_id:          '{snapshots_id}'
+          testrail_plan:         '{testrail_plan}'
+          testrail_plan_desc:    '{testrail_plan_desc}'
+          testrail_suite:        '{testrail_suite}'
+          testrail_suite_desc:   '{testrail_suite_desc}'
+          update_master:         '{update_master}'
+          vcenter_use:           '{vcenter_use}'
+          ws_norevert:           '{ws_norevert}'
       - plugin-specific-parameters
 
 - test-parameters: &test-parameters
@@ -227,31 +227,31 @@
           '{testgroup_value_type}': '{obj:testgroup_value}'
           description: "test-group name"
       - common-parameters:
+          debug:                 '{debug}'
+          disable_ssl:           '{disable_ssl}'
+          enable_proposed:       '{enable_proposed}'
+          env_prefix:            '{fuel-release}.{plugin-name}'
+          force_erase:           '{force_erase}'
+          force_reuse:           '{force_reuse}'
           fuel_qa_refs:          '{fuel_qa_refs}'
-          publish_results: '{publish_results}'
-          debug:           '{debug}'
-          disable_ssl:     '{disable_ssl}'
-          force_erase:     '{force_erase}'
-          force_reuse:     '{force_reuse}'
-          recreate_venv:   '{recreate_venv}'
-          ws_norevert:     '{ws_norevert}'
-          nfs_clean:       '{nfs_clean}'
-          iso_file:        '{iso_file}'
-          gerrit_branch:   '{gerrit_branch}'
-          env_prefix:      '{fuel-release}.{plugin-name}'
-          pkg_job_name:    '{pkg_job_name}'
-          testrail_suite:       '{testrail_suite}'
-          testrail_suite_desc:  '{testrail_suite_desc}'
-          testrail_plan:        '{testrail_plan}'
-          testrail_plan_desc:   '{testrail_plan_desc}'
+          gerrit_branch:         '{gerrit_branch}'
+          iso_file:              '{iso_file}'
+          iso_storage:           '{iso_storage}'
+          kvm_use:               '{kvm_use}'
+          nfs_clean:             '{nfs_clean}'
+          pkg_job_name:          '{pkg_job_name}'
+          publish_results:       '{publish_results}'
+          recreate_venv:         '{recreate_venv}'
+          skip_vote_failed:      '{skip_vote_failed}'
           skip_vote_successfull: '{skip_vote_successfull}'
-          skip_vote_failed:     '{skip_vote_failed}'
-          enable_proposed:      '{enable_proposed}'
-          update_master:        '{update_master}'
-          kvm_use:              '{kvm_use}'
-          iso_storage:          '{iso_storage}'
-          snapshots_id:         '{snapshots_id}'
-          vcenter_use:         '{vcenter_use}'
+          snapshots_id:          '{snapshots_id}'
+          testrail_plan:         '{testrail_plan}'
+          testrail_plan_desc:    '{testrail_plan_desc}'
+          testrail_suite:        '{testrail_suite}'
+          testrail_suite_desc:   '{testrail_suite_desc}'
+          update_master:         '{update_master}'
+          vcenter_use:           '{vcenter_use}'
+          ws_norevert:           '{ws_norevert}'
       - plugin-specific-parameters
 
 - defaults:

@@ -8,17 +8,17 @@
       - text:
           name: SPECIFIC_PROPS
           default: |
-            SLAVE_NODE_MEMORY=8192;
             ADMIN_NODE_MEMORY=8192;
-            WORKSTATION_SNAPSHOT=nsxv_6.2;
-            WORKSTATION_NODES=esxi1 esxi2 esxi3 vcenter trusty;
-            VCENTER_USER=administrator@vsphere.local;
-            VCENTER_PASSWORD=Qwer!1234;
-            VCENTER_IP=172.16.0.254;
-            VCENTER_CLUSTERS=Cluster1,Cluster2;
-            NSXV_USER=administrator@vsphere.local;
             NSXV_PASSWORD=Qwer!1234;
             NSXV_PLUGIN_VERSION=3.0.1;
+            NSXV_USER=administrator@vsphere.local;
+            SLAVE_NODE_MEMORY=8192;
+            VCENTER_CLUSTERS=Cluster1,Cluster2;
+            VCENTER_IP=172.16.0.254;
+            VCENTER_PASSWORD=Qwer!1234;
+            VCENTER_USER=administrator@vsphere.local;
+            WORKSTATION_NODES=esxi1 esxi2 esxi3 vcenter trusty;
+            WORKSTATION_SNAPSHOT=nsxv_6.2;
 - project:
     name: 'predefined_parameters'
     fuel-release: '9.x'
@@ -191,32 +191,32 @@
           default: '{multijob_build_pkg}'
           description: "Triggers build of pkg of $PKG_JOB_NAME before run of tests"
       - common-parameters:
-          fuel_qa_refs:          '{fuel_qa_refs}'
-          plugin_version:        '{plugin-version}'
-          publish_results:       '{publish_results}'
           debug:                 '{debug}'
           disable_ssl:           '{disable_ssl}'
+          enable_proposed:       '{enable_proposed}'
+          env_prefix:            '{fuel-release}.{plugin-name}'
           force_erase:           '{force_erase}'
           force_reuse:           '{force_reuse}'
-          recreate_venv:         '{recreate_venv}'
-          ws_norevert:           '{ws_norevert}'
-          nfs_clean:             '{nfs_clean}'
-          iso_file:              '{iso_file}'
+          fuel_qa_refs:          '{fuel_qa_refs}'
           gerrit_branch:         '{gerrit_branch}'
-          env_prefix:            '{fuel-release}.{plugin-name}'
+          iso_file:              '{iso_file}'
+          iso_storage:           '{iso_storage}'
+          kvm_use:               '{kvm_use}'
+          nfs_clean:             '{nfs_clean}'
           pkg_job_name:          '{pkg_job_name}'
-          testrail_suite:        '{testrail_suite}'
-          testrail_suite_desc:   '{testrail_suite_desc}'
+          plugin_version:        '{plugin-version}'
+          publish_results:       '{publish_results}'
+          recreate_venv:         '{recreate_venv}'
+          skip_vote_failed:      '{skip_vote_failed}'
+          skip_vote_successfull: '{skip_vote_successfull}'
+          snapshots_id:          '{snapshots_id}'
           testrail_plan:         '{testrail_plan}'
           testrail_plan_desc:    '{testrail_plan_desc}'
-          skip_vote_successfull: '{skip_vote_successfull}'
-          skip_vote_failed:      '{skip_vote_failed}'
-          enable_proposed:       '{enable_proposed}'
+          testrail_suite:        '{testrail_suite}'
+          testrail_suite_desc:   '{testrail_suite_desc}'
           update_master:         '{update_master}'
-          kvm_use:               '{kvm_use}'
-          iso_storage:           '{iso_storage}'
-          snapshots_id:          '{snapshots_id}'
           vcenter_use:           '{vcenter_use}'
+          ws_norevert:           '{ws_norevert}'
       - plugin-specific-parameters
 
 - test-parameters: &test-parameters
@@ -235,31 +235,31 @@
           '{testgroup_value_type}': '{obj:testgroup_value}'
           description: "test-group name"
       - common-parameters:
-          fuel_qa_refs:          '{fuel_qa_refs}'
-          publish_results:       '{publish_results}'
           debug:                 '{debug}'
           disable_ssl:           '{disable_ssl}'
+          enable_proposed:       '{enable_proposed}'
+          env_prefix:            '{fuel-release}.{plugin-name}'
           force_erase:           '{force_erase}'
           force_reuse:           '{force_reuse}'
-          recreate_venv:         '{recreate_venv}'
-          ws_norevert:           '{ws_norevert}'
-          nfs_clean:             '{nfs_clean}'
-          iso_file:              '{iso_file}'
+          fuel_qa_refs:          '{fuel_qa_refs}'
           gerrit_branch:         '{gerrit_branch}'
-          env_prefix:            '{fuel-release}.{plugin-name}'
+          iso_file:              '{iso_file}'
+          iso_storage:           '{iso_storage}'
+          kvm_use:               '{kvm_use}'
+          nfs_clean:             '{nfs_clean}'
           pkg_job_name:          '{pkg_job_name}'
-          testrail_suite:        '{testrail_suite}'
-          testrail_suite_desc:   '{testrail_suite_desc}'
+          publish_results:       '{publish_results}'
+          recreate_venv:         '{recreate_venv}'
+          skip_vote_failed:      '{skip_vote_failed}'
+          skip_vote_successfull: '{skip_vote_successfull}'
+          snapshots_id:          '{snapshots_id}'
           testrail_plan:         '{testrail_plan}'
           testrail_plan_desc:    '{testrail_plan_desc}'
-          skip_vote_successfull: '{skip_vote_successfull}'
-          skip_vote_failed:      '{skip_vote_failed}'
-          enable_proposed:       '{enable_proposed}'
+          testrail_suite:        '{testrail_suite}'
+          testrail_suite_desc:   '{testrail_suite_desc}'
           update_master:         '{update_master}'
-          kvm_use:               '{kvm_use}'
-          iso_storage:           '{iso_storage}'
-          snapshots_id:          '{snapshots_id}'
           vcenter_use:           '{vcenter_use}'
+          ws_norevert:           '{ws_norevert}'
       - plugin-specific-parameters
 
 - defaults:

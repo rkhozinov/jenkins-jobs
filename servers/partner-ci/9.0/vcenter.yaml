@@ -6,39 +6,39 @@
           name: SPECIFIC_PROPS
           default: |
             ADMIN_NODE_MEMORY=8192;
-            SLAVE_NODE_MEMORY=8192;
+            CLEAN_IPTABLES=true;
+            CONV_SNAP_PATH=utils/jenkins/conv_snapshot_file.py;
+            DISABLE_STP=true;
             ESXI_HOSTS=172.16.0.250 172.16.0.252 172.16.0.253;
+            FORCE_DISABLE_UPDATES=true;
             NFS_SERVER=172.16.0.1;
             NFS_SHARES=nfs nfs2;
-            VSPHERE_VERSION=5.5;
-            WORKSTATION_SNAPSHOT=doubledvs;
-            WORKSTATION_USERNAME=vmware;
-            WORKSTATION_PASSWORD=VMware01;
-            WORKSTATION_IFS=vmnet2,vmnet3,vmnet4;
-            WORKSTATION_NODES=esxi1 esxi2 esxi3 vcenter;
-            VCENTER_IP=172.16.0.145;
-            VCENTER_GLANCE_IP=172.16.0.145;
-            VCENTER_GLANCE_USERNAME=openstack;
-            VCENTER_GLANCE_PASSWORD=vmware;
+            SLAVE_NODE_MEMORY=8192;
+            VCENTER_CERT_BYPASS=True;
+            VCENTER_CERT_URL="http://tpi-s2.bud.mirantis.net:5000/downloads/certs/server.pem";
+            VCENTER_CLUSTERS=Cluster1,Cluster2;
             VCENTER_DATACENTER=Datacenter;
             VCENTER_DATASTORE=nfs;
-            VCENTER_CLUSTERS=Cluster1,Cluster2;
-            VCENTER_USE=true;
-            VC_IMAGE_DIR=openstack_glance;
-            VMWARE_IMG_NAME=shaker.vmdk;
-            VMWARE_IMG_URL="http://pce-storage.bud.mirantis.net:5000/distr/$VMWARE_IMG_NAME";
-            VMWARE_IMG_LOGIN=root;
-            VMWARE_IMG_PASSWORD=r00tme;
-            VCENTER_USERNAME=openstack;
-            VCENTER_PASSWORD=vmware;
-            CLEAN_IPTABLES=true;
-            DISABLE_STP=true;
-            VCENTER_GLANCE_CERT_URL="http://tpi-s2.bud.mirantis.net:5000/downloads/certs/server.pem";
             VCENTER_GLANCE_CERT_BYPASS=True;
-            VCENTER_CERT_URL="http://tpi-s2.bud.mirantis.net:5000/downloads/certs/server.pem";
-            VCENTER_CERT_BYPASS=True;
-            CONV_SNAP_PATH=utils/jenkins/conv_snapshot_file.py;
-            FORCE_DISABLE_UPDATES=true;
+            VCENTER_GLANCE_CERT_URL="http://tpi-s2.bud.mirantis.net:5000/downloads/certs/server.pem";
+            VCENTER_GLANCE_IP=172.16.0.145;
+            VCENTER_GLANCE_PASSWORD=vmware;
+            VCENTER_GLANCE_USERNAME=openstack;
+            VCENTER_IP=172.16.0.145;
+            VCENTER_PASSWORD=vmware;
+            VCENTER_USE=true;
+            VCENTER_USERNAME=openstack;
+            VC_IMAGE_DIR=openstack_glance;
+            VMWARE_IMG_LOGIN=root;
+            VMWARE_IMG_NAME=shaker.vmdk;
+            VMWARE_IMG_PASSWORD=r00tme;
+            VMWARE_IMG_URL="http://pce-storage.bud.mirantis.net:5000/distr/$VMWARE_IMG_NAME";
+            VSPHERE_VERSION=5.5;
+            WORKSTATION_IFS=vmnet2,vmnet3,vmnet4;
+            WORKSTATION_NODES=esxi1 esxi2 esxi3 vcenter;
+            WORKSTATION_PASSWORD=VMware01;
+            WORKSTATION_SNAPSHOT=doubledvs;
+            WORKSTATION_USERNAME=vmware;
 - project:
     name: 'predefined_parameters'
     fuel-release: '9.0'
@@ -185,30 +185,30 @@
           default: '{multijob_build_pkg}'
           description: "Triggers build of pkg of $PKG_JOB_NAME before run of tests"
       - common-parameters:
+          debug:                 '{debug}'
+          disable_ssl:           '{disable_ssl}'
+          enable_proposed:       '{enable_proposed}'
+          env_prefix:            '{fuel-release}.{plugin-name}'
+          force_erase:           '{force_erase}'
+          force_reuse:           '{force_reuse}'
           fuel_qa_refs:          '{fuel_qa_refs}'
-          publish_results:      '{publish_results}'
-          debug:                '{debug}'
-          disable_ssl:          '{disable_ssl}'
-          force_erase:          '{force_erase}'
-          force_reuse:          '{force_reuse}'
-          recreate_venv:        '{recreate_venv}'
-          ws_norevert:          '{ws_norevert}'
-          nfs_clean:            '{nfs_clean}'
-          iso_file:             '{iso_file}'
-          gerrit_branch:        '{gerrit_branch}'
-          env_prefix:           '{fuel-release}.{plugin-name}'
-          pkg_job_name:         '{pkg_job_name}'
-          testrail_suite:       '{testrail_suite}'
-          testrail_suite_desc:  '{testrail_suite_desc}'
-          testrail_plan:        '{testrail_plan}'
-          testrail_plan_desc:   '{testrail_plan_desc}'
+          gerrit_branch:         '{gerrit_branch}'
+          iso_file:              '{iso_file}'
+          iso_storage:           '{iso_storage}'
+          kvm_use:               '{kvm_use}'
+          nfs_clean:             '{nfs_clean}'
+          pkg_job_name:          '{pkg_job_name}'
+          publish_results:       '{publish_results}'
+          recreate_venv:         '{recreate_venv}'
+          skip_vote_failed:      '{skip_vote_failed}'
           skip_vote_successfull: '{skip_vote_successfull}'
-          skip_vote_failed:     '{skip_vote_failed}'
-          enable_proposed:      '{enable_proposed}'
-          update_master:        '{update_master}'
-          kvm_use:              '{kvm_use}'
-          iso_storage:          '{iso_storage}'
-          snapshots_id:         '{snapshots_id}'
+          snapshots_id:          '{snapshots_id}'
+          testrail_plan:         '{testrail_plan}'
+          testrail_plan_desc:    '{testrail_plan_desc}'
+          testrail_suite:        '{testrail_suite}'
+          testrail_suite_desc:   '{testrail_suite_desc}'
+          update_master:         '{update_master}'
+          ws_norevert:           '{ws_norevert}'
       - plugin-specific-parameters
 
 - test-parameters: &test-parameters
@@ -231,30 +231,30 @@
           name: TEST_GROUP_CONFIG
           default: '${{TEST_GROUP}}'
       - common-parameters:
+          debug:                 '{debug}'
+          disable_ssl:           '{disable_ssl}'
+          enable_proposed:       '{enable_proposed}'
+          env_prefix:            '{fuel-release}.{plugin-name}'
+          force_erase:           '{force_erase}'
+          force_reuse:           '{force_reuse}'
           fuel_qa_refs:          '{fuel_qa_refs}'
-          publish_results: '{publish_results}'
-          debug:           '{debug}'
-          disable_ssl:     '{disable_ssl}'
-          force_erase:     '{force_erase}'
-          force_reuse:     '{force_reuse}'
-          recreate_venv:   '{recreate_venv}'
-          ws_norevert:     '{ws_norevert}'
-          nfs_clean:       '{nfs_clean}'
-          iso_file:        '{iso_file}'
-          gerrit_branch:   '{gerrit_branch}'
-          env_prefix:      '{fuel-release}.{plugin-name}'
-          pkg_job_name:    '{pkg_job_name}'
-          testrail_suite:       '{testrail_suite}'
-          testrail_suite_desc:  '{testrail_suite_desc}'
-          testrail_plan:        '{testrail_plan}'
-          testrail_plan_desc:   '{testrail_plan_desc}'
+          gerrit_branch:         '{gerrit_branch}'
+          iso_file:              '{iso_file}'
+          iso_storage:           '{iso_storage}'
+          kvm_use:               '{kvm_use}'
+          nfs_clean:             '{nfs_clean}'
+          pkg_job_name:          '{pkg_job_name}'
+          publish_results:       '{publish_results}'
+          recreate_venv:         '{recreate_venv}'
+          skip_vote_failed:      '{skip_vote_failed}'
           skip_vote_successfull: '{skip_vote_successfull}'
-          skip_vote_failed:     '{skip_vote_failed}'
-          enable_proposed:      '{enable_proposed}'
-          update_master:        '{update_master}'
-          kvm_use:              '{kvm_use}'
-          iso_storage:          '{iso_storage}'
-          snapshots_id:         '{snapshots_id}'
+          snapshots_id:          '{snapshots_id}'
+          testrail_plan:         '{testrail_plan}'
+          testrail_plan_desc:    '{testrail_plan_desc}'
+          testrail_suite:        '{testrail_suite}'
+          testrail_suite_desc:   '{testrail_suite_desc}'
+          update_master:         '{update_master}'
+          ws_norevert:           '{ws_norevert}'
       - plugin-specific-parameters
 
 - defaults:
