@@ -5,37 +5,37 @@
       - text:
           name: SPECIFIC_PROPS
           default: |
+            CLEAN_IPTABLES=true;
+            CONV_SNAP_PATH=utils/jenkins/conv_snapshot_file.py;
+            DISABLE_STP=true;
             ESXI_HOSTS=172.16.0.250 172.16.0.252 172.16.0.253;
             NFS_SERVER=172.16.0.1;
             NFS_SHARES=nfs nfs2;
-            VSPHERE_VERSION=5.5;
-            WORKSTATION_SNAPSHOT=doubledvs;
-            WORKSTATION_USERNAME=vmware;
-            WORKSTATION_PASSWORD=VMware01;
-            WORKSTATION_IFS=vmnet2,vmnet3,vmnet4;
-            WORKSTATION_NODES=esxi1 esxi2 esxi3 vcenter;
-            VCENTER_IP=172.16.0.145;
-            VCENTER_GLANCE_IP=172.16.0.145;
-            VCENTER_GLANCE_USERNAME=openstack;
-            VCENTER_GLANCE_PASSWORD=vmware;
+            VCENTER_CERT_BYPASS=True;
+            VCENTER_CERT_URL="http://tpi-s2.bud.mirantis.net:5000/downloads/certs/server.pem";
+            VCENTER_CLUSTERS=Cluster1,Cluster2;
             VCENTER_DATACENTER=Datacenter;
             VCENTER_DATASTORE=nfs;
-            VCENTER_CLUSTERS=Cluster1,Cluster2;
-            VCENTER_USE=true;
-            VC_IMAGE_DIR=openstack_glance;
-            VMWARE_IMG_NAME=shaker.vmdk;
-            VMWARE_IMG_URL="http://pce-storage.bud.mirantis.net:5000/distr/$VMWARE_IMG_NAME";
-            VMWARE_IMG_LOGIN=root;
-            VMWARE_IMG_PASSWORD=r00tme;
-            VCENTER_USERNAME=openstack;
-            VCENTER_PASSWORD=vmware;
-            CLEAN_IPTABLES=true;
-            DISABLE_STP=true;
-            VCENTER_GLANCE_CERT_URL="http://tpi-s2.bud.mirantis.net:5000/downloads/certs/server.pem";
             VCENTER_GLANCE_CERT_BYPASS=True;
-            VCENTER_CERT_URL="http://tpi-s2.bud.mirantis.net:5000/downloads/certs/server.pem";
-            VCENTER_CERT_BYPASS=True;
-            CONV_SNAP_PATH=utils/jenkins/conv_snapshot_file.py;
+            VCENTER_GLANCE_CERT_URL="http://tpi-s2.bud.mirantis.net:5000/downloads/certs/server.pem";
+            VCENTER_GLANCE_IP=172.16.0.145;
+            VCENTER_GLANCE_PASSWORD=vmware;
+            VCENTER_GLANCE_USERNAME=openstack;
+            VCENTER_IP=172.16.0.145;
+            VCENTER_PASSWORD=vmware;
+            VCENTER_USE=true;
+            VCENTER_USERNAME=openstack;
+            VC_IMAGE_DIR=openstack_glance;
+            VMWARE_IMG_LOGIN=root;
+            VMWARE_IMG_NAME=shaker.vmdk;
+            VMWARE_IMG_PASSWORD=r00tme;
+            VMWARE_IMG_URL="http://pce-storage.bud.mirantis.net:5000/distr/$VMWARE_IMG_NAME";
+            VSPHERE_VERSION=5.5;
+            WORKSTATION_IFS=vmnet2,vmnet3,vmnet4;
+            WORKSTATION_NODES=esxi1 esxi2 esxi3 vcenter;
+            WORKSTATION_PASSWORD=VMware01;
+            WORKSTATION_SNAPSHOT=doubledvs;
+            WORKSTATION_USERNAME=vmware;
 - project:
     name: 'predefined_parameters'
     fuel-release: '9.x'
@@ -100,62 +100,58 @@
 
     testgroup:
       - vcenter_add_cindervmware
+      - vcenter_add_cluster_to_ctrl
+      - vcenter_add_computevmware
       - vcenter_add_controller
+      - vcenter_attach_empty_vol
+      - vcenter_batch_instance_creation
+      - vcenter_bootable_vol
       - vcenter_ceilometer_and_computevmware
       - vcenter_ceph_and_computevmware
+      - vcenter_ceph_upload_img
+      - vcenter_check_cindervmware_srv
+      - vcenter_check_gw
+      - vcenter_check_nova_services
+      - vcenter_check_vcenter_configs
+      - vcenter_cinder_upload_img
       - vcenter_cindervmdk_and_computevmware
       - vcenter_computevmware
+      - vcenter_custom_hostname
+      - vcenter_delete_cindervmware
+      - vcenter_delete_computevmware
+      - vcenter_delete_controller
+      - vcenter_disable_hosts
+      - vcenter_disktypes
       - vcenter_dvs_bvt
       - vcenter_dvs_smoke
       - vcenter_glance_backend_and_computevmware
       - vcenter_ha_ceilometer
       - vcenter_ha_ceph
       - vcenter_ha_cinder_and_ceph
-      - vcenter_ha_multiple_clusters
-      - vcenter_multiroles_ceilometer
-      - vcenter_multiroles_cindervmdk_and_ceph
-      - vcenter_multiroles_cindervmdk_and_cinder
-      - vcenter_delete_controller
-      - vcenter_delete_cindervmware
-      - vcenter_delete_computevmware
-      - vcenter_add_computevmware
-      - vcenter_multiroles_computevmware_cindervmware
-      - vcenter_custom_hostname
-      - vcenter_check_vcenter_configs
-      - vcenter_check_nova_services
-      - vcenter_check_cindervmware_srv
-      - vcenter_check_gw
-      - vcenter_attach_empty_vol
-      - vcenter_bootable_vol
-      - vcenter_vmware_datastore_upload_img
-      - vcenter_cinder_upload_img
-      - vcenter_ceph_upload_img
-      - vcenter_vmxnet3
-      - vcenter_batch_instance_creation
-      - vcenter_disktypes
       - vcenter_ha_kvm
-      - vcenter_disable_hosts
-
-      - vcenter_shutdown_ctrl
-      - vcenter_reboot_ctrl
-      - vcenter_reset_ctrl
-      - vcenter_shutdown_cindervmware
-      - vcenter_reboot_cindervmware
+      - vcenter_ha_multiple_clusters
       - vcenter_idatastore
       - vcenter_iname_glance_dc
       - vcenter_iname_glance_ds
-
-      - vcenter_add_cluster_to_ctrl
+      - vcenter_multiroles_ceilometer
+      - vcenter_multiroles_cindervmdk_and_ceph
+      - vcenter_multiroles_cindervmdk_and_cinder
+      - vcenter_multiroles_computevmware_cindervmware
       - vcenter_mv_cluster_compute_to_compute
       - vcenter_mv_cluster_compute_to_ctrl
       - vcenter_mv_cluster_ctrl_to_compute
-
-      - vcenter_redeploy_successful_cluster
-      - vcenter_redeploy_stopped_cluster
+      - vcenter_reboot_cindervmware
+      - vcenter_reboot_ctrl
       - vcenter_redeploy_failed_cluster
-
-      - vcenter_secure_nova_cinder
+      - vcenter_redeploy_stopped_cluster
+      - vcenter_redeploy_successful_cluster
+      - vcenter_reset_ctrl
       - vcenter_secure_glance
+      - vcenter_secure_nova_cinder
+      - vcenter_shutdown_cindervmware
+      - vcenter_shutdown_ctrl
+      - vcenter_vmware_datastore_upload_img
+      - vcenter_vmxnet3
 
     jobs:
       - '{nightly-name}':
@@ -185,34 +181,34 @@
           default: '{multijob_build_pkg}'
           description: "Triggers build of pkg of $PKG_JOB_NAME before run of tests"
       - common-parameters:
-          fuel_qa_refs:          '{fuel_qa_refs}'
-          publish_results:      '{publish_results}'
-          debug:                '{debug}'
-          disable_ssl:          '{disable_ssl}'
-          force_erase:          '{force_erase}'
+          admin_node_cpu:        '{admin_node_cpu}'
+          admin_node_memory:     '{admin_node_memory}'
+          debug:                 '{debug}'
+          disable_ssl:           '{disable_ssl}'
+          enable_proposed:       '{enable_proposed}'
+          env_prefix:            '{fuel-release}.{plugin-name}'
+          force_erase:           '{force_erase}'
           force_reuse:           '{force_reuse}'
-          recreate_venv:        '{recreate_venv}'
-          ws_norevert:          '{ws_norevert}'
-          nfs_clean:            '{nfs_clean}'
-          iso_file:             '{iso_file}'
-          gerrit_branch:        '{gerrit_branch}'
-          env_prefix:           '{fuel-release}.{plugin-name}'
-          pkg_job_name:         '{pkg_job_name}'
-          admin_node_memory:    '{admin_node_memory}'
-          slave_node_memory:    '{slave_node_memory}'
-          admin_node_cpu:       '{admin_node_cpu}'
-          slave_node_cpu:       '{slave_node_cpu}'
-          testrail_suite:       '{testrail_suite}'
-          testrail_suite_desc:  '{testrail_suite_desc}'
-          testrail_plan:        '{testrail_plan}'
-          testrail_plan_desc:   '{testrail_plan_desc}'
+          fuel_qa_refs:          '{fuel_qa_refs}'
+          gerrit_branch:         '{gerrit_branch}'
+          iso_file:              '{iso_file}'
+          iso_storage:           '{iso_storage}'
+          kvm_use:               '{kvm_use}'
+          nfs_clean:             '{nfs_clean}'
+          pkg_job_name:          '{pkg_job_name}'
+          publish_results:       '{publish_results}'
+          recreate_venv:         '{recreate_venv}'
+          skip_vote_failed:      '{skip_vote_failed}'
           skip_vote_successfull: '{skip_vote_successfull}'
-          skip_vote_failed:     '{skip_vote_failed}'
-          enable_proposed:      '{enable_proposed}'
-          update_master:        '{update_master}'
-          kvm_use:              '{kvm_use}'
-          iso_storage:          '{iso_storage}'
-          snapshots_id:         '{snapshots_id}'
+          slave_node_cpu:        '{slave_node_cpu}'
+          slave_node_memory:     '{slave_node_memory}'
+          snapshots_id:          '{snapshots_id}'
+          testrail_plan:         '{testrail_plan}'
+          testrail_plan_desc:    '{testrail_plan_desc}'
+          testrail_suite:        '{testrail_suite}'
+          testrail_suite_desc:   '{testrail_suite_desc}'
+          update_master:         '{update_master}'
+          ws_norevert:           '{ws_norevert}'
       - plugin-specific-parameters
 
 - test-parameters: &test-parameters
@@ -235,34 +231,34 @@
           name: TEST_GROUP_CONFIG
           default: '${{TEST_GROUP}}'
       - common-parameters:
-          fuel_qa_refs:          '{fuel_qa_refs}'
-          publish_results: '{publish_results}'
-          debug:           '{debug}'
-          disable_ssl:     '{disable_ssl}'
-          force_erase:     '{force_erase}'
+          admin_node_cpu:        '{admin_node_cpu}'
+          admin_node_memory:     '{admin_node_memory}'
+          debug:                 '{debug}'
+          disable_ssl:           '{disable_ssl}'
+          enable_proposed:       '{enable_proposed}'
+          env_prefix:            '{fuel-release}.{plugin-name}'
+          force_erase:           '{force_erase}'
           force_reuse:           '{force_reuse}'
-          recreate_venv:   '{recreate_venv}'
-          ws_norevert:     '{ws_norevert}'
-          nfs_clean:       '{nfs_clean}'
-          iso_file:        '{iso_file}'
-          gerrit_branch:   '{gerrit_branch}'
-          env_prefix:      '{fuel-release}.{plugin-name}'
-          pkg_job_name:    '{pkg_job_name}'
-          admin_node_memory:    '{admin_node_memory}'
-          slave_node_memory:    '{slave_node_memory}'
-          admin_node_cpu:       '{admin_node_cpu}'
-          slave_node_cpu:       '{slave_node_cpu}'
-          testrail_suite:       '{testrail_suite}'
-          testrail_suite_desc:  '{testrail_suite_desc}'
-          testrail_plan:        '{testrail_plan}'
-          testrail_plan_desc:   '{testrail_plan_desc}'
+          fuel_qa_refs:          '{fuel_qa_refs}'
+          gerrit_branch:         '{gerrit_branch}'
+          iso_file:              '{iso_file}'
+          iso_storage:           '{iso_storage}'
+          kvm_use:               '{kvm_use}'
+          nfs_clean:             '{nfs_clean}'
+          pkg_job_name:          '{pkg_job_name}'
+          publish_results:       '{publish_results}'
+          recreate_venv:         '{recreate_venv}'
+          skip_vote_failed:      '{skip_vote_failed}'
           skip_vote_successfull: '{skip_vote_successfull}'
-          skip_vote_failed:     '{skip_vote_failed}'
-          enable_proposed:      '{enable_proposed}'
-          update_master:        '{update_master}'
-          kvm_use:              '{kvm_use}'
-          iso_storage:          '{iso_storage}'
-          snapshots_id:         '{snapshots_id}'
+          slave_node_cpu:        '{slave_node_cpu}'
+          slave_node_memory:     '{slave_node_memory}'
+          snapshots_id:          '{snapshots_id}'
+          testrail_plan:         '{testrail_plan}'
+          testrail_plan_desc:    '{testrail_plan_desc}'
+          testrail_suite:        '{testrail_suite}'
+          testrail_suite_desc:   '{testrail_suite_desc}'
+          update_master:         '{update_master}'
+          ws_norevert:           '{ws_norevert}'
       - plugin-specific-parameters
 
 - defaults:
