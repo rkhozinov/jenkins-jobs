@@ -5,12 +5,14 @@
       - text:
           name: SPECIFIC_PROPS
           default: |
+            ADMIN_NODE_MEMORY=8192;
             CLEAN_IPTABLES=true;
             CONV_SNAP_PATH=utils/jenkins/conv_snapshot_file.py;
             DISABLE_STP=true;
             ESXI_HOSTS=172.16.0.250 172.16.0.252 172.16.0.253;
             NFS_SERVER=172.16.0.1;
             NFS_SHARES=nfs nfs2;
+            SLAVE_NODE_MEMORY=8192;
             VCENTER_CERT_BYPASS=True;
             VCENTER_CERT_URL="http://tpi-s2.bud.mirantis.net:5000/downloads/certs/server.pem";
             VCENTER_CLUSTERS=Cluster1,Cluster2;
@@ -46,10 +48,6 @@
     nightly-name: '{fuel-release}.{plugin-name}.nightly'
     custom-name: '{fuel-release}.{plugin-name}.custom'
     reporter-name: '{fuel-release}.{plugin-name}.reporter'
-    admin_node_memory: '8192'
-    slave_node_memory: '8192'
-    admin_node_cpu: '4'
-    slave_node_cpu: '4'
     pkg_job_name: '{fuel-release}.dvs.build'
     nightly_timer: 'H 21 * * *'
     regression_timer: 'H 18 * * *'
@@ -181,8 +179,6 @@
           default: '{multijob_build_pkg}'
           description: "Triggers build of pkg of $PKG_JOB_NAME before run of tests"
       - common-parameters:
-          admin_node_cpu:        '{admin_node_cpu}'
-          admin_node_memory:     '{admin_node_memory}'
           debug:                 '{debug}'
           disable_ssl:           '{disable_ssl}'
           enable_proposed:       '{enable_proposed}'
@@ -200,8 +196,6 @@
           recreate_venv:         '{recreate_venv}'
           skip_vote_failed:      '{skip_vote_failed}'
           skip_vote_successfull: '{skip_vote_successfull}'
-          slave_node_cpu:        '{slave_node_cpu}'
-          slave_node_memory:     '{slave_node_memory}'
           snapshots_id:          '{snapshots_id}'
           testrail_plan:         '{testrail_plan}'
           testrail_plan_desc:    '{testrail_plan_desc}'
@@ -231,8 +225,6 @@
           name: TEST_GROUP_CONFIG
           default: '${{TEST_GROUP}}'
       - common-parameters:
-          admin_node_cpu:        '{admin_node_cpu}'
-          admin_node_memory:     '{admin_node_memory}'
           debug:                 '{debug}'
           disable_ssl:           '{disable_ssl}'
           enable_proposed:       '{enable_proposed}'
@@ -250,8 +242,6 @@
           recreate_venv:         '{recreate_venv}'
           skip_vote_failed:      '{skip_vote_failed}'
           skip_vote_successfull: '{skip_vote_successfull}'
-          slave_node_cpu:        '{slave_node_cpu}'
-          slave_node_memory:     '{slave_node_memory}'
           snapshots_id:          '{snapshots_id}'
           testrail_plan:         '{testrail_plan}'
           testrail_plan_desc:    '{testrail_plan_desc}'
