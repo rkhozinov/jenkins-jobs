@@ -43,6 +43,7 @@
     nightly_disabled: true
     regression_disabled: false
     force_erase: true
+    force_reuse: false
     recreate_venv: false
     ws_norevert: false
     vcenter_use: true

@@ -54,6 +54,7 @@
     nightly_disabled: false
     regression_disabled: true
     force_erase: false
+    force_reuse: false
     recreate_venv: false
     ws_norevert: false
     nfs_clean: false

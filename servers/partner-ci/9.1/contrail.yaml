@@ -27,273 +27,273 @@
             VSRX_TARGET_IMAGE_PATH=/var/lib/libvirt/images/vSRX.400.img;
             VSRX_TEMPLATE_PATH=/storage/contrail/vSRX_400.template;
 
-  - project:
-      name: 'predefined_parameters'
-      fuel-release: '9.1'
-      plugin-version: '5.0'
-      plugin-name: 'contrail'
-      build-name: '{fuel-release}.{plugin-name}.{plugin-version}.build'
-      flake8-name: '{fuel-release}.{plugin-name}.{plugin-version}.flake8'
-      radon-name: '{fuel-release}.{plugin-name}.{plugin-version}.radon'
-      shellcheck-name: '{fuel-release}.{plugin-name}.{plugin-version}.shellcheck'
-      smoke-name: '{fuel-release}.{plugin-name}.{plugin-version}.smoke'
-      bvt-name: '{fuel-release}.{plugin-name}.{plugin-version}.bvt'
-      regression-name: '{fuel-release}.{plugin-name}.{plugin-version}.regression'
-      nightly-name: '{fuel-release}.{plugin-name}.{plugin-version}.nightly'
-      full-name: '{fuel-release}.{plugin-name}.{plugin-version}.full'
-      doc-check-name: '{fuel-release}.{plugin-name}.{plugin-version}.doc.check'
-      doc-update-name: '{fuel-release}.{plugin-name}.{plugin-version}.doc.update'
-      baremetal-name: '{fuel-release}.{plugin-name}.{plugin-version}.baremetal'
-      custom-name: '{fuel-release}.{plugin-name}.{plugin-version}.custom'
-      reporter-name: '{fuel-release}.{plugin-name}.{plugin-version}.reporter'
-      smoke-test-name: 'contrail_smoke'
-      bvt-test-name: 'contrail_bvt'
-      pkg_job_name: '{fuel-release}.{plugin-name}.{plugin-version}.build'
-      nightly_timer: 'H 21 * * *'
-      full_timer: 'H 21 * * *'
-      regression_timer: 'H 18 * * *'
-      nightly_disabled: true
-      full_disabled: true
-      baremetal_disabled: false
-      regression_disabled: false
-      force_erase: true
-      force_reuse: false
-      force_vsrx_copy: false
-      recreate_venv: true
-      disable_ssl: false
-      ws_norevert: false
-      nfs_clean: false
-      bonding: false
-      kvm_use: false
-      update_master: true
-      enable_proposed: false
-      debug: true
-      build_debug: true
-      publish_results: true
-      multijob_build_pkg: true
-      testjob_build_pkg: false
-      runner_timeout: 600
-      test_timeout: 300
-      fuel_qa_refs: ''
-      iso_file: 'MirantisOpenStack-9.0.iso'
-      iso_storage: '/storage/downloads'
-      snapshots_id: 'released'
-      gerrit_repo: 'fuel-plugin-contrail'
-      gerrit_branch: 'master'
-      email_to: 'rkhozinov@mirantis.com okosse@mirantis.com otsvigun@mirantis.com'
-      released_plugin_path: '/storage/contrail/released/contrail-5.0-5.0.0-1.noarch.rpm'
-      scm_submodule_disabled: false
-      scm_wipe_workspace: false
-      skip_vote_successfull: false
-      skip_vote_failed: false
-      testrail_project: "Contrail plugin"
-      testrail_suite: "[9.0][PCE] Fuel plugin contrail v5.0.0 nightly"
-      testrail_suite_desc: "Suite description"
-      testrail_milestone: "Fuel Contrail Plugin v5.0.0"
-      testrail_plan: "$TREP_TESTRAIL_SUITE pkg#${{JUNIPER_PKG_VERSION}} build#${{PKG_JOB_BUILD_NUMBER}}"
-      testrail_plan_desc: "Test plan description"
-      testrail_run: "$TREP_TESTRAIL_SUITE"
-      testrail_run_desc: "Test run description"
-      testrail_item_case: "$TEST_GROUP"
-      trep_results_source: "xunit"
-      trep_debug_level: "DEBUG"
+- project:
+     name: 'predefined_parameters'
+     fuel-release: '9.1'
+     plugin-version: '5.0'
+     plugin-name: 'contrail'
+     build-name: '{fuel-release}.{plugin-name}.{plugin-version}.build'
+     flake8-name: '{fuel-release}.{plugin-name}.{plugin-version}.flake8'
+     radon-name: '{fuel-release}.{plugin-name}.{plugin-version}.radon'
+     shellcheck-name: '{fuel-release}.{plugin-name}.{plugin-version}.shellcheck'
+     smoke-name: '{fuel-release}.{plugin-name}.{plugin-version}.smoke'
+     bvt-name: '{fuel-release}.{plugin-name}.{plugin-version}.bvt'
+     regression-name: '{fuel-release}.{plugin-name}.{plugin-version}.regression'
+     nightly-name: '{fuel-release}.{plugin-name}.{plugin-version}.nightly'
+     full-name: '{fuel-release}.{plugin-name}.{plugin-version}.full'
+     doc-check-name: '{fuel-release}.{plugin-name}.{plugin-version}.doc.check'
+     doc-update-name: '{fuel-release}.{plugin-name}.{plugin-version}.doc.update'
+     baremetal-name: '{fuel-release}.{plugin-name}.{plugin-version}.baremetal'
+     custom-name: '{fuel-release}.{plugin-name}.{plugin-version}.custom'
+     reporter-name: '{fuel-release}.{plugin-name}.{plugin-version}.reporter'
+     smoke-test-name: 'contrail_smoke'
+     bvt-test-name: 'contrail_bvt'
+     pkg_job_name: '{fuel-release}.{plugin-name}.{plugin-version}.build'
+     nightly_timer: 'H 21 * * *'
+     full_timer: 'H 21 * * *'
+     regression_timer: 'H 18 * * *'
+     nightly_disabled: true
+     full_disabled: true
+     baremetal_disabled: false
+     regression_disabled: false
+     force_erase: true
+     force_reuse: false
+     force_vsrx_copy: false
+     recreate_venv: true
+     disable_ssl: false
+     ws_norevert: false
+     nfs_clean: false
+     bonding: false
+     kvm_use: false
+     update_master: true
+     enable_proposed: false
+     debug: true
+     build_debug: true
+     publish_results: true
+     multijob_build_pkg: true
+     testjob_build_pkg: false
+     runner_timeout: 600
+     test_timeout: 300
+     fuel_qa_refs: ''
+     iso_file: 'MirantisOpenStack-9.0.iso'
+     iso_storage: '/storage/downloads'
+     snapshots_id: 'released'
+     gerrit_repo: 'fuel-plugin-contrail'
+     gerrit_branch: 'master'
+     email_to: 'rkhozinov@mirantis.com okosse@mirantis.com otsvigun@mirantis.com'
+     released_plugin_path: '/storage/contrail/released/contrail-5.0-5.0.0-1.noarch.rpm'
+     scm_submodule_disabled: false
+     scm_wipe_workspace: false
+     skip_vote_successfull: false
+     skip_vote_failed: false
+     testrail_project: "Contrail plugin"
+     testrail_suite: "[9.0][PCE] Fuel plugin contrail v5.0.0 nightly"
+     testrail_suite_desc: "Suite description"
+     testrail_milestone: "Fuel Contrail Plugin v5.0.0"
+     testrail_plan: "$TREP_TESTRAIL_SUITE pkg#${{JUNIPER_PKG_VERSION}} build#${{PKG_JOB_BUILD_NUMBER}}"
+     testrail_plan_desc: "Test plan description"
+     testrail_run: "$TREP_TESTRAIL_SUITE"
+     testrail_run_desc: "Test run description"
+     testrail_item_case: "$TEST_GROUP"
+     trep_results_source: "xunit"
+     trep_debug_level: "DEBUG"
 
-      testgroup_parameter_type: string
-      testgroup_value_type: default
-      testgroup_value: '{testgroup}'
+     testgroup_parameter_type: string
+     testgroup_value_type: default
+     testgroup_value: '{testgroup}'
 
-      doc_modern_model: false
-      testrail_custom_qa_team: '6'
-      testrail_create_section: true
+     doc_modern_model: false
+     testrail_custom_qa_team: '6'
+     testrail_create_section: true
 
-      testgroup:
-        - contrail_bvt
-        - contrail_smoke
-        - contrail_ha
-        - contrail_ha_baseos
-        - contrail_ceilometer
-        - contrail_bonding
-        - contrail_vlan
-        - contrail_jumbo
-        - contrail_ceph_multirole
-        - contrail_cinder_multirole
-        - contrail_cinder_ceph_multirole
-        - contrail_plugin_add_delete_controller_node
-        - contrail_plugin_add_delete_compute_node
-        - contrail_ha_with_shutdown_contrail_node
-        - cannot_deploy_only_contrail_db
-        - cannot_deploy_only_contrail_config
-        - cannot_deploy_only_contrail_control
-        - contrail_add_ha_analytics_db
-        - contrail_net_template
-        - create_new_network_via_contrail
-        - create_networks
+     testgroup:
+       - contrail_bvt
+       - contrail_smoke
+       - contrail_ha
+       - contrail_ha_baseos
+       - contrail_ceilometer
+       - contrail_bonding
+       - contrail_vlan
+       - contrail_jumbo
+       - contrail_ceph_multirole
+       - contrail_cinder_multirole
+       - contrail_cinder_ceph_multirole
+       - contrail_plugin_add_delete_controller_node
+       - contrail_plugin_add_delete_compute_node
+       - contrail_ha_with_shutdown_contrail_node
+       - cannot_deploy_only_contrail_db
+       - cannot_deploy_only_contrail_config
+       - cannot_deploy_only_contrail_control
+       - contrail_add_ha_analytics_db
+       - contrail_net_template
+       - create_new_network_via_contrail
+       - create_networks
 
-        - contrail_login_password
-        - contrail_vm_connection_in_different_tenants
+       - contrail_login_password
+       - contrail_vm_connection_in_different_tenants
 
-        - install_contrail
-        - contrail_uninstall
-        - contrail_no_default
-        - contrail_ceilometer_metrics
+       - install_contrail
+       - contrail_uninstall
+       - contrail_no_default
+       - contrail_ceilometer_metrics
 
-        - contrail_ha_dpdk
-        - contrail_dpdk_add_compute
-        - contrail_dpdk_delete_compute
-        - contrail_dpdk_add_dpdk
-        - contrail_dpdk_delete_dpdk
+       - contrail_ha_dpdk
+       - contrail_dpdk_add_compute
+       - contrail_dpdk_delete_compute
+       - contrail_dpdk_add_dpdk
+       - contrail_dpdk_delete_dpdk
 
-        - contrail_ha_multiple_networks
-        - contrail_multiple_networks_add_controller
-        - contrail_multiple_networks_delete_controller
-        - contrail_multiple_networks_delete_compute
-        - contrail_multiple_networks_add_compute
-        - contrail_add_delete_compute_ceph
-        - contrail_add_analytics
-        - contrail_delete_analytics
-        - contrail_different_ha_in_multinet
+       - contrail_ha_multiple_networks
+       - contrail_multiple_networks_add_controller
+       - contrail_multiple_networks_delete_controller
+       - contrail_multiple_networks_delete_compute
+       - contrail_multiple_networks_add_compute
+       - contrail_add_delete_compute_ceph
+       - contrail_add_analytics
+       - contrail_delete_analytics
+       - contrail_different_ha_in_multinet
 
-        - https_tls_selected
-        - contrail_ostf_net_provisioning_disable
+       - https_tls_selected
+       - contrail_ostf_net_provisioning_disable
 
-        - contrail_dpdk_add_controller
-        - contrail_dpdk_delete_controller
-        - contrail_add_to_dpdk_sriov
-        - contrail_ha_sriov
-        - contrail_sriov_add_compute
-        - contrail_sriov_delete_compute
-        - contrail_sriov_add_sriov
-        - contrail_sriov_delete_sriov
-        - contrail_sriov_add_controller
-        - contrail_sriov_delete_controller
+       - contrail_dpdk_add_controller
+       - contrail_dpdk_delete_controller
+       - contrail_add_to_dpdk_sriov
+       - contrail_ha_sriov
+       - contrail_sriov_add_compute
+       - contrail_sriov_delete_compute
+       - contrail_sriov_add_sriov
+       - contrail_sriov_delete_sriov
+       - contrail_sriov_add_controller
+       - contrail_sriov_delete_controller
 
-        - contrail_public_connectivity_from_instance_without_fip
-        - contrail_dpdk_update_core_repos
-        - contrail_sriov_update_core_repos
+       - contrail_public_connectivity_from_instance_without_fip
+       - contrail_dpdk_update_core_repos
+       - contrail_sriov_update_core_repos
 
-        - contrail_murano
-        - contrail_sahara
-        - contrail_add_controller
+       - contrail_murano
+       - contrail_sahara
+       - contrail_add_controller
 
-        - contrail_ha_dpdk_on_vf
-        - contrail_dpdk_on_vf_add_compute
-        - contrail_dpdk_on_vf_delete_compute
-        - contrail_dpdk_on_vf_add_dpdk
-        - contrail_dpdk_on_vf_delete_dpdk
-        - contrail_dpdk_on_vf_add_controller
-        - contrail_dpdk_on_vf_delete_controller
+       - contrail_ha_dpdk_on_vf
+       - contrail_dpdk_on_vf_add_compute
+       - contrail_dpdk_on_vf_delete_compute
+       - contrail_dpdk_on_vf_add_dpdk
+       - contrail_dpdk_on_vf_delete_dpdk
+       - contrail_dpdk_on_vf_add_controller
+       - contrail_dpdk_on_vf_delete_controller
 
-      jobs:
-        - '{build-name}':
-            scm_submodule_disabled: true
-            scm_wipe_workspace: true
-        - '{flake8-name}':
-            scm_submodule_disabled: true
-        - '{radon-name}':
-            scm_submodule_disabled: true
-        - '{shellcheck-name}':
-            scm_submodule_disabled: true
-            skip_vote_successfull: '{skip_vote_successfull}'
-            skip_vote_failed: '{skip_vote_failed}'
+     jobs:
+       - '{build-name}':
+           scm_submodule_disabled: true
+           scm_wipe_workspace: true
+       - '{flake8-name}':
+           scm_submodule_disabled: true
+       - '{radon-name}':
+           scm_submodule_disabled: true
+       - '{shellcheck-name}':
+           scm_submodule_disabled: true
+           skip_vote_successfull: '{skip_vote_successfull}'
+           skip_vote_failed: '{skip_vote_failed}'
 
-        - '{nightly-name}':
-            multijob_build_pkg: true
-            testrail_suite: "[9.1][PCE] Fuel plugin contrail v5.0.0 nightly"
+       - '{nightly-name}':
+           multijob_build_pkg: true
+           testrail_suite: "[9.1][PCE] Fuel plugin contrail v5.0.0 nightly"
 
-        - '{full-name}':
-            multijob_build_pkg: true
-            testrail_suite: "[9.1][PCE] Fuel plugin contrail v5.0.0 Release Acceptance"
+       - '{full-name}':
+           multijob_build_pkg: true
+           testrail_suite: "[9.1][PCE] Fuel plugin contrail v5.0.0 Release Acceptance"
 
-        - '{baremetal-name}':
-            multijob_build_pkg: true
+       - '{baremetal-name}':
+           multijob_build_pkg: true
 
-        - '{custom-name}.qa':
-            publish_results: false
+       - '{custom-name}.qa':
+           publish_results: false
 
-        - '{custom-name}.dev':
-            scm_submodule_disabled: false
-            publish_results: false
-            testgroup_parameter_type: choice
-            testgroup_value_type: choices
-            testgroup_value: '{obj:testgroup}'
+       - '{custom-name}.dev':
+           scm_submodule_disabled: false
+           publish_results: false
+           testgroup_parameter_type: choice
+           testgroup_value_type: choices
+           testgroup_value: '{obj:testgroup}'
 
-        - '{reporter-name}'
+       - '{reporter-name}'
 
-        - '{doc-check-name}':
-            scm_submodule_disabled: true
-            scm_wipe_workspace: true
-            doc_check_only: true
-            skip_vote_successfull: false
-            skip_vote_failed: false
+       - '{doc-check-name}':
+           scm_submodule_disabled: true
+           scm_wipe_workspace: true
+           doc_check_only: true
+           skip_vote_successfull: false
+           skip_vote_failed: false
 
-        - '{doc-update-name}':
-            scm_submodule_disabled: true
-            scm_wipe_workspace: true
-            doc_check_only: false
-            skip_vote_successfull: false
-            skip_vote_failed: false
+       - '{doc-update-name}':
+           scm_submodule_disabled: true
+           scm_wipe_workspace: true
+           doc_check_only: false
+           skip_vote_successfull: false
+           skip_vote_failed: false
 
-        - '{fuel-release}.{plugin-name}.{plugin-version}.{testgroup}.juniper'
+       - '{fuel-release}.{plugin-name}.{plugin-version}.{testgroup}.juniper'
 
-        - '{smoke-name}':
-            publish_results: false
-            multijob_build_pkg: false
+       - '{smoke-name}':
+           publish_results: false
+           multijob_build_pkg: false
 
-        - '{fuel-release}.{plugin-name}.{plugin-version}.smoke.test.juniper'
+       - '{fuel-release}.{plugin-name}.{plugin-version}.smoke.test.juniper'
 
-        - '{bvt-name}':
-            publish_results: false
-            multijob_build_pkg: true
+       - '{bvt-name}':
+           publish_results: false
+           multijob_build_pkg: true
 
-        - '{fuel-release}.{plugin-name}.{plugin-version}.bvt.test.juniper'
+       - '{fuel-release}.{plugin-name}.{plugin-version}.bvt.test.juniper'
 
-        - '{regression-name}':
-            testrail_suite: "[9.0][PCE] Fuel plugin contrail v5.0.0 Regression"
-            testrail_suite_desc: "Suite description"
-            testrail_milestone: "Fuel Contrail Plugin v5.0"
-            testrail_plan: "$TREP_TESTRAIL_SUITE iso #${{ISO_VERSION}} pkg#${{JUNIPER_PKG_VERSION}} build#${{PKG_JOB_BUILD_NUMBER}}"
-            testrail_plan_desc: "Test plan description"
-            testrail_run: "$TREP_TESTRAIL_SUITE"
-            testrail_run_desc: "Test run description"
-            pkg_job_name: ''
-            iso_job_name: ''
-            multijob_build_pkg: false
+       - '{regression-name}':
+           testrail_suite: "[9.0][PCE] Fuel plugin contrail v5.0.0 Regression"
+           testrail_suite_desc: "Suite description"
+           testrail_milestone: "Fuel Contrail Plugin v5.0"
+           testrail_plan: "$TREP_TESTRAIL_SUITE iso #${{ISO_VERSION}} pkg#${{JUNIPER_PKG_VERSION}} build#${{PKG_JOB_BUILD_NUMBER}}"
+           testrail_plan_desc: "Test plan description"
+           testrail_run: "$TREP_TESTRAIL_SUITE"
+           testrail_run_desc: "Test run description"
+           pkg_job_name: ''
+           iso_job_name: ''
+           multijob_build_pkg: false
 
-        - '{fuel-release}.{plugin-name}.{plugin-version}.regression.test.juniper'
+       - '{fuel-release}.{plugin-name}.{plugin-version}.regression.test.juniper'
 
-  # parameters for smoke, bvt and nightly multijobs
-  - runner-parameters: &runner-parameters
-      name: 'runner-parameters'
-      parameters:
-        - bool:
-            name: MJ_BUILD_PKG
-            default: '{multijob_build_pkg}'
-            description: "Triggers build of pkg of $PKG_JOB_NAME before run of tests"
-        - common-parameters:
-            debug:                 '{debug}'
-            disable_ssl:           '{disable_ssl}'
-            enable_proposed:       '{enable_proposed}'
-            env_prefix:            '{fuel-release}.{plugin-name}'
-            force_erase:           '{force_erase}'
-            force_reuse:           '{force_reuse}'
-            fuel_qa_refs:          '{fuel_qa_refs}'
-            gerrit_branch:         '{gerrit_branch}'
-            iso_file:              '{iso_file}'
-            kvm_use:               '{kvm_use}'
-            nfs_clean:             '{nfs_clean}'
-            pkg_job_name:          '{pkg_job_name}'
-            publish_results:       '{publish_results}'
-            recreate_venv:         '{recreate_venv}'
-            skip_vote_failed:      '{skip_vote_failed}'
-            skip_vote_successfull: '{skip_vote_successfull}'
-            snapshots_id:          '{snapshots_id}'
-            testrail_plan:         '{testrail_plan}'
-            testrail_plan_desc:    '{testrail_plan_desc}'
-            testrail_suite:        '{testrail_suite}'
-            testrail_suite_desc:   '{testrail_suite_desc}'
-            update_master:         '{update_master}'
-            ws_norevert:           '{ws_norevert}'
-        - plugin-specific-parameters
+# parameters for smoke, bvt and nightly multijobs
+- runner-parameters: &runner-parameters
+    name: 'runner-parameters'
+    parameters:
+      - bool:
+          name: MJ_BUILD_PKG
+          default: '{multijob_build_pkg}'
+          description: "Triggers build of pkg of $PKG_JOB_NAME before run of tests"
+      - common-parameters:
+          debug:                 '{debug}'
+          disable_ssl:           '{disable_ssl}'
+          enable_proposed:       '{enable_proposed}'
+          env_prefix:            '{fuel-release}.{plugin-name}'
+          force_erase:           '{force_erase}'
+          force_reuse:           '{force_reuse}'
+          fuel_qa_refs:          '{fuel_qa_refs}'
+          gerrit_branch:         '{gerrit_branch}'
+          iso_file:              '{iso_file}'
+          kvm_use:               '{kvm_use}'
+          nfs_clean:             '{nfs_clean}'
+          pkg_job_name:          '{pkg_job_name}'
+          publish_results:       '{publish_results}'
+          recreate_venv:         '{recreate_venv}'
+          skip_vote_failed:      '{skip_vote_failed}'
+          skip_vote_successfull: '{skip_vote_successfull}'
+          snapshots_id:          '{snapshots_id}'
+          testrail_plan:         '{testrail_plan}'
+          testrail_plan_desc:    '{testrail_plan_desc}'
+          testrail_suite:        '{testrail_suite}'
+          testrail_suite_desc:   '{testrail_suite_desc}'
+          update_master:         '{update_master}'
+          ws_norevert:           '{ws_norevert}'
+      - plugin-specific-parameters
 
 - runner-parameters: &baremetal-parameters
     name: 'baremetal-parameters'
