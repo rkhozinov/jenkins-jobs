@@ -8,6 +8,8 @@
       - text:
           name: SPECIFIC_PROPS
           default: |
+            SLAVE_NODE_MEMORY=8192;
+            ADMIN_NODE_MEMORY=8192;
             WORKSTATION_SNAPSHOT=nsxt;
             WORKSTATION_NODES=esxi1 esxi2 esxi3 vcenter nsx-edge trusty;
             VCENTER_USERNAME=administrator@vsphere.local;
@@ -34,10 +36,6 @@
     reporter-name: '{fuel-release}.{plugin-name}.reporter'
     smoke-test-name: 'nsxt_smoke'
     bvt-test-name: 'nsxt_bvt'
-    admin_node_memory: '8192'
-    slave_node_memory: '8192'
-    admin_node_cpu: '4'
-    slave_node_cpu: '4'
     pkg_job_name: '{fuel-release}.{plugin-name}.build'
     nightly_timer: 'H 18 * * *'
     regression_timer: 'H 18 * * *'
@@ -195,14 +193,10 @@
           gerrit_branch:        '{gerrit_branch}'
           env_prefix:           '{fuel-release}.{plugin-name}'
           pkg_job_name:         '{pkg_job_name}'
-          admin_node_memory:    '{admin_node_memory}'
-          slave_node_memory:    '{slave_node_memory}'
-          admin_node_cpu:       '{admin_node_cpu}'
-          slave_node_cpu:       '{slave_node_cpu}'
-          testrail_suite:       '{testrail_suite}'
-          testrail_suite_desc:  '{testrail_suite_desc}'
-          testrail_plan:        '{testrail_plan}'
-          testrail_plan_desc:   '{testrail_plan_desc}'
+          testrail_suite:        '{testrail_suite}'
+          testrail_suite_desc:   '{testrail_suite_desc}'
+          testrail_plan:         '{testrail_plan}'
+          testrail_plan_desc:    '{testrail_plan_desc}'
           skip_vote_successfull: '{skip_vote_successfull}'
           skip_vote_failed:     '{skip_vote_failed}'
           enable_proposed:      '{enable_proposed}'
@@ -245,10 +239,6 @@
           gerrit_branch:   '{gerrit_branch}'
           env_prefix:      '{fuel-release}.{plugin-name}'
           pkg_job_name:    '{pkg_job_name}'
-          admin_node_memory:    '{admin_node_memory}'
-          slave_node_memory:    '{slave_node_memory}'
-          admin_node_cpu:       '{admin_node_cpu}'
-          slave_node_cpu:       '{slave_node_cpu}'
           testrail_suite:       '{testrail_suite}'
           testrail_suite_desc:  '{testrail_suite_desc}'
           testrail_plan:        '{testrail_plan}'

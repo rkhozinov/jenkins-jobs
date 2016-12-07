@@ -8,15 +8,17 @@
       - text:
           name: SPECIFIC_PROPS
           default: |
-             WORKSTATION_SNAPSHOT=nsxv_6.2;
-             WORKSTATION_NODES=esxi1 esxi2 esxi3 vcenter trusty;
-             VCENTER_USER=administrator@vsphere.local;
-             VCENTER_PASSWORD=Qwer!1234;
-             VCENTER_IP=172.16.0.254;
-             VCENTER_CLUSTERS=Cluster1,Cluster2;
-             NSXV_USER=administrator@vsphere.local;
-             NSXV_PASSWORD=Qwer!1234;
-             NSXV_PLUGIN_VERSION=3.0.1;
+            ADMIN_NODE_MEMORY=8192;
+            SLAVE_NODE_MEMORY=8192;
+            WORKSTATION_SNAPSHOT=nsxv_6.2;
+            WORKSTATION_NODES=esxi1 esxi2 esxi3 vcenter trusty;
+            VCENTER_USER=administrator@vsphere.local;
+            VCENTER_PASSWORD=Qwer!1234;
+            VCENTER_IP=172.16.0.254;
+            VCENTER_CLUSTERS=Cluster1,Cluster2;
+            NSXV_USER=administrator@vsphere.local;
+            NSXV_PASSWORD=Qwer!1234;
+            NSXV_PLUGIN_VERSION=3.0.1;
 - project:
     name: 'predefined_parameters'
     fuel-release: '9.1'
@@ -35,10 +37,6 @@
     reporter-name: '{fuel-release}.{plugin-name}.reporter'
     smoke-test-name: 'nsxv_smoke'
     bvt-test-name: 'nsxv_bvt'
-    admin_node_memory: '8192'
-    slave_node_memory: '8192'
-    admin_node_cpu: '4'
-    slave_node_cpu: '4'
     pkg_job_name: '{fuel-release}.{plugin-name}.build'
     nightly_timer: 'H 22 * * *'
     regression_timer: 'H 18 * * *'
@@ -208,10 +206,6 @@
           gerrit_branch:         '{gerrit_branch}'
           env_prefix:            '{fuel-release}.{plugin-name}'
           pkg_job_name:          '{pkg_job_name}'
-          admin_node_memory:     '{admin_node_memory}'
-          slave_node_memory:     '{slave_node_memory}'
-          admin_node_cpu:        '{admin_node_cpu}'
-          slave_node_cpu:        '{slave_node_cpu}'
           testrail_suite:        '{testrail_suite}'
           testrail_suite_desc:   '{testrail_suite_desc}'
           testrail_plan:         '{testrail_plan}'
@@ -255,10 +249,6 @@
           gerrit_branch:         '{gerrit_branch}'
           env_prefix:            '{fuel-release}.{plugin-name}'
           pkg_job_name:          '{pkg_job_name}'
-          admin_node_memory:     '{admin_node_memory}'
-          slave_node_memory:     '{slave_node_memory}'
-          admin_node_cpu:        '{admin_node_cpu}'
-          slave_node_cpu:        '{slave_node_cpu}'
           testrail_suite:        '{testrail_suite}'
           testrail_suite_desc:   '{testrail_suite_desc}'
           testrail_plan:         '{testrail_plan}'
