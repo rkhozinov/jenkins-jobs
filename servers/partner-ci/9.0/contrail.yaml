@@ -26,10 +26,10 @@
             VSRX_ORIGINAL_IMAGE_PATH=/storage/contrail/vSRX.400.img;
             VSRX_TARGET_IMAGE_PATH=/var/lib/libvirt/images/vSRX.400.img;
             VSRX_TEMPLATE_PATH=/storage/contrail/vSRX_400.template;
-
+            FORCE_DISABLE_UPDATES=true;
 - project:
     name: 'predefined_parameters'
-    fuel-release: '9.1'
+    fuel-release: '9.0'
     plugin-version: '5.0.0'
     plugin-name: 'contrail'
     build-name: '{fuel-release}.{plugin-name}.{plugin-version}.build'
@@ -69,7 +69,7 @@
     nfs_clean: false
     bonding: false
     kvm_use: false
-    update_master: true
+    update_master: false
     enable_proposed: false
     debug: true
     build_debug: true
@@ -484,7 +484,7 @@
     name: '{build-name}'
     node: 'runner'
     concurrent: true
-    disabled: false
+    disabled: true
     triggers:
       - draft-gerrit-trigger:
           gerrit_repo: '{gerrit_repo}'
@@ -678,7 +678,7 @@
 
 - job-template:
     name: '{smoke-name}'
-    disabled: false
+    disabled: true
     description: 'The Smoke test for {fuel-release}.{plugin-name}.{plugin-version}'
     concurrent: true
     quiet-period: 5
@@ -718,7 +718,7 @@
 - job-template:
     name: '{bvt-name}'
     description: 'The BVT test for {fuel-release}.{plugin-name}.{plugin-version}'
-    disabled: false
+    disabled: true
     concurrent: true
     project-type: multijob
     node: runner

@@ -2,26 +2,36 @@
 - parameter:
     name: plugin-specific-parameters
     parameters:
-      - string:
-          name: DEVOPS_SETTINGS_TEMPLATE
-          default: '$WORKSPACE/plugin_test/test_templates/default.yaml'
       - text:
           name: SPECIFIC_PROPS
           default: |
-            WORKSTATION_SNAPSHOT=nsxt;
-            WORKSTATION_NODES=esxi1 esxi2 esxi3 vcenter nsx-edge trusty;
-            VCENTER_USERNAME=administrator@vsphere.local;
-            WORKSTATION_PASSWORD=VMware01;
+            ESXI_HOSTS=172.16.0.250 172.16.0.252 172.16.0.253;
+            NFS_SERVER=172.16.0.1;
+            NFS_SHARES=nfs nfs2;
+            VSPHERE_VERSION=5.5;
+            WORKSTATION_SNAPSHOT=doubledvs;
             WORKSTATION_USERNAME=vmware;
-            VCENTER_PASSWORD=Qwer!1234;
-            VCENTER_IP=172.16.0.254;
+            WORKSTATION_PASSWORD=VMware01;
+            WORKSTATION_IFS=vmnet2,vmnet3,vmnet4;
+            WORKSTATION_NODES=esxi1 esxi2 esxi3 vcenter;
+            VCENTER_IP=172.16.0.145;
+            VC_DATACENTER=Datacenter;
+            VCENTER_DATASTORE=nfs;
             VCENTER_CLUSTERS=Cluster1,Cluster2;
-            NSXT_PASSWORD=Qwer!1234;
+            DVS_SWITCHES=Cluster1,Cluster2;
+            DVS_UPLINKS=dvUplink1,dvUplink2,dvUplink3;
+            VCENTER_CERT_URL=http://tpi-s2.bud.mirantis.net:5000/downloads/certs/server.pem;
+            VCENTER_CERT_BYPASS=True;
+            VCENTER_USE=true;
+            CLEAN_IPTABLES=true;
+            DISABLE_STP=true;
+            VCENTER_USERNAME=openstack;
+            VCENTER_PASSWORD=vmware;
 - project:
     name: 'predefined_parameters'
-    fuel-release: '9.x'
-    plugin-version: '1.0.0'
-    plugin-name: 'nsxt'
+    fuel-release: '9.1'
+    plugin-version: '3.1.0'
+    plugin-name: 'dvs'
     build-name: '{fuel-release}.{plugin-name}.build'
     flake8-name: '{fuel-release}.{plugin-name}.flake8'
     radon-name: '{fuel-release}.{plugin-name}.radon'
@@ -32,27 +42,27 @@
     nightly-name: '{fuel-release}.{plugin-name}.nightly'
     custom-name: '{fuel-release}.{plugin-name}.custom'
     reporter-name: '{fuel-release}.{plugin-name}.reporter'
-    smoke-test-name: 'nsxt_smoke'
-    bvt-test-name: 'nsxt_bvt'
+    smoke-test-name: 'dvs_vcenter_smoke'
+    bvt-test-name: 'dvs_vcenter_bvt'
+    regression-test-name: 'dvs_regression'
     admin_node_memory: '8192'
     slave_node_memory: '8192'
     admin_node_cpu: '4'
     slave_node_cpu: '4'
     pkg_job_name: '{fuel-release}.{plugin-name}.build'
-    nightly_timer: 'H 18 * * *'
+    nightly_timer: 'H 22 * * *'
     regression_timer: 'H 18 * * *'
     nightly_disabled: true
-    regression_disabled: true
-    force_erase: true
-    force_reuse: false
-    recreate_venv: true
+    regression_disabled: false
+    force_erase: false
+    recreate_venv: false
     ws_norevert: false
-    vcenter_use: false
     nfs_clean: false
+    force_reuse: false
     disable_ssl: true
     kvm_use: false
     update_master: true
-    enable_proposed: true
+    enable_proposed: false
     debug: true
     build_debug: true
     publish_results: true
@@ -63,53 +73,66 @@
     fuel_qa_refs: ''
     iso_file: 'MirantisOpenStack-9.0.iso'
     iso_storage: '/storage/downloads'
-    snapshots_id: 'lastSuccessfulBuild'
-    gerrit_repo: 'fuel-plugin-nsx-t'
+    snapshots_id: 'released'
+    gerrit_repo: 'fuel-plugin-vmware-dvs'
     gerrit_branch: 'master'
-    email_to: 'rkhozinov@mirantis.com'
-    released_plugin_path: '/storage/nsxt/released/nsx-t-1.0-1.0.0-1-375.noarch.rpm'
+    email_to: 'rkhozinov@mirantis.com vnaumov@mirantis.com ibumarskov@mirantis.com'
+    released_plugin_path: '/storage/dvs/released/fuel-plugin-vmware-dvs-3.1-3.1.0-1.noarch.rpm'
     scm_submodule_disabled: false
     scm_wipe_workspace: true
     skip_vote_successfull: false
     skip_vote_failed: false
 
-    testrail_project: "VMware NSX-T plugin"
-    testrail_suite: "[{fuel-release}][PCE] VMware NSX-T plugin v{plugin-version}"
+    testrail_project: "VMware DVS plugin"
+    testrail_suite: "[{fuel-release}][PCE] VMware DVS plugin v{plugin-version}"
     testrail_suite_desc: "Suite description"
     testrail_milestone: "{plugin-version}"
-    testrail_plan: "[{fuel-release}][PCE] NSX-T plugin v{plugin-version} build#${{PKG_JOB_BUILD_NUMBER}} snapshot#${{SNAPSHOTS_ID}}"
+    testrail_plan: "$TREP_TESTRAIL_SUITE build#${{PKG_JOB_BUILD_NUMBER}} snapshot#${{SNAPSHOTS_ID}}"
     testrail_plan_desc: "Test plan description"
     testrail_run: "$TREP_TESTRAIL_SUITE"
     testrail_run_desc: "Test run description"
     testrail_item_case: "$TEST_GROUP"
     trep_results_source: "xunit"
-    trep_debug_level: "INFO"
+    trep_debug_level: "DEBUG"
 
     testgroup_parameter_type: string
     testgroup_value_type: default
     testgroup_value: '{testgroup}'
 
     testgroup:
-      - nsxt_smoke
-      - nsxt_bvt
-      - nsxt_ceilometer
-      - nsxt_ceph
-      - nsxt_add_delete_controller
-      - nsxt_add_delete_compute_node
-      - nsxt_add_delete_compute_vmware_node
-      - nsxt_uninstall_negative
-      - nsxt_shutdown_controller
-      - nsxt_setup_system
-      - nsxt_manage_ports
-      - nsxt_hot
-      - nsxt_manage_networks
-      - nsxt_public_network_availability
-      - nsxt_connectivity_diff_networks
-      - nsxt_batch_instance_creation
-      - nsxt_manage_secgroups
-      - nsxt_manage_compute_hosts
-      - nsxt_different_tenants
-      - nsxt_same_ip_different_tenants
+      - dvs_vcenter_networks
+      - dvs_vcenter_ping_public
+      - dvs_instances_one_group
+      - dvs_vcenter_security
+      - dvs_vcenter_tenants_isolation
+      - dvs_vcenter_same_ip
+      - dvs_vcenter_uninstall
+      - dvs_vcenter_bind_port
+      - dvs_vcenter_add_delete_controller
+      - dvs_vcenter_add_delete_nodes
+      - dvs_vcenter_reset_controller
+      - dvs_vcenter_net_template
+      - dvs_vcenter_shutdown_controller
+      - dvs_vcenter_multiple_nics
+      - dvs_update_network
+      - dvs_port_security_group
+      - dvs_attached_ports
+      - dvs_instances_batch_mix_sg
+      - dvs_different_networks
+      - dvs_remote_sg_simple
+      - dvs_remote_ip_prefix
+      - dvs_connect_default_net
+      - dvs_connect_nodefault_net
+      - dvs_ping_without_fip
+      - dvs_reboot_vcenter_1
+      - dvs_reboot_vcenter_2
+      - dvs_volume
+      - dvs_vcenter_smoke
+      - dvs_vcenter_bvt
+      - dvs_heat
+      - dvs_multiple_uplinks_active
+      - dvs_multiple_uplinks_active_standby
+      - dvs_secure
 
     jobs:
       - '{build-name}':
@@ -126,19 +149,15 @@
 
       - '{nightly-name}':
           multijob_build_pkg: true
-          scm_wipe_workspace: true
 
       - '{custom-name}.qa':
           publish_results: false
-          vcenter_use: true
-          scm_wipe_workspace: true
 
       - '{custom-name}.dev':
           publish_results: false
           testgroup_parameter_type: choice
           testgroup_value_type: choices
           testgroup_value: '{obj:testgroup}'
-          scm_wipe_workspace: true
 
       - '{reporter-name}'
 
@@ -147,21 +166,17 @@
       - '{smoke-name}':
           publish_results: false
           multijob_build_pkg: false
-          scm_wipe_workspace: true
 
       - '{fuel-release}.{plugin-name}.smoke.test'
 
       - '{bvt-name}':
           publish_results: false
           multijob_build_pkg: true
-          scm_wipe_workspace: true
 
-      - '{fuel-release}.{plugin-name}.bvt.test':
-          vcenter_use: true
-          scm_wipe_workspace: true
+      - '{fuel-release}.{plugin-name}.bvt.test'
 
       - '{regression-name}':
-          testrail_suite: "[{fuel-release}][PCE] VMware NSX-T plugin v{plugin-version} Regression"
+          testrail_suite: "[{fuel-release}][PCE] VMware DVS plugin v{plugin-version} Regression"
           testrail_suite_desc: "Suite description"
           testrail_plan: "$TREP_TESTRAIL_SUITE #${{DATE}}"
           testrail_plan_desc: "Test plan description"
@@ -169,11 +184,10 @@
           testrail_run_desc: "Test run description"
           pkg_job_name: ''
           multijob_build_pkg: false
-          vcenter_use: true
 
-      - '{fuel-release}.{plugin-name}.regression.test':
-          vcenter_use: true
+      - '{fuel-release}.{plugin-name}.regression.test'
 
+# parameters for smoke, bvt and nightly multijobs
 - runner-parameters: &runner-parameters
     name: 'runner-parameters'
     parameters:
@@ -187,7 +201,7 @@
           debug:                '{debug}'
           disable_ssl:          '{disable_ssl}'
           force_erase:          '{force_erase}'
-          force_reuse:           '{force_reuse}'
+          force_reuse:          '{force_reuse}'
           recreate_venv:        '{recreate_venv}'
           ws_norevert:          '{ws_norevert}'
           nfs_clean:            '{nfs_clean}'
@@ -210,41 +224,43 @@
           kvm_use:              '{kvm_use}'
           iso_storage:          '{iso_storage}'
           snapshots_id:         '{snapshots_id}'
-          vcenter_use:         '{vcenter_use}'
       - plugin-specific-parameters
 
+# parameters for jobs created per test-group and custom test job
 - test-parameters: &test-parameters
     name: 'test-parameters'
     parameters:
       - label:
           name: node
-          default: 'nsxt'
+          default: 'dvs'
           description: "The node on which to run the job"
       - bool:
           name: BUILD_PKG
           default: '{testjob_build_pkg}'
           description: "Triggers build of pkg from $PKG_JOB_NAME (only for custom)"
       - bool:
-          name: VCENTER_USE
-          default: '{vcenter_use}'
+          name: VCENTER_CERT_BYPASS
       - '{testgroup_parameter_type}':
           name: TEST_GROUP
           '{testgroup_value_type}': '{obj:testgroup_value}'
           description: "test-group name"
+      - string:
+          name: TEST_GROUP_CONFIG
+          default: '${{TEST_GROUP}}'
       - common-parameters:
           fuel_qa_refs:          '{fuel_qa_refs}'
-          publish_results: '{publish_results}'
-          debug:           '{debug}'
-          disable_ssl:     '{disable_ssl}'
-          force_erase:     '{force_erase}'
+          publish_results:       '{publish_results}'
+          debug:                 '{debug}'
+          disable_ssl:           '{disable_ssl}'
+          force_erase:           '{force_erase}'
           force_reuse:           '{force_reuse}'
-          recreate_venv:   '{recreate_venv}'
-          ws_norevert:     '{ws_norevert}'
-          nfs_clean:       '{nfs_clean}'
-          iso_file:        '{iso_file}'
-          gerrit_branch:   '{gerrit_branch}'
-          env_prefix:      '{fuel-release}.{plugin-name}'
-          pkg_job_name:    '{pkg_job_name}'
+          recreate_venv:         '{recreate_venv}'
+          ws_norevert:           '{ws_norevert}'
+          nfs_clean:             '{nfs_clean}'
+          iso_file:              '{iso_file}'
+          gerrit_branch:         '{gerrit_branch}'
+          env_prefix:            '{fuel-release}.{plugin-name}'
+          pkg_job_name:          '{pkg_job_name}'
           admin_node_memory:    '{admin_node_memory}'
           slave_node_memory:    '{slave_node_memory}'
           admin_node_cpu:       '{admin_node_cpu}'
@@ -260,13 +276,12 @@
           kvm_use:              '{kvm_use}'
           iso_storage:          '{iso_storage}'
           snapshots_id:         '{snapshots_id}'
-          vcenter_use:         '{vcenter_use}'
       - plugin-specific-parameters
 
 - defaults:
     name: global
     disabled: false
-    node: nsxt
+    node: dvs
     <<: *test-parameters
     scm:
       - common-scm:
@@ -274,7 +289,7 @@
           scm_wipe_workspace: '{scm_wipe_workspace}'
           gerrit_repo: '{gerrit_repo}'
           skip_vote_successfull: '{skip_vote_successfull}'
-          skip_vote_failed:     '{skip_vote_failed}'
+          skip_vote_failed: '{skip_vote_failed}'
     wrappers:
       - test-wrapper:
           test_timeout: '{test_timeout}'
@@ -296,9 +311,9 @@
       - conditional-step:
           condition-kind: shell
           condition-command: |
-            [ ! -z ${{PKG_JOB_NAME}}          ] && \
-            [   -z ${{PKG_JOB_BUILD_NUMBER}}  ] && \
-            [   -z ${{NSXT_PLUGIN_PATH}}      ]
+            [ ! -z ${{PKG_JOB_NAME}}         ] && \
+            [   -z ${{PKG_JOB_BUILD_NUMBER}} ] && \
+            [   -z ${{DVS_PLUGIN_PATH}}      ]
           steps:
             - copyartifact:
                 project: ${{PKG_JOB_NAME}}
@@ -306,9 +321,9 @@
       - conditional-step:
           condition-kind: shell
           condition-command: |
-            [ ! -z ${{PKG_JOB_NAME}}          ] && \
-            [ ! -z ${{PKG_JOB_BUILD_NUMBER}}  ] && \
-            [   -z ${{NSXT_PLUGIN_PATH}}      ]
+            [ ! -z ${{PKG_JOB_NAME}}         ] && \
+            [ ! -z ${{PKG_JOB_BUILD_NUMBER}} ] && \
+            [   -z ${{DVS_PLUGIN_PATH}}      ]
           steps:
             - copyartifact:
                 project: ${{PKG_JOB_NAME}}
@@ -318,7 +333,9 @@
       - shell:
           !include-raw-escape: ../builders/common.prepare.sh
       - shell:
-          !include-raw-escape: ../builders/nsxt.test.sh
+          !include-raw-escape: ../builders/workstation.sh
+      - shell:
+          !include-raw-escape: ../builders/dvs.test.sh
     publishers:
       - runner-publisher:
           properties_name: properties
@@ -330,9 +347,9 @@
     name: '{build-name}'
     node: 'runner'
     concurrent: true
-    disabled: true
+    disabled: false
     triggers:
-      - default-draft-trigger:
+      - draft-gerrit-trigger:
           gerrit_repo: '{gerrit_repo}'
           gerrit_branch: '{gerrit_branch}'
           skip_vote_successfull: '{skip_vote_successfull}'
@@ -353,6 +370,12 @@
       - string:
           name: GERRIT_REFSPEC
           default: 'refs/heads/{gerrit_branch}'
+      - string:
+          name: PUPPETLINT_PATH
+          default: './deployment_scripts/puppet/manifests ./deployment_scripts/puppet/modules/vmware_dvs'
+      - string:
+          name: PUPPETLINT_IGNORE
+          default: 'l2.pp'
       - bool:
           name: DEBUG
           default: '{build_debug}'
@@ -363,7 +386,7 @@
           colormap: xterm
     builders:
       - shell:
-          !include-raw-escape: ../builders/build-plugin-nsxt.sh
+          !include-raw-escape: ../builders/build-plugin-dvs.sh
       - shell:
           !include-raw-escape: ../builders/rpm-check.sh
     publishers:
@@ -424,8 +447,8 @@
       - shell: |
           #!/bin/bash
           cat <<EOF > property
-          TEST_GROUP=nsxt_bvt
-          NSXT_PLUGIN_PATH={released_plugin_path}
+          TEST_GROUP=dvs_regression
+          DVS_PLUGIN_PATH={released_plugin_path}
           PLUGIN_VERSION={plugin-version}
           PKG_JOB_BUILD_NUMBER=released
           EOF
@@ -440,19 +463,19 @@
 
 - job-template:
     name: '{smoke-name}'
-    disabled: true
+    disabled: false
     description: 'The Smoke test for {fuel-release}.{plugin-name}.{plugin-version}'
     concurrent: true
     quiet-period: 5
     project-type: multijob
     node: runner
     <<: *runner-parameters
-    #triggers:
-    #  - default-draft-trigger:
-    #      gerrit_repo: '{gerrit_repo}'
-    #      gerrit_branch: '{gerrit_branch}'
-    #      skip_vote_successfull: '{skip_vote_successfull}'
-    #      skip_vote_failed: '{skip_vote_failed}'
+    triggers:
+      - draft-gerrit-trigger:
+          gerrit_repo: '{gerrit_repo}'
+          gerrit_branch: '{gerrit_branch}'
+          skip_vote_successfull: '{skip_vote_successfull}'
+          skip_vote_failed: '{skip_vote_failed}'
     properties:
       - runner-property:
           build-name: '{build-name}'
@@ -479,14 +502,14 @@
 - job-template:
     name: '{bvt-name}'
     description: 'The BVT test for {fuel-release}.{plugin-name}.{plugin-version}'
-    disabled: true
+    disabled: false
     concurrent: true
     project-type: multijob
     node: runner
     <<: *runner-parameters
     scm: []
     triggers:
-      - default-merge-trigger:
+      - merge-gerrit-trigger:
           gerrit_repo: '{gerrit_repo}'
           gerrit_branch: '{gerrit_branch}'
           skip_vote_successfull: '{skip_vote_successfull}'
@@ -506,7 +529,7 @@
               current-parameters: true
               property-file: build_number
               predefined-parameters: |
-                 TEST_GROUP={bvt-test-name}
+                TEST_GROUP={bvt-test-name}
               kill-phase-on: NEVER
     publishers:
       - runner-publisher:
@@ -532,4 +555,4 @@
           properties_name: nightly.properties
           email_to: '{email_to}'
     builders:
-      !include: nsxt-nightly.yaml
+      !include: dvs-nightly.yaml

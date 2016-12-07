@@ -52,7 +52,7 @@
     disable_ssl: true
     kvm_use: false
     update_master: true
-    enable_proposed: false
+    enable_proposed: true
     debug: true
     build_debug: true
     publish_results: true
@@ -60,6 +60,7 @@
     testjob_build_pkg: false
     runner_timeout: 600
     test_timeout: 300
+    fuel_qa_refs: ''
     iso_file: 'MirantisOpenStack-9.0.iso'
     iso_storage: '/storage/downloads'
     snapshots_id: 'lastSuccessfulBuild'
@@ -198,6 +199,7 @@
           debug:                 '{debug}'
           disable_ssl:           '{disable_ssl}'
           force_erase:           '{force_erase}'
+          force_reuse:           '{force_reuse}'
           recreate_venv:         '{recreate_venv}'
           ws_norevert:           '{ws_norevert}'
           nfs_clean:             '{nfs_clean}'
@@ -244,6 +246,7 @@
           debug:                 '{debug}'
           disable_ssl:           '{disable_ssl}'
           force_erase:           '{force_erase}'
+          force_reuse:           '{force_reuse}'
           recreate_venv:         '{recreate_venv}'
           ws_norevert:           '{ws_norevert}'
           nfs_clean:             '{nfs_clean}'

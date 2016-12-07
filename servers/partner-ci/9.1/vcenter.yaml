@@ -38,7 +38,7 @@
             CONV_SNAP_PATH=utils/jenkins/conv_snapshot_file.py;
 - project:
     name: 'predefined_parameters'
-    fuel-release: '9.x'
+    fuel-release: '9.1'
     plugin-version: '3.1.0'
     plugin-name: 'vcenter'
     build-name: '{fuel-release}.dvs.build'
@@ -62,17 +62,16 @@
     disable_ssl: true
     kvm_use: false
     update_master: true
-    enable_proposed: true
+    enable_proposed: false
     debug: true
     publish_results: true
     multijob_build_pkg: true
     testjob_build_pkg: false
     runner_timeout: 600
     test_timeout: 300
-    fuel_qa_refs: ''
     iso_file: 'MirantisOpenStack-9.0.iso'
     iso_storage: '/storage/downloads'
-    snapshots_id: 'lastSuccessfulBuild'
+    snapshots_id: 'released'
     gerrit_repo: 'fuel-qa'
     gerrit_branch: 'stable/mitaka'
     email_to: 'rkhozinov@mirantis.com ibumarskov@mirantis.com'
@@ -83,7 +82,7 @@
     skip_vote_failed: false
 
     testrail_project: "Mirantis OpenStack"
-    testrail_suite: "[9.x][PCE] vCenter"
+    testrail_suite: "[9.0][PCE] vCenter"
     testrail_suite_desc: "Suite description"
     testrail_milestone: "9.2"
     testrail_plan: "$TREP_TESTRAIL_MILESTONE snapshot #${{SNAPSHOTS_ID}}"
@@ -185,12 +184,10 @@
           default: '{multijob_build_pkg}'
           description: "Triggers build of pkg of $PKG_JOB_NAME before run of tests"
       - common-parameters:
-          fuel_qa_refs:          '{fuel_qa_refs}'
           publish_results:      '{publish_results}'
           debug:                '{debug}'
           disable_ssl:          '{disable_ssl}'
           force_erase:          '{force_erase}'
-          force_reuse:           '{force_reuse}'
           recreate_venv:        '{recreate_venv}'
           ws_norevert:          '{ws_norevert}'
           nfs_clean:            '{nfs_clean}'
@@ -235,12 +232,10 @@
           name: TEST_GROUP_CONFIG
           default: '${{TEST_GROUP}}'
       - common-parameters:
-          fuel_qa_refs:          '{fuel_qa_refs}'
           publish_results: '{publish_results}'
           debug:           '{debug}'
           disable_ssl:     '{disable_ssl}'
           force_erase:     '{force_erase}'
-          force_reuse:           '{force_reuse}'
           recreate_venv:   '{recreate_venv}'
           ws_norevert:     '{ws_norevert}'
           nfs_clean:       '{nfs_clean}'

@@ -3,10 +3,20 @@
     name: plugin-specific-parameters
     parameters:
       - string:
-          name: PLUGIN_VERSION
-      - string:
-          name: NSXT_PLUGIN_PATH
-
+          name: DEVOPS_SETTINGS_TEMPLATE
+          default: '$WORKSPACE/plugin_test/test_templates/default.yaml'
+      - text:
+          name: SPECIFIC_PROPS
+          default: |
+            WORKSTATION_SNAPSHOT=nsxt;
+            WORKSTATION_NODES=esxi1 esxi2 esxi3 vcenter nsx-edge trusty;
+            VCENTER_USERNAME=administrator@vsphere.local;
+            WORKSTATION_PASSWORD=VMware01;
+            WORKSTATION_USERNAME=vmware;
+            VCENTER_PASSWORD=Qwer!1234;
+            VCENTER_IP=172.16.0.254;
+            VCENTER_CLUSTERS=Cluster1,Cluster2;
+            NSXT_PASSWORD=Qwer!1234;
 - project:
     name: 'predefined_parameters'
     fuel-release: '9.1'
@@ -29,18 +39,21 @@
     admin_node_cpu: '4'
     slave_node_cpu: '4'
     pkg_job_name: '{fuel-release}.{plugin-name}.build'
-    nightly_timer: 'H 22 * * *'
+    nightly_timer: 'H 18 * * *'
     regression_timer: 'H 18 * * *'
-    nightly_disabled: false
+    nightly_disabled: true
     regression_disabled: true
     force_erase: true
-    recreate_venv: false
+    force_reuse: false
+    recreate_venv: true
     ws_norevert: false
+    vcenter_use: false
     nfs_clean: false
+    force_reuse: false
     disable_ssl: true
     kvm_use: false
     update_master: true
-    enable_proposed: true
+    enable_proposed: false
     debug: true
     build_debug: true
     publish_results: true
@@ -48,23 +61,24 @@
     testjob_build_pkg: false
     runner_timeout: 600
     test_timeout: 300
+    fuel_qa_refs: ''
     iso_file: 'MirantisOpenStack-9.0.iso'
     iso_storage: '/storage/downloads'
-    snapshots_id: 'lastSuccessfulBuild'
+    snapshots_id: 'released'
     gerrit_repo: 'fuel-plugin-nsx-t'
     gerrit_branch: 'master'
     email_to: 'rkhozinov@mirantis.com'
-    released_plugin_path: ''
+    released_plugin_path: '/storage/nsxt/released/nsx-t-1.0-1.0.0-1-375.noarch.rpm'
     scm_submodule_disabled: false
     scm_wipe_workspace: true
     skip_vote_successfull: false
     skip_vote_failed: false
 
     testrail_project: "VMware NSX-T plugin"
-    testrail_suite: "[9.0][PCE] VMware NSX-t plugin v1.0.0"
+    testrail_suite: "[{fuel-release}][PCE] VMware NSX-T plugin v{plugin-version}"
     testrail_suite_desc: "Suite description"
-    testrail_milestone: "1.0.0"
-    testrail_plan: "[9.0][PCE] NSX-t plugin v1.0.0 build#${{PKG_JOB_BUILD_NUMBER}} snapshot#${{SNAPSHOTS_ID}}"
+    testrail_milestone: "{plugin-version}"
+    testrail_plan: "[{fuel-release}][PCE] NSX-T plugin v{plugin-version} build#${{PKG_JOB_BUILD_NUMBER}} snapshot#${{SNAPSHOTS_ID}}"
     testrail_plan_desc: "Test plan description"
     testrail_run: "$TREP_TESTRAIL_SUITE"
     testrail_run_desc: "Test run description"
@@ -77,45 +91,26 @@
     testgroup_value: '{testgroup}'
 
     testgroup:
-      - nsxt_add_delete_nodes
-      - nsxt_add_delete_controller
-
-      - nsxt_ceilometer
-      - nsxt_ha_mode
-
       - nsxt_smoke
       - nsxt_bvt
-
-      - nsxt_floating_ip_to_public
-      - nsxt_create_and_delete_vms
-      - nsxt_smoke_add_compute
-      - nsxt_public_network_availability
-      - nsxt_connectivity_via_shared_router
-      - nsxt_connectivity_via_distributed_router
-      - nsxt_connectivity_via_exclusive_router
-      - nsxt_create_terminate_networks
-      - nsxt_public_network_to_all_nodes
-      - nsxt_kvm_deploy
-      - nsxt_specified_router_type
-      - nsxt_metadata_mgt_disabled
-      - nsxt_metadata_listen_public
-      - nsxt_metadata_listen_management
-      - nsxt_create_and_delete_secgroups
-      - nsxt_multi_vnic
-      - nsxt_install
-      - nsxt_uninstall
+      - nsxt_ceilometer
+      - nsxt_ceph
+      - nsxt_add_delete_controller
+      - nsxt_add_delete_compute_node
+      - nsxt_add_delete_compute_vmware_node
       - nsxt_uninstall_negative
+      - nsxt_shutdown_controller
+      - nsxt_setup_system
+      - nsxt_manage_ports
+      - nsxt_hot
+      - nsxt_manage_networks
+      - nsxt_public_network_availability
       - nsxt_connectivity_diff_networks
+      - nsxt_batch_instance_creation
+      - nsxt_manage_secgroups
+      - nsxt_manage_compute_hosts
       - nsxt_different_tenants
       - nsxt_same_ip_different_tenants
-      - nsxt_disable_hosts
-
-      - nsxt_ha_edges
-
-      - nsxt_ability_to_bind_port
-      - nsxt_insecure_false
-
-      - nsxt_config_ok_metadata_self_signed_certificate
 
     jobs:
       - '{build-name}':
@@ -132,15 +127,19 @@
 
       - '{nightly-name}':
           multijob_build_pkg: true
+          scm_wipe_workspace: true
 
       - '{custom-name}.qa':
           publish_results: false
+          vcenter_use: true
+          scm_wipe_workspace: true
 
       - '{custom-name}.dev':
           publish_results: false
           testgroup_parameter_type: choice
           testgroup_value_type: choices
           testgroup_value: '{obj:testgroup}'
+          scm_wipe_workspace: true
 
       - '{reporter-name}'
 
@@ -149,28 +148,33 @@
       - '{smoke-name}':
           publish_results: false
           multijob_build_pkg: false
+          scm_wipe_workspace: true
 
       - '{fuel-release}.{plugin-name}.smoke.test'
 
       - '{bvt-name}':
           publish_results: false
           multijob_build_pkg: true
+          scm_wipe_workspace: true
 
-      - '{fuel-release}.{plugin-name}.bvt.test'
+      - '{fuel-release}.{plugin-name}.bvt.test':
+          vcenter_use: true
+          scm_wipe_workspace: true
 
-      - '{regression-name}'
-          #testrail_suite: "[9.0][PCE] VMware NSX-t plugin v1.0.0 Smoke/BVT"
-          #testrail_suite_desc: "Suite description"
-          #testrail_plan: "$TREP_TESTRAIL_SUITE #${{DATE}}"
-          #testrail_plan_desc: "Test plan description"
-          #testrail_run: "$TREP_TESTRAIL_SUITE"
-          #testrail_run_desc: "Test run description"
-          #pkg_job_name: ''
-          #multijob_build_pkg: false
+      - '{regression-name}':
+          testrail_suite: "[{fuel-release}][PCE] VMware NSX-T plugin v{plugin-version} Regression"
+          testrail_suite_desc: "Suite description"
+          testrail_plan: "$TREP_TESTRAIL_SUITE #${{DATE}}"
+          testrail_plan_desc: "Test plan description"
+          testrail_run: "$TREP_TESTRAIL_SUITE"
+          testrail_run_desc: "Test run description"
+          pkg_job_name: ''
+          multijob_build_pkg: false
+          vcenter_use: true
 
-      - '{fuel-release}.{plugin-name}.regression.test'
+      - '{fuel-release}.{plugin-name}.regression.test':
+          vcenter_use: true
 
-# parameters for smoke, bvt and nightly multijobs
 - runner-parameters: &runner-parameters
     name: 'runner-parameters'
     parameters:
@@ -179,10 +183,12 @@
           default: '{multijob_build_pkg}'
           description: "Triggers build of pkg of $PKG_JOB_NAME before run of tests"
       - common-parameters:
+          fuel_qa_refs:          '{fuel_qa_refs}'
           publish_results:      '{publish_results}'
           debug:                '{debug}'
           disable_ssl:          '{disable_ssl}'
           force_erase:          '{force_erase}'
+          force_reuse:          '{force_reuse}'
           recreate_venv:        '{recreate_venv}'
           ws_norevert:          '{ws_norevert}'
           nfs_clean:            '{nfs_clean}'
@@ -205,9 +211,9 @@
           kvm_use:              '{kvm_use}'
           iso_storage:          '{iso_storage}'
           snapshots_id:         '{snapshots_id}'
+          vcenter_use:         '{vcenter_use}'
       - plugin-specific-parameters
 
-# parameters for jobs created per test-group and custom test job
 - test-parameters: &test-parameters
     name: 'test-parameters'
     parameters:
@@ -221,15 +227,18 @@
           description: "Triggers build of pkg from $PKG_JOB_NAME (only for custom)"
       - bool:
           name: VCENTER_USE
+          default: '{vcenter_use}'
       - '{testgroup_parameter_type}':
           name: TEST_GROUP
           '{testgroup_value_type}': '{obj:testgroup_value}'
           description: "test-group name"
       - common-parameters:
+          fuel_qa_refs:          '{fuel_qa_refs}'
           publish_results: '{publish_results}'
           debug:           '{debug}'
           disable_ssl:     '{disable_ssl}'
           force_erase:     '{force_erase}'
+          force_reuse:     '{force_reuse}'
           recreate_venv:   '{recreate_venv}'
           ws_norevert:     '{ws_norevert}'
           nfs_clean:       '{nfs_clean}'
@@ -252,6 +261,7 @@
           kvm_use:              '{kvm_use}'
           iso_storage:          '{iso_storage}'
           snapshots_id:         '{snapshots_id}'
+          vcenter_use:         '{vcenter_use}'
       - plugin-specific-parameters
 
 - defaults:
@@ -272,24 +282,8 @@
     properties:
       - test-property
     builders:
-      - inject:
-          properties-content: |
-            TREP_TESTRAIL_SUITE={testrail_suite}
-            TREP_TESTRAIL_SUITE_DESCRIPTION={testrail_suite_desc}
-            TREP_TESTRAIL_PLAN={testrail_plan}
-            TREP_TESTRAIL_PLAN_DESCRIPTION={testrail_plan_desc}
-            DEVOPS_SETTINGS_TEMPLATE=${{WORKSPACE}}/plugin_test/test_templates/default.yaml
-            ENV_PREFIX={fuel-release}.{plugin-name}
-            OPENSTACK_RELEASE=Ubuntu
-            DESTROY_ENV_AFTER=0
-            WORKSTATION_SNAPSHOT=nsx-t-1.0.1
-            WORKSTATION_NODES=esxi1 esxi2 esxi3 vcenter nsx-edge trusty
-            VCENTER_IP=172.16.0.254
-            VCENTER_CLUSTERS=Cluster1,Cluster2
-            NSXT_PASSWORD=Qwer!1234
-            SNAPSHOT_OUTPUT_FILE=extra_repos.sh
-            SNAPSHOT_ARTIFACTS_FILE=snapshots.params
-
+      - get-refs
+      - get-props
       - conditional-step:
            condition-kind: shell
            condition-command: |
@@ -321,29 +315,7 @@
                 project: ${{PKG_JOB_NAME}}
                 which-build: specific-build
                 build-number: ${{PKG_JOB_BUILD_NUMBER}}
-      - conditional-step:
-          condition-kind: shell
-          condition-command: |
-            [[ "${{UPDATE_MASTER}}" == "true" ]]
-          steps:
-            - inject:
-                properties-content: |
-                  ENABLE_MOS_CENTOS_OS=true
-                  ENABLE_MOS_CENTOS_PROPOSED=true
-                  ENABLE_MOS_CENTOS_UPDATES=true
-                  ENABLE_MOS_CENTOS_HOLDBACK=true
-                  ENABLE_MOS_CENTOS_HOTFIX=false
-                  ENABLE_MOS_CENTOS_SECURITY=true
-                  ENABLE_MOS_UBUNTU_OS=true
-                  ENABLE_MOS_UBUNTU_PROPOSED=true
-                  ENABLE_MOS_UBUNTU_UPDATES=true
-                  ENABLE_MOS_UBUNTU_HOLDBACK=true
-                  ENABLE_MOS_UBUNTU_HOTFIX=false
-                  ENABLE_MOS_UBUNTU_SECURITY=true
-            - shell: |
-                [ ! -n ${{SNAPSHOTS_ID}} ] && {{ echo "SNAPSHOTS_ID is empty"; exit 1; }}
-                wget --no-check-certificate -O ${{SNAPSHOT_ARTIFACTS_FILE}} ${{SNAPSHOTS_URL/SNAPSHOTS_ID/$SNAPSHOTS_ID}}
-                python plugin_test/fuel-qa/utils/jenkins/conv_snapshot_file.py
+      - get-updates
       - shell:
           !include-raw-escape: ../builders/common.prepare.sh
       - shell:
@@ -359,7 +331,7 @@
     name: '{build-name}'
     node: 'runner'
     concurrent: true
-    disabled: false
+    disabled: true
     triggers:
       - default-draft-trigger:
           gerrit_repo: '{gerrit_repo}'
@@ -372,7 +344,7 @@
           scm_submodule_disabled: '{scm_submodule_disabled}'
           gerrit_repo: '{gerrit_repo}'
           skip_vote_successfull: '{skip_vote_successfull}'
-          skip_vote_failed:     '{skip_vote_failed}'
+          skip_vote_failed: '{skip_vote_failed}'
     wrapper:
       - runner-wrapper
     parameters:
@@ -386,8 +358,7 @@
           name: DEBUG
           default: '{build_debug}'
     properties:
-      - heavy-job:
-          weight: 1
+      - test-property
     wrappers:
       - ansicolor:
           colormap: xterm
@@ -453,10 +424,12 @@
     builders:
       - shell: |
           #!/bin/bash
-          echo "TEST_GROUP={regression-name}" > property
-          echo "NSXV_PLUGIN_PATH={released_plugin_path}" >> property
-          echo "PLUGIN_VERSION={plugin-version}" >> property
-          echo "PKG_JOB_BUILD_NUMBER=released" >> property
+          cat <<EOF > property
+          TEST_GROUP=nsxt_bvt
+          NSXT_PLUGIN_PATH={released_plugin_path}
+          PLUGIN_VERSION={plugin-version}
+          PKG_JOB_BUILD_NUMBER=released
+          EOF
       - multijob:
           name: '1st phase - regression test'
           condition: COMPLETED
@@ -468,19 +441,19 @@
 
 - job-template:
     name: '{smoke-name}'
-    disabled: false
+    disabled: true
     description: 'The Smoke test for {fuel-release}.{plugin-name}.{plugin-version}'
     concurrent: true
     quiet-period: 5
     project-type: multijob
     node: runner
     <<: *runner-parameters
-    triggers:
-      - default-draft-trigger:
-          gerrit_repo: '{gerrit_repo}'
-          gerrit_branch: '{gerrit_branch}'
-          skip_vote_successfull: '{skip_vote_successfull}'
-          skip_vote_failed: '{skip_vote_failed}'
+    #triggers:
+    #  - default-draft-trigger:
+    #      gerrit_repo: '{gerrit_repo}'
+    #      gerrit_branch: '{gerrit_branch}'
+    #      skip_vote_successfull: '{skip_vote_successfull}'
+    #      skip_vote_failed: '{skip_vote_failed}'
     properties:
       - runner-property:
           build-name: '{build-name}'
@@ -507,7 +480,7 @@
 - job-template:
     name: '{bvt-name}'
     description: 'The BVT test for {fuel-release}.{plugin-name}.{plugin-version}'
-    disabled: false
+    disabled: true
     concurrent: true
     project-type: multijob
     node: runner
@@ -560,4 +533,4 @@
           properties_name: nightly.properties
           email_to: '{email_to}'
     builders:
-      !include: nsxt-nightly.yaml.inc
+      !include: nsxt-nightly.yaml

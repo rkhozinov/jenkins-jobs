@@ -17,9 +17,10 @@
             VCENTER_IP=172.16.0.254;
             VCENTER_CLUSTERS=Cluster1,Cluster2;
             NSXT_PASSWORD=Qwer!1234;
+            FORCE_DISABLE_UPDATES=true;
 - project:
     name: 'predefined_parameters'
-    fuel-release: '9.x'
+    fuel-release: '9.0'
     plugin-version: '1.0.0'
     plugin-name: 'nsxt'
     build-name: '{fuel-release}.{plugin-name}.build'
@@ -51,8 +52,8 @@
     nfs_clean: false
     disable_ssl: true
     kvm_use: false
-    update_master: true
-    enable_proposed: true
+    update_master: false
+    enable_proposed: false
     debug: true
     build_debug: true
     publish_results: true
@@ -63,7 +64,7 @@
     fuel_qa_refs: ''
     iso_file: 'MirantisOpenStack-9.0.iso'
     iso_storage: '/storage/downloads'
-    snapshots_id: 'lastSuccessfulBuild'
+    snapshots_id: 'released'
     gerrit_repo: 'fuel-plugin-nsx-t'
     gerrit_branch: 'master'
     email_to: 'rkhozinov@mirantis.com'
@@ -187,7 +188,7 @@
           debug:                '{debug}'
           disable_ssl:          '{disable_ssl}'
           force_erase:          '{force_erase}'
-          force_reuse:           '{force_reuse}'
+          force_reuse:          '{force_reuse}'
           recreate_venv:        '{recreate_venv}'
           ws_norevert:          '{ws_norevert}'
           nfs_clean:            '{nfs_clean}'
@@ -237,7 +238,7 @@
           debug:           '{debug}'
           disable_ssl:     '{disable_ssl}'
           force_erase:     '{force_erase}'
-          force_reuse:           '{force_reuse}'
+          force_reuse:     '{force_reuse}'
           recreate_venv:   '{recreate_venv}'
           ws_norevert:     '{ws_norevert}'
           nfs_clean:       '{nfs_clean}'

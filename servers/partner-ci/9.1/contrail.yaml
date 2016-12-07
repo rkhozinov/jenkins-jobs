@@ -70,7 +70,7 @@
       bonding: false
       kvm_use: false
       update_master: true
-      enable_proposed: true
+      enable_proposed: false
       debug: true
       build_debug: true
       publish_results: true
@@ -78,10 +78,10 @@
       testjob_build_pkg: false
       runner_timeout: 600
       test_timeout: 300
-      fuel_qa_refs: 'b8c539afa04f2ef2215a5a84047805e5930747e1'
+      fuel_qa_refs: ''
       iso_file: 'MirantisOpenStack-9.0.iso'
       iso_storage: '/storage/downloads'
-      snapshots_id: 'lastSuccessfulBuild'
+      snapshots_id: 'released'
       gerrit_repo: 'fuel-plugin-contrail'
       gerrit_branch: 'master'
       email_to: 'rkhozinov@mirantis.com okosse@mirantis.com otsvigun@mirantis.com'
@@ -91,7 +91,7 @@
       skip_vote_successfull: false
       skip_vote_failed: false
       testrail_project: "Contrail plugin"
-      testrail_suite: "[9.1][PCE] Fuel plugin contrail v5.0.0 nightly"
+      testrail_suite: "[9.0][PCE] Fuel plugin contrail v5.0.0 nightly"
       testrail_suite_desc: "Suite description"
       testrail_milestone: "Fuel Contrail Plugin v5.0.0"
       testrail_plan: "$TREP_TESTRAIL_SUITE pkg#${{JUNIPER_PKG_VERSION}} build#${{PKG_JOB_BUILD_NUMBER}}"
@@ -252,7 +252,7 @@
         - '{fuel-release}.{plugin-name}.{plugin-version}.bvt.test.juniper'
 
         - '{regression-name}':
-            testrail_suite: "[9.1][PCE] Fuel plugin contrail v5.0.0 Regression"
+            testrail_suite: "[9.0][PCE] Fuel plugin contrail v5.0.0 Regression"
             testrail_suite_desc: "Suite description"
             testrail_milestone: "Fuel Contrail Plugin v5.0"
             testrail_plan: "$TREP_TESTRAIL_SUITE iso #${{ISO_VERSION}} pkg#${{JUNIPER_PKG_VERSION}} build#${{PKG_JOB_BUILD_NUMBER}}"

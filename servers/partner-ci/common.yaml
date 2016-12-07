@@ -3,7 +3,7 @@
     parameters:
       - string:
           name: FUEL_RELEASE_VERSION
-          default: '{fuel_release}'
+          default: '{fuel-release}'
           description: "fuel-qa checks version of fuel, by default fuel-qa sets the value to 9.2"
       - bool:
           name: UPDATE_MASTER

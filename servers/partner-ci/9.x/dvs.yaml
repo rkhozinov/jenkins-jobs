@@ -69,6 +69,7 @@
     testjob_build_pkg: false
     runner_timeout: 600
     test_timeout: 300
+    fuel_qa_refs: ''
     iso_file: 'MirantisOpenStack-9.0.iso'
     iso_storage: '/storage/downloads'
     snapshots_id: 'lastSuccessfulBuild'
@@ -194,10 +195,12 @@
           default: '{multijob_build_pkg}'
           description: "Triggers build of pkg of $PKG_JOB_NAME before run of tests"
       - common-parameters:
+          fuel_qa_refs:          '{fuel_qa_refs}'
           publish_results:      '{publish_results}'
           debug:                '{debug}'
           disable_ssl:          '{disable_ssl}'
           force_erase:          '{force_erase}'
+          force_reuse:           '{force_reuse}'
           recreate_venv:        '{recreate_venv}'
           ws_norevert:          '{ws_norevert}'
           nfs_clean:            '{nfs_clean}'
@@ -244,10 +247,12 @@
           name: TEST_GROUP_CONFIG
           default: '${{TEST_GROUP}}'
       - common-parameters:
+          fuel_qa_refs:          '{fuel_qa_refs}'
           publish_results: '{publish_results}'
           debug:           '{debug}'
           disable_ssl:     '{disable_ssl}'
           force_erase:     '{force_erase}'
+          force_reuse:           '{force_reuse}'
           recreate_venv:   '{recreate_venv}'
           ws_norevert:     '{ws_norevert}'
           nfs_clean:       '{nfs_clean}'
