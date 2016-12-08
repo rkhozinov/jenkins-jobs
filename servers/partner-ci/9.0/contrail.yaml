@@ -617,7 +617,7 @@
       - test-wrapper
     builders:
       - shell:
-          !include-raw-escape: builders/doc.sh
+          !include-raw-escape: ../builders/doc.sh
     publishers:
       - doc-publisher:
           email_to: '{email_to}'
@@ -658,7 +658,7 @@
       - test-wrapper
     builders:
       - shell:
-          !include-raw-escape: builders/doc.sh
+          !include-raw-escape: ../builders/doc.sh
     publishers:
       - doc-publisher:
           email_to: '{email_to}'

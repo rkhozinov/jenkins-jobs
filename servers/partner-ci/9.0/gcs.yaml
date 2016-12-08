@@ -47,7 +47,7 @@
     testjob_build_pkg: false
     runner_timeout: 600
     test_timeout: 300
-     fuel_qa_refs: ''
+    fuel_qa_refs: ''
     iso_file: 'MirantisOpenStack-9.0.iso'
     iso_storage: '/storage/downloads'
     gerrit_repo: 'fuel-plugin-cinder-gcs'
