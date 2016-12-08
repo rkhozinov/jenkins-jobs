@@ -166,7 +166,6 @@
       - contrail_sriov_add_sriov
       - contrail_sriov_delete_sriov
       - contrail_sriov_add_controller
-      - contrail_sriov_delete_controller
 
       - contrail_public_connectivity_from_instance_without_fip
       - contrail_dpdk_update_core_repos
@@ -188,8 +187,7 @@
       - '{build-name}':
           scm_submodule_disabled: true
           scm_wipe_workspace: true
-      - '{flake8-name}':
-          scm_submodule_disabled: true
+      - '{flake8-name}'
       - '{radon-name}':
           scm_submodule_disabled: true
       - '{shellcheck-name}':
@@ -250,6 +248,7 @@
           force_erase:           '{force_erase}'
           force_reuse:           '{force_reuse}'
           fuel_qa_refs:          '{fuel_qa_refs}'
+          fuel_release:          '{fuel_release}'
           gerrit_branch:         '{gerrit_branch}'
           iso_file:              '{iso_file}'
           kvm_use:               '{kvm_use}'
@@ -291,6 +290,7 @@
           force_erase:           '{force_erase}'
           force_reuse:           '{force_reuse}'
           fuel_qa_refs:          '{fuel_qa_refs}'
+          fuel_release:          '{fuel_release}'
           gerrit_branch:         '{gerrit_branch}'
           iso_file:              '{iso_file}'
           iso_storage:           '{iso_storage}'

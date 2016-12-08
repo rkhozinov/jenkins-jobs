@@ -185,6 +185,7 @@
           force_erase:            '{force_erase}'
           force_reuse:            '{force_reuse}'
           fuel_qa_refs:           '{fuel_qa_refs}'
+          fuel_release:           '{fuel_release}'
           gerrit_branch:          '{gerrit_branch}'
           iso_file:               '{iso_file}'
           iso_storage:            '{iso_storage}'
@@ -223,12 +224,14 @@
           name: TEST_GROUP
           '{testgroup_value_type}': '{obj:testgroup_value}'
           description: "test-group name"
+      - common-parameters:
           debug:                 '{debug}'
           enable_proposed:       '{enable_proposed}'
           env_prefix:            '{fuel_release}.{plugin-name}'
           force_erase:           '{force_erase}'
           force_reuse:           '{force_reuse}'
           fuel_qa_refs:          '{fuel_qa_refs}'
+          fuel_release:          '{fuel_release}'
           gerrit_branch:         '{gerrit_branch}'
           iso_file:              '{iso_file}'
           iso_storage:           '{iso_storage}'
@@ -247,7 +250,6 @@
           update_master:         '{update_master}'
           vcenter_use:           '{vcenter_use}'
           ws_norevert:           '{ws_norevert}'
-      - common-parameters:
       - plugin-specific-parameters
 
 - defaults:
