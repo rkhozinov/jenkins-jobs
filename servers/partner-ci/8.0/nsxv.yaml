@@ -28,20 +28,20 @@
 
 - project:
     name: 'predefined_parameters'
-    fuel-release: '8.0'
+    fuel_release: '8.0'
     plugin-version: '2.0.0'
     plugin-name: 'nsxv'
-    build-name: '{fuel-release}.{plugin-name}.build'
-    flake8-name: '{fuel-release}.{plugin-name}.flake8'
-    radon-name: '{fuel-release}.{plugin-name}.radon'
-    shellcheck-name: '{fuel-release}.{plugin-name}.shellcheck'
-    smoke-name: '{fuel-release}.{plugin-name}.smoke'
-    bvt-name: '{fuel-release}.{plugin-name}.bvt'
-    regression-name: '{fuel-release}.{plugin-name}.regression'
-    canary-name: '{fuel-release}.{plugin-name}.canary'
-    nightly-name: '{fuel-release}.{plugin-name}.nightly'
-    custom-name: '{fuel-release}.{plugin-name}.custom'
-    reporter-name: '{fuel-release}.{plugin-name}.reporter'
+    build-name: '{fuel_release}.{plugin-name}.build'
+    flake8-name: '{fuel_release}.{plugin-name}.flake8'
+    radon-name: '{fuel_release}.{plugin-name}.radon'
+    shellcheck-name: '{fuel_release}.{plugin-name}.shellcheck'
+    smoke-name: '{fuel_release}.{plugin-name}.smoke'
+    bvt-name: '{fuel_release}.{plugin-name}.bvt'
+    regression-name: '{fuel_release}.{plugin-name}.regression'
+    canary-name: '{fuel_release}.{plugin-name}.canary'
+    nightly-name: '{fuel_release}.{plugin-name}.nightly'
+    custom-name: '{fuel_release}.{plugin-name}.custom'
+    reporter-name: '{fuel_release}.{plugin-name}.reporter'
     smoke-test-name: 'nsxv_smoke'
     bvt-test-name: 'nsxv_bvt'
     canary-skinny-test-name: 'nsxv_smoke'
@@ -50,8 +50,8 @@
     slave_node_memory: '8192'
     admin_node_cpu: '4'
     slave_node_cpu: '4'
-    pkg_job_name: '{fuel-release}.{plugin-name}.build'
-    iso_job_name: '{fuel-release}.{plugin-name}.canary'
+    pkg_job_name: '{fuel_release}.{plugin-name}.build'
+    iso_job_name: '{fuel_release}.{plugin-name}.canary'
     nightly_timer: 'H 22 * * *'
     regression_timer: 'H 16 * * *'
     nightly_disabled: true
@@ -135,19 +135,19 @@
 
       - '{reporter-name}'
 
-      - '{fuel-release}.{plugin-name}.{testgroup}'
+      - '{fuel_release}.{plugin-name}.{testgroup}'
 
       - '{smoke-name}':
           publish_results: false
           multijob_build_pkg: false
 
-      - '{fuel-release}.{plugin-name}.smoke.test'
+      - '{fuel_release}.{plugin-name}.smoke.test'
 
       - '{bvt-name}':
           publish_results: false
           multijob_build_pkg: true
 
-      - '{fuel-release}.{plugin-name}.bvt.test'
+      - '{fuel_release}.{plugin-name}.bvt.test'
 
       - '{regression-name}':
           testrail_suite: "[8.0][PCE] VMware NSXv plugin v2.0.0 Regression"
@@ -161,7 +161,7 @@
           multijob_build_pkg: false
 
 
-      - '{fuel-release}.{plugin-name}.regression.test'
+      - '{fuel_release}.{plugin-name}.regression.test'
 
       - '{canary-name}':
           testrail_suite: "[9.0][PCE] VMware NSXv plugin v3.0.0 Smoke/BVT"
@@ -173,9 +173,9 @@
           testrail_run_desc: "Test run description"
           testrail_item_case: "$TEST_GROUP"
 
-      - '{fuel-release}.{plugin-name}.canary.skinny'
+      - '{fuel_release}.{plugin-name}.canary.skinny'
 
-      - '{fuel-release}.{plugin-name}.canary.fat'
+      - '{fuel_release}.{plugin-name}.canary.fat'
 
 # parameters for smoke, bvt and nightly multijobs
 - runner-parameters: &runner-parameters
@@ -194,7 +194,7 @@
           use_snapshots:        '{use_snapshots}'
           iso_file:             '{iso_file}'
           gerrit_branch:        '{gerrit_branch}'
-          env_prefix:           '{fuel-release}.{plugin-name}'
+          env_prefix:           '{fuel_release}.{plugin-name}'
           pkg_job_name:         '{pkg_job_name}'
           iso_job_name:         '{iso_job_name}'
           admin_node_memory:    '{admin_node_memory}'
@@ -237,7 +237,7 @@
           use_snapshots:   '{use_snapshots}'
           iso_file:        '{iso_file}'
           gerrit_branch:   '{gerrit_branch}'
-          env_prefix:      '{fuel-release}.{plugin-name}'
+          env_prefix:      '{fuel_release}.{plugin-name}'
           pkg_job_name:    '{pkg_job_name}'
           iso_job_name:    '{iso_job_name}'
           admin_node_memory:    '{admin_node_memory}'
@@ -365,27 +365,27 @@
       - build-publisher:
           email_to: '{email_to}'
 - job-template:
-    name: '{fuel-release}.{plugin-name}.{testgroup}'
+    name: '{fuel_release}.{plugin-name}.{testgroup}'
     concurrent: true
 
 - job-template:
-    name: '{fuel-release}.{plugin-name}.bvt.test'
+    name: '{fuel_release}.{plugin-name}.bvt.test'
     concurrent: true
 
 - job-template:
-    name: '{fuel-release}.{plugin-name}.smoke.test'
+    name: '{fuel_release}.{plugin-name}.smoke.test'
     concurrent: true
 
 - job-template:
-    name: '{fuel-release}.{plugin-name}.regression.test'
+    name: '{fuel_release}.{plugin-name}.regression.test'
     concurrent: true
 
 - job-template:
-    name: '{fuel-release}.{plugin-name}.canary.skinny'
+    name: '{fuel_release}.{plugin-name}.canary.skinny'
     concurrent: true
 
 - job-template:
-    name: '{fuel-release}.{plugin-name}.canary.fat'
+    name: '{fuel_release}.{plugin-name}.canary.fat'
     concurrent: true
 
 - job-template:
@@ -426,7 +426,7 @@
           name: '1st phase - regression test'
           condition: COMPLETED
           projects:
-            - name: '{fuel-release}.{plugin-name}.regression.test'
+            - name: '{fuel_release}.{plugin-name}.regression.test'
              # predefined-parameters: |
              #   TEST_GROUP=nsxv_bvt
              #   NSXV_PLUGIN_PATH={released_plugin_path}
@@ -439,7 +439,7 @@
 - job-template:
     name: '{smoke-name}'
     disabled: false
-    description: 'The Smoke test for {fuel-release}.{plugin-name}.{plugin-version}'
+    description: 'The Smoke test for {fuel_release}.{plugin-name}.{plugin-version}'
     concurrent: true
     quiet-period: 5
     project-type: multijob
@@ -460,10 +460,10 @@
     builders:
       - runner-condition
       - multijob:
-          name: 'The smoke test for {fuel-release}.{plugin-name}.{plugin-version}'
+          name: 'The smoke test for {fuel_release}.{plugin-name}.{plugin-version}'
           condition: COMPLETED
           projects:
-            - name: '{fuel-release}.{plugin-name}.smoke.test'
+            - name: '{fuel_release}.{plugin-name}.smoke.test'
               current-parameters: true
               property-file: build_number
               predefined-parameters: |
@@ -476,7 +476,7 @@
 
 - job-template:
     name: '{bvt-name}'
-    description: 'The BVT test for {fuel-release}.{plugin-name}.{plugin-version}'
+    description: 'The BVT test for {fuel_release}.{plugin-name}.{plugin-version}'
     disabled: false
     concurrent: true
     project-type: multijob
@@ -497,10 +497,10 @@
     builders:
       - runner-condition
       - multijob:
-          name: 'The BVT test for {fuel-release}.{plugin-name}.{plugin-version}'
+          name: 'The BVT test for {fuel_release}.{plugin-name}.{plugin-version}'
           condition: COMPLETED
           projects:
-            - name: '{fuel-release}.{plugin-name}.bvt.test'
+            - name: '{fuel_release}.{plugin-name}.bvt.test'
               current-parameters: true
               property-file: build_number
               predefined-parameters: |
@@ -513,7 +513,7 @@
 
 - job-template:
     name: '{canary-name}'
-    description: 'The Smoke test for {fuel-release}.{plugin-name}.{plugin-version}'
+    description: 'The Smoke test for {fuel_release}.{plugin-name}.{plugin-version}'
     disabled: true
     concurrent: true
     project-type: multijob
@@ -539,13 +539,13 @@
           name: 'Canary tests for {plugin-name}'
           condition: SUCCESSFUL
           projects:
-            - name: '{fuel-release}.{plugin-name}.canary.skinny'
+            - name: '{fuel_release}.{plugin-name}.canary.skinny'
               property-file: build_number
               predefined-parameters: |
                  TEST_GROUP={canary-skinny-test-name}
               current-parameters: true
               kill-phase-on: NEVER
-            - name: '{fuel-release}.{plugin-name}.canary.fat'
+            - name: '{fuel_release}.{plugin-name}.canary.fat'
               property-file: build_number
               predefined-parameters: |
                  TEST_GROUP={canary-fat-test-name}

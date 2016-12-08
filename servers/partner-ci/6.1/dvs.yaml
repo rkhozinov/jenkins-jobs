@@ -1,20 +1,20 @@
 - project:
     name: 'predefined_parameters'
-    fuel-release: '6.1'
+    fuel_release: '6.1'
     plugin-version: '1.0'
     plugin-name: 'dvs'
 
-    build-name: '{fuel-release}.{plugin-name}.build'
-    smoke-name: '{fuel-release}.{plugin-name}.smoke'
-    bvt-name: '{fuel-release}.{plugin-name}.bvt'
-    regression-name: '{fuel-release}.{plugin-name}.regression'
-    nightly-name: '{fuel-release}.{plugin-name}.nightly'
-    custom-name: '{fuel-release}.{plugin-name}.custom'
+    build-name: '{fuel_release}.{plugin-name}.build'
+    smoke-name: '{fuel_release}.{plugin-name}.smoke'
+    bvt-name: '{fuel_release}.{plugin-name}.bvt'
+    regression-name: '{fuel_release}.{plugin-name}.regression'
+    nightly-name: '{fuel_release}.{plugin-name}.nightly'
+    custom-name: '{fuel_release}.{plugin-name}.custom'
 
     nightly-timer: 'H 22 * * *'
     regression-timer: 'H 18 * * *'
-    
-    nightly-disabled: false  
+
+    nightly-disabled: false
 
     use-snapshots: false
     force-erase: true
@@ -56,15 +56,15 @@
       - '{custom-name}'
 
       - '{smoke-name}'
-      - '{fuel-release}.{plugin-name}.smoke.test'
+      - '{fuel_release}.{plugin-name}.smoke.test'
 
       - '{bvt-name}'
-      - '{fuel-release}.{plugin-name}.bvt.test'
+      - '{fuel_release}.{plugin-name}.bvt.test'
 
       - '{regression-name}'
-      - '{fuel-release}.{plugin-name}.regression.test'
+      - '{fuel_release}.{plugin-name}.regression.test'
 
-      - '{fuel-release}.{plugin-name}.{testgroup}'
+      - '{fuel_release}.{plugin-name}.{testgroup}'
 
 ## common git settings to get sources
 - common-scm: &common-scm
@@ -253,7 +253,7 @@
           description: 'The branch for fuel-qa gerrit'
       - string:
           name: ENV_PREFIX
-          default: '{fuel-release}.{plugin-name}'
+          default: '{fuel_release}.{plugin-name}'
           description: 'The name of devops env. Needed to properly work of existing mode of devops'
 
 ## parameters for jobs created per test-group and custom test job
@@ -356,7 +356,7 @@
           description: 'Amount of vitrual CPUs per slave node'
       - string:
           name: ENV_PREFIX
-          default: '{fuel-release}.{plugin-name}'
+          default: '{fuel_release}.{plugin-name}'
           description: 'The name of devops env. Needed to properly work of existing mode of devops'
       - string:
           name: TESTRAIL_PLAN_NAME
@@ -462,37 +462,37 @@
 
 # jobs for system tests
 - job-template:
-    name: '{fuel-release}.{plugin-name}.{testgroup}'
-    description: 'The test "{testgroup}" for {fuel-release}.{plugin-name}.{plugin-version}'
+    name: '{fuel_release}.{plugin-name}.{testgroup}'
+    description: 'The test "{testgroup}" for {fuel_release}.{plugin-name}.{plugin-version}'
     concurrent: true
 
 ## jobs for bvt tests
 - job-template:
-    name: '{fuel-release}.{plugin-name}.bvt.test'
-    description: 'The test for {fuel-release}.{plugin-name}.{plugin-version}'
+    name: '{fuel_release}.{plugin-name}.bvt.test'
+    description: 'The test for {fuel_release}.{plugin-name}.{plugin-version}'
     concurrent: true
 
 ## jobs for smoke tests
 - job-template:
-    name: '{fuel-release}.{plugin-name}.smoke.test'
-    description: 'The test for {fuel-release}.{plugin-name}.{plugin-version}'
+    name: '{fuel_release}.{plugin-name}.smoke.test'
+    description: 'The test for {fuel_release}.{plugin-name}.{plugin-version}'
     concurrent: true
 
 # jobs for regression tests
 - job-template:
-    name: '{fuel-release}.{plugin-name}.regression.test'
-    description: 'The regression test for {fuel-release}.{plugin-name}.{plugin-version}'
+    name: '{fuel_release}.{plugin-name}.regression.test'
+    description: 'The regression test for {fuel_release}.{plugin-name}.{plugin-version}'
     concurrent: true
 
 - job-template:
     name: '{custom-name}'
-    description: 'The custom test for {fuel-release}.{plugin-name}.{plugin-version}'
+    description: 'The custom test for {fuel_release}.{plugin-name}.{plugin-version}'
     concurrent: true
 
 - job-template:
     name: '{smoke-name}'
     disabled: false
-    description: 'The Smoke test for {fuel-release}.{plugin-name}.{plugin-version}'
+    description: 'The Smoke test for {fuel_release}.{plugin-name}.{plugin-version}'
     concurrent: true
     project-type: multijob
     node: runner
@@ -510,10 +510,10 @@
           which-build: last-successful
           stable: true
       - multijob:
-          name: 'The smoke test for {fuel-release}.{plugin-name}.{plugin-version}'
+          name: 'The smoke test for {fuel_release}.{plugin-name}.{plugin-version}'
           condition: COMPLETED
           projects:
-            - name: '{fuel-release}.{plugin-name}.smoke.test'
+            - name: '{fuel_release}.{plugin-name}.smoke.test'
               current-parameters: true
               predefined-parameters: |
                 TEST_GROUP=dvs_vcenter_smoke
@@ -535,7 +535,7 @@
 
 - job-template:
     name: '{bvt-name}'
-    description: 'The BVT test for {fuel-release}.{plugin-name}.{plugin-version}'
+    description: 'The BVT test for {fuel_release}.{plugin-name}.{plugin-version}'
     disabled: false
     concurrent: true
     project-type: multijob
@@ -557,7 +557,7 @@
           name: 'BVT tests for dvs.vcenter5'
           condition: COMPLETED
           projects:
-            - name: '{fuel-release}.{plugin-name}.bvt.test'
+            - name: '{fuel_release}.{plugin-name}.bvt.test'
               current-parameters: true
               predefined-parameters: |
                 TEST_GROUP=dvs_vcenter_bvt
@@ -581,7 +581,7 @@
 
 - job-template:
     name: '{regression-name}'
-    description: 'The regression test for {fuel-release}.{plugin-name}.{plugin-version}'
+    description: 'The regression test for {fuel_release}.{plugin-name}.{plugin-version}'
     disabled: false
     concurrent: true
     project-type: multijob
@@ -609,7 +609,7 @@
           name: 'regression test'
           condition: COMPLETED
           projects:
-            - name: '{fuel-release}.{plugin-name}.regression.test'
+            - name: '{fuel_release}.{plugin-name}.regression.test'
               predefined-parameters: |
                 TEST_GROUP=dvs_vcenter_ha_mode
                 DVS_PLUGIN_PATH={released-plugin-path}
@@ -650,73 +650,73 @@
           which-build: last-successful
           stable: true
       - multijob:
-          name: 'System tests for {fuel-release}.{plugin-name}.{plugin-version} vcenter5'
+          name: 'System tests for {fuel_release}.{plugin-name}.{plugin-version} vcenter5'
           condition: COMPLETED
           projects:
-           - name: '{fuel-release}.{plugin-name}.dvs_vcenter_ha_mode'
+           - name: '{fuel_release}.{plugin-name}.dvs_vcenter_ha_mode'
              current-parameters: true
              kill-phase-on: NEVER
 
-           - name: '{fuel-release}.{plugin-name}.dvs_vcenter_ceph'
+           - name: '{fuel_release}.{plugin-name}.dvs_vcenter_ceph'
              current-parameters: true
              kill-phase-on: NEVER
 
-           - name: '{fuel-release}.{plugin-name}.dvs_vcenter_ceilometer'
+           - name: '{fuel_release}.{plugin-name}.dvs_vcenter_ceilometer'
              current-parameters: true
              kill-phase-on: NEVER
 
-           - name: '{fuel-release}.{plugin-name}.dvs_vcenter_add_delete_nodes'
+           - name: '{fuel_release}.{plugin-name}.dvs_vcenter_add_delete_nodes'
              current-parameters: true
              kill-phase-on: NEVER
 
-           - name: '{fuel-release}.{plugin-name}.dvs_vcenter_add_delete_controller'
+           - name: '{fuel_release}.{plugin-name}.dvs_vcenter_add_delete_controller'
              current-parameters: true
              kill-phase-on: NEVER
 
-           - name: '{fuel-release}.{plugin-name}.dvs_vcenter_multiroles'
+           - name: '{fuel_release}.{plugin-name}.dvs_vcenter_multiroles'
              current-parameters: true
              kill-phase-on: NEVER
 
-           - name: '{fuel-release}.{plugin-name}.dvs_vcenter_diff_networks'
+           - name: '{fuel_release}.{plugin-name}.dvs_vcenter_diff_networks'
              current-parameters: true
              kill-phase-on: NEVER
 
-           - name: '{fuel-release}.{plugin-name}.dvs_vcenter_networks'
+           - name: '{fuel_release}.{plugin-name}.dvs_vcenter_networks'
              current-parameters: true
              kill-phase-on: NEVER
 
-           - name: '{fuel-release}.{plugin-name}.dvs_vcenter_security'
+           - name: '{fuel_release}.{plugin-name}.dvs_vcenter_security'
              current-parameters: true
              kill-phase-on: NEVER
 
-           - name: '{fuel-release}.{plugin-name}.dvs_vcenter_tenants_isolation'
+           - name: '{fuel_release}.{plugin-name}.dvs_vcenter_tenants_isolation'
              current-parameters: true
              kill-phase-on: NEVER
 
-           - name: '{fuel-release}.{plugin-name}.dvs_vcenter_same_ip'
+           - name: '{fuel_release}.{plugin-name}.dvs_vcenter_same_ip'
              current-parameters: true
              kill-phase-on: NEVER
 
-           - name: '{fuel-release}.{plugin-name}.dvs_vcenter_ping_public'
+           - name: '{fuel_release}.{plugin-name}.dvs_vcenter_ping_public'
              current-parameters: true
              kill-phase-on: NEVER
 
-           - name: '{fuel-release}.{plugin-name}.dvs_vcenter_bind_port'
+           - name: '{fuel_release}.{plugin-name}.dvs_vcenter_bind_port'
              current-parameters: true
              kill-phase-on: NEVER
 
-           - name: '{fuel-release}.{plugin-name}.dvs_vcenter_5_instances'
+           - name: '{fuel_release}.{plugin-name}.dvs_vcenter_5_instances'
              current-parameters: true
              kill-phase-on: NEVER
 
-           - name: '{fuel-release}.{plugin-name}.dvs_vcenter_uninstall'
+           - name: '{fuel_release}.{plugin-name}.dvs_vcenter_uninstall'
              current-parameters: true
              kill-phase-on: NEVER
 
-           - name: '{fuel-release}.{plugin-name}.dvs_vcenter_reset_controller'
+           - name: '{fuel_release}.{plugin-name}.dvs_vcenter_reset_controller'
              current-parameters: true
              kill-phase-on: NEVER
 
-           - name: '{fuel-release}.{plugin-name}.dvs_vcenter_shutdown_controller'
+           - name: '{fuel_release}.{plugin-name}.dvs_vcenter_shutdown_controller'
              current-parameters: true
              kill-phase-on: NEVER

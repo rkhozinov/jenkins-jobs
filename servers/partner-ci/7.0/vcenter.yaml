@@ -118,7 +118,7 @@
           description: 'Amount of vitrual CPUs per slave node'
       - string:
           name: ENV_PREFIX
-          default: '{fuel-release}.vcenter'
+          default: '{fuel_release}.vcenter'
           description: 'The name of devops env. Needed to properly work of existing mode of devops'
       - bool:
           name: USE_SNAPSHOTS
@@ -233,7 +233,7 @@
           description: 'Amount of vitrual CPUs per slave node'
       - string:
           name: ENV_PREFIX
-          default: '{fuel-release}.vcenter'
+          default: '{fuel_release}.vcenter'
           description: 'The name of devops env. Needed to properly work of existing mode of devops'
       - bool:
           name: USE_SNAPSHOTS
@@ -250,12 +250,12 @@
 
 - project:
    name: 'predefined_parameters'
-   fuel-release: '7.0'
+   fuel_release: '7.0'
    gerrit-branch: 'stable/7.0'
    gerrit-repo: 'fuel-qa'
    repourl: 'https://review.openstack.org/openstack/{gerrit-repo}.git'
    iso-file: 'fuel-7.0-301-2015-09-22_20-01-53.iso'
-   nightly-name: '{fuel-release}.vcenter.nightly'
+   nightly-name: '{fuel_release}.vcenter.nightly'
 #   mail-to: 'rkhozinov@mirantis.com'
 
 
@@ -283,7 +283,7 @@
        - vcenter_ha_nova_vlan_multiple_clusters
    jobs:
      - '{nightly-name}'
-     - '{fuel-release}.{testgroup}'
+     - '{fuel_release}.{testgroup}'
 
 - defaults:
     name: global
@@ -333,8 +333,8 @@
 
 ## Jobs for system tests by testgroup
 - job-template:
-    name: '{fuel-release}.{testgroup}'
-    # with throttle configuration we can run some concurrent tests 
+    name: '{fuel_release}.{testgroup}'
+    # with throttle configuration we can run some concurrent tests
     concurrent: true
     node: vcenter
 
@@ -345,7 +345,7 @@
     project-type: multijob
     name: '{nightly-name}'
     description: "System tests for vcenter feature"
-    node: runner    
+    node: runner
     scm: []
     triggers:
         - timed: 'H 19  * * *'
@@ -356,108 +356,108 @@
           name: 'System tests for vcenter with vcenter5'
           condition: COMPLETED
           projects:
-            - name: '{fuel-release}.vcenter_cindervmdk'
+            - name: '{fuel_release}.vcenter_cindervmdk'
               current-parameters: true
               predefined-parameters: VCENTER_SNAPSHOT=vcenterha
               kill-phase-on: NEVER
 
-            - name: '{fuel-release}.vcenter_computevmware'
+            - name: '{fuel_release}.vcenter_computevmware'
               current-parameters: true
               predefined-parameters: VCENTER_SNAPSHOT=vcenterha
               kill-phase-on: NEVER
 
-            - name: '{fuel-release}.vcenter_cindervmdk_and_computevmware'
+            - name: '{fuel_release}.vcenter_cindervmdk_and_computevmware'
               current-parameters: true
               predefined-parameters: VCENTER_SNAPSHOT=vcenterha
               kill-phase-on: NEVER
 
-            - name: '{fuel-release}.vcenter_glance_backend'
+            - name: '{fuel_release}.vcenter_glance_backend'
               current-parameters: true
               predefined-parameters: VCENTER_SNAPSHOT=vcenterha
               kill-phase-on: NEVER
 
-            - name: '{fuel-release}.vcenter_multiple_cluster_with_computevmware'
+            - name: '{fuel_release}.vcenter_multiple_cluster_with_computevmware'
               current-parameters: true
               predefined-parameters: VCENTER_SNAPSHOT=vcenterha
               kill-phase-on: NEVER
 
-            - name: '{fuel-release}.vcenter_ceph'
+            - name: '{fuel_release}.vcenter_ceph'
               current-parameters: true
               predefined-parameters: VCENTER_SNAPSHOT=vcenterha
               kill-phase-on: NEVER
 
-            - name: '{fuel-release}.vcenter_computevmware_and_ceph'
+            - name: '{fuel_release}.vcenter_computevmware_and_ceph'
               current-parameters: true
               predefined-parameters: VCENTER_SNAPSHOT=vcenterha
               kill-phase-on: NEVER
 
-            - name: '{fuel-release}.vcenter_multiroles_cindervmdk_and_ceph'
+            - name: '{fuel_release}.vcenter_multiroles_cindervmdk_and_ceph'
               current-parameters: true
               predefined-parameters: VCENTER_SNAPSHOT=vcenterha
               kill-phase-on: NEVER
 
-            - name: '{fuel-release}.vcenter_multiroles_cindervmdk_and_cinder'
+            - name: '{fuel_release}.vcenter_multiroles_cindervmdk_and_cinder'
               current-parameters: true
               predefined-parameters: VCENTER_SNAPSHOT=vcenterha
               kill-phase-on: NEVER
 
-            - name: '{fuel-release}.vcenter_ceilometer'
+            - name: '{fuel_release}.vcenter_ceilometer'
               current-parameters: true
               predefined-parameters: VCENTER_SNAPSHOT=vcenterha
               kill-phase-on: NEVER
 
-            - name: '{fuel-release}.vcenter_ceilometer_and_computevmware'
+            - name: '{fuel_release}.vcenter_ceilometer_and_computevmware'
               current-parameters: true
               predefined-parameters: VCENTER_SNAPSHOT=vcenterha
               kill-phase-on: NEVER
 
-            - name: '{fuel-release}.vcenter_multiroles_ceilometer'
+            - name: '{fuel_release}.vcenter_multiroles_ceilometer'
               current-parameters: true
               predefined-parameters: VCENTER_SNAPSHOT=vcenterha
               kill-phase-on: NEVER
 
-            - name: '{fuel-release}.vcenter_add_delete_nodes'
+            - name: '{fuel_release}.vcenter_add_delete_nodes'
               current-parameters: true
               predefined-parameters: VCENTER_SNAPSHOT=vcenterha
               kill-phase-on: NEVER
 
-            - name: '{fuel-release}.vcenter_delete_controler'
+            - name: '{fuel_release}.vcenter_delete_controler'
               current-parameters: true
               predefined-parameters: VCENTER_SNAPSHOT=vcenterha
               kill-phase-on: NEVER
 
-            - name: '{fuel-release}.vcenter_ha_ceph'
+            - name: '{fuel_release}.vcenter_ha_ceph'
               current-parameters: true
               kill-phase-on: NEVER
               predefined-parameters: VCENTER_SNAPSHOT=vcenterha
               current-parameters: true
 
-            - name: '{fuel-release}.vcenter_ha_cinder_and_ceph'
+            - name: '{fuel_release}.vcenter_ha_cinder_and_ceph'
               current-parameters: true
               predefined-parameters: VCENTER_SNAPSHOT=vcenterha
               kill-phase-on: NEVER
 
-            - name: '{fuel-release}.vcenter_ha_glance_backend_multiple_cluster'
+            - name: '{fuel_release}.vcenter_ha_glance_backend_multiple_cluster'
               current-parameters: true
               predefined-parameters: VCENTER_SNAPSHOT=vcenterha
               kill-phase-on: NEVER
 
-            - name: '{fuel-release}.vcenter_ha_multiroles_cindervmdk_and_ceph'
+            - name: '{fuel_release}.vcenter_ha_multiroles_cindervmdk_and_ceph'
               current-parameters: true
               predefined-parameters: VCENTER_SNAPSHOT=vcenterha
               kill-phase-on: NEVER
 
-            - name: '{fuel-release}.vcenter_ha_multiroles_cindervmdk_and_cinder'
+            - name: '{fuel_release}.vcenter_ha_multiroles_cindervmdk_and_cinder'
               current-parameters: true
               predefined-parameters: VCENTER_SNAPSHOT=vcenterha
               kill-phase-on: NEVER
 
-            - name: '{fuel-release}.vcenter_ha_nova_flat_multiple_clusters'
+            - name: '{fuel_release}.vcenter_ha_nova_flat_multiple_clusters'
               current-parameters: true
               predefined-parameters: VCENTER_SNAPSHOT=vcenterha
               kill-phase-on: NEVER
 
-            - name: '{fuel-release}.vcenter_ha_nova_vlan_multiple_clusters'
+            - name: '{fuel_release}.vcenter_ha_nova_vlan_multiple_clusters'
               current-parameters: true
               predefined-parameters: VCENTER_SNAPSHOT=vcenterha
               kill-phase-on: NEVER
@@ -466,111 +466,111 @@
 #          name: 'System tests for vcenter with vcenter6'
 #          condition: COMPLETED
 #          projects:
-#            - name: '{fuel-release}.vcenter_cindervmdk'
+#            - name: '{fuel_release}.vcenter_cindervmdk'
 #              current-parameters: true
 #              predefined-parameters: VCENTER_SNAPSHOT=vcenter6
 #              kill-phase-on: NEVER
 #
-#            - name: '{fuel-release}.vcenter_computevmware'
+#            - name: '{fuel_release}.vcenter_computevmware'
 #              current-parameters: true
 #              predefined-parameters: VCENTER_SNAPSHOT=vcenter6
 #              kill-phase-on: NEVER
 #
-#            - name: '{fuel-release}.vcenter_cindervmdk_and_computevmware'
+#            - name: '{fuel_release}.vcenter_cindervmdk_and_computevmware'
 #              current-parameters: true
 #              predefined-parameters: VCENTER_SNAPSHOT=vcenter6
 #              kill-phase-on: NEVER
 #
-#            - name: '{fuel-release}.vcenter_glance_backend'
+#            - name: '{fuel_release}.vcenter_glance_backend'
 #              current-parameters: true
 #              predefined-parameters: VCENTER_SNAPSHOT=vcenter6
 #              kill-phase-on: NEVER
 #
-#            - name: '{fuel-release}.vcenter_multiple_cluster_with_computevmware'
+#            - name: '{fuel_release}.vcenter_multiple_cluster_with_computevmware'
 #              current-parameters: true
 #              predefined-parameters: VCENTER_SNAPSHOT=vcenter6
 #              kill-phase-on: NEVER
 #
-#            - name: '{fuel-release}.vcenter_ceph'
+#            - name: '{fuel_release}.vcenter_ceph'
 #              current-parameters: true
 #              predefined-parameters: VCENTER_SNAPSHOT=vcenter6
 #              kill-phase-on: NEVER
 #
-#            - name: '{fuel-release}.vcenter_computevmware_and_ceph'
+#            - name: '{fuel_release}.vcenter_computevmware_and_ceph'
 #              current-parameters: true
 #              predefined-parameters: VCENTER_SNAPSHOT=vcenter6
 #              kill-phase-on: NEVER
 #
-#            - name: '{fuel-release}.vcenter_multiroles_cindervmdk_and_ceph'
+#            - name: '{fuel_release}.vcenter_multiroles_cindervmdk_and_ceph'
 #              current-parameters: true
 #              predefined-parameters: VCENTER_SNAPSHOT=vcenter6
 #              kill-phase-on: NEVER
 #
-#            - name: '{fuel-release}.vcenter_multiroles_cindervmdk_and_cinder'
+#            - name: '{fuel_release}.vcenter_multiroles_cindervmdk_and_cinder'
 #              current-parameters: true
 #              predefined-parameters: VCENTER_SNAPSHOT=vcenter6
 #              kill-phase-on: NEVER
 #
-#            - name: '{fuel-release}.vcenter_ceilometer'
+#            - name: '{fuel_release}.vcenter_ceilometer'
 #              current-parameters: true
 #              predefined-parameters: VCENTER_SNAPSHOT=vcenter6
 #              kill-phase-on: NEVER
 #
-#            - name: '{fuel-release}.vcenter_ceilometer_and_computevmware'
+#            - name: '{fuel_release}.vcenter_ceilometer_and_computevmware'
 #              current-parameters: true
 #              predefined-parameters: VCENTER_SNAPSHOT=vcenter6
 #              kill-phase-on: NEVER
 #
-#            - name: '{fuel-release}.vcenter_multiroles_ceilometer'
+#            - name: '{fuel_release}.vcenter_multiroles_ceilometer'
 #              current-parameters: true
 #              predefined-parameters: VCENTER_SNAPSHOT=vcenter6
 #              kill-phase-on: NEVER
 #
-#            - name: '{fuel-release}.vcenter_add_delete_nodes'
+#            - name: '{fuel_release}.vcenter_add_delete_nodes'
 #              current-parameters: true
 #              predefined-parameters: VCENTER_SNAPSHOT=vcenter6
 #              kill-phase-on: NEVER
 #
-#            - name: '{fuel-release}.vcenter_delete_controler'
+#            - name: '{fuel_release}.vcenter_delete_controler'
 #              current-parameters: true
 #              predefined-parameters: VCENTER_SNAPSHOT=vcenter6
 #              kill-phase-on: NEVER
 #
-#            - name: '{fuel-release}.vcenter_ha_ceph'
+#            - name: '{fuel_release}.vcenter_ha_ceph'
 #              current-parameters: true
 #              predefined-parameters: VCENTER_SNAPSHOT=vcenter6
 #              kill-phase-on: NEVER
 #
-#            - name: '{fuel-release}.vcenter_ha_cinder_and_ceph'
+#            - name: '{fuel_release}.vcenter_ha_cinder_and_ceph'
 #              current-parameters: true
 #              predefined-parameters: VCENTER_SNAPSHOT=vcenter6
 #              kill-phase-on: NEVER
 #
-#            - name: '{fuel-release}.vcenter_ha_glance_backend_multiple_cluster'
+#            - name: '{fuel_release}.vcenter_ha_glance_backend_multiple_cluster'
 #              current-parameters: true
 #              predefined-parameters: VCENTER_SNAPSHOT=vcenter6
 #              kill-phase-on: NEVER
 #
-#            - name: '{fuel-release}.vcenter_ha_multiroles_cindervmdk_and_ceph'
+#            - name: '{fuel_release}.vcenter_ha_multiroles_cindervmdk_and_ceph'
 #              current-parameters: true
 #              predefined-parameters: VCENTER_SNAPSHOT=vcenter6
 #              kill-phase-on: NEVER
 #
-#            - name: '{fuel-release}.vcenter_ha_multiroles_cindervmdk_and_cinder'
+#            - name: '{fuel_release}.vcenter_ha_multiroles_cindervmdk_and_cinder'
 #              current-parameters: true
 #              predefined-parameters: VCENTER_SNAPSHOT=vcenter6
 #              kill-phase-on: NEVER
 #
-#            - name: '{fuel-release}.vcenter_ha_nova_flat_multiple_clusters'
+#            - name: '{fuel_release}.vcenter_ha_nova_flat_multiple_clusters'
 #              current-parameters: true
 #              predefined-parameters: VCENTER_SNAPSHOT=vcenter6
 #              kill-phase-on: NEVER
 #
-#            - name: '{fuel-release}.vcenter_ha_nova_vlan_multiple_clusters'
+#            - name: '{fuel_release}.vcenter_ha_nova_vlan_multiple_clusters'
 #              current-parameters: true
 #              predefined-parameters: VCENTER_SNAPSHOT=vcenter6
 #              kill-phase-on: NEVER
 #    publishers:
-#        - email: 
+#        - email:
 #            recipients: '{mail-to}'
 

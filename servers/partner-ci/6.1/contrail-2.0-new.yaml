@@ -65,18 +65,18 @@
 
 - project:
     name: 'predefined_parameters'
-    fuel-release: 6.1
+    fuel_release: 6.1
     plugin-version: 2.0
     plugin-name: 'contrail'
-    build-name: '{fuel-release}.{plugin-name}.{plugin-version}.build'
-    regression-name: '{fuel-release}.{plugin-name}.{plugin-version}.regression'
-    reporter-name: '{fuel-release}.{plugin-name}.{plugin-version}.reporter'
+    build-name: '{fuel_release}.{plugin-name}.{plugin-version}.build'
+    regression-name: '{fuel_release}.{plugin-name}.{plugin-version}.regression'
+    reporter-name: '{fuel_release}.{plugin-name}.{plugin-version}.reporter'
 
     admin_node_memory: '4096'
     slave_node_memory: '4096'
     admin_node_cpu: '4'
     slave_node_cpu: '4'
-    pkg_job_name: '{fuel-release}.{plugin-name}.{plugin-version}.build'
+    pkg_job_name: '{fuel_release}.{plugin-name}.{plugin-version}.build'
     iso_job_name: ''
     nightly_timer: 'H 22 * * *'
     regression_timer: 'H 18 * * *'
@@ -149,7 +149,7 @@
           iso_job_name: ''
           multijob_build_pkg: false
 
-      - '{fuel-release}.{plugin-name}.{plugin-version}.regression.test.juniper':
+      - '{fuel_release}.{plugin-name}.{plugin-version}.regression.test.juniper':
           scm_submodule_disabled: false
 
 - runner-parameters: &runner-parameters
@@ -168,7 +168,7 @@
           use_snapshots:        '{use_snapshots}'
           iso_file:             '{iso_file}'
           gerrit_branch:        '{gerrit_branch}'
-          env_prefix:           '{fuel-release}.{plugin-name}'
+          env_prefix:           '{fuel_release}.{plugin-name}'
           pkg_job_name:         '{pkg_job_name}'
           iso_job_name:         '{iso_job_name}'
           admin_node_memory:    '{admin_node_memory}'
@@ -212,7 +212,7 @@
           use_snapshots:        '{use_snapshots}'
           iso_file:             '{iso_file}'
           gerrit_branch:        '{gerrit_branch}'
-          env_prefix:           '{fuel-release}.{plugin-name}'
+          env_prefix:           '{fuel_release}.{plugin-name}'
           pkg_job_name:         '{pkg_job_name}'
           iso_job_name:         '{iso_job_name}'
           admin_node_memory:    '{admin_node_memory}'
@@ -239,7 +239,7 @@
     scm:
       - common-scm:
           scm_submodule_disabled: '{scm_submodule_disabled}'
-          scm_wipe_workspace: '{scm_wipe_workspace}'      
+          scm_wipe_workspace: '{scm_wipe_workspace}'
           gerrit_repo: '{gerrit_repo}'
           skip_vote_successfull: '{skip_vote_successfull}'
           skip_vote_failed: '{skip_vote_failed}'
@@ -343,18 +343,18 @@
           email_to: '{email_to}'
 
 - job-template:
-    name: '{fuel-release}.{plugin-name}.{plugin-version}.regression.test.open'
-    description: 'The test for {fuel-release}.{plugin-name}.{plugin-version} open contrail'
+    name: '{fuel_release}.{plugin-name}.{plugin-version}.regression.test.open'
+    description: 'The test for {fuel_release}.{plugin-name}.{plugin-version} open contrail'
     concurrent: true
 
 - job-template:
-    name: '{fuel-release}.{plugin-name}.{plugin-version}.regression.test.juniper'
-    description: 'The test for {fuel-release}.{plugin-name}.{plugin-version} juniper contrail'
+    name: '{fuel_release}.{plugin-name}.{plugin-version}.regression.test.juniper'
+    description: 'The test for {fuel_release}.{plugin-name}.{plugin-version} juniper contrail'
     concurrent: true
 
 - job-template:
     name: '{regression-name}'
-    description: 'The regression test for {fuel-release}.{plugin-name}.{plugin-version}'
+    description: 'The regression test for {fuel_release}.{plugin-name}.{plugin-version}'
     disabled: '{obj:regression_disabled}'
     concurrent: true
     project-type: multijob
@@ -377,7 +377,7 @@
           name: '1st phase - regression test'
           condition: COMPLETED
           projects:
-            - name: '{fuel-release}.{plugin-name}.{plugin-version}.regression.test.open'
+            - name: '{fuel_release}.{plugin-name}.{plugin-version}.regression.test.open'
               predefined-parameters: |
                 TEST_GROUP=contrail_bvt
                 CONTRAIL_DISTRIBUTION=open
@@ -387,7 +387,7 @@
               current-parameters: true
               kill-phase-on: NEVER
 
-            - name: '{fuel-release}.{plugin-name}.{plugin-version}.regression.test.juniper'
+            - name: '{fuel_release}.{plugin-name}.{plugin-version}.regression.test.juniper'
               predefined-parameters: |
                 TEST_GROUP=contrail_bvt
                 CONTRAIL_DISTRIBUTION=juniper

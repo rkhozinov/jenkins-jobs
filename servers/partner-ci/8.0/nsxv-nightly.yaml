@@ -1,61 +1,61 @@
 - runner-condition
 - multijob:
-    name: 'System tests for nsxv {fuel-release}.{plugin-version} vcenter5'
+    name: 'System tests for nsxv {fuel_release}.{plugin-version} vcenter5'
     condition: COMPLETED
     projects:
-     - name: '{fuel-release}.{plugin-name}.nsxv_add_delete_nodes'
+     - name: '{fuel_release}.{plugin-name}.nsxv_add_delete_nodes'
        property-file: build_number
        current-parameters: true
        kill-phase-on: NEVER
-     - name: '{fuel-release}.{plugin-name}.nsxv_add_delete_controller'
+     - name: '{fuel_release}.{plugin-name}.nsxv_add_delete_controller'
        property-file: build_number
        current-parameters: true
        kill-phase-on: NEVER
-     - name: '{fuel-release}.{plugin-name}.nsxv_ceilometer'
+     - name: '{fuel_release}.{plugin-name}.nsxv_ceilometer'
        property-file: build_number
        current-parameters: true
        kill-phase-on: NEVER
-     - name: '{fuel-release}.{plugin-name}.nsxv_ha_mode'
+     - name: '{fuel_release}.{plugin-name}.nsxv_ha_mode'
        property-file: build_number
        current-parameters: true
        kill-phase-on: NEVER
-     - name: '{fuel-release}.{plugin-name}.nsxv_floating_ip_to_public'
+     - name: '{fuel_release}.{plugin-name}.nsxv_floating_ip_to_public'
        property-file: build_number
        current-parameters: true
        kill-phase-on: NEVER
-     - name: '{fuel-release}.{plugin-name}.nsxv_create_and_delete_vms'
+     - name: '{fuel_release}.{plugin-name}.nsxv_create_and_delete_vms'
        property-file: build_number
        current-parameters: true
        kill-phase-on: NEVER
-     - name: '{fuel-release}.{plugin-name}.nsxv_vcenter_ha_mode'
+     - name: '{fuel_release}.{plugin-name}.nsxv_vcenter_ha_mode'
        property-file: build_number
        current-parameters: true
        kill-phase-on: NEVER
-     - name: '{fuel-release}.{plugin-name}.nsxv_connectivity_via_shared_router'
+     - name: '{fuel_release}.{plugin-name}.nsxv_connectivity_via_shared_router'
        property-file: build_number
        current-parameters: true
        kill-phase-on: NEVER
-     - name: '{fuel-release}.{plugin-name}.nsxv_connectivity_via_distributed_router'
+     - name: '{fuel_release}.{plugin-name}.nsxv_connectivity_via_distributed_router'
        property-file: build_number
        current-parameters: true
        kill-phase-on: NEVER
-     - name: '{fuel-release}.{plugin-name}.nsxv_connectivity_via_exclusive_router'
+     - name: '{fuel_release}.{plugin-name}.nsxv_connectivity_via_exclusive_router'
        property-file: build_number
        current-parameters: true
        kill-phase-on: NEVER
-     - name: '{fuel-release}.{plugin-name}.nsxv_create_terminate_networks'
+     - name: '{fuel_release}.{plugin-name}.nsxv_create_terminate_networks'
        property-file: build_number
        current-parameters: true
        kill-phase-on: NEVER
-     - name: '{fuel-release}.{plugin-name}.nsxv_kvm_deploy'
+     - name: '{fuel_release}.{plugin-name}.nsxv_kvm_deploy'
        property-file: build_number
        current-parameters: true
        kill-phase-on: NEVER
-     - name: '{fuel-release}.{plugin-name}.nsxv_public_network_to_all_nodes'
+     - name: '{fuel_release}.{plugin-name}.nsxv_public_network_to_all_nodes'
        property-file: build_number
        current-parameters: true
        kill-phase-on: NEVER
-     - name: '{fuel-release}.{plugin-name}.nsxv_specified_router_type'
+     - name: '{fuel_release}.{plugin-name}.nsxv_specified_router_type'
        property-file: build_number
        current-parameters: true
        kill-phase-on: NEVER

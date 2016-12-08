@@ -7,19 +7,19 @@
         default: '{plugin-version}'
 - project:
     name: 'predefined_parameters'
-    fuel-release: '8.0'
+    fuel_release: '8.0'
     plugin-version: '2.0.0'
     plugin-name: 'vcenter'
-    build-name: '{fuel-release}.dvs.build'
-    regression-name: '{fuel-release}.{plugin-name}.regression'
-    nightly-name: '{fuel-release}.{plugin-name}.nightly'
-    custom-name: '{fuel-release}.{plugin-name}.custom'
-    reporter-name: '{fuel-release}.{plugin-name}.reporter'
+    build-name: '{fuel_release}.dvs.build'
+    regression-name: '{fuel_release}.{plugin-name}.regression'
+    nightly-name: '{fuel_release}.{plugin-name}.nightly'
+    custom-name: '{fuel_release}.{plugin-name}.custom'
+    reporter-name: '{fuel_release}.{plugin-name}.reporter'
     admin_node_memory: '8192'
     slave_node_memory: '8192'
     admin_node_cpu: '4'
     slave_node_cpu: '4'
-    pkg_job_name: '{fuel-release}.dvs.build'
+    pkg_job_name: '{fuel_release}.dvs.build'
     nightly_timer: 'H 22 * * *'
     regression_timer: 'H 18 * * *'
     nightly_disabled: true
@@ -51,7 +51,7 @@
     skip_vote_failed: false
 
     testrail_project: "Mirantis OpenStack"
-    testrail_milestone: "{fuel-release}"
+    testrail_milestone: "{fuel_release}"
     testrail_suite: "[8.0][PCE] vCenter"
     testrail_suite_desc: "Suite description"
     testrail_plan: "$TREP_TESTRAIL_MILESTONE snapshot #${{SNAPSHOTS_ID}}"
@@ -102,12 +102,12 @@
 
       - '{reporter-name}'
 
-      - '{fuel-release}.{plugin-name}.{testgroup}':
+      - '{fuel_release}.{plugin-name}.{testgroup}':
           scm_submodule_disabled: false
 
       - '{regression-name}':
           iso_file: 'MirantisOpenStack-8.0.iso'
-          iso_storage: '/storage/downloads'        
+          iso_storage: '/storage/downloads'
           pkg_job_name: ''
           iso_job_name: ''
           multijob_build_pkg: false
@@ -118,7 +118,7 @@
           testrail_run: "$TREP_TESTRAIL_SUITE"
           testrail_run_desc: "Test run description"
 
-      - '{fuel-release}.{plugin-name}.regression.test':
+      - '{fuel_release}.{plugin-name}.regression.test':
           scm_submodule_disabled: false
 
 # parameters for smoke, bvt and nightly multijobs
@@ -139,7 +139,7 @@
           nfs_clean:            '{nfs_clean}'
           iso_file:             '{iso_file}'
           gerrit_branch:        '{gerrit_branch}'
-          env_prefix:           '{fuel-release}.{plugin-name}'
+          env_prefix:           '{fuel_release}.{plugin-name}'
           pkg_job_name:         '{pkg_job_name}'
           admin_node_memory:    '{admin_node_memory}'
           slave_node_memory:    '{slave_node_memory}'
@@ -192,7 +192,7 @@
           nfs_clean:       '{nfs_clean}'
           iso_file:        '{iso_file}'
           gerrit_branch:   '{gerrit_branch}'
-          env_prefix:      '{fuel-release}.{plugin-name}'
+          env_prefix:      '{fuel_release}.{plugin-name}'
           pkg_job_name:    '{pkg_job_name}'
           admin_node_memory:    '{admin_node_memory}'
           slave_node_memory:    '{slave_node_memory}'
@@ -231,7 +231,7 @@
     builders:
       - inject:
           properties-content: |
-            ENV_PREFIX={fuel-release}.{plugin-name}
+            ENV_PREFIX={fuel_release}.{plugin-name}
             OPENSTACK_RELEASE=Ubuntu
             NODES_COUNT=10
             DESTROY_ENV_AFTER=0
@@ -311,28 +311,28 @@
           reporter_name: '{reporter-name}'
 
 - job-template:
-    name: '{fuel-release}.{plugin-name}.{testgroup}'
-    description: 'The test "{testgroup}" for {fuel-release}.{plugin-name}.{plugin-version}'
+    name: '{fuel_release}.{plugin-name}.{testgroup}'
+    description: 'The test "{testgroup}" for {fuel_release}.{plugin-name}.{plugin-version}'
     concurrent: true
 
 - job-template:
-    name: '{fuel-release}.{plugin-name}.regression.test'
-    description: 'The regression test for {fuel-release}.{plugin-name}.{plugin-version}'
+    name: '{fuel_release}.{plugin-name}.regression.test'
+    description: 'The regression test for {fuel_release}.{plugin-name}.{plugin-version}'
     concurrent: true
 
 - job-template:
     name: '{custom-name}.qa'
-    description: 'The custom test for {fuel-release}.{plugin-name}.{plugin-version}'
+    description: 'The custom test for {fuel_release}.{plugin-name}.{plugin-version}'
     concurrent: true
 
 - job-template:
     name: '{custom-name}.dev'
-    description: 'The custom test for {fuel-release}.{plugin-name}.{plugin-version}'
+    description: 'The custom test for {fuel_release}.{plugin-name}.{plugin-version}'
     concurrent: true
 
 - job-template:
     name: '{regression-name}'
-    description: 'The regression test for {fuel-release}.{plugin-name}.{plugin-version}'
+    description: 'The regression test for {fuel_release}.{plugin-name}.{plugin-version}'
     disabled: '{obj:regression_disabled}'
     concurrent: true
     project-type: multijob
@@ -362,7 +362,7 @@
           name: '1st phase - regression test'
           condition: COMPLETED
           projects:
-            - name: '{fuel-release}.{plugin-name}.regression.test'
+            - name: '{fuel_release}.{plugin-name}.regression.test'
              #predefined-parameters: |
              #  TEST_GROUP=vcenter_dvs_bvt
              #  TEST_GROUP_CONFIG=${{TEST_GROUP}}
