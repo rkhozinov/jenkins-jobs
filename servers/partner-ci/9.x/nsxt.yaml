@@ -47,7 +47,6 @@
     ws_norevert: false
     vcenter_use: false
     nfs_clean: false
-    disable_ssl: true
     kvm_use: false
     update_master: true
     enable_proposed: true
@@ -181,7 +180,6 @@
           description: "Triggers build of pkg of $PKG_JOB_NAME before run of tests"
       - common-parameters:
           debug:                  '{debug}'
-          disable_ssl:            '{disable_ssl}'
           enable_proposed:        '{enable_proposed}'
           env_prefix:             '{fuel-release}.{plugin-name}'
           force_erase:            '{force_erase}'
@@ -226,7 +224,6 @@
           '{testgroup_value_type}': '{obj:testgroup_value}'
           description: "test-group name"
           debug:                 '{debug}'
-          disable_ssl:           '{disable_ssl}'
           enable_proposed:       '{enable_proposed}'
           env_prefix:            '{fuel-release}.{plugin-name}'
           force_erase:           '{force_erase}'

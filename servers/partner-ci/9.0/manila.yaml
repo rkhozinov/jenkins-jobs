@@ -5,10 +5,10 @@
       - text:
           name: SPECIFIC_PROPS
           default: |
-             MANILA_IMAGE_PATH=/storage/manila/manila-service-image.qcow2;
-             WORKSTATION_SNAPSHOT=base_image;
-             WORKSTATION_IFS=vmnet2:management,vmnet3:private,vmnet4:storage;
-             WORKSTATION_NODES=netapp;
+            MANILA_IMAGE_PATH=/storage/manila/manila-service-image.qcow2;
+            WORKSTATION_SNAPSHOT=base_image;
+            WORKSTATION_IFS=vmnet2:management,vmnet3:private,vmnet4:storage;
+            WORKSTATION_NODES=netapp;
 - project:
     name: 'predefined_parameters'
     fuel-release: '9.1'
@@ -27,18 +27,14 @@
     smoke-test-name: 'manila_smoke'
     bvt-test-name: 'manila_bvt'
     regression-test-name: 'manila_bvt'
-    admin_node_memory: '4096'
-    slave_node_memory: '4096'
-    admin_node_cpu: '4'
-    slave_node_cpu: '4'
     pkg_job_name: '{fuel-release}.{plugin-name}.build'
     nightly_timer: 'H 22 * * *'
     regression_timer: 'H 16 * * *'
     nightly_disabled: true
     regression_disabled: false
     force_erase: false
+    force_reuse: false
     recreate_venv: false
-    disable_ssl: true
     kvm_use: false
     update_master: true
     enable_proposed: true
@@ -49,6 +45,7 @@
     testjob_build_pkg: false
     runner_timeout: 600
     test_timeout: 300
+     fuel_qa_refs: ''
     iso_file: 'MirantisOpenStack-9.0.iso'
     iso_storage: '/storage/downloads'
     snapshots_id: 'lastSuccessfulBuild'
@@ -164,17 +161,12 @@
       - common-parameters:
           publish_results:      '{publish_results}'
           debug:                '{debug}'
-          disable_ssl:          '{disable_ssl}'
           force_erase:          '{force_erase}'
           recreate_venv:        '{recreate_venv}'
           iso_file:             '{iso_file}'
           gerrit_branch:        '{gerrit_branch}'
           env_prefix:           '{fuel-release}.{plugin-name}'
           pkg_job_name:         '{pkg_job_name}'
-          admin_node_memory:    '{admin_node_memory}'
-          slave_node_memory:    '{slave_node_memory}'
-          admin_node_cpu:       '{admin_node_cpu}'
-          slave_node_cpu:       '{slave_node_cpu}'
           testrail_suite:       '{testrail_suite}'
           testrail_suite_desc:  '{testrail_suite_desc}'
           testrail_plan:        '{testrail_plan}'
@@ -207,17 +199,12 @@
       - common-parameters:
           publish_results:       '{publish_results}'
           debug:                 '{debug}'
-          disable_ssl:           '{disable_ssl}'
           force_erase:           '{force_erase}'
           recreate_venv:         '{recreate_venv}'
           iso_file:              '{iso_file}'
           gerrit_branch:         '{gerrit_branch}'
           env_prefix:            '{fuel-release}.{plugin-name}'
           pkg_job_name:          '{pkg_job_name}'
-          admin_node_memory:     '{admin_node_memory}'
-          slave_node_memory:     '{slave_node_memory}'
-          admin_node_cpu:        '{admin_node_cpu}'
-          slave_node_cpu:        '{slave_node_cpu}'
           testrail_suite:        '{testrail_suite}'
           testrail_suite_desc:   '{testrail_suite_desc}'
           testrail_plan:         '{testrail_plan}'
@@ -229,13 +216,7 @@
           kvm_use:               '{kvm_use}'
           iso_storage:           '{iso_storage}'
           snapshots_id:          '{snapshots_id}'
-      - plugin-specific-parameters:
-           plugin_version:       '{plugin-version}'
-           env_prefix:           '{fuel-release}.{plugin-name}'
-           testrail_suite:       '{testrail_suite}'
-           testrail_suite_desc:  '{testrail_suite_desc}'
-           testrail_plan:        '{testrail_plan}'
-           testrail_plan_desc:   '{testrail_plan_desc}'
+      - plugin-specific-parameters
 
 - defaults:
     name: global

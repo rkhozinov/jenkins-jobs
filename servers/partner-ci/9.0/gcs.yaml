@@ -1,4 +1,15 @@
 ---
+- parameter:
+    name: plugin-specific-parameters
+    parameters:
+      - text:
+          name: SPECIFIC_PROPS
+          default: |
+            DISABLE_SSL=false;
+            GCS_BUCKET_NAME=plugin-qa-bucket
+            GCS_CERT_URL=https://www.googleapis.com/robot/v1/metadata/x509/qa-1-218%40fuelgcsplugin.iam.gserviceaccount.com
+            GCS_LOCATION=EUROPE-WEST1
+            GCS_PROJECT_ID=fuelgcsplugin
 - project:
     name: 'predefined_parameters'
     fuel-release: '9.0'
@@ -17,18 +28,14 @@
     smoke-test-name: 'gcs_smoke'
     bvt-test-name: 'gcs_bvt'
     regression-test-name: 'gcs_bvt'
-    admin_node_memory: '4096'
-    slave_node_memory: '4096'
-    admin_node_cpu: '4'
-    slave_node_cpu: '4'
     pkg_job_name: '{fuel-release}.{plugin-name}.{plugin-version}.build'
     nightly_timer: 'H 21 * * *'
     regression_timer: 'H 18 * * *'
     nightly_disabled: true
     regression_disabled: true
     force_erase: true
+    force_reuse: false
     recreate_venv: true
-    disable_ssl: false
     kvm_use: false
     update_master: false
     enable_proposed: false
@@ -40,6 +47,7 @@
     testjob_build_pkg: false
     runner_timeout: 600
     test_timeout: 300
+     fuel_qa_refs: ''
     iso_file: 'MirantisOpenStack-9.0.iso'
     iso_storage: '/storage/downloads'
     gerrit_repo: 'fuel-plugin-cinder-gcs'
@@ -47,10 +55,9 @@
     email_to: 'rkhozinov@mirantis.com okosse@mirantis.com otsvigun@mirantis.com'
     released_plugin_path: ''
     scm_submodule_disabled: false
-    scm_wipe_workspace: false 
+    scm_wipe_workspace: false
     skip_vote_successfull: false
     skip_vote_failed: false
-
     testrail_project: "GCS-Cinder plugin"
     testrail_suite: "[9.0][PCE] Fuel plugin GCS cinder backup v1.0.0"
     testrail_suite_desc: "Suite descriptioni"
@@ -143,19 +150,17 @@
           default: '{multijob_build_pkg}'
           description: "Triggers build of pkg of $PKG_JOB_NAME before run of tests"
       - common-parameters:
+          force_erase:           '{force_erase}'
+          force_reuse:           '{force_reuse}'
+          fuel_qa_refs:          '{fuel_qa_refs}'
           publish_results:      '{publish_results}'
           debug:                '{debug}'
-          disable_ssl:          '{disable_ssl}'
           force_erase:          '{force_erase}'
           recreate_venv:        '{recreate_venv}'
           iso_file:             '{iso_file}'
           gerrit_branch:        '{gerrit_branch}'
           env_prefix:           '{fuel-release}.{plugin-name}'
           pkg_job_name:         '{pkg_job_name}'
-          admin_node_memory:    '{admin_node_memory}'
-          slave_node_memory:    '{slave_node_memory}'
-          admin_node_cpu:       '{admin_node_cpu}'
-          slave_node_cpu:       '{slave_node_cpu}'
           testrail_suite:       '{testrail_suite}'
           testrail_suite_desc:  '{testrail_suite_desc}'
 #         testrail_suite_conf:  '{testrail_suite_conf}'
@@ -168,7 +173,7 @@
           kvm_use:              '{kvm_use}'
           iso_storage:          '{iso_storage}'
           snapshots_id:         '{snapshots_id}'
-
+      - plugin-specific-parameters
 # parameters for jobs created per test-group and custom test job
 - test-parameters: &test-parameters
     name: 'test-parameters'
@@ -186,18 +191,17 @@
           default: '${{TEST_GROUP}}'
       - common-parameters:
           publish_results: '{publish_results}'
+          force_erase:           '{force_erase}'
+          force_reuse:           '{force_reuse}'
+          fuel_qa_refs:          '{fuel_qa_refs}'
           debug:           '{debug}'
-          disable_ssl:     '{disable_ssl}'
           force_erase:     '{force_erase}'
           recreate_venv:   '{recreate_venv}'
           iso_file:        '{iso_file}'
           gerrit_branch:   '{gerrit_branch}'
           env_prefix:      '{fuel-release}.{plugin-name}'
           pkg_job_name:    '{pkg_job_name}'
-          admin_node_memory:    '{admin_node_memory}'
-          slave_node_memory:    '{slave_node_memory}'
-          admin_node_cpu:       '{admin_node_cpu}'
-          slave_node_cpu:       '{slave_node_cpu}'
+
           testrail_suite:       '{testrail_suite}'
           testrail_suite_desc:  '{testrail_suite_desc}'
           testrail_plan:        '{testrail_plan}'
@@ -209,6 +213,7 @@
           kvm_use:              '{kvm_use}'
           iso_storage:          '{iso_storage}'
           snapshots_id:         '{snapshots_id}'
+      - plugin-specific-parameters
 
 - defaults:
     name: global
@@ -228,25 +233,8 @@
     properties:
       - test-property
     builders:
-      - inject:
-          properties-content: |
-            ENV_PREFIX={fuel-release}.{plugin-name}
-            OPENSTACK_RELEASE=Ubuntu
-            NODES_COUNT=10
-            DESTROY_ENV_AFTER=0
-            ADMIN_NODE_MEMORY={admin_node_memory}
-            SLAVE_NODE_MEMORY={slave_node_memory}
-            ADMIN_NODE_CPU={admin_node_cpu}
-            SLAVE_NODE_CPU={slave_node_cpu}
-            TREP_TESTRAIL_SUITE={testrail_suite}
-            TREP_TESTRAIL_SUITE_DESCRIPTION={testrail_suite_desc}
-            TREP_TESTRAIL_PLAN={testrail_plan}
-            TREP_TESTRAIL_PLAN_DESCRIPTION={testrail_plan_desc}
-            PLUGIN_VERSION={plugin-version}
-            GCS_BUCKET_NAME=plugin-qa-bucket
-            GCS_LOCATION=EUROPE-WEST1
-            GCS_PROJECT_ID=fuelgcsplugin
-            GCS_CERT_URL=https://www.googleapis.com/robot/v1/metadata/x509/qa-1-218%40fuelgcsplugin.iam.gserviceaccount.com
+      - get-refs
+      - get-props
       - conditional-step:
           condition-kind: shell
           condition-command: |
@@ -317,8 +305,7 @@
           name: DEBUG
           default: '{build_debug}'
     properties:
-      - heavy-job:
-          weight: 1
+      - test-property
     wrappers:
       - ansicolor:
           colormap: xterm
@@ -382,16 +369,20 @@
           properties_name: regression.properties
           email_to: '{email_to}'
     builders:
+      - shell: |
+          #!/bin/bash
+          cat <<EOF > property
+          TEST_GROUP={regression-test-name}
+          DVS_PLUGIN_PATH={released_plugin_path}
+          PLUGIN_VERSION={plugin-version}
+          PKG_JOB_BUILD_NUMBER=released
+          EOF
       - multijob:
           name: '1st phase - regression test'
           condition: COMPLETED
           projects:
             - name: '{fuel-release}.{plugin-name}.{plugin-version}.regression.test'
-              predefined-parameters: |
-                TEST_GROUP={regression-test-name}
-                DVS_PLUGIN_PATH={released_plugin_path}
-                PLUGIN_VERSION={plugin-version}
-                PKG_JOB_BUILD_NUMBER=released
+              property-file: property
               current-parameters: true
               kill-phase-on: NEVER
 

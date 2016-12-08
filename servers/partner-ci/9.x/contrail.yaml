@@ -15,6 +15,7 @@
             CONTRAIL_PLUGIN_PACK_UB_PATH=;
             CONTRAIL_PLUGIN_PATH=;
             CONTRAIL_VERSION=5.0;
+            DISABLE_SSL=false;
             FORCE_VSRX_COPY=False;
             KVM_USE=True;
             MIRROR=http://mirror.seed-cz1.fuel-infra.org;
@@ -60,7 +61,6 @@
     force_reuse: false
     force_vsrx_copy: false
     recreate_venv: true
-    disable_ssl: false
     ws_norevert: false
     nfs_clean: false
     bonding: false
@@ -245,7 +245,6 @@
           description: "Triggers build of pkg of $PKG_JOB_NAME before run of tests"
       - common-parameters:
           debug:                 '{debug}'
-          disable_ssl:           '{disable_ssl}'
           enable_proposed:       '{enable_proposed}'
           env_prefix:            '{fuel-release}.{plugin-name}'
           force_erase:           '{force_erase}'
@@ -287,7 +286,6 @@
           description: "test-group name"
       - common-parameters:
           debug:                 '{debug}'
-          disable_ssl:           '{disable_ssl}'
           enable_proposed:       '{enable_proposed}'
           env_prefix:            '{fuel-release}.{plugin-name}'
           force_erase:           '{force_erase}'
