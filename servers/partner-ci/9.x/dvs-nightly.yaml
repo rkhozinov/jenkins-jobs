@@ -1,6 +1,6 @@
 - runner-condition
 - multijob:
-    name: 'Smoke/BVT test for dvs{fuel_release}.{plugin-version} vcenter5'
+    name: 'Smoke/BVT test for dvs{fuel_release}.{plugin_version} vcenter5'
     condition: SUCCESSFUL
     projects:
       - name: '{fuel_release}.{plugin-name}.dvs_vcenter_smoke'
@@ -19,7 +19,7 @@
         kill-phase-on: NEVER
 
 - multijob:
-    name: 'System tests for dvs{fuel_release}.{plugin-version} vcenter5'
+    name: 'System tests for dvs{fuel_release}.{plugin_version} vcenter5'
     condition: COMPLETED
     projects:
       - name: '{fuel_release}.{plugin-name}.dvs_vcenter_networks'

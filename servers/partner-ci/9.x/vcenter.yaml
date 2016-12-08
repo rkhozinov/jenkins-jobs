@@ -41,7 +41,7 @@
 - project:
     name: 'predefined_parameters'
     fuel_release: '9.x'
-    plugin-version: '3.1.0'
+    plugin_version: '3.1.0'
     plugin-name: 'vcenter'
     build-name: '{fuel_release}.dvs.build'
     regression-name: '{fuel_release}.{plugin-name}.regression'
@@ -308,17 +308,17 @@
 
 - job-template:
     name: '{fuel_release}.{plugin-name}.{testgroup}'
-    description: 'The test "{testgroup}" for {fuel_release}.{plugin-name}.{plugin-version}'
+    description: 'The test "{testgroup}" for {fuel_release}.{plugin-name}.{plugin_version}'
     concurrent: true
 
 - job-template:
     name: '{custom-name}.qa'
-    description: 'The custom test for {fuel_release}.{plugin-name}.{plugin-version}'
+    description: 'The custom test for {fuel_release}.{plugin-name}.{plugin_version}'
     concurrent: true
 
 - job-template:
     name: '{custom-name}.dev'
-    description: 'The custom test for {fuel_release}.{plugin-name}.{plugin-version}'
+    description: 'The custom test for {fuel_release}.{plugin-name}.{plugin_version}'
     concurrent: true
 
 - job-template:

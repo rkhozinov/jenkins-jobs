@@ -1,6 +1,6 @@
 - runner-condition
 - multijob:
-    name: 'System tests for {plugin-name} {fuel_release}.{plugin-version} vcenter5'
+    name: 'System tests for {plugin-name} {fuel_release}.{plugin_version} vcenter5'
     condition: SUCCESSFUL
     projects:
      - name: '{fuel_release}.{plugin-name}.nsxt_smoke'
@@ -18,7 +18,7 @@
        property-file: build_number
 
 - multijob:
-    name: 'System tests for {plugin-name} {fuel_release}.{plugin-version} vcenter5'
+    name: 'System tests for {plugin-name} {fuel_release}.{plugin_version} vcenter5'
     condition: COMPLETED
     projects:
      - name: '{fuel_release}.{plugin-name}.nsxt_ceilometer'

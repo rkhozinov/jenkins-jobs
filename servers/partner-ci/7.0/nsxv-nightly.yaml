@@ -5,16 +5,16 @@
        The nightly tests scope will be runned only if smoke/bvt will have successful state'
     condition: SUCCESSFUL
     projects:
-    - name: '{fuel_release}.{plugin-name}.{plugin-version}.nsxv_smoke'
+    - name: '{fuel_release}.{plugin-name}.{plugin_version}.nsxv_smoke'
       property-file: build_number
       current-parameters: true
       kill-phase-on: FAILURE
-    - name: '{fuel_release}.{plugin-name}.{plugin-version}.nsxv_bvt'
+    - name: '{fuel_release}.{plugin-name}.{plugin_version}.nsxv_bvt'
       property-file: build_number
       current-parameters: true
       kill-phase-on: FAILURE
 - multijob:
-    name: 'Nightly tests for {fuel_release}.{plugin-name}.{plugin-version} vcenter5'
+    name: 'Nightly tests for {fuel_release}.{plugin-name}.{plugin_version} vcenter5'
     condition: COMPLETED
     projects:
     - name: '{fuel_release}.{plugin-name}.nsxv_vcenter_ha_mode'

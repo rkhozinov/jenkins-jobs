@@ -1,6 +1,6 @@
 - runner-condition
 - multijob:
-    name: 'Pre-check for {plugin-name} {fuel_release}.{plugin-version}'
+    name: 'Pre-check for {plugin-name} {fuel_release}.{plugin_version}'
     condition: SUCCESSFUL
     projects:
      - name: '{fuel_release}.{plugin-name}.manila_smoke'
@@ -13,7 +13,7 @@
        property-file: build_number
 
 - multijob:
-    name: 'System tests for {plugin-name} {fuel_release}.{plugin-version}'
+    name: 'System tests for {plugin-name} {fuel_release}.{plugin_version}'
     condition: SUCCESSFUL
     projects:
      - name: '{fuel_release}.{plugin-name}.manila_install'

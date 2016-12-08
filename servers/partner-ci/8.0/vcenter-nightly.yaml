@@ -14,7 +14,7 @@
        kill-phase-on: NEVER
 
 - multijob:
-    name: 'System tests for {fuel_release}.{plugin-version} vcenter5'
+    name: 'System tests for {fuel_release}.{plugin_version} vcenter5'
     condition: COMPLETED
     projects:
      - name: '{fuel_release}.{plugin-name}.vcenter_add_cindervmware'

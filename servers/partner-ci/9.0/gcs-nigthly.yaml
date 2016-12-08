@@ -1,67 +1,67 @@
 - runner-condition
 - multijob:
-    name: 'Pre-check for {plugin-name} {fuel_release}.{plugin-version}'
+    name: 'Pre-check for {plugin-name} {fuel_release}.{plugin_version}'
     condition: SUCCESSFUL
     projects:
-     - name: '{fuel_release}.{plugin-name}.{plugin-version}.gcs_smoke'
+     - name: '{fuel_release}.{plugin-name}.{plugin_version}.gcs_smoke'
        current-parameters: true
        kill-phase-on: NEVER
        property-file: build_number
-     - name: '{fuel_release}.{plugin-name}.{plugin-version}.gcs_bvt'
+     - name: '{fuel_release}.{plugin-name}.{plugin_version}.gcs_bvt'
        current-parameters: true
        kill-phase-on: NEVER
        property-file: build_number
 
 - multijob:
-    name: 'Nightly suite {plugin-name} {fuel_release}.{plugin-version}'
+    name: 'Nightly suite {plugin-name} {fuel_release}.{plugin_version}'
     condition: COMPLETED
     projects:
-     - name: '{fuel_release}.{plugin-name}.{plugin-version}.gcs_ceph'
+     - name: '{fuel_release}.{plugin-name}.{plugin_version}.gcs_ceph'
        current-parameters: true
        kill-phase-on: NEVER
        property-file: build_number
 
-     - name: '{fuel_release}.{plugin-name}.{plugin-version}.gcs_cinder_multirole'
+     - name: '{fuel_release}.{plugin-name}.{plugin_version}.gcs_cinder_multirole'
        current-parameters: true
        kill-phase-on: NEVER
        property-file: build_number
 
-     - name: '{fuel_release}.{plugin-name}.{plugin-version}.gcs_cinder_ceph_multirole'
+     - name: '{fuel_release}.{plugin-name}.{plugin_version}.gcs_cinder_ceph_multirole'
        current-parameters: true
        kill-phase-on: NEVER
        property-file: build_number
 
-     - name: '{fuel_release}.{plugin-name}.{plugin-version}.gcs_ceilometer'
+     - name: '{fuel_release}.{plugin-name}.{plugin_version}.gcs_ceilometer'
        current-parameters: true
        kill-phase-on: NEVER
        property-file: build_number
 
-     - name: '{fuel_release}.{plugin-name}.{plugin-version}.gcs_delete_add_controller'
+     - name: '{fuel_release}.{plugin-name}.{plugin_version}.gcs_delete_add_controller'
        current-parameters: true
        kill-phase-on: NEVER
        property-file: build_number
 
-     - name: '{fuel_release}.{plugin-name}.{plugin-version}.gcs_delete_add_compute'
+     - name: '{fuel_release}.{plugin-name}.{plugin_version}.gcs_delete_add_compute'
        current-parameters: true
        kill-phase-on: NEVER
        property-file: build_number
 
-     - name: '{fuel_release}.{plugin-name}.{plugin-version}.gcs_delete_add_cinder'
+     - name: '{fuel_release}.{plugin-name}.{plugin_version}.gcs_delete_add_cinder'
        current-parameters: true
        kill-phase-on: NEVER
        property-file: build_number
 
-     - name: '{fuel_release}.{plugin-name}.{plugin-version}.gcs_delete_add_single_cinder'
+     - name: '{fuel_release}.{plugin-name}.{plugin_version}.gcs_delete_add_single_cinder'
        current-parameters: true
        kill-phase-on: NEVER
        property-file: build_number
 
-     - name: '{fuel_release}.{plugin-name}.{plugin-version}.gcs_add_ceph'
+     - name: '{fuel_release}.{plugin-name}.{plugin_version}.gcs_add_ceph'
        current-parameters: true
        kill-phase-on: NEVER
        property-file: build_number
 
-     - name: '{fuel_release}.{plugin-name}.{plugin-version}.gcs_gui_defaults'
+     - name: '{fuel_release}.{plugin-name}.{plugin_version}.gcs_gui_defaults'
        current-parameters: true
        kill-phase-on: NEVER
        property-file: build_number

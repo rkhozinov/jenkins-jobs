@@ -30,7 +30,7 @@
           default: ''
       - string:
           name: CONTRAIL_VERSION
-          default: '{plugin-version}'
+          default: '{plugin_version}'
           description: >
             'There is a version of juniper packages stored in common sotrage'
       - string:
@@ -66,17 +66,17 @@
 - project:
     name: 'predefined_parameters'
     fuel_release: 6.1
-    plugin-version: 2.0
+    plugin_version: 2.0
     plugin-name: 'contrail'
-    build-name: '{fuel_release}.{plugin-name}.{plugin-version}.build'
-    regression-name: '{fuel_release}.{plugin-name}.{plugin-version}.regression'
-    reporter-name: '{fuel_release}.{plugin-name}.{plugin-version}.reporter'
+    build-name: '{fuel_release}.{plugin-name}.{plugin_version}.build'
+    regression-name: '{fuel_release}.{plugin-name}.{plugin_version}.regression'
+    reporter-name: '{fuel_release}.{plugin-name}.{plugin_version}.reporter'
 
     admin_node_memory: '4096'
     slave_node_memory: '4096'
     admin_node_cpu: '4'
     slave_node_cpu: '4'
-    pkg_job_name: '{fuel_release}.{plugin-name}.{plugin-version}.build'
+    pkg_job_name: '{fuel_release}.{plugin-name}.{plugin_version}.build'
     iso_job_name: ''
     nightly_timer: 'H 22 * * *'
     regression_timer: 'H 18 * * *'
@@ -149,7 +149,7 @@
           iso_job_name: ''
           multijob_build_pkg: false
 
-      - '{fuel_release}.{plugin-name}.{plugin-version}.regression.test.juniper':
+      - '{fuel_release}.{plugin-name}.{plugin_version}.regression.test.juniper':
           scm_submodule_disabled: false
 
 - runner-parameters: &runner-parameters
@@ -185,7 +185,7 @@
           bonding:              '{bonding}'
           kvm_use:              '{kvm_use}'
           update_master:        '{update_master}'
-          plugin-version:       '{plugin-version}'
+          plugin_version:       '{plugin_version}'
 
 # parameters for jobs created per test-group and custom test job
 - test-parameters: &test-parameters
@@ -229,7 +229,7 @@
           update_master:        '{update_master}'
           bonding:              '{bonding}'
           kvm_use:              '{kvm_use}'
-          plugin-version:       '{plugin-version}'
+          plugin_version:       '{plugin_version}'
 
 - defaults:
     name: global
@@ -343,18 +343,18 @@
           email_to: '{email_to}'
 
 - job-template:
-    name: '{fuel_release}.{plugin-name}.{plugin-version}.regression.test.open'
-    description: 'The test for {fuel_release}.{plugin-name}.{plugin-version} open contrail'
+    name: '{fuel_release}.{plugin-name}.{plugin_version}.regression.test.open'
+    description: 'The test for {fuel_release}.{plugin-name}.{plugin_version} open contrail'
     concurrent: true
 
 - job-template:
-    name: '{fuel_release}.{plugin-name}.{plugin-version}.regression.test.juniper'
-    description: 'The test for {fuel_release}.{plugin-name}.{plugin-version} juniper contrail'
+    name: '{fuel_release}.{plugin-name}.{plugin_version}.regression.test.juniper'
+    description: 'The test for {fuel_release}.{plugin-name}.{plugin_version} juniper contrail'
     concurrent: true
 
 - job-template:
     name: '{regression-name}'
-    description: 'The regression test for {fuel_release}.{plugin-name}.{plugin-version}'
+    description: 'The regression test for {fuel_release}.{plugin-name}.{plugin_version}'
     disabled: '{obj:regression_disabled}'
     concurrent: true
     project-type: multijob
@@ -377,22 +377,22 @@
           name: '1st phase - regression test'
           condition: COMPLETED
           projects:
-            - name: '{fuel_release}.{plugin-name}.{plugin-version}.regression.test.open'
+            - name: '{fuel_release}.{plugin-name}.{plugin_version}.regression.test.open'
               predefined-parameters: |
                 TEST_GROUP=contrail_bvt
                 CONTRAIL_DISTRIBUTION=open
                 CONTRAIL_PLUGIN_PATH={released_plugin_path}
-                PLUGIN_VERSION={plugin-version}
+                PLUGIN_VERSION={plugin_version}
                 PKG_JOB_BUILD_NUMBER=released
               current-parameters: true
               kill-phase-on: NEVER
 
-            - name: '{fuel_release}.{plugin-name}.{plugin-version}.regression.test.juniper'
+            - name: '{fuel_release}.{plugin-name}.{plugin_version}.regression.test.juniper'
               predefined-parameters: |
                 TEST_GROUP=contrail_bvt
                 CONTRAIL_DISTRIBUTION=juniper
                 CONTRAIL_PLUGIN_PATH={released_plugin_path}
-                PLUGIN_VERSION={plugin-version}
+                PLUGIN_VERSION={plugin_version}
                 PKG_JOB_BUILD_NUMBER=released
               current-parameters: true
               kill-phase-on: NEVER

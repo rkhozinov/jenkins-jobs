@@ -1,7 +1,7 @@
 - project:
     name: 'predefined_parameters'
     fuel_release: '7.0'
-    plugin-version: '1.1'
+    plugin_version: '1.1'
     plugin-name: 'dvs'
 
     build-name: '{fuel_release}.{plugin-name}.build'
@@ -462,36 +462,36 @@
 ## jobs for system test
 - job-template:
     name: '{fuel_release}.{plugin-name}.{testgroup}'
-    description: 'The test "{testgroup}" for {fuel_release}.{plugin-name}.{plugin-version}'
+    description: 'The test "{testgroup}" for {fuel_release}.{plugin-name}.{plugin_version}'
     concurrent: true
 
 ## jobs for bvt tests
 - job-template:
     name: '{fuel_release}.{plugin-name}.bvt.test'
-    description: 'The test for {fuel_release}.{plugin-name}.{plugin-version}'
+    description: 'The test for {fuel_release}.{plugin-name}.{plugin_version}'
     concurrent: true
 
 ## jobs for smoke tests
 - job-template:
     name: '{fuel_release}.{plugin-name}.smoke.test'
-    description: 'The test for {fuel_release}.{plugin-name}.{plugin-version}'
+    description: 'The test for {fuel_release}.{plugin-name}.{plugin_version}'
     concurrent: true
 
 # jobs for regression tests
 - job-template:
     name: '{fuel_release}.{plugin-name}.regression.test'
-    description: 'The regression test for {fuel_release}.{plugin-name}.{plugin-version}'
+    description: 'The regression test for {fuel_release}.{plugin-name}.{plugin_version}'
     concurrent: true
 
 - job-template:
     name: '{custom-name}'
-    description: 'The custom test for {fuel_release}.{plugin-name}.{plugin-version}'
+    description: 'The custom test for {fuel_release}.{plugin-name}.{plugin_version}'
     concurrent: true
 
 - job-template:
     name: '{smoke-name}'
     disabled: false
-    description: 'The Smoke test for {fuel_release}.{plugin-name}.{plugin-version}'
+    description: 'The Smoke test for {fuel_release}.{plugin-name}.{plugin_version}'
     concurrent: true
     project-type: multijob
     node: runner
@@ -509,7 +509,7 @@
           which-build: last-successful
           stable: true
       - multijob:
-          name: 'The smoke test for {fuel_release}.{plugin-name}.{plugin-version}'
+          name: 'The smoke test for {fuel_release}.{plugin-name}.{plugin_version}'
           condition: COMPLETED
           projects:
            - name: '{fuel_release}.{plugin-name}.smoke.test'
@@ -534,7 +534,7 @@
 
 - job-template:
     name: '{bvt-name}'
-    description: 'The BVT test for {fuel_release}.{plugin-name}.{plugin-version}'
+    description: 'The BVT test for {fuel_release}.{plugin-name}.{plugin_version}'
     disabled: false
     concurrent: true
     project-type: multijob
@@ -553,7 +553,7 @@
           which-build: last-successful
           stable: true
       - multijob:
-          name: 'The BVT test for {fuel_release}.{plugin-name}.{plugin-version}'
+          name: 'The BVT test for {fuel_release}.{plugin-name}.{plugin_version}'
           condition: COMPLETED
           projects:
            - name: '{fuel_release}.{plugin-name}.bvt.test'
@@ -580,7 +580,7 @@
 
 - job-template:
     name: '{regression-name}'
-    description: 'The regression test for {fuel_release}.{plugin-name}.{plugin-version}'
+    description: 'The regression test for {fuel_release}.{plugin-name}.{plugin_version}'
     disabled: false
     concurrent: true
     project-type: multijob
@@ -649,7 +649,7 @@
           which-build: last-successful
           stable: true
       - multijob:
-          name: 'System tests for dvs {fuel_release}.{plugin-version} vcenter5'
+          name: 'System tests for dvs {fuel_release}.{plugin_version} vcenter5'
           condition: COMPLETED
           projects:
            - name: '{fuel_release}.{plugin-name}.dvs_vcenter_ha_mode'
