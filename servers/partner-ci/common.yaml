@@ -276,14 +276,14 @@
             FUEL_QA_GIT_URL=$(git config --get remote.origin.url)
             for refspec in ${FUEL_QA_REFS}; do
               git fetch ${FUEL_QA_GIT_URL} "$refspec" && git cherry-pick FETCH_HEAD || { git status; exit 1; }
-              git log --pretty=oneline
+              git log --pretty=oneline | head
             done
           fi
           if [[ "${MULTI_REFS}" != "none" ]]; then
             cd ${WORKSPACE}
             for refspec in ${MULTI_REFS}; do
               git fetch ${GIT_URL} "$refspec" && git cherry-pick FETCH_HEAD ||  { git status; exit 1; }
-              git log --pretty=oneline
+              git log --pretty=oneline | head
             done
           fi
 
