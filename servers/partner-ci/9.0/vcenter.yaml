@@ -41,15 +41,15 @@
             WORKSTATION_USERNAME=vmware;
 - project:
     name: 'predefined_parameters'
-    fuel-release: '9.0'
+    fuel_release: '9.0'
     plugin-version: '3.1.0'
     plugin-name: 'vcenter'
-    build-name: '{fuel-release}.dvs.build'
-    regression-name: '{fuel-release}.{plugin-name}.regression'
-    nightly-name: '{fuel-release}.{plugin-name}.nightly'
-    custom-name: '{fuel-release}.{plugin-name}.custom'
-    reporter-name: '{fuel-release}.{plugin-name}.reporter'
-    pkg_job_name: '{fuel-release}.dvs.build'
+    build-name: '{fuel_release}.dvs.build'
+    regression-name: '{fuel_release}.{plugin-name}.regression'
+    nightly-name: '{fuel_release}.{plugin-name}.nightly'
+    custom-name: '{fuel_release}.{plugin-name}.custom'
+    reporter-name: '{fuel_release}.{plugin-name}.reporter'
+    pkg_job_name: '{fuel_release}.dvs.build'
     nightly_timer: 'H 21 * * *'
     regression_timer: 'H 18 * * *'
     nightly_disabled: true
@@ -173,7 +173,7 @@
 
       - '{reporter-name}'
 
-      - '{fuel-release}.{plugin-name}.{testgroup}':
+      - '{fuel_release}.{plugin-name}.{testgroup}':
           scm_submodule_disabled: false
 
 - runner-parameters: &runner-parameters
@@ -186,7 +186,7 @@
       - common-parameters:
           debug:                 '{debug}'
           enable_proposed:       '{enable_proposed}'
-          env_prefix:            '{fuel-release}.{plugin-name}'
+          env_prefix:            '{fuel_release}.{plugin-name}'
           force_erase:           '{force_erase}'
           force_reuse:           '{force_reuse}'
           fuel_qa_refs:          '{fuel_qa_refs}'
@@ -232,7 +232,7 @@
       - common-parameters:
           debug:                 '{debug}'
           enable_proposed:       '{enable_proposed}'
-          env_prefix:            '{fuel-release}.{plugin-name}'
+          env_prefix:            '{fuel_release}.{plugin-name}'
           force_erase:           '{force_erase}'
           force_reuse:           '{force_reuse}'
           fuel_qa_refs:          '{fuel_qa_refs}'
@@ -312,18 +312,18 @@
           reporter_name: '{reporter-name}'
 
 - job-template:
-    name: '{fuel-release}.{plugin-name}.{testgroup}'
-    description: 'The test "{testgroup}" for {fuel-release}.{plugin-name}.{plugin-version}'
+    name: '{fuel_release}.{plugin-name}.{testgroup}'
+    description: 'The test "{testgroup}" for {fuel_release}.{plugin-name}.{plugin-version}'
     concurrent: true
 
 - job-template:
     name: '{custom-name}.qa'
-    description: 'The custom test for {fuel-release}.{plugin-name}.{plugin-version}'
+    description: 'The custom test for {fuel_release}.{plugin-name}.{plugin-version}'
     concurrent: true
 
 - job-template:
     name: '{custom-name}.dev'
-    description: 'The custom test for {fuel-release}.{plugin-name}.{plugin-version}'
+    description: 'The custom test for {fuel_release}.{plugin-name}.{plugin-version}'
     concurrent: true
 
 - job-template:

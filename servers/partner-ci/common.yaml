@@ -863,7 +863,7 @@
 - job-template:
     name: '{reporter-name}'
     disabled: false
-    description: 'The reporter for the {fuel-release}.{plugin-name}.{plugin-version}'
+    description: 'The reporter for the {fuel_release}.{plugin-name}.{plugin-version}'
     concurrent: true
     node: runner
     properties:
