@@ -1,7 +1,12 @@
 language: bash
 
 # Use container-based infrastructure for quicker build start-up
-sudo: false
+sudo: required
+python:
+  - "3.5"
+
+install:
+  - sudo pip install tox
 
 addons:
   apt:
@@ -10,8 +15,10 @@ addons:
     packages:
       - shellcheck
 
+
 script:
   - bash -c 'shopt -s globstar; shellcheck -e SC1091,SC2086,SC2046,SC2015,SC2155,SC1090,SC2012,SC2035,SC2016 **/*.sh'
+  - tox
 
 matrix:
   fast_finish: true
