@@ -6,12 +6,12 @@ sudo: false
 addons:
   apt:
     sources:
-    - debian-sid    # Grab shellcheck from the Debian repo (o_O)
+      - debian-sid    # Grab shellcheck from the Debian repo (o_O)
     packages:
-    - shellcheck
+      - shellcheck
 
 script:
- - bash -c 'shopt -s globstar; shellcheck -e SC1091,SC2086,SC2046,SC2015,SC2155,SC1090,SC2012,SC2035,SC2016 **/*.sh'
+  - bash -c 'shopt -s globstar; shellcheck -e SC1091,SC2086,SC2046,SC2015,SC2155,SC1090,SC2012,SC2035,SC2016 **/*.sh'
 
 matrix:
   fast_finish: true
