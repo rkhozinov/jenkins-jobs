@@ -878,8 +878,8 @@
           name: PLUGIN_VERSION
           default: '{plugin_version}'
       - string:
-          name: PLUGIN_VERSION
-          description: "Plugin version from the test plan string"
+          name: ISO_VERSION
+          description: "ISO number for form the test plan string"
       - string:
           name: TEST_JOB_NAME
           description: "The name of a test for getting test results"
