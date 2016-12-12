@@ -26,39 +26,19 @@ fi
 [[ $SNAPSHOTS_ID == *"lastSuccessfulBuild"* ]] && \
   export SNAPSHOTS_ID=$(grep -Po '#\K[^ ]+' < snapshots.params)
 
-if [ -f build.plugin_version ]; then
-  version=$(grep "PLUGIN_VERSION" < build.plugin_version | cut -d= -f2 )
-  export DVS_PLUGIN_VERSION=$version
-else
-  if [ -z $PLUGIN_VERSION ]; then
-    echo "build.properties file is not available so a test couldn't be runned"
-    exit 1
-  else
-    export DVS_PLUGIN_VERSION=$PLUGIN_VERSION
-  fi
-fi
+version=$(grep "PLUGIN_VERSION" < build.plugin_version | cut -d= -f2 )
+export PLUGIN_VERSION=${PLUGIN_VERSION:-$version}
+export DVS_PLUGIN_VERSION=${PLUGIN_VERSION:?}
 
-
-if [ -z "${PKG_JOB_BUILD_NUMBER}" ]; then
-  if [ -f build.properties ]; then
-    export PKG_JOB_BUILD_NUMBER=$(grep "BUILD_NUMBER" < build.properties | cut -d= -f2 )
-  else
-    echo "build.properties file is not available so the results couldn't be publihsed"
-    echo "$PKG_JOB_BUILD_NUMBER is empty, but it's needed for reporter. Exit."
-    exit 1
-  fi
-fi
+build_version=$(grep "BUILD_NUMBER" < build.properties | cut -d= -f2 )
+export PKG_JOB_BUILD_NUMBER=${PKG_JOB_BUILD_NUMBER:-$build_version}
 
 #remove old logs and test data
 [ -f nosetest.xml ] && sudo rm -f nosetests.xml
 sudo rm -rf logs/*
 
-if [[ $ISO_FILE == *"Mirantis"* ]]; then
-  export FUEL_RELEASE=$(echo $ISO_FILE | cut -d- -f2 | tr -d '.iso')
-fi
-
-export ENV_NAME="${ENV_PREFIX}.${SNAPSHOTS_ID}"
-export VENV_PATH="${HOME}/${FUEL_RELEASE}-venv"
+export ENV_NAME="${ENV_PREFIX:?}.${SNAPSHOTS_ID:?}"
+export VENV_PATH="${HOME}/${FUEL_RELEASE:?}-venv"
 
 dvs_plugin_path=$(ls -t ${WORKSPACE}/fuel-plugin-vmware-dvs*.rpm | head -n 1)
 export DVS_PLUGIN_PATH=${DVS_PLUGIN_PATH:-$dvs_plugin_path}
@@ -136,8 +116,8 @@ sh -x "utils/jenkins/system_tests.sh" \
     -k \
     -K \
     -t test \
-    -i ${ISO_PATH} \
-    -o --group="${TEST_GROUP_PREFIX}(${TEST_GROUP_CONFIG})" &
+    -i ${ISO_PATH:?} \
+    -o --group="${TEST_GROUP_PREFIX:?}(${TEST_GROUP_CONFIG:?})" &
 
 export SYSTEST_PID=$!
 
