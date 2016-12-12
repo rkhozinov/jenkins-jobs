@@ -38,8 +38,6 @@
     publish_results: true
     multijob_build_pkg: true
     testjob_build_pkg: false
-    runner_timeout: 600
-    test_timeout: 300
     iso_file: 'MirantisOpenStack-9.0.iso'
     iso_storage: '/storage/downloads'
     gerrit_repo: 'fuel-plugin-mistral'
@@ -200,8 +198,7 @@
           skip_vote_successfull: '{skip_vote_successfull}'
           skip_vote_failed: '{skip_vote_failed}'
     wrappers:
-      - test-wrapper:
-          test_timeout: '{test_timeout}'
+      - test-wrapper
     properties:
       - test-property
     builders:

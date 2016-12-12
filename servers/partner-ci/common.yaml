@@ -659,6 +659,11 @@
     wrappers:
       - ansicolor:
           colormap: xterm
+      - timeout:
+          fail: true
+          type: no-activity
+          write-description: "Runner-timeout is exceeded"
+          timeout: 10
 
 # properties for smoke, bvt and nightly multijobs
 - wrapper:
@@ -672,8 +677,8 @@
       - timeout:
           fail: true
           type: no-activity
-          write-description: "Timeout is exceeded"
-          timeout: '{test_timeout}'
+          write-description: "Test-timeout is exceeded"
+          timeout: 5
 
 - property:
     name: runner-property
