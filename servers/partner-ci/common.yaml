@@ -875,8 +875,8 @@
           mask-password-params: true
     parameters:
       - string:
-          name: ISO_VERSION
-          description: "ISO number for form the test plan string"
+          name: PLUGIN_VERSION
+          default: '{plugin_version}'
       - string:
           name: PLUGIN_VERSION
           description: "Plugin version from the test plan string"

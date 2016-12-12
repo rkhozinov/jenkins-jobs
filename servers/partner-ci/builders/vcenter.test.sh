@@ -62,7 +62,7 @@ if [[ $ISO_FILE == *"Mirantis"* ]]; then
   export FUEL_RELEASE=$(echo $ISO_FILE | cut -d- -f2 | tr -d '.iso')
 fi
 
-export ENV_NAME="${ENV_PREFIX}.${SNAPSHOTS_ID:?}"
+export ENV_NAME="${ENV_PREFIX}.${SNAPSHOTS_ID}"
 export VENV_PATH="${HOME}/${FUEL_RELEASE}-venv"
 
 dvs_plugin_path=$(ls -t ${WORKSPACE}/fuel-plugin-vmware-dvs*.rpm | head -n 1)
@@ -136,9 +136,9 @@ setup_bridge() {
 }
 
 clean_iptables() {
-  iptables -F
-  iptables -t nat -F
-  iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE
+  sudo iptables -F
+  sudo iptables -t nat -F
+  sudo iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE
 }
 
 sh -x "utils/jenkins/system_tests.sh" \
