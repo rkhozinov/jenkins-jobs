@@ -4,12 +4,8 @@
 
 export ISO_PATH=${ISO_PATH:-"$ISO_STORAGE/$ISO_FILE"}
 
-if [[ $ISO_FILE == *"custom"* ]]; then
-  export FUEL_RELEASE=90
-else
-  fuel_release=$(echo $ISO_FILE | cut -d- -f2 | tr -d '.iso')
-  export FUEL_RELEASE=$fuel_release
-fi
+fuel_release=$(echo $ISO_FILE | cut -d- -f2 | tr -d '.iso')
+export FUEL_RELEASE=$fuel_release
 
 if [ "${SNAPSHOTS_ID}" != "released" ]; then
   if [[ "${UPDATE_MASTER}" == "true" ]] && [[ ${FUEL_RELEASE} != *"80"* ]]; then
@@ -28,8 +24,7 @@ if [ "${SNAPSHOTS_ID}" != "released" ]; then
 fi
 
 [[ $SNAPSHOTS_ID == *"lastSuccessfulBuild"* ]] && \
-  id=$(grep -Po '#\K[^ ]+' < snapshots.params)
-  export SNAPSHOTS_ID=$id
+  export SNAPSHOTS_ID=$(grep -Po '#\K[^ ]+' < snapshots.params)
 
 if [ -f build.plugin_version ]; then
   version=$(grep "PLUGIN_VERSION" < build.plugin_version | cut -d= -f2 )
@@ -45,13 +40,13 @@ fi
 
 
 if [ -z "${PKG_JOB_BUILD_NUMBER}" ]; then
-    if [ -f build.properties ]; then
-        export PKG_JOB_BUILD_NUMBER=$(grep "BUILD_NUMBER" < build.properties | cut -d= -f2 )
-    else
-        echo "build.properties file is not available so the results couldn't be publihsed"
-        echo "$PKG_JOB_BUILD_NUMBER is empty, but it's needed for reporter. Exit."
-        exit 1
-    fi
+  if [ -f build.properties ]; then
+    export PKG_JOB_BUILD_NUMBER=$(grep "BUILD_NUMBER" < build.properties | cut -d= -f2 )
+  else
+    echo "build.properties file is not available so the results couldn't be publihsed"
+    echo "$PKG_JOB_BUILD_NUMBER is empty, but it's needed for reporter. Exit."
+    exit 1
+  fi
 fi
 
 #remove old logs and test data
@@ -70,15 +65,15 @@ export DVS_PLUGIN_PATH=${DVS_PLUGIN_PATH:-$dvs_plugin_path}
 export PLUGIN_PATH=${PLUGIN_PATH:-$DVS_PLUGIN_PATH}
 
 echo -e "test-group-prefix: ${TEST_GROUP_PREFIX}\n \
-         test-group: ${TEST_GROUP}\n \
-         env-name: ${ENV_NAME}\n \
-         use-snapshots: ${USE_SNAPSHOTS}\n \
-         fuel-release: ${FUEL_RELEASE}\n \
-         venv-path: ${VENV_PATH}\n \
-         env-name: ${ENV_NAME}\n \
-         iso-path: ${ISO_PATH}\n \
-         plugin-path: ${DVS_PLUGIN_PATH}\n \
-         plugin-checksum: $(md5sum -b ${DVS_PLUGIN_PATH})\n"
+test-group: ${TEST_GROUP}\n \
+env-name: ${ENV_NAME}\n \
+use-snapshots: ${USE_SNAPSHOTS}\n \
+fuel-release: ${FUEL_RELEASE}\n \
+venv-path: ${VENV_PATH}\n \
+env-name: ${ENV_NAME}\n \
+iso-path: ${ISO_PATH}\n \
+plugin-path: ${DVS_PLUGIN_PATH}\n \
+plugin-checksum: $(md5sum -b ${DVS_PLUGIN_PATH})\n"
 
 cat << REPORTER_PROPERTIES > reporter.properties
 ISO_VERSION=${SNAPSHOTS_ID:?}
@@ -120,8 +115,8 @@ setup_bridge() {
   sudo ip link set dev $bridge up
 
   if sudo iptables-save | grep $bridge | grep -i reject | grep -q FORWARD; then
-    iptables -D FORWARD -o $bridge -j REJECT --reject-with icmp-port-unreachable
-    iptables -D FORWARD -i $bridge -j REJECT --reject-with icmp-port-unreachable
+    sudo iptables -D FORWARD -o $bridge -j REJECT --reject-with icmp-port-unreachable
+    sudo iptables -D FORWARD -i $bridge -j REJECT --reject-with icmp-port-unreachable
   fi
 
   if [[ "${DEBUG}" == "true" ]]; then
