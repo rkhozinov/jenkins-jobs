@@ -36,6 +36,8 @@
     force_erase: true
     force_reuse: false
     recreate_venv: true
+    ws_norevert: false
+    nfs_clean: false
     kvm_use: false
     update_master: false
     enable_proposed: false
@@ -159,6 +161,7 @@
           iso_file:              '{iso_file}'
           iso_storage:           '{iso_storage}'
           kvm_use:               '{kvm_use}'
+          nfs_clean:             '{nfs_clean}'
           pkg_job_name:          '{pkg_job_name}'
           plugin_version:        '{plugin_version}'
           publish_results:       '{publish_results}'
@@ -171,6 +174,7 @@
           testrail_suite:        '{testrail_suite}'
           testrail_suite_desc:   '{testrail_suite_desc}'
           update_master:         '{update_master}'
+          ws_norevert:           '{ws_norevert}'
       - plugin-specific-parameters
 # parameters for jobs created per test-group and custom test job
 - test-parameters: &test-parameters
@@ -199,6 +203,7 @@
           iso_file:              '{iso_file}'
           iso_storage:           '{iso_storage}'
           kvm_use:               '{kvm_use}'
+          nfs_clean:             '{nfs_clean}'
           pkg_job_name:          '{pkg_job_name}'
           plugin_version:        '{plugin_version}'
           publish_results:       '{publish_results}'
@@ -211,6 +216,7 @@
           testrail_suite:        '{testrail_suite}'
           testrail_suite_desc:   '{testrail_suite_desc}'
           update_master:         '{update_master}'
+          ws_norevert:           '{ws_norevert}'
       - plugin-specific-parameters
 
 - defaults:
