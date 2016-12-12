@@ -166,18 +166,7 @@
           testgroup_value_type: choices
           testgroup_value: '{obj:testgroup}'
 
-      - '{reporter-name}':
-          testrail_project: "Mirantis OpenStack"
-          testrail_suite: "[9.1][PCE] vCenter"
-          testrail_suite_desc: "Suite description"
-          testrail_milestone: "9.2"
-          testrail_plan: "${{TREP_TESTRAIL_MILESTONE}} snapshot #${{SNAPSHOTS_ID}}"
-          testrail_plan_desc: "Test plan description"
-          testrail_run: "${{TREP_TESTRAIL_SUITE}}"
-          testrail_run_desc: "Test run description"
-          testrail_item_case: "${{TEST_GROUP}}"
-          trep_results_source: "xunit_items"
-          trep_debug_level: "DEBUG"
+      - '{reporter-name}'
 
       - '{fuel_release}.{plugin-name}.{testgroup}':
           scm_submodule_disabled: false
