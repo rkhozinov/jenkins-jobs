@@ -42,6 +42,7 @@
 - project:
     name: 'predefined_parameters'
     fuel_release: '9.0'
+    fuel_release_checker: '9.0'
     plugin_version: '3.1.0'
     plugin-name: 'vcenter'
     build-name: '{fuel_release}.dvs.build'
@@ -55,10 +56,10 @@
     nightly_disabled: true
     regression_disabled: false
     force_erase: false
+    force_reuse: false
     recreate_venv: false
     ws_norevert: false
     nfs_clean: false
-    force_reuse: false
     kvm_use: false
     update_master: false
     enable_proposed: false
@@ -188,7 +189,7 @@
           force_erase:           '{force_erase}'
           force_reuse:           '{force_reuse}'
           fuel_qa_refs:          '{fuel_qa_refs}'
-          fuel_release:          '{fuel_release}'
+          fuel_release_checker:  '{fuel_release_checker}'
           gerrit_branch:         '{gerrit_branch}'
           iso_file:              '{iso_file}'
           iso_storage:           '{iso_storage}'
@@ -235,7 +236,7 @@
           force_erase:           '{force_erase}'
           force_reuse:           '{force_reuse}'
           fuel_qa_refs:          '{fuel_qa_refs}'
-          fuel_release:          '{fuel_release}'
+          fuel_release_checker:  '{fuel_release_checker}'
           gerrit_branch:         '{gerrit_branch}'
           iso_file:              '{iso_file}'
           iso_storage:           '{iso_storage}'

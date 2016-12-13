@@ -31,6 +31,7 @@
 - project:
     name: 'predefined_parameters'
     fuel_release: '9.x'
+    fuel_release_checker: '9.2'
     plugin_version: '5.0.0'
     plugin-name: 'contrail'
     build-name: '{fuel_release}.{plugin-name}.{plugin_version}.build'
@@ -84,7 +85,6 @@
     scm_wipe_workspace: false
     skip_vote_successfull: false
     skip_vote_failed: false
-
     testrail_project: "Contrail plugin"
     testrail_suite: "[9.x][PCE] Fuel plugin contrail v5.0.0 nightly"
     testrail_suite_desc: "Suite description"
@@ -246,7 +246,7 @@
           force_erase:           '{force_erase}'
           force_reuse:           '{force_reuse}'
           fuel_qa_refs:          '{fuel_qa_refs}'
-          fuel_release:          '{fuel_release}'
+          fuel_release_checker:  '{fuel_release_checker}'
           gerrit_branch:         '{gerrit_branch}'
           iso_file:              '{iso_file}'
           kvm_use:               '{kvm_use}'
@@ -289,7 +289,7 @@
           force_erase:           '{force_erase}'
           force_reuse:           '{force_reuse}'
           fuel_qa_refs:          '{fuel_qa_refs}'
-          fuel_release:          '{fuel_release}'
+          fuel_release_checker:  '{fuel_release_checker}'
           gerrit_branch:         '{gerrit_branch}'
           iso_file:              '{iso_file}'
           iso_storage:           '{iso_storage}'

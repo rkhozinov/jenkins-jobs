@@ -1,0 +1,12 @@
+*.*~
+*.ini
+*.pyc
+*.swp
+\.*.idea
+/.project
+\#*.*\#
+\.*.swp
+jenkins_job.ini
+output/
+utils/jobsdump/xml_cache
+utils/jobsdump/yaml
