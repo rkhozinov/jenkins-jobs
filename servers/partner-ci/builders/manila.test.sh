@@ -1,13 +1,10 @@
 #!/bin/bash -e
 [[ "${DEBUG}" == "true" ]] && set -x || set +x
 
-export ISO_PATH="${ISO_STORAGE}/${ISO_FILE}"
+export ISO_PATH=${ISO_PATH:-"$ISO_STORAGE/$ISO_FILE"}
 
-if [[ $ISO_FILE == *"custom"* ]]; then
-  export FUEL_RELEASE=90
-else
-  export FUEL_RELEASE=$(echo $ISO_FILE | cut -d- -f2 | tr -d '.iso')
-fi
+fuel_release=$(echo $ISO_FILE | cut -d- -f2 | tr -d '.iso')
+export FUEL_RELEASE=$fuel_release
 
 if [ "${SNAPSHOTS_ID}" != "released" ]; then
   if [[ "${UPDATE_MASTER}" == "true" ]] && [[ ${FUEL_RELEASE} != *"80"* ]]; then
@@ -25,47 +22,29 @@ if [ "${SNAPSHOTS_ID}" != "released" ]; then
   fi
 fi
 
-if [[ $SNAPSHOTS_ID == *"lastSuccessfulBuild"* ]]; then
+[[ $SNAPSHOTS_ID == *"lastSuccessfulBuild"* ]] && \
   export SNAPSHOTS_ID=$(grep -Po '#\K[^ ]+' < snapshots.params)
-fi
 
-if [ -f build.plugin_version ]; then
-  export MANILA_PLUGIN_VERSION=$(grep "PLUGIN_VERSION" < build.plugin_version | cut -d= -f2 )
-else
-  export MANILA_PLUGIN_VERSION=${PLUGIN_VERSION:?}
-fi
+version=$(grep "PLUGIN_VERSION" < build.plugin_version | cut -d= -f2 )
+export MANILA_PLUGIN_VERSION=${version:?}
 
 
 [ ! -f $MANILA_IMAGE_PATH ] && \
   { echo "MANILA_IMAGE_PATH is empty or doesn't exist"; exit 1; }
 
-if [ -z "${PKG_JOB_BUILD_NUMBER}" ]; then
-    if [ -f build.properties ]; then
-        export PKG_JOB_BUILD_NUMBER=$(grep "BUILD_NUMBER" < build.properties | cut -d= -f2 )
-    else
-        echo "build.properties file is not available so the results couldn't be publihsed"
-        echo "$PKG_JOB_BUILD_NUMBER is empty, but it's needed for reporter. Exit."
-        exit 1
-    fi
-fi
+build_version=$(grep "BUILD_NUMBER" < build.properties | cut -d= -f2 )
+export PKG_JOB_BUILD_NUMBER=${PKG_JOB_BUILD_NUMBER:-$build_version}
 
 #remove old logs and test data
 [ -f nosetest.xml ] && sudo rm -f nosetests.xml
 sudo rm -rf logs/*
 
-if [[ $ISO_FILE == *"Mirantis"* ]]; then
-  export FUEL_RELEASE=$(echo $ISO_FILE | cut -d- -f2 | tr -d '.iso')
-fi
+export ENV_NAME="${ENV_PREFIX:?}.${SNAPSHOTS_ID:?}"
+export VENV_PATH="${HOME}/${FUEL_RELEASE:?}-venv"
 
-if [[ $ISO_FILE == *"custom"* ]]; then
-  export FUEL_RELEASE=90
-fi
-
-export ENV_NAME="${ENV_PREFIX}.${SNAPSHOTS_ID}"
-export VENV_PATH="${HOME}/${FUEL_RELEASE}-venv"
-
-[ -z "${MANILA_PLUGIN_PATH}" ] && export MANILA_PLUGIN_PATH=$(ls -t ${WORKSPACE}/fuel-plugin-manila*.rpm | head -n 1)
-[ -z "${PLUGIN_PATH}"     ] && export PLUGIN_PATH=${MANILA_PLUGIN_PATH:?}
+manila_plugin_path=$(ls -t ${WORKSPACE}/fuel-plugin-manila*.rpm | head -n 1)
+export MANILA_PLUGIN_PATH=${MANILA_PLUGIN_PATH:-$manila_plugin_path}
+export PLUGIN_PATH=${PLUGIN_PATH:-$MANILA_PLUGIN_PATH}
 
 echo -e "test-group: ${TEST_GROUP}\n \
 env-name: ${ENV_NAME}\n \
@@ -78,23 +57,19 @@ plugin-path: ${MANILA_PLUGIN_PATH}\n \
 plugin-checksum: $(md5sum -b ${MANILA_PLUGIN_PATH})\n"
 
 cat << REPORTER_PROPERTIES > reporter.properties
-ISO_VERSION=$SNAPSHOTS_ID
-SNAPSHOTS_ID=$SNAPSHOTS_ID
-ISO_FILE=$ISO_FILE
-TEST_GROUP=$TEST_GROUP
-TEST_JOB_NAME=$JOB_NAME
-TEST_JOB_BUILD_NUMBER=$BUILD_NUMBER
-PKG_JOB_BUILD_NUMBER=$PKG_JOB_BUILD_NUMBER
-PLUGIN_VERSION=$PLUGIN_VERSION
-MANILA_PLUGIN_VERSION=$MANILA_PLUGIN_VERSION
-TREP_TESTRAIL_SUITE=$TREP_TESTRAIL_SUITE
-TREP_TESTRAIL_SUITE_DESCRIPTION=$TREP_TESTRAIL_SUITE_DESCRIPTION
-TREP_TESTRAIL_PLAN=$TREP_TESTRAIL_PLAN
-TREP_TESTRAIL_PLAN_DESCRIPTION=$TREP_TESTRAIL_PLAN_DESCRIPTION
+ISO_VERSION=${SNAPSHOTS_ID:?}
+SNAPSHOTS_ID=${SNAPSHOTS_ID:?}
+ISO_FILE=${ISO_FILE:?}
+TEST_GROUP=${TEST_GROUP:?}
+TEST_JOB_NAME=${JOB_NAME:?}
+TEST_JOB_BUILD_NUMBER=${BUILD_NUMBER:?}
+PKG_JOB_BUILD_NUMBER=${PKG_JOB_BUILD_NUMBER:?}
+PLUGIN_VERSION=${PLUGIN_VERSION:?}
+MANILA_PLUGIN_VERSION=${MANILA_PLUGIN_VERSION:?}
 DATE=$(date +'%B-%d')
 REPORTER_PROPERTIES
 
-source "${VENV_PATH}/bin/activate"
+. "${VENV_PATH}/bin/activate"
 
 add_interface_to_bridge() {
   env=$1

@@ -2,13 +2,10 @@
 # activate bash xtrace for script
 [[ "${DEBUG}" == "true" ]] && set -x || set +x
 
-export ISO_PATH="${ISO_STORAGE}/${ISO_FILE}"
+export ISO_PATH=${ISO_PATH:-"$ISO_STORAGE/$ISO_FILE"}
 
-if [[ $ISO_FILE == *"custom"* ]]; then
-  export FUEL_RELEASE=90
-else
-  export FUEL_RELEASE=$(echo "${ISO_FILE}" | cut -d- -f2 | tr -d '.iso')
-fi
+fuel_release=$(echo $ISO_FILE | cut -d- -f2 | tr -d '.iso')
+export FUEL_RELEASE=$fuel_release
 
 if [ "${SNAPSHOTS_ID}" != "released" ]; then
   if [[ "${UPDATE_MASTER}" == "true" ]] && [[ ${FUEL_RELEASE} != *"80"* ]]; then
@@ -26,33 +23,18 @@ if [ "${SNAPSHOTS_ID}" != "released" ]; then
 fi
 
 [[ $SNAPSHOTS_ID == *"lastSuccessfulBuild"* ]] && \
-  export SNAPSHOTS_ID=$(grep -Po '#\K[^ ]+' snapshots.params )
+  export SNAPSHOTS_ID=$(grep -Po '#\K[^ ]+' < snapshots.params)
 
-${SNAPSHOTS_ID:?"SNAPSHOTS_ID is empty"}
 
-if [ -f build.plugin_version ]; then
-  export PLUGIN_VERSION=$(grep "PLUGIN_VERSION" < build.plugin_version | cut -d= -f2 )
-else
-  ${PLUGIN_VERSION:?"build.properties file is not available so a test couldn't be runned"}
-fi
+export PLUGIN_VERSION=$(grep "PLUGIN_VERSION" < build.plugin_version | cut -d= -f2 )
 
-${PLUGIN_VERSION:?"PLUGIN_VERSION variable is empty"} && \
-    export NSXV_PLUGIN_VERSION=$PLUGIN_VERSION
-
-if [ -z "${PKG_JOB_BUILD_NUMBER}" ]; then
-    if [ -f build.properties ]; then
-        export PKG_JOB_BUILD_NUMBER=$(grep "^BUILD_NUMBER" < build.properties | cut -d= -f2 )
-    else
-        : ${PKG_JOB_BUILD_NUMBER?}
-        echo -e "build.properties file is not available so \
-                 the results couldn't be publihsed\n \
-                 PKG_JOB_BUILD_NUMBER is empty, but it's needed for reporter."
-    fi
-fi
+export NSXV_PLUGIN_VERSION=${PLUGIN_VERSION:?}
+build_version=$(grep "BUILD_NUMBER" < build.properties | cut -d= -f2 )
+export PKG_JOB_BUILD_NUMBER=${PKG_JOB_BUILD_NUMBER:-$build_version}
 
 #remove old logs and test data
-[ -f nosetest.xml ] && rm -f nosetests.xml
-rm -rf logs/*
+[ -f nosetest.xml ] && sudo rm -f nosetests.xml
+sudo rm -rf logs/*
 
 export ENV_NAME="${ENV_PREFIX:?}.${SNAPSHOTS_ID:?}"
 export VENV_PATH="${HOME}/${FUEL_RELEASE:?}-venv"
@@ -75,22 +57,19 @@ plugin-path: ${NSXV_PLUGIN_PATH}\n\
 plugin-checksum: $(md5sum -b ${NSXV_PLUGIN_PATH})"
 
 cat << REPORTER_PROPERTIES > reporter.properties
-ISO_VERSION=$SNAPSHOTS_ID
-SNAPSHOTS_ID=$SNAPSHOTS_ID
-ISO_FILE=$ISO_FILE
-TEST_GROUP=$TEST_GROUP
-TEST_JOB_NAME=$JOB_NAME
-TEST_JOB_BUILD_NUMBER=$BUILD_NUMBER
-PKG_JOB_BUILD_NUMBER=$PKG_JOB_BUILD_NUMBER
-PLUGIN_VERSION=$PLUGIN_VERSION
-TREP_TESTRAIL_SUITE=${TREP_TESTRAIL_SUITE}
-TREP_TESTRAIL_SUITE_DESCRIPTION=$TREP_TESTRAIL_SUITE_DESCRIPTION
-TREP_TESTRAIL_PLAN=$TREP_TESTRAIL_PLAN
-TREP_TESTRAIL_PLAN_DESCRIPTION=$TREP_TESTRAIL_PLAN_DESCRIPTION
+ISO_VERSION=${SNAPSHOTS_ID:?}
+SNAPSHOTS_ID=${SNAPSHOTS_ID:?}
+ISO_FILE=${ISO_FILE:?}
+TEST_GROUP=${TEST_GROUP:?}
+TEST_JOB_NAME=${JOB_NAME:?}
+TEST_JOB_BUILD_NUMBER=${BUILD_NUMBER:?}
+PKG_JOB_BUILD_NUMBER=${PKG_JOB_BUILD_NUMBER:?}
+PLUGIN_VERSION=${PLUGIN_VERSION:?}
+NSXV_PLUGIN_VERSION=${PLUGIN_VERSION:?}
 DATE=$(date +'%B-%d')
 REPORTER_PROPERTIES
 
-source "${VENV_PATH}/bin/activate"
+. "${VENV_PATH}/bin/activate"
 
 bash plugin_test/utils/jenkins/system_tests.sh \
   -t test ${systest_parameters} \

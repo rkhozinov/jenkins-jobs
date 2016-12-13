@@ -2,13 +2,10 @@
 # activate bash xtrace for script
 [[ "${DEBUG}" == "true" ]] && set -x || set +x
 
-export ISO_PATH="${ISO_STORAGE}/${ISO_FILE}"
+export ISO_PATH=${ISO_PATH:-"$ISO_STORAGE/$ISO_FILE"}
 
-if [[ $ISO_FILE == *"custom"* ]]; then
-  export FUEL_RELEASE=90
-else
-  export FUEL_RELEASE=$(echo $ISO_FILE | cut -d- -f2 | tr -d '.iso')
-fi
+fuel_release=$(echo $ISO_FILE | cut -d- -f2 | tr -d '.iso')
+export FUEL_RELEASE=$fuel_release
 
 if [ "${SNAPSHOTS_ID}" != "released" ]; then
   if [[ "${UPDATE_MASTER}" == "true" ]] && [[ ${FUEL_RELEASE} != *"80"* ]]; then
@@ -28,35 +25,26 @@ fi
 [[ $SNAPSHOTS_ID == *"lastSuccessfulBuild"* ]] && \
   export SNAPSHOTS_ID=$(grep -Po '#\K[^ ]+' < snapshots.params)
 
-[ -f build.plugin_version ] && \
+
   export PLUGIN_VERSION=$(grep "PLUGIN_VERSION" < build.plugin_version | cut -d= -f2 )
 
-[ -z $NSXV_PLUGIN_VERSION  ] && \
-    export NSXV_PLUGIN_VERSION=${PLUGIN_VERSION:?}
-
-if [ -z "${PKG_JOB_BUILD_NUMBER}" ]; then
-    if [ -f build.properties ]; then
-        export PKG_JOB_BUILD_NUMBER=$(grep "^BUILD_NUMBER" < build.properties | cut -d= -f2 )
-    else
-        echo "build.properties file is not available so the results couldn't be publihsed"
-        echo "$PKG_JOB_BUILD_NUMBER is empty, but it's needed for reporter. Exit."
-        exit 1
-    fi
-fi
+export NSXT_PLUGIN_VERSION=${PLUGIN_VERSION:?}
+build_version=$(grep "BUILD_NUMBER" < build.properties | cut -d= -f2 )
+export PKG_JOB_BUILD_NUMBER=${PKG_JOB_BUILD_NUMBER:-$build_version}
 
 #remove old logs and test data
 [ -f nosetest.xml ] && sudo rm -f nosetests.xml
 sudo rm -rf logs/*
 
-export ENV_NAME="${ENV_PREFIX}.${SNAPSHOTS_ID}"
-export VENV_PATH="${HOME}/${FUEL_RELEASE}-venv"
-
-[ -z "${NSXT_PLUGIN_PATH}"  ] && export NSXT_PLUGIN_PATH=$(ls -t ${WORKSPACE}/nsx-t*.rpm | head -n 1)
-[ -z "${PLUGIN_PATH}"       ] && export PLUGIN_PATH=${NSXT_PLUGIN_PATH:?}
+export ENV_NAME="${ENV_PREFIX:?}.${SNAPSHOTS_ID:?}"
+export VENV_PATH="${HOME}/${FUEL_RELEASE:?}-venv"
+export NSXT_PLUGIN_PATH="${NSXT_PLUGIN_PATH:-$(ls -t ${WORKSPACE}/nsx-t*.rpm | head -n 1)}"
+plugin_path="${PLUGIN_PATH:-$NSXT_PLUGIN_PATH}"
+export PLUGIN_PATH=${plugin_path:?}
 
 systest_parameters=''
 [[ $FORCE_REUSE == "true"  ]] && systest_parameters+=' -k' || echo "new env will be created"
-[[ $ERASE_AFTER   == "true"  ]] && echo "the env will be erased after test" || systest_parameters+=' -K'
+[[ $ERASE_AFTER == "true"  ]] && echo "the env will be erased after test" || systest_parameters+=' -K'
 
 echo -e "test-group: ${TEST_GROUP}\n \
 env-name: ${ENV_NAME}\n \
@@ -69,22 +57,19 @@ plugin-path: ${NSXT_PLUGIN_PATH}\n \
 plugin-checksum: $(md5sum -b ${NSXT_PLUGIN_PATH})"
 
 cat << REPORTER_PROPERTIES > reporter.properties
-ISO_VERSION=$SNAPSHOTS_ID
-SNAPSHOTS_ID=$SNAPSHOTS_ID
-ISO_FILE=$ISO_FILE
-TEST_GROUP=$TEST_GROUP
-TEST_JOB_NAME=$JOB_NAME
-TEST_JOB_BUILD_NUMBER=$BUILD_NUMBER
-PKG_JOB_BUILD_NUMBER=$PKG_JOB_BUILD_NUMBER
-PLUGIN_VERSION=$PLUGIN_VERSION
-TREP_TESTRAIL_SUITE=${TREP_TESTRAIL_SUITE}
-TREP_TESTRAIL_SUITE_DESCRIPTION=$TREP_TESTRAIL_SUITE_DESCRIPTION
-TREP_TESTRAIL_PLAN=$TREP_TESTRAIL_PLAN
-TREP_TESTRAIL_PLAN_DESCRIPTION=$TREP_TESTRAIL_PLAN_DESCRIPTION
+ISO_VERSION=${SNAPSHOTS_ID:?}
+SNAPSHOTS_ID=${SNAPSHOTS_ID:?}
+ISO_FILE=${ISO_FILE:?}
+TEST_GROUP=${TEST_GROUP:?}
+TEST_JOB_NAME=${JOB_NAME:?}
+TEST_JOB_BUILD_NUMBER=${BUILD_NUMBER:?}
+PKG_JOB_BUILD_NUMBER=${PKG_JOB_BUILD_NUMBER:?}
+PLUGIN_VERSION=${PLUGIN_VERSION:?}
+NSXT_PLUGIN_VERSION=${PLUGIN_VERSION:?}
 DATE=$(date +'%B-%d')
 REPORTER_PROPERTIES
 
-source "${VENV_PATH}/bin/activate"
+. "${VENV_PATH}/bin/activate"
 
 bash plugin_test/utils/jenkins/system_tests.sh \
   -t test ${systest_parameters} \

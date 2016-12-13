@@ -27,7 +27,7 @@ fi
   export SNAPSHOTS_ID=$(grep -Po '#\K[^ ]+' < snapshots.params)
 
 version=$(grep "PLUGIN_VERSION" < build.plugin_version | cut -d= -f2 )
-export PLUGIN_VERSION=${PLUGIN_VERSION:-$version}
+export PLUGIN_VERSION=${version:?}
 export DVS_PLUGIN_VERSION=${PLUGIN_VERSION:?}
 
 build_version=$(grep "BUILD_NUMBER" < build.properties | cut -d= -f2 )
