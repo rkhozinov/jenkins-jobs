@@ -3,6 +3,8 @@
 *.pyc
 *.swp
 \.*.idea
+.idea
+.tox
 /.project
 \#*.*\#
 \.*.swp
