@@ -25,9 +25,12 @@ fi
 [[ $SNAPSHOTS_ID == *"lastSuccessfulBuild"* ]] && \
   export SNAPSHOTS_ID=$(grep -Po '#\K[^ ]+' < snapshots.params)
 
-version=$(grep "PLUGIN_VERSION" < build.plugin_version | cut -d= -f2 )
-export MANILA_PLUGIN_VERSION=${version:?}
+if [ "${SNAPSHOTS_ID}" != "released" ]; then
+  version=$(grep "PLUGIN_VERSION" < build.plugin_version | cut -d= -f2 )
+  export PLUGIN_VERSION=${version:?}
+fi
 
+export MANILA_PLUGIN_VERSION=${PLUGIN_VERSION:?}
 
 [ ! -f $MANILA_IMAGE_PATH ] && \
   { echo "MANILA_IMAGE_PATH is empty or doesn't exist"; exit 1; }

@@ -25,10 +25,12 @@ fi
 [[ $SNAPSHOTS_ID == *"lastSuccessfulBuild"* ]] && \
   export SNAPSHOTS_ID=$(grep -Po '#\K[^ ]+' < snapshots.params)
 
-
-  export PLUGIN_VERSION=$(grep "PLUGIN_VERSION" < build.plugin_version | cut -d= -f2 )
-
+if [ "${SNAPSHOTS_ID}" != "released" ]; then
+  version=$(grep "PLUGIN_VERSION" < build.plugin_version | cut -d= -f2 )
+  export PLUGIN_VERSION=${version:?}
+fi
 export NSXT_PLUGIN_VERSION=${PLUGIN_VERSION:?}
+
 build_version=$(grep "BUILD_NUMBER" < build.properties | cut -d= -f2 )
 export PKG_JOB_BUILD_NUMBER=${PKG_JOB_BUILD_NUMBER:-$build_version}
 

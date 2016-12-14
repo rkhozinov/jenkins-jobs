@@ -26,8 +26,10 @@ fi
 [[ $SNAPSHOTS_ID == *"lastSuccessfulBuild"* ]] && \
   export SNAPSHOTS_ID=$(grep -Po '#\K[^ ]+' < snapshots.params)
 
-version=$(grep "PLUGIN_VERSION" < build.plugin_version | cut -d= -f2 )
-export PLUGIN_VERSION=${version:?}
+if [ "${SNAPSHOTS_ID}" != "released" ]; then
+  version=$(grep "PLUGIN_VERSION" < build.plugin_version | cut -d= -f2 )
+  export PLUGIN_VERSION=${version:?}
+fi
 export DVS_PLUGIN_VERSION=${PLUGIN_VERSION:?}
 
 build_version=$(grep "BUILD_NUMBER" < build.properties | cut -d= -f2 )
