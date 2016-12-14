@@ -149,7 +149,7 @@
       - postbuildscript:
           script-only-if-succeeded: False
           builders:
-            - shell: env > {properties_name}
+            - shell: env | egrep -v "(KEY|PWD|PASSW|COOKIE)" > {properties_name}
       - archive:
           artifacts: '*.properties'
           allow-empty: true
