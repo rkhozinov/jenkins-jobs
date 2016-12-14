@@ -5,8 +5,7 @@ export FUEL_STATS_HOST=${FUEL_STATS_HOST:-"fuel-collect-systest.infra.mirantis.n
 export ANALYTICS_IP="${ANALYTICS_IP:-"fuel-stats-systest.infra.mirantis.net"}"
 export MIRROR_HOST=${MIRROR_HOST:-"mirror.seed-cz1.fuel-infra.org"}
 
-[ ${SNAPSHOTS_ID} ] && export SNAPSHOTS_ID=${SNAPSHOTS_ID} || export SNAPSHOTS_ID=${CUSTOM_VERSION:10}
-[ -z "${SNAPSHOTS_ID}" ] && { echo SNAPSHOTS_ID is empty; exit 1; }
+export SNAPSHOTS_ID=${SNAPSHOTS_ID:-"${CUSTOM_VERSION:10}"}
 
 wget --no-check-certificate -O snapshots.params ${SNAPSHOTS_URL/SNAPSHOTS_ID/$SNAPSHOTS_ID}
 
@@ -123,23 +122,13 @@ REPORTER_PROPERTIES
 
 source "${VENV_PATH}/bin/activate"
 
-#/btsync/tpi_systest_mod.sh -d ${OPENSTACK_RELEASE} \
-#                           -n "${NODES_COUNT}" \
-#                           -i ${ISO_PATH} \
-#                           -t "${TEST_GROUP_PREFIX}(${TEST_GROUP_CONFIG})" \
-#                           $systest_parameters
-
-#/btsync/tpi_systest_mod2.sh -d ${OPENSTACK_RELEASE} \
-#                            -i ${ISO_PATH} \
-#                            -t "${TEST_GROUP_PREFIX}(${TEST_GROUP_CONFIG})" \
-#                            $systest_parameters
 
 
 main() {
 
   #clean_old_bridges
 
-  if [ -z $NOREVERT ]; then  
+  if [ -z $NOREVERT ]; then
     restart_ws_network
     revert_ws "$WORKSTATION_NODES"
     configure_nfs
@@ -149,24 +138,24 @@ main() {
   rm -rf logs/*
 
   #Run test in background and wait before environment is created
-  echo sh -x "utils/jenkins/system_tests.sh" -t test $systest_parameters -i "${ISO_PATH}" -o --group=$TEST_GROUP
+  echo sh -x "utils/jenkins/system_tests.sh" -t test  -i "${ISO_PATH}" -o --group=$TEST_GROUP
   sh -x "utils/jenkins/system_tests.sh" \
-      -t test $systest_parameters \
+      -t test  \
       -i "${ISO_PATH}" \
       -o --group="${TEST_GROUP_PREFIX}(${TEST_GROUP_CONFIG})" &
 
   export SYSTEST_PID=$!
 
   #Wait before environment is created
-  while [ $(virsh net-list | grep $ENV_NAME | wc -l) -ne 5 ]; do 
-    sleep 10 
+  while [ $(virsh net-list | grep -c $ENV_NAME ) -ne 5 ]; do
+    sleep 10
     if ! ps -p $SYSTEST_PID > /dev/null
     then
       echo System tests exited prematurely, aborting
       exit 1
     fi
   done
-  sleep 5 
+  sleep 5
 
   add_interface_to_bridge $ENV_NAME private vmnet2
 
@@ -202,13 +191,13 @@ kill_test(){
     else
         echo "test process id doesn't exist"
         exit 1
-    fi 
+    fi
 }
 
 add_interface_to_bridge() {
   env=$1
   net_name=$2
-  nic=$3  
+  nic=$3
   ip=$4
 
   for net in $(virsh net-list | grep ${env}_${net_name} | awk '{print $1}'); do
@@ -254,9 +243,9 @@ revert_ws() {
   cmd="vmrun -T ws-shared -h https://localhost:443/sdk -u ${WORKSTATION_USERNAME} -p ${WORKSTATION_PASSWORD}"
   for i in $1; do
     $cmd listRegisteredVM | grep -q $i || { echo "VM $i does not exist"; exit 1; }
-    echo vmrun: reverting $i to $WORKSTATION_SNAPSHOT 
+    echo vmrun: reverting $i to $WORKSTATION_SNAPSHOT
     $cmd revertToSnapshot "[standard] $i/$i.vmx" $WORKSTATION_SNAPSHOT && echo "vmrun: $i reverted" || { echo "Error: revert of $i failed";  exit 1; }
-    echo vmrun: starting $i 
+    echo vmrun: starting $i
     $cmd start "[standard] $i/$i.vmx" && echo "vmrun: $i is started" || { echo "Error: $i failed to start";  exit 1; }
   done
 }
