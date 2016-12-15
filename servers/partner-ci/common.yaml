@@ -352,21 +352,16 @@
       - inject:
           properties-file: specific.properties
 
-- builder:
-    name: get-baremetal-props
-    builders:
-      - shell: |
-          #!/bin/bash
-          IFS='\n'
-          echo > baremetal.properties
-          if [ ! -z "${BAREMETAL_PROPS}" ]; then
-            for param in ${BAREMETAL_PROPS}; do
-              echo $param >> baremetal.properties
-            done
-          fi
-      - inject:
-          properties-file: baremetal.properties
-
+ - builder:
+     name: get-baremetal-props
+     builders:
+       - inject:
+           properties: |
+             BM_HOST_BRIDGE_INTERFACES=eth2:10.109.0.0/24;eth3:10.109.4.0/24;
+             BM_IPMI_ADDR=cz7660-kvm.host-telecom.com;
+             BM_IPMI_PASSWORD=Ba2Ie23#GHgho;
+             BM_IPMI_USER=engineer;
+             BM_TARGET_MACS=00:1b:21:87:21:99;00:1b:21:87:21:98;
 - builder:
     name: get-updates
     builders:
