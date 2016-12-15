@@ -1,9 +1,0 @@
-[jenkins]
-#user=
-#password=
-url=https://jenkins-tpi.bud.mirantis.net:8080/
-
-[job_builder]
-ignore_cache=True
-keep_descriptions=False
-recursive=True
