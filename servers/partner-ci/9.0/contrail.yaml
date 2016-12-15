@@ -804,4 +804,3 @@
           email_to: '{email_to}'
     builders:
       !include: contrail-baremetal.yaml
-

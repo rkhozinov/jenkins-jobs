@@ -2,68 +2,36 @@
 - parameter:
     name: plugin-specific-parameters
     parameters:
-      - bool:
-          name: UPDATE_MASTER
-          default: '{update_master}'
-          description: 'turns on update fuel master node to maintenance update'
-      - bool:
-          name: BONDING
-          default: '{obj:bonding}'
-          description: 'turns on bonding'
-      - bool:
-          name: KVM_USE
-          default: '{obj:kvm_use}'
-          description: 'turns on kvm_mode for an openstack cluster'
-      - bool:
-          name: FORCE_VSRX_COPY
-          default: '{obj:force_vsrx_copy}'
-          description: 'force copying of vsrx image'
-      - string:
-          name: MIRROR
-          default: 'http://mirror.seed-cz1.fuel-infra.org'
-          description: 'mirror for package repositories. this mirror is optimized for CZ'
-      - string:
-          name: CONTRAIL_PLUGIN_PATH
-      - string:
-          name: CONTRAIL_DISTRIBUTION
-      - string:
-          name: CONTRAIL_VERSION
-          default: '{plugin_version}'
-          description: 'There is a version of juniper packages stored in common sotrage'
-      - string:
-          name: POOL_ADMIN
-      - string:
-          name: POOL_PUBLIC
-      - string:
-          name: POOL_MANAGEMENT
-      - string:
-          name: POOL_PRIVATE
-      - string:
-          name: POOL_STORAGE
-      - string:
-          name: CONTRAIL_PLUGIN_PACK_UB_PATH
-          description: 'The path to the contrail package on storage'
-      - string:
-          name: MIRROR_UBUNTU
-          default: >
-             deb ${{MIRROR}}/pkgs/ubuntu/ trusty main universe multiverse |
-             deb ${{MIRROR}}/pkgs/ubuntu/ trusty-updates main universe multiverse |
-             deb ${{MIRROR}}/pkgs/ubuntu/ trusty-security main universe multiverse
-          description: 'proposed repositories to update ubuntu cluster'
       - text:
-          name: ADDITIONAL_PARAMETERS
+          name: SPECIFIC_PROPS
           default: |
-            NODE_VOLUME_SIZE=512
-            CONTRAIL_VERSION={plugin_version}
-            PLUGIN_VERSION=${{CONTRAIL_VERSION}}
-            VSRX_ORIGINAL_IMAGE_PATH={vsrx_original_image_path}
-            VSRX_TARGET_IMAGE_PATH={vsrx_target_image_path}
-            VSRX_TEMPLATE_PATH={vsrx_template_path}
-            ISO_STORAGE={iso_storage}
-
+            BM_HOST_BRIDGE_INTERFACES=eth2:10.109.0.0/24;eth3:10.109.4.0/24;
+            BM_IPMI_ADDR=cz7660-kvm.host-telecom.com;
+            BM_IPMI_PASSWORD=Ba2Ie23#GHgho;
+            BM_IPMI_USER=engineer;
+            BM_TARGET_MACS=00:1b:21:87:21:99;00:1b:21:87:21:98;
+            BONDING=False;
+            CONTRAIL_DISTRIBUTION=;
+            CONTRAIL_PLUGIN_PACK_UB_PATH=;
+            CONTRAIL_PLUGIN_PATH=;
+            CONTRAIL_VERSION=5.0;
+            DISABLE_SSL=false;
+            FORCE_DISABLE_UPDATES=true;
+            FORCE_VSRX_COPY=False;
+            KVM_USE=True;
+            MIRROR=http://mirror.seed-cz1.fuel-infra.org;
+            MULTIPLE_NETWORKS=;
+            MULTIPLE_NETWORKS_TEMPLATE=;
+            NODE_VOLUME_SIZE=512;
+            SPECIFIC_VC=False;
+            VSRX_CONFIG_PATH=;
+            VSRX_ORIGINAL_IMAGE_PATH=/storage/contrail/vSRX.400.img;
+            VSRX_TARGET_IMAGE_PATH=/var/lib/libvirt/images/vSRX.400.img;
+            VSRX_TEMPLATE_PATH=/storage/contrail/vSRX_400.template;
 - project:
     name: 'predefined_parameters'
     fuel_release: '8.0'
+    fuel_release_checker: '8.0'
     plugin_version: '4.0.0'
     plugin-name: 'contrail'
     build-name: '{fuel_release}.{plugin-name}.{plugin_version}.build'
@@ -79,34 +47,32 @@
     reporter-name: '{fuel_release}.{plugin-name}.{plugin_version}.reporter'
     smoke-test-name: 'contrail_smoke'
     bvt-test-name: 'contrail_bvt'
-    admin_node_memory: '4096'
-    slave_node_memory: '4096'
-    admin_node_cpu: '4'
-    slave_node_cpu: '4'
     pkg_job_name: '{fuel_release}.{plugin-name}.{plugin_version}.build'
-    iso_job_name: ''
     nightly_timer: 'H 21 * * *'
     regression_timer: 'H 18 * * *'
     nightly_disabled: true
-    baremetal_disabled: false
+    baremetal_disabled: true
     regression_disabled: true
     use_snapshots: false
     force_erase: true
+    force_reuse: false
     force_vsrx_copy: false
     recreate_venv: false
-    disable_ssl: false
+    ws_norevert: false
+    nfs_clean: false
     bonding: false
     kvm_use: false
-    update_master: true
+    update_master: false
+    enable_proposed: false
     debug: true
     build_debug: true
     publish_results: true
     multijob_build_pkg: true
     testjob_build_pkg: false
-    runner_timeout: 600
-    test_timeout: 300
+    fuel_qa_refs: ''
     iso_file: 'MirantisOpenStack-8.0.iso'
     iso_storage: '/storage/downloads'
+    snapshots_id: 'released'
     gerrit_repo: 'fuel-plugin-contrail'
     gerrit_branch: 'stable/4.0'
     email_to: 'rkhozinov@mirantis.com okosse@mirantis.com otsvigun@mirantis.com'
@@ -115,11 +81,6 @@
     scm_wipe_workspace: false
     skip_vote_successfull: false
     skip_vote_failed: false
-
-    vsrx_original_image_path: '/storage/contrail/vSRX.400.img'
-    vsrx_target_image_path: '/var/lib/libvirt/images/vSRX.400.img'
-    vsrx_template_path: '/storage/contrail/vSRX_400.template'
-
 
     testrail_project: "Contrail plugin"
     testrail_suite: "[8.0][PCE] Fuel plugin contrail v4.0.0"
@@ -228,8 +189,6 @@
       - '{fuel_release}.{plugin-name}.{plugin_version}.bvt.test.juniper'
 
       - '{regression-name}':
-          iso_file: 'MirantisOpenStack-8.0.iso'
-          iso_storage: '/storage/downloads'
           testrail_suite: "Contrail Plugin v4.x.x"
           testrail_suite_desc: "Suite description"
           testrail_milestone: "Fuel Contrail Plugin v4.0.0"
@@ -251,39 +210,32 @@
           default: '{multijob_build_pkg}'
           description: "Triggers build of pkg of $PKG_JOB_NAME before run of tests"
       - common-parameters:
-          publish_results:      '{publish_results}'
-          debug:                '{debug}'
-          disable_ssl:          '{disable_ssl}'
-          force_erase:          '{force_erase}'
-          recreate_venv:        '{recreate_venv}'
-          use_snapshots:        '{use_snapshots}'
-          iso_file:             '{iso_file}'
-          gerrit_branch:        '{gerrit_branch}'
-          env_prefix:           '{fuel_release}.{plugin-name}'
-          pkg_job_name:         '{pkg_job_name}'
-          iso_job_name:         '{iso_job_name}'
-          admin_node_memory:    '{admin_node_memory}'
-          slave_node_memory:    '{slave_node_memory}'
-          admin_node_cpu:       '{admin_node_cpu}'
-          slave_node_cpu:       '{slave_node_cpu}'
-          testrail_suite:       '{testrail_suite}'
-          testrail_suite_desc:  '{testrail_suite_desc}'
-          testrail_plan:        '{testrail_plan}'
-          testrail_plan_desc:   '{testrail_plan_desc}'
+          debug:                 '{debug}'
+          enable_proposed:       '{enable_proposed}'
+          env_prefix:            '{fuel_release}.{plugin-name}'
+          force_erase:           '{force_erase}'
+          force_reuse:           '{force_reuse}'
+          fuel_qa_refs:          '{fuel_qa_refs}'
+          fuel_release_checker:  '{fuel_release_checker}'
+          gerrit_branch:         '{gerrit_branch}'
+          iso_file:              '{iso_file}'
+          kvm_use:               '{kvm_use}'
+          nfs_clean:             '{nfs_clean}'
+          pkg_job_name:          '{pkg_job_name}'
+          plugin_version:        '{plugin_version}'
+          publish_results:       '{publish_results}'
+          recreate_venv:         '{recreate_venv}'
+          skip_vote_failed:      '{skip_vote_failed}'
           skip_vote_successfull: '{skip_vote_successfull}'
-          skip_vote_failed:     '{skip_vote_failed}'
-          kvm_use:              '{kvm_use}'
+          snapshots_id:          '{snapshots_id}'
+          testrail_plan:         '{testrail_plan}'
+          testrail_plan_desc:    '{testrail_plan_desc}'
+          testrail_suite:        '{testrail_suite}'
+          testrail_suite_desc:   '{testrail_suite_desc}'
+          update_master:         '{update_master}'
+          ws_norevert:           '{ws_norevert}'
+      - plugin-specific-parameters
 
-      - plugin-specific-parameters:
-          bonding:              '{bonding}'
-          kvm_use:              '{kvm_use}'
-          update_master:        '{update_master}'
-          plugin_version:       '{plugin_version}'
-          force_vsrx_copy:      '{force_vsrx_copy}'
-          vsrx_original_image_path: '{vsrx_original_image_path}'
-          vsrx_target_image_path:   '{vsrx_target_image_path}'
-          vsrx_template_path:       '{vsrx_template_path}'
-          iso_storage:           '{iso_storage}'
 
 # parameters for jobs created per test-group and custom test job
 - test-parameters: &test-parameters
@@ -303,37 +255,32 @@
           description: "test-group name"
       - common-parameters:
           publish_results:      '{publish_results}'
-          debug:                '{debug}'
-          disable_ssl:          '{disable_ssl}'
-          force_erase:          '{force_erase}'
-          recreate_venv:        '{recreate_venv}'
-          use_snapshots:        '{use_snapshots}'
-          iso_file:             '{iso_file}'
-          gerrit_branch:        '{gerrit_branch}'
-          env_prefix:           '{fuel_release}.{plugin-name}'
-          pkg_job_name:         '{pkg_job_name}'
-          iso_job_name:         '{iso_job_name}'
-          admin_node_memory:    '{admin_node_memory}'
-          slave_node_memory:    '{slave_node_memory}'
-          admin_node_cpu:       '{admin_node_cpu}'
-          slave_node_cpu:       '{slave_node_cpu}'
-          testrail_suite:       '{testrail_suite}'
-          testrail_suite_desc:  '{testrail_suite_desc}'
-          testrail_plan:        '{testrail_plan}'
-          testrail_plan_desc:   '{testrail_plan_desc}'
-          skip_vote_successfull: '{skip_vote_successfull}'
-          skip_vote_failed:     '{skip_vote_failed}'
-          kvm_use:              '{kvm_use}'
-      - plugin-specific-parameters:
-          update_master:        '{update_master}'
-          bonding:              '{bonding}'
-          kvm_use:              '{kvm_use}'
-          plugin_version:       '{plugin_version}'
-          force_vsrx_copy:      '{force_vsrx_copy}'
-          vsrx_original_image_path: '{vsrx_original_image_path}'
-          vsrx_target_image_path:   '{vsrx_target_image_path}'
-          vsrx_template_path:       '{vsrx_template_path}'
+          debug:                 '{debug}'
+          enable_proposed:       '{enable_proposed}'
+          env_prefix:            '{fuel_release}.{plugin-name}'
+          force_erase:           '{force_erase}'
+          force_reuse:           '{force_reuse}'
+          fuel_qa_refs:          '{fuel_qa_refs}'
+          fuel_release_checker:  '{fuel_release_checker}'
+          gerrit_branch:         '{gerrit_branch}'
+          iso_file:              '{iso_file}'
           iso_storage:           '{iso_storage}'
+          kvm_use:               '{kvm_use}'
+          nfs_clean:             '{nfs_clean}'
+          pkg_job_name:          '{pkg_job_name}'
+          plugin_version:        '{plugin_version}'
+          publish_results:       '{publish_results}'
+          recreate_venv:         '{recreate_venv}'
+          skip_vote_failed:      '{skip_vote_failed}'
+          skip_vote_successfull: '{skip_vote_successfull}'
+          snapshots_id:          '{snapshots_id}'
+          testrail_plan:         '{testrail_plan}'
+          testrail_plan_desc:    '{testrail_plan_desc}'
+          testrail_suite:        '{testrail_suite}'
+          testrail_suite_desc:   '{testrail_suite_desc}'
+          update_master:         '{update_master}'
+          ws_norevert:           '{ws_norevert}'
+      - plugin-specific-parameters
 
 - defaults:
     name: global
@@ -348,13 +295,12 @@
           skip_vote_successfull: '{skip_vote_successfull}'
           skip_vote_failed:     '{skip_vote_failed}'
     wrappers:
-      - test-wrapper:
-          test_timeout: '{test_timeout}'
+      - test-wrapper
     properties:
       - test-property
     builders:
-      - inject:
-          properties-content: $ADDITIONAL_PARAMETERS
+      - get-refs
+      - get-props
       - conditional-step:
            condition-kind: shell
            condition-command: |
@@ -386,16 +332,7 @@
                 project: ${{PKG_JOB_NAME}}
                 which-build: specific-build
                 build-number: ${{PKG_JOB_BUILD_NUMBER}}
-      - conditional-step:
-          condition-kind: shell
-          condition-command: |
-            [ ! -z ${{ISO_JOB_NAME}} ] && \
-            [   -z ${{ISO_FILE}}     ]
-          steps:
-            - copyartifact:
-                project: "${{ISO_JOB_NAME}}"
-                filter: "iso_file"
-                which-build: last-successful
+      - get-updates
       - shell:
           !include-raw-escape: ../builders/common.prepare.sh
       - shell:
@@ -411,9 +348,9 @@
     name: '{build-name}'
     node: 'runner'
     concurrent: true
-    disabled: false
+    disabled: true
     triggers:
-      - draft-patchset-gerrit-trigger:
+      - draft-gerrit-trigger:
           gerrit_repo: '{gerrit_repo}'
           gerrit_branch: '{gerrit_branch}'
           skip_vote_successfull: '{skip_vote_successfull}'
@@ -525,32 +462,35 @@
           properties_name: regression.properties
           email_to: '{email_to}'
     builders:
-      - inject:
-          properties-content: $ADDITIONAL_PARAMETERS
+      - shell: |
+          #!/bin/bash
+          cat <<EOF > property
+          TEST_GROUP=contrail_bvt
+          CONTRAIL_DISTRIBUTION=juniper
+          CONTRAIL_PLUGIN_PATH={released_plugin_path}
+          PLUGIN_VERSION={plugin_version}
+          PKG_JOB_BUILD_NUMBER=released
+          EOF
       - multijob:
           name: '1st phase - regression test'
           condition: COMPLETED
           projects:
             - name: '{fuel_release}.{plugin-name}.{plugin_version}.regression.test.juniper'
-              predefined-parameters: |
-                TEST_GROUP=contrail_bvt
-                CONTRAIL_DISTRIBUTION=juniper
-                CONTRAIL_PLUGIN_PATH={released_plugin_path}
-                PLUGIN_VERSION={plugin_version}
-                PKG_JOB_BUILD_NUMBER=released
+              property-file: property
               current-parameters: true
               kill-phase-on: NEVER
 
 - job-template:
     name: '{smoke-name}'
-    disabled: false
+    disabled: true
     description: 'The Smoke test for {fuel_release}.{plugin-name}.{plugin_version}'
     concurrent: true
+    quiet-period: 5
     project-type: multijob
     node: runner
     <<: *runner-parameters
     triggers:
-      - draft-patchset-gerrit-trigger:
+      - draft-gerrit-trigger:
           gerrit_repo: '{gerrit_repo}'
           gerrit_branch: '{gerrit_branch}'
           skip_vote_successfull: '{skip_vote_successfull}'
@@ -562,8 +502,6 @@
       - runner-wrapper
     scm: []
     builders:
-      - inject:
-          properties-content: $ADDITIONAL_PARAMETERS
       - runner-condition
       - multijob:
           name: 'The smoke test for {fuel_release}.{plugin-name}.{plugin_version}'
@@ -584,7 +522,7 @@
 - job-template:
     name: '{bvt-name}'
     description: 'The BVT test for {fuel_release}.{plugin-name}.{plugin_version}'
-    disabled: false
+    disabled: true
     concurrent: true
     project-type: multijob
     node: runner
@@ -602,8 +540,6 @@
     wrappers:
       - runner-wrapper
     builders:
-      - inject:
-          properties-content: $ADDITIONAL_PARAMETERS
       - runner-condition
       - multijob:
           name: 'The BVT test for {fuel_release}.{plugin-name}.{plugin_version}'

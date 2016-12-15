@@ -2,12 +2,47 @@
 - parameter:
     name: plugin-specific-parameters
     parameters:
-    - string:
-        name: PLUGIN_VERSION
-        default: '{plugin_version}'
+      - text:
+          name: SPECIFIC_PROPS
+          default: |
+            ADMIN_NODE_MEMORY=8192;
+            CLEAN_IPTABLES=true;
+            CONV_SNAP_PATH=utils/jenkins/conv_snapshot_file.py;
+            DISABLE_STP=true;
+            ESXI_HOSTS=172.16.0.250 172.16.0.252 172.16.0.253;
+            FORCE_DISABLE_UPDATES=true;
+            NFS_SERVER=172.16.0.1;
+            NFS_SHARES=nfs nfs2;
+            SLAVE_NODE_MEMORY=8192;
+            VCENTER_CERT_BYPASS=True;
+            VCENTER_CERT_URL="http://tpi-s2.bud.mirantis.net:5000/downloads/certs/server.pem";
+            VCENTER_CLUSTERS=Cluster1,Cluster2;
+            VCENTER_DATACENTER=Datacenter;
+            VCENTER_DATASTORE=nfs;
+            VCENTER_GLANCE_CERT_BYPASS=True;
+            VCENTER_GLANCE_CERT_URL="http://tpi-s2.bud.mirantis.net:5000/downloads/certs/server.pem";
+            VCENTER_GLANCE_IP=172.16.0.145;
+            VCENTER_GLANCE_PASSWORD=vmware;
+            VCENTER_GLANCE_USERNAME=openstack;
+            VCENTER_IP=172.16.0.145;
+            VCENTER_PASSWORD=vmware;
+            VCENTER_USE=true;
+            VCENTER_USERNAME=openstack;
+            VC_IMAGE_DIR=openstack_glance;
+            VMWARE_IMG_LOGIN=root;
+            VMWARE_IMG_NAME=shaker.vmdk;
+            VMWARE_IMG_PASSWORD=r00tme;
+            VMWARE_IMG_URL="http://pce-storage.bud.mirantis.net:5000/distr/$VMWARE_IMG_NAME";
+            VSPHERE_VERSION=5.5;
+            WORKSTATION_IFS=vmnet2,vmnet3,vmnet4;
+            WORKSTATION_NODES=esxi1 esxi2 esxi3 vcenter;
+            WORKSTATION_PASSWORD=VMware01;
+            WORKSTATION_SNAPSHOT=doubledvs;
+            WORKSTATION_USERNAME=vmware;
 - project:
     name: 'predefined_parameters'
     fuel_release: '8.0'
+    fuel_release_checker: '8.0'
     plugin_version: '2.0.0'
     plugin-name: 'vcenter'
     build-name: '{fuel_release}.dvs.build'
@@ -15,29 +50,24 @@
     nightly-name: '{fuel_release}.{plugin-name}.nightly'
     custom-name: '{fuel_release}.{plugin-name}.custom'
     reporter-name: '{fuel_release}.{plugin-name}.reporter'
-    admin_node_memory: '8192'
-    slave_node_memory: '8192'
-    admin_node_cpu: '4'
-    slave_node_cpu: '4'
     pkg_job_name: '{fuel_release}.dvs.build'
     nightly_timer: 'H 22 * * *'
     regression_timer: 'H 18 * * *'
     nightly_disabled: true
     regression_disabled: true
-    force_erase: true
+    force_erase: false
+    force_reuse: false
     recreate_venv: false
     ws_norevert: false
     nfs_clean: true
-    disable_ssl: true
     kvm_use: false
-    update_master: true
+    update_master: false
     enable_proposed: false
     debug: true
     publish_results: true
     multijob_build_pkg: true
     testjob_build_pkg: false
-    runner_timeout: 600
-    test_timeout: 300
+    fuel_qa_refs: ''
     iso_file: 'MirantisOpenStack-8.0.iso'
     iso_storage: '/storage/downloads'
     snapshots_id: 'released'
@@ -130,32 +160,31 @@
           default: '{multijob_build_pkg}'
           description: "Triggers build of pkg of $PKG_JOB_NAME before run of tests"
       - common-parameters:
-          publish_results:      '{publish_results}'
-          debug:                '{debug}'
-          disable_ssl:          '{disable_ssl}'
-          force_erase:          '{force_erase}'
-          recreate_venv:        '{recreate_venv}'
-          ws_norevert:          '{ws_norevert}'
-          nfs_clean:            '{nfs_clean}'
-          iso_file:             '{iso_file}'
-          gerrit_branch:        '{gerrit_branch}'
-          env_prefix:           '{fuel_release}.{plugin-name}'
-          pkg_job_name:         '{pkg_job_name}'
-          admin_node_memory:    '{admin_node_memory}'
-          slave_node_memory:    '{slave_node_memory}'
-          admin_node_cpu:       '{admin_node_cpu}'
-          slave_node_cpu:       '{slave_node_cpu}'
-          testrail_suite:       '{testrail_suite}'
-          testrail_suite_desc:  '{testrail_suite_desc}'
-          testrail_plan:        '{testrail_plan}'
-          testrail_plan_desc:   '{testrail_plan_desc}'
+          debug:                 '{debug}'
+          enable_proposed:       '{enable_proposed}'
+          env_prefix:            '{fuel_release}.{plugin-name}'
+          force_erase:           '{force_erase}'
+          force_reuse:           '{force_reuse}'
+          fuel_qa_refs:          '{fuel_qa_refs}'
+          fuel_release_checker:  '{fuel_release_checker}'
+          gerrit_branch:         '{gerrit_branch}'
+          iso_file:              '{iso_file}'
+          iso_storage:           '{iso_storage}'
+          kvm_use:               '{kvm_use}'
+          nfs_clean:             '{nfs_clean}'
+          pkg_job_name:          '{pkg_job_name}'
+          plugin_version:        '{plugin_version}'
+          publish_results:       '{publish_results}'
+          recreate_venv:         '{recreate_venv}'
+          skip_vote_failed:      '{skip_vote_failed}'
           skip_vote_successfull: '{skip_vote_successfull}'
-          skip_vote_failed:     '{skip_vote_failed}'
-          enable_proposed:      '{enable_proposed}'
-          update_master:        '{update_master}'
-          kvm_use:              '{kvm_use}'
-          iso_storage:          '{iso_storage}'
-          snapshots_id:         '{snapshots_id}'
+          snapshots_id:          '{snapshots_id}'
+          testrail_plan:         '{testrail_plan}'
+          testrail_plan_desc:    '{testrail_plan_desc}'
+          testrail_suite:        '{testrail_suite}'
+          testrail_suite_desc:   '{testrail_suite_desc}'
+          update_master:         '{update_master}'
+          ws_norevert:           '{ws_norevert}'
       - plugin-specific-parameters
 
 # parameters for jobs created per test-group and custom test job
@@ -183,32 +212,31 @@
           name: TEST_GROUP_CONFIG
           default: '${{TEST_GROUP}}'
       - common-parameters:
-          publish_results: '{publish_results}'
-          debug:           '{debug}'
-          disable_ssl:     '{disable_ssl}'
-          force_erase:     '{force_erase}'
-          recreate_venv:   '{recreate_venv}'
-          ws_norevert:     '{ws_norevert}'
-          nfs_clean:       '{nfs_clean}'
-          iso_file:        '{iso_file}'
-          gerrit_branch:   '{gerrit_branch}'
-          env_prefix:      '{fuel_release}.{plugin-name}'
-          pkg_job_name:    '{pkg_job_name}'
-          admin_node_memory:    '{admin_node_memory}'
-          slave_node_memory:    '{slave_node_memory}'
-          admin_node_cpu:       '{admin_node_cpu}'
-          slave_node_cpu:       '{slave_node_cpu}'
-          testrail_suite:       '{testrail_suite}'
-          testrail_suite_desc:  '{testrail_suite_desc}'
-          testrail_plan:        '{testrail_plan}'
-          testrail_plan_desc:   '{testrail_plan_desc}'
+          debug:                 '{debug}'
+          enable_proposed:       '{enable_proposed}'
+          env_prefix:            '{fuel_release}.{plugin-name}'
+          force_erase:           '{force_erase}'
+          force_reuse:           '{force_reuse}'
+          fuel_qa_refs:          '{fuel_qa_refs}'
+          fuel_release_checker:  '{fuel_release_checker}'
+          gerrit_branch:         '{gerrit_branch}'
+          iso_file:              '{iso_file}'
+          iso_storage:           '{iso_storage}'
+          kvm_use:               '{kvm_use}'
+          nfs_clean:             '{nfs_clean}'
+          pkg_job_name:          '{pkg_job_name}'
+          plugin_version:        '{plugin_version}'
+          publish_results:       '{publish_results}'
+          recreate_venv:         '{recreate_venv}'
+          skip_vote_failed:      '{skip_vote_failed}'
           skip_vote_successfull: '{skip_vote_successfull}'
-          skip_vote_failed:     '{skip_vote_failed}'
-          enable_proposed:      '{enable_proposed}'
-          update_master:        '{update_master}'
-          kvm_use:              '{kvm_use}'
-          iso_storage:          '{iso_storage}'
-          snapshots_id:         '{snapshots_id}'
+          snapshots_id:          '{snapshots_id}'
+          testrail_plan:         '{testrail_plan}'
+          testrail_plan_desc:    '{testrail_plan_desc}'
+          testrail_suite:        '{testrail_suite}'
+          testrail_suite_desc:   '{testrail_suite_desc}'
+          update_master:         '{update_master}'
+          ws_norevert:           '{ws_norevert}'
       - plugin-specific-parameters
 
 - defaults:
@@ -224,58 +252,12 @@
           skip_vote_successfull: '{skip_vote_successfull}'
           skip_vote_failed: '{skip_vote_failed}'
     wrappers:
-      - test-wrapper:
-          test_timeout: '{test_timeout}'
+      - test-wrapper
     properties:
       - test-property
     builders:
-      - inject:
-          properties-content: |
-            ENV_PREFIX={fuel_release}.{plugin-name}
-            OPENSTACK_RELEASE=Ubuntu
-            NODES_COUNT=10
-            DESTROY_ENV_AFTER=0
-            ADMIN_NODE_MEMORY={admin_node_memory}
-            SLAVE_NODE_MEMORY={slave_node_memory}
-            ADMIN_NODE_CPU={admin_node_cpu}
-            SLAVE_NODE_CPU={slave_node_cpu}
-            TREP_TESTRAIL_SUITE={testrail_suite}
-            TREP_TESTRAIL_SUITE_DESCRIPTION={testrail_suite_desc}
-            TREP_TESTRAIL_PLAN={testrail_plan}
-            TREP_TESTRAIL_PLAN_DESCRIPTION={testrail_plan_desc}
-            SNAPSHOT_OUTPUT_FILE=extra_repos.sh
-            SNAPSHOT_ARTIFACTS_FILE=snapshots.params
-            ESXI_PASSWORD=swordfish
-            ESXI_USER=root
-            ESXI_HOSTS=172.16.0.250 172.16.0.252 172.16.0.253
-            NFS_SERVER=172.16.0.1
-            NFS_SHARES=nfs nfs2
-            VSPHERE_VERSION=5.5
-            WORKSTATION_SNAPSHOT=doubledvs
-            WORKSTATION_IFS=vmnet2,vmnet3,vmnet4
-            WORKSTATION_NODES=esxi1 esxi2 esxi3 vcenter
-            VCENTER_IP=172.16.0.145
-            VCENTER_USERNAME=openstack
-            VCENTER_PASSWORD=vmware
-            VCENTER_GLANCE_IP=172.16.0.145
-            VCENTER_GLANCE_USERNAME=openstack
-            VCENTER_GLANCE_PASSWORD=vmware
-            VCENTER_DATACENTER=Datacenter
-            VCENTER_DATASTORE=nfs
-            VCENTER_CLUSTERS=Cluster1,Cluster2
-            #DVS_NAME=Cluster1:Cluster1;Cluster2:Cluster2
-            VCENTER_USE=true
-            VC_IMAGE_DIR=openstack_glance
-            VMWARE_IMG_NAME=shaker.vmdk
-            VMWARE_IMG_URL="http://pce-storage.bud.mirantis.net:5000/distr/$VMWARE_IMG_NAME"
-            VMWARE_IMG_LOGIN=root
-            VMWARE_IMG_PASSWORD=r00tme
-            CLEAN_IPTABLES=true
-            DISABLE_STP=true
-            VCENTER_GLANCE_CERT_URL="http://tpi-s2.bud.mirantis.net:5000/downloads/certs/server.pem"
-            VCENTER_GLANCE_CERT_BYPASS=True
-            VCENTER_CERT_URL="http://tpi-s2.bud.mirantis.net:5000/downloads/certs/server.pem"
-            VCENTER_CERT_BYPASS=True
+      - get-refs
+      - get-props
       - conditional-step:
           condition-kind: shell
           condition-command: |
@@ -297,6 +279,7 @@
                 project: ${{PKG_JOB_NAME}}
                 which-build: specific-build
                 build-number: ${{PKG_JOB_BUILD_NUMBER}}
+      - get-updates
       - shell:
           !include-raw-escape: ../builders/common.prepare.sh
       - shell:

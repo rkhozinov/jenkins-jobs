@@ -2,44 +2,44 @@
 - parameter:
     name: plugin-specific-parameters
     parameters:
-      - bool:
-          name: ENABLE_UPDATES
-          default: true
-      - bool:
-          name: ENABLE_SECURITY
-          default: true
-      - bool:
-          name: ENABLE_UPDATE_CENTOS
-          default: true
-      - string:
-          name: LOCATION
-          default: bud
       - text:
-          name: VCENTER_PARAMETERS
+          name: SPECIFIC_PROPS
           default: |
-            ESXI_PASSWORD=swordfish
-            ESXI_USER=root
-            ESXI_HOSTS=172.16.0.250 172.16.0.252 172.16.0.253
-            NFS_SERVER=172.16.0.1
-            NFS_SHARES=nfs nfs2
-            VSPHERE_VERSION=5.5
-            WORKSTATION_SNAPSHOT=doubledvs
-            WORKSTATION_IFS=vmnet2,vmnet3
-            WORKSTATION_NODES=esxi1 esxi2 esxi3 vcenter
-            VCENTER_IP=172.16.0.145
-            VCENTER_USERNAME=root
-            VCENTER_PASSWORD=vmware
-            VC_DATACENTER=Datacenter
-            VCENTER_DATASTORE=nfs
-            VCENTER_CLUSTERS=Cluster1,Cluster2
-            DVS_SWITCHES=Cluster1,Cluster2
-            VCENTER_USE=true
-            CLEAN_IPTABLES=true
-            DISABLE_STP=true
-
+            ENABLE_UPDATES=true;
+            ENABLE_SECURITY=true;
+            ENABLE_UPDATE_CENTOS=true;
+            LOCATION=bud;
+            DEB_LATESTlatest;
+            RPM_LATEST=latest;
+            ADMIN_NODE_MEMORY=8192;
+            CLEAN_IPTABLES=true;
+            DISABLE_STP=true;
+            DVS_SWITCHES=Cluster1,Cluster2;
+            DVS_UPLINKS=dvUplink1,dvUplink2,dvUplink3;
+            ESXI_HOSTS=172.16.0.250 172.16.0.252 172.16.0.253;
+            FORCE_DISABLE_UPDATES=true;
+            NFS_SERVER=172.16.0.1;
+            NFS_SHARES=nfs nfs2;
+            SLAVE_NODE_MEMORY=8192;
+            VCENTER_CERT_BYPASS=True;
+            VCENTER_CERT_URL=http://tpi-s2.bud.mirantis.net:5000/downloads/certs/server.pem;
+            VCENTER_CLUSTERS=Cluster1,Cluster2;
+            VCENTER_DATASTORE=nfs;
+            VCENTER_IP=172.16.0.145;
+            VCENTER_PASSWORD=vmware;
+            VCENTER_USE=true;
+            VCENTER_USERNAME=openstack;
+            VC_DATACENTER=Datacenter;
+            VSPHERE_VERSION=5.5;
+            WORKSTATION_IFS=vmnet2,vmnet3,vmnet4;
+            WORKSTATION_NODES=esxi1 esxi2 esxi3 vcenter;
+            WORKSTATION_PASSWORD=VMware01;
+            WORKSTATION_SNAPSHOT=doubledvs;
+            WORKSTATION_USERNAME=vmware;
 - project:
     name: 'predefined_parameters'
     fuel_release: '8.0'
+    fuel_release_checker: '8.0'
     plugin_version: '2.0.0'
     plugin-name: 'dvs-agentless'
     build-name: '{fuel_release}.{plugin-name}.build'
@@ -55,30 +55,25 @@
     smoke-test-name: 'dvs_vcenter_smoke'
     bvt-test-name: 'dvs_vcenter_bvt'
     regression-test-name: 'dvs_regression'
-    admin_node_memory: '8192'
-    slave_node_memory: '8192'
-    admin_node_cpu: '4'
-    slave_node_cpu: '4'
     pkg_job_name: '{fuel_release}.{plugin-name}.build'
     nightly_timer: 'H 22 * * *'
     regression_timer: 'H 18 * * *'
-    nightly_disabled: false
+    nightly_disabled: true
     regression_disabled: true
     force_erase: false
+    force_reuse: false
     recreate_venv: false
     ws_norevert: false
     nfs_clean: false
-    disable_ssl: true
     kvm_use: false
-    update_master: true
+    update_master: false
     enable_proposed: false
     debug: true
     build_debug: true
     publish_results: true
     multijob_build_pkg: true
     testjob_build_pkg: false
-    runner_timeout: 600
-    test_timeout: 300
+    fuel_qa_refs: ''
     iso_file: 'MirantisOpenStack-8.0.iso'
     iso_storage: '/storage/downloads'
     snapshots_id: 'released'
@@ -94,7 +89,6 @@
     testrail_project: "VMware DVS plugin"
     testrail_suite: "[8.0][PCE] VMware DVS plugin v2.0.0"
     testrail_suite_desc: "Suite description"
-#   testrail_suite_conf: "CI job: [${{JOB_NAME}}](${{JOB_URL}})"
     testrail_milestone: "2.0.0"
     testrail_plan: "$TREP_TESTRAIL_SUITE build#${{PKG_JOB_BUILD_NUMBER}}"
     testrail_plan_desc: "Test plan description"
@@ -188,33 +182,31 @@
           default: '{multijob_build_pkg}'
           description: "Triggers build of pkg of $PKG_JOB_NAME before run of tests"
       - common-parameters:
-          publish_results:      '{publish_results}'
-          debug:                '{debug}'
-          disable_ssl:          '{disable_ssl}'
-          force_erase:          '{force_erase}'
-          recreate_venv:        '{recreate_venv}'
-          ws_norevert:          '{ws_norevert}'
-          nfs_clean:            '{nfs_clean}'
-          iso_file:             '{iso_file}'
-          gerrit_branch:        '{gerrit_branch}'
-          env_prefix:           '{fuel_release}.{plugin-name}'
-          pkg_job_name:         '{pkg_job_name}'
-          admin_node_memory:    '{admin_node_memory}'
-          slave_node_memory:    '{slave_node_memory}'
-          admin_node_cpu:       '{admin_node_cpu}'
-          slave_node_cpu:       '{slave_node_cpu}'
-          testrail_suite:       '{testrail_suite}'
-          testrail_suite_desc:  '{testrail_suite_desc}'
-#         testrail_suite_conf:  '{testrail_suite_conf}'
-          testrail_plan:        '{testrail_plan}'
-          testrail_plan_desc:   '{testrail_plan_desc}'
+          debug:                 '{debug}'
+          enable_proposed:       '{enable_proposed}'
+          env_prefix:            '{fuel_release}.{plugin-name}'
+          force_erase:           '{force_erase}'
+          force_reuse:           '{force_reuse}'
+          fuel_qa_refs:          '{fuel_qa_refs}'
+          fuel_release_checker:  '{fuel_release_checker}'
+          gerrit_branch:         '{gerrit_branch}'
+          iso_file:              '{iso_file}'
+          iso_storage:           '{iso_storage}'
+          kvm_use:               '{kvm_use}'
+          nfs_clean:             '{nfs_clean}'
+          pkg_job_name:          '{pkg_job_name}'
+          plugin_version:        '{plugin_version}'
+          publish_results:       '{publish_results}'
+          recreate_venv:         '{recreate_venv}'
+          skip_vote_failed:      '{skip_vote_failed}'
           skip_vote_successfull: '{skip_vote_successfull}'
-          skip_vote_failed:     '{skip_vote_failed}'
-          enable_proposed:      '{enable_proposed}'
-          update_master:        '{update_master}'
-          kvm_use:              '{kvm_use}'
-          iso_storage:          '{iso_storage}'
-          snapshots_id:         '{snapshots_id}'
+          snapshots_id:          '{snapshots_id}'
+          testrail_plan:         '{testrail_plan}'
+          testrail_plan_desc:    '{testrail_plan_desc}'
+          testrail_suite:        '{testrail_suite}'
+          testrail_suite_desc:   '{testrail_suite_desc}'
+          update_master:         '{update_master}'
+          ws_norevert:           '{ws_norevert}'
       - plugin-specific-parameters
 
 # parameters for jobs created per test-group and custom test job
@@ -233,33 +225,31 @@
           name: TEST_GROUP_CONFIG
           default: '${{TEST_GROUP}}'
       - common-parameters:
-          publish_results: '{publish_results}'
-          debug:           '{debug}'
-          disable_ssl:     '{disable_ssl}'
-          force_erase:     '{force_erase}'
-          recreate_venv:   '{recreate_venv}'
-          ws_norevert:     '{ws_norevert}'
-          nfs_clean:       '{nfs_clean}'
-          iso_file:        '{iso_file}'
-          gerrit_branch:   '{gerrit_branch}'
-          env_prefix:      '{fuel_release}.{plugin-name}'
-          pkg_job_name:    '{pkg_job_name}'
-          admin_node_memory:    '{admin_node_memory}'
-          slave_node_memory:    '{slave_node_memory}'
-          admin_node_cpu:       '{admin_node_cpu}'
-          slave_node_cpu:       '{slave_node_cpu}'
-          testrail_suite:       '{testrail_suite}'
-          testrail_suite_desc:  '{testrail_suite_desc}'
-#         testrail_suite_conf:  '{testrail_suite_conf}'
-          testrail_plan:        '{testrail_plan}'
-          testrail_plan_desc:   '{testrail_plan_desc}'
+          debug:                 '{debug}'
+          enable_proposed:       '{enable_proposed}'
+          env_prefix:            '{fuel_release}.{plugin-name}'
+          force_erase:           '{force_erase}'
+          force_reuse:           '{force_reuse}'
+          fuel_qa_refs:          '{fuel_qa_refs}'
+          fuel_release_checker:  '{fuel_release_checker}'
+          gerrit_branch:         '{gerrit_branch}'
+          iso_file:              '{iso_file}'
+          iso_storage:           '{iso_storage}'
+          kvm_use:               '{kvm_use}'
+          nfs_clean:             '{nfs_clean}'
+          pkg_job_name:          '{pkg_job_name}'
+          plugin_version:        '{plugin_version}'
+          publish_results:       '{publish_results}'
+          recreate_venv:         '{recreate_venv}'
+          skip_vote_failed:      '{skip_vote_failed}'
           skip_vote_successfull: '{skip_vote_successfull}'
-          skip_vote_failed:     '{skip_vote_failed}'
-          enable_proposed:      '{enable_proposed}'
-          update_master:        '{update_master}'
-          kvm_use:              '{kvm_use}'
-          iso_storage:          '{iso_storage}'
-          snapshots_id:         '{snapshots_id}'
+          snapshots_id:          '{snapshots_id}'
+          testrail_plan:         '{testrail_plan}'
+          testrail_plan_desc:    '{testrail_plan_desc}'
+          testrail_suite:        '{testrail_suite}'
+          testrail_suite_desc:   '{testrail_suite_desc}'
+          update_master:         '{update_master}'
+          ws_norevert:           '{ws_norevert}'
       - plugin-specific-parameters
 
 - defaults:
@@ -275,11 +265,22 @@
           skip_vote_successfull: '{skip_vote_successfull}'
           skip_vote_failed: '{skip_vote_failed}'
     wrappers:
-      - test-wrapper:
-          test_timeout: '{test_timeout}'
+      - test-wrapper
     properties:
-     - test-property
+      - test-property
     builders:
+      - get-refs
+      - get-props
+      - conditional-step:
+           condition-kind: shell
+           condition-command: |
+            [ "${{BUILD_PKG}}" == "true"       ]
+           steps:
+             - trigger-builds:
+                 - project: ${{PKG_JOB_NAME}}
+                   current-parameters: false
+                   git-revision: false
+                   block: true
       - conditional-step:
           condition-kind: shell
           condition-command: |
@@ -308,17 +309,6 @@
           steps:
             - shell:
                 !include-raw-escape: ../builders/maintenance-update.sh
-      - inject:
-          properties-content: |
-            $TESTRAIL_PARAMETERS
-            $ENV_PARAMETERS
-            $VCENTER_PARAMETERS
-  #      - inject:
-  #          properties-content: $TESTRAIL_PARAMETERS
-  #      - inject:
-  #          properties-content: $ENV_PARAMETERS
-  #      - inject:
-  #          properties-content: $VCENTER_PARAMETERS
       - shell:
           !include-raw-escape: ../builders/common.prepare.sh
       - shell:
@@ -336,9 +326,9 @@
     name: '{build-name}'
     node: 'runner'
     concurrent: true
-    disabled: false
+    disabled: true
     triggers:
-      - draft-patchset-gerrit-trigger:
+      - draft-gerrit-trigger:
           gerrit_repo: '{gerrit_repo}'
           gerrit_branch: '{gerrit_branch}'
           skip_vote_successfull: '{skip_vote_successfull}'
@@ -369,8 +359,7 @@
           name: DEBUG
           default: '{build_debug}'
     properties:
-      - heavy-job:
-          weight: 1
+      - test-property
     wrappers:
       - ansicolor:
           colormap: xterm
@@ -434,22 +423,26 @@
           properties_name: regression.properties
           email_to: '{email_to}'
     builders:
+      - shell: |
+          #!/bin/bash
+          cat <<EOF > property
+          TEST_GROUP=dvs_regression
+          DVS_PLUGIN_PATH={released_plugin_path}
+          PLUGIN_VERSION={plugin_version}
+          PKG_JOB_BUILD_NUMBER=released
+          EOF
       - multijob:
           name: '1st phase - regression test'
           condition: COMPLETED
           projects:
             - name: '{fuel_release}.{plugin-name}.regression.test'
-              predefined-parameters: |
-                TEST_GROUP={regression-test-name}
-                DVS_PLUGIN_PATH={released_plugin_path}
-                PLUGIN_VERSION={plugin_version}
-                PKG_JOB_BUILD_NUMBER=released
+              property-file: property
               current-parameters: true
               kill-phase-on: NEVER
 
 - job-template:
     name: '{smoke-name}'
-    disabled: false
+    disabled: true
     description: 'The Smoke test for {fuel_release}.{plugin-name}.{plugin_version}'
     concurrent: true
     quiet-period: 5
@@ -457,7 +450,7 @@
     node: runner
     <<: *runner-parameters
     triggers:
-      - draft-patchset-gerrit-trigger:
+      - draft-gerrit-trigger:
           gerrit_repo: '{gerrit_repo}'
           gerrit_branch: '{gerrit_branch}'
           skip_vote_successfull: '{skip_vote_successfull}'
@@ -488,7 +481,7 @@
 - job-template:
     name: '{bvt-name}'
     description: 'The BVT test for {fuel_release}.{plugin-name}.{plugin_version}'
-    disabled: false
+    disabled: true
     concurrent: true
     project-type: multijob
     node: runner
