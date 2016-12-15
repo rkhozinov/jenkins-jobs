@@ -353,6 +353,21 @@
           properties-file: specific.properties
 
 - builder:
+    name: get-baremetal-props
+    builders:
+      - shell: |
+          #!/bin/bash
+          IFS='\n'
+          echo > baremetal.properties
+          if [ ! -z "${BAREMETAL_PROPS}" ]; then
+            for param in ${BAREMETAL_PROPS}; do
+              echo $param >> baremetal.properties
+            done
+          fi
+      - inject:
+          properties-file: baremetal.properties
+
+- builder:
     name: get-updates
     builders:
       - conditional-step:

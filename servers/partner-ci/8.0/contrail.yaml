@@ -5,11 +5,6 @@
       - text:
           name: SPECIFIC_PROPS
           default: |
-            BM_HOST_BRIDGE_INTERFACES=eth2:10.109.0.0/24;eth3:10.109.4.0/24;
-            BM_IPMI_ADDR=cz7660-kvm.host-telecom.com;
-            BM_IPMI_PASSWORD=Ba2Ie23#GHgho;
-            BM_IPMI_USER=engineer;
-            BM_TARGET_MACS=00:1b:21:87:21:99;00:1b:21:87:21:98;
             BONDING=False;
             CONTRAIL_DISTRIBUTION=;
             CONTRAIL_PLUGIN_PACK_UB_PATH=;
@@ -301,6 +296,7 @@
     builders:
       - get-refs
       - get-props
+      - get-baremetal-props
       - conditional-step:
            condition-kind: shell
            condition-command: |
