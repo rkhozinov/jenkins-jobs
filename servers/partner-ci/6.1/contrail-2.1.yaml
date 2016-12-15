@@ -108,7 +108,7 @@
     iso-file: 'MirantisOpenStack-6.1.iso'
     gerrit-repo: 'fuel-plugin-contrail'
     gerrit-branch: 'stable/2.1'
-    email_to: 'rkhozinov@mirantis.com okosse@mirantis.com otsvigun@mirantis.com'
+    email_to: 'rkhozinov@mirantis.com okosse@mirantis.com '
     released-plugin-path: '/storage/contrail/released/contrail-2.1-2.1.1-1.noarch.rpm'
     scm_submodule_disabled: true
 

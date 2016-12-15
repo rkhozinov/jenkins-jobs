@@ -84,7 +84,7 @@
     testrail_milestone: "{fuel_release}"
     testrail_suite: "[8.0][PCE] vCenter"
     testrail_suite_desc: "Suite description"
-    testrail_plan: "$TREP_TESTRAIL_MILESTONE snapshot #${{SNAPSHOTS_ID}}"
+    testrail_plan: "$TREP_TESTRAIL_MILESTONE snapshot"
     testrail_plan_desc: "Test plan description"
     testrail_run: "$TREP_TESTRAIL_SUITE"
     testrail_run_desc: "Test run description"

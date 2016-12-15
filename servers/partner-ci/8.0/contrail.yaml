@@ -70,7 +70,7 @@
     snapshots_id: 'released'
     gerrit_repo: 'fuel-plugin-contrail'
     gerrit_branch: 'stable/4.0'
-    email_to: 'rkhozinov@mirantis.com okosse@mirantis.com otsvigun@mirantis.com'
+    email_to: 'rkhozinov@mirantis.com okosse@mirantis.com '
     released_plugin_path: '/storage/contrail/released/contrail-3.0.noarch.rpm'
     scm_submodule_disabled: true
     scm_wipe_workspace: false

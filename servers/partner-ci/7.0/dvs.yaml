@@ -90,7 +90,7 @@
     testrail_suite: "[7.0][PCE] VMware DVS plugin v1.1.0"
     testrail_suite_desc: "Suite description"
     testrail_milestone: "1.1.0"
-    testrail_plan: "$TREP_TESTRAIL_SUITE build#${{PKG_JOB_BUILD_NUMBER}} snapshot#${{SNAPSHOTS_ID}}"
+    testrail_plan: "$TREP_TESTRAIL_SUITE build#${{PKG_JOB_BUILD_NUMBER}}"
     testrail_plan_desc: "Test plan description"
     testrail_run: "$TREP_TESTRAIL_SUITE"
     testrail_run_desc: "Test run description"
