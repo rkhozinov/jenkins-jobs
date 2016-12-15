@@ -165,7 +165,7 @@
           description-for-failed: '\1'
 
 - publisher:
-    name: build-publisher
+    name: pce-build-publisher
     publishers:
       - postbuildscript:
           script-only-if-succeeded: False

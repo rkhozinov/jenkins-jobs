@@ -506,7 +506,7 @@
       - shell:
           !include-raw-escape: ../builders/rpm-check.sh
     publishers:
-      - build-publisher:
+      - pce-build-publisher:
           email_to: '{email_to}'
 
 - job-template:
