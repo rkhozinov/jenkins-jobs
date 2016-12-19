@@ -267,7 +267,7 @@
     wrappers:
       - test-wrapper
     properties:
-     - test-property
+      - test-property
     builders:
       - get-refs
       - get-props

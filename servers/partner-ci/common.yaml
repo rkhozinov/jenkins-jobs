@@ -712,10 +712,10 @@
       - ansicolor:
           colormap: xterm
       - timeout:
+          timeout: 20
           fail: true
           type: no-activity
           write-description: "Runner-timeout is exceeded"
-          timeout: 10
 
 # properties for smoke, bvt and nightly multijobs
 - wrapper:
@@ -727,10 +727,10 @@
           global: true
           mask-password-params: true
       - timeout:
+          timeout: 20
           fail: true
           type: no-activity
           write-description: "Test-timeout is exceeded"
-          timeout: 5
 
 - property:
     name: runner-property
