@@ -712,7 +712,7 @@
       - ansicolor:
           colormap: xterm
       - timeout:
-          timeout: 20
+          timeout: 600
           fail: true
           type: no-activity
           write-description: "Runner-timeout is exceeded"
@@ -727,7 +727,7 @@
           global: true
           mask-password-params: true
       - timeout:
-          timeout: 20
+          timeout: 300
           fail: true
           type: no-activity
           write-description: "Test-timeout is exceeded"

@@ -13,8 +13,8 @@
     pkg_job_name: '{fuel_release}.dvs.build'
     nightly_timer: 'H 21 * * *'
     regression_timer: 'H 18 * * *'
-    nightly_disabled: false
-    regression_disabled: true
+    nightly_disabled: true
+    regression_disabled: false
     force_erase: true
     force_reuse: false
     recreate_venv: true

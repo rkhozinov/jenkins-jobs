@@ -51,8 +51,8 @@
     pkg_job_name: '{fuel_release}.{plugin-name}.build'
     nightly_timer: 'H 22 * * *'
     regression_timer: 'H 18 * * *'
-    nightly_disabled: true
-    regression_disabled: false
+    nightly_disabled: false
+    regression_disabled: true
     force_erase: true
     force_reuse: false
     recreate_venv: true

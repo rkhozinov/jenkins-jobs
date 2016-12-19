@@ -51,7 +51,7 @@
     regression_timer: 'H 18 * * *'
     nightly_disabled: true
     full_disabled: true
-    baremetal_disabled: false
+    baremetal_disabled: true
     regression_disabled: false
     force_erase: true
     force_reuse: false
