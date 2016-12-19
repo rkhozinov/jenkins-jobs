@@ -53,7 +53,7 @@
     full_disabled: true
     baremetal_disabled: false
     regression_disabled: false
-    force_erase: false
+    force_erase: true
     force_reuse: false
     force_vsrx_copy: false
     recreate_venv: true

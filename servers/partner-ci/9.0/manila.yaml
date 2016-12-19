@@ -33,9 +33,9 @@
     regression_timer: 'H 16 * * *'
     nightly_disabled: true
     regression_disabled: false
-    force_erase: false
+    force_erase: true
     force_reuse: false
-    recreate_venv: false
+    recreate_venv: true
     ws_norevert: false
     nfs_clean: false
     kvm_use: false
