@@ -5,7 +5,7 @@
     sync_jira_with_launchpad: 'sync_jira_with_launchpad'
     clean_envs: 'clean_envs'
     puppet_run: 'puppet_run'
-    contrail_rst_upload_name: 'contrail_rst_upload'
+    update_jobs: 'update_jobs'
     jobs:
       - '{download_iso}'
 
@@ -14,6 +14,8 @@
       - '{clean_envs}'
 
       - '{puppet_run}'
+
+      - '{update_jobs}'
 
 - job-template:
     name: '{download_iso}'
@@ -139,3 +141,30 @@
                 echo "result in acceptable limits ( exit code = $ref )"
               fi
           fi
+
+- job-template:
+    name: '{update_jobs}'
+    concurrent: false
+    disabled: false
+    scm:
+      - git:
+          url: https://github.com/rkhozinov/jenkins-jobs.git
+          branches:
+            - master
+    wrappers:
+      - ansicolor:
+          colormap: xterm
+      - inject-passwords:
+          global: true
+          mask-password-params: true
+    triggers:
+      - github
+    parameters:
+      - label:
+          name: node
+          default: runner
+    properties:
+      - test-property
+    builders:
+      - shell: |
+          tox -c tox_update.ini
