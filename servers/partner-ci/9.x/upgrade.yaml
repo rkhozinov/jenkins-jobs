@@ -1,0 +1,262 @@
+---
+- parameter:
+    name: plugin-specific-parameters
+    parameters:
+      - text:
+          name: SPECIFIC_PROPS
+          default: |
+            ADMIN_NODE_MEMORY=8192;
+            CONV_SNAP_PATH=utils/jenkins/conv_snapshot_file.py;
+            SLAVE_NODE_MEMORY=8192;
+            ENABLE_MOS_CENTOS_HOLDBACK=false;
+            ENABLE_MOS_CENTOS_HOTFIX=false;
+            ENABLE_MOS_CENTOS_OS=false;
+            ENABLE_MOS_CENTOS_PROPOSED=false;
+            ENABLE_MOS_CENTOS_SECURITY=false;
+            ENABLE_MOS_CENTOS_UPDATES=false;
+            ENABLE_MOS_UBUNTU_HOLDBACK=false;
+            ENABLE_MOS_UBUNTU_HOTFIX=false;
+            ENABLE_MOS_UBUNTU_OS=false;
+            ENABLE_MOS_UBUNTU_PROPOSED=false;
+            ENABLE_MOS_UBUNTU_SECURITY=false;
+            ENABLE_MOS_UBUNTU_UPDATES=false;
+            UPDATE_MASTER=True;
+            UPDATE_MASTER_VIA_MOS_MU=False;
+            FUEL_RELEASE_VERSION=9.0;
+            FORCE_DISABLE_UPDATES=False;
+            USE_MOS_MU_FOR_UPGRADE=True;
+            REPLACE_DEFAULT_REPOS=True;
+            REPLACE_DEFAULT_REPOS_ONLY_ONCE=True;
+            UPGRADE_CLUSTER_FROM_PROPOSED=True;
+            UPGRADE_CLUSTER_FROM_PROPOSED_RPM=http://mirror.fuel-infra.org/mos-repos/centos/mos9.0-centos7/snapshots/$MOS_CENTOS_PROPOSED_MIRROR_ID/x86_64/;
+            UPGRADE_CLUSTER_FROM_PROPOSED_RPM_KEY=http://mirror.fuel-infra.org/mos-repos/centos/mos9.0-centos7/snapshots/$MOS_CENTOS_PROPOSED_MIRROR_ID/RPM-GPG-KEY-mos9.0;
+            CUDET_UBUNTU_DB_URL=https://jenkins-sandbox.infra.mirantis.net/job/generate-packages-database/9/artifact/9.0-ubuntu-mu-1.sqlite;
+            CUDET_CENTOS_DB_URL=https://jenkins-sandbox.infra.mirantis.net/job/generate-packages-database/8/artifact/9.0-centos-mu-1.sqlite;
+
+- project:
+    name: 'predefined_parameters'
+    fuel_release: '9.x'
+    fuel_release_checker: '9.0'
+    plugin_version: ''
+    plugin-name: 'fuel'
+    build-name: ''
+    regression-name: '{fuel_release}.{plugin-name}.regression'
+    nightly-name: '{fuel_release}.{plugin-name}.nightly'
+    custom-name: '{fuel_release}.{plugin-name}.custom'
+    reporter-name: '{fuel_release}.{plugin-name}.reporter'
+    pkg_job_name: '{fuel_release}.dvs.build'
+    nightly_timer: 'H 21 * * *'
+    regression_timer: 'H 18 * * *'
+    nightly_disabled: false
+    regression_disabled: true
+    force_erase: false
+    force_reuse: false
+    recreate_venv: false
+    ws_norevert: false
+    nfs_clean: false
+    kvm_use: false
+    update_master: true
+    enable_proposed: true
+    debug: true
+    publish_results: true
+    multijob_build_pkg: true
+    testjob_build_pkg: false
+    fuel_qa_refs: ''
+    iso_file: 'MirantisOpenStack-9.0.iso'
+    iso_storage: '/storage/downloads'
+    snapshots_id: 'lastSuccessfulBuild'
+    gerrit_repo: 'fuel-qa'
+    gerrit_branch: 'stable/mitaka'
+    email_to: 'rkhozinov@mirantis.com'
+    released_plugin_path: ''
+    scm_submodule_disabled: true
+    scm_wipe_workspace: false
+    skip_vote_successfull: false
+    skip_vote_failed: false
+
+    testrail_project: "Mirantis OpenStack"
+    testrail_suite: "[9.x]"
+    testrail_suite_desc: "Suite description"
+    testrail_milestone: "9.2"
+    testrail_plan: "${{TREP_TESTRAIL_MILESTONE}} snapshot #${{SNAPSHOTS_ID}}"
+    testrail_plan_desc: "Test plan description"
+    testrail_run: "${{TREP_TESTRAIL_SUITE}}"
+    testrail_run_desc: "Test run description"
+    testrail_item_case: "${{TEST_GROUP}}"
+    trep_results_source: "xunit_items"
+    trep_debug_level: "DEBUG"
+
+    testgroup_parameter_type: string
+    testgroup_value_type: default
+    testgroup_value: '{testgroup}'
+
+    testgroup:
+      - install_mu_no_ha_base_negative
+      - install_mu_no_ha_failover
+      - install_mu_ironic_ceilometer
+      - install_mu_ha
+      - install_mu_murano_ha
+      - install_mu_sahara_ha
+      - mos_mu_customization_included
+
+    jobs:
+      - '{nightly-name}':
+          multijob_build_pkg: true
+
+      - '{custom-name}.qa':
+          publish_results: false
+          scm_submodule_disabled: false
+
+      - '{custom-name}.dev':
+          scm_submodule_disabled: false
+          publish_results: false
+          testgroup_parameter_type: choice
+          testgroup_value_type: choices
+          testgroup_value: '{obj:testgroup}'
+
+      - '{fuel_release}.{plugin-name}.{testgroup}':
+          scm_submodule_disabled: false
+
+- runner-parameters: &runner-parameters
+    name: 'runner-parameters'
+    parameters:
+      - bool:
+          name: MJ_BUILD_PKG
+          default: '{multijob_build_pkg}'
+          description: "Triggers build of pkg of $PKG_JOB_NAME before run of tests"
+      - common-parameters:
+          debug:                 '{debug}'
+          enable_proposed:       '{enable_proposed}'
+          env_prefix:            '{fuel_release}.{plugin-name}'
+          force_erase:           '{force_erase}'
+          force_reuse:           '{force_reuse}'
+          fuel_qa_refs:          '{fuel_qa_refs}'
+          fuel_release_checker:  '{fuel_release_checker}'
+          gerrit_branch:         '{gerrit_branch}'
+          iso_file:              '{iso_file}'
+          iso_storage:           '{iso_storage}'
+          kvm_use:               '{kvm_use}'
+          nfs_clean:             '{nfs_clean}'
+          pkg_job_name:          '{pkg_job_name}'
+          plugin_version:        '{plugin_version}'
+          publish_results:       '{publish_results}'
+          recreate_venv:         '{recreate_venv}'
+          skip_vote_failed:      '{skip_vote_failed}'
+          skip_vote_successfull: '{skip_vote_successfull}'
+          snapshots_id:          '{snapshots_id}'
+          testrail_plan:         '{testrail_plan}'
+          testrail_plan_desc:    '{testrail_plan_desc}'
+          testrail_suite:        '{testrail_suite}'
+          testrail_suite_desc:   '{testrail_suite_desc}'
+          update_master:         '{update_master}'
+          ws_norevert:           '{ws_norevert}'
+      - plugin-specific-parameters
+
+- test-parameters: &test-parameters
+    name: 'test-parameters'
+    parameters:
+      - label:
+          name: node
+          default: 'upgrade'
+          description: "The node on which to run the job"
+      - '{testgroup_parameter_type}':
+          name: TEST_GROUP
+          '{testgroup_value_type}': '{obj:testgroup_value}'
+          description: "test-group name"
+      - string:
+          name: TEST_GROUP_CONFIG
+          default: '${{TEST_GROUP}}'
+      - common-parameters:
+          debug:                 '{debug}'
+          enable_proposed:       '{enable_proposed}'
+          env_prefix:            '{fuel_release}.{plugin-name}'
+          force_erase:           '{force_erase}'
+          force_reuse:           '{force_reuse}'
+          fuel_qa_refs:          '{fuel_qa_refs}'
+          fuel_release_checker:  '{fuel_release_checker}'
+          gerrit_branch:         '{gerrit_branch}'
+          iso_file:              '{iso_file}'
+          iso_storage:           '{iso_storage}'
+          kvm_use:               '{kvm_use}'
+          nfs_clean:             '{nfs_clean}'
+          pkg_job_name:          '{pkg_job_name}'
+          plugin_version:        '{plugin_version}'
+          publish_results:       '{publish_results}'
+          recreate_venv:         '{recreate_venv}'
+          skip_vote_failed:      '{skip_vote_failed}'
+          skip_vote_successfull: '{skip_vote_successfull}'
+          snapshots_id:          '{snapshots_id}'
+          testrail_plan:         '{testrail_plan}'
+          testrail_plan_desc:    '{testrail_plan_desc}'
+          testrail_suite:        '{testrail_suite}'
+          testrail_suite_desc:   '{testrail_suite_desc}'
+          update_master:         '{update_master}'
+          ws_norevert:           '{ws_norevert}'
+      - plugin-specific-parameters
+
+- defaults:
+    name: global
+    disabled: false
+    node: upgrade
+    <<: *test-parameters
+    scm:
+      - common-scm:
+          scm_submodule_disabled: '{scm_submodule_disabled}'
+          scm_wipe_workspace: '{scm_wipe_workspace}'
+          gerrit_repo: '{gerrit_repo}'
+          skip_vote_successfull: '{skip_vote_successfull}'
+          skip_vote_failed: '{skip_vote_failed}'
+    wrappers:
+      - test-wrapper
+    properties:
+      - test-property
+    builders:
+      - get-refs
+      - get-props
+      - get-updates
+      - shell:
+          !include-raw-escape: ../builders/common.prepare.sh
+      - shell:
+          !include-raw-escape: ../builders/upgrade.test.sh
+    publishers:
+      - runner-publisher:
+          properties_name: properties
+          email_to: '{email_to}'
+      - test-publisher:
+          reporter_name: '{reporter-name}'
+
+- job-template:
+    name: '{fuel_release}.{plugin-name}.{testgroup}'
+    description: 'The test "{testgroup}" for {fuel_release}.{plugin-name}.{plugin_version}'
+    concurrent: true
+
+- job-template:
+    name: '{custom-name}.qa'
+    description: 'The custom test for {fuel_release}.{plugin-name}.{plugin_version}'
+    concurrent: true
+
+- job-template:
+    name: '{custom-name}.dev'
+    description: 'The custom test for {fuel_release}.{plugin-name}.{plugin_version}'
+    concurrent: true
+
+- job-template:
+    name: '{nightly-name}'
+    project-type: multijob
+    disabled: '{obj:nightly_disabled}'
+    node: runner
+    <<: *runner-parameters
+    scm: []
+    triggers:
+      - timed: '{nightly_timer}'
+    properties:
+      - runner-property:
+          build-name: '{build-name}'
+    wrappers:
+      - runner-wrapper
+    publishers:
+      - runner-publisher:
+          properties_name: nightly.properties
+          email_to: '{email_to}'
+    builders:
+      !include: upgrade-nightly.yaml

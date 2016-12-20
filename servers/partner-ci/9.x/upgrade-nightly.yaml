@@ -1,0 +1,32 @@
+- runner-condition
+- multijob:
+    name: 'Smoke test for fuel {fuel_release}'
+    condition: SUCCESSFUL
+    projects:
+     - name: '{fuel_release}.{plugin-name}.install_mu_ha'
+       current-parameters: true
+       kill-phase-on: NEVER
+
+
+- multijob:
+    name: 'Nightly tests for fuel {fuel_release}'
+    condition: COMPLETED
+    projects:
+     - name: '{fuel_release}.{plugin-name}.install_mu_no_ha_base_negative'
+       current-parameters: true
+       kill-phase-on: NEVER
+     - name: '{fuel_release}.{plugin-name}.install_mu_no_ha_failover'
+       current-parameters: true
+       kill-phase-on: NEVER
+     - name: '{fuel_release}.{plugin-name}.install_mu_ironic_ceilometer'
+       current-parameters: true
+       kill-phase-on: NEVER
+     - name: '{fuel_release}.{plugin-name}.install_mu_murano_ha'
+       current-parameters: true
+       kill-phase-on: NEVER
+     - name: '{fuel_release}.{plugin-name}.install_mu_sahara_ha'
+       current-parameters: true
+       kill-phase-on: NEVER
+     - name: '{fuel_release}.{plugin-name}.mos_mu_customization_included'
+       current-parameters: true
+       kill-phase-on: NEVER
