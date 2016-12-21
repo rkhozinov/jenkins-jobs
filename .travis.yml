@@ -6,6 +6,7 @@ python:
   - "3.5"
 
 install:
+  - sudo pip install --upgrade pip
   - sudo pip install tox
 
 addons:
