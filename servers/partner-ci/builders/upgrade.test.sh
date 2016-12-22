@@ -26,10 +26,10 @@ fi
 [[ $SNAPSHOTS_ID == *"lastSuccessfulBuild"* ]] && \
   export SNAPSHOTS_ID=$(grep -Po '#\K[^ ]+' < snapshots.params)
 
-if [ "${SNAPSHOTS_ID}" != "released" ]; then
-  version=$(grep "PLUGIN_VERSION" < build.plugin_version | cut -d= -f2 )
-  export PLUGIN_VERSION=${version:?}
-fi
+#if [ "${SNAPSHOTS_ID}" != "released" ]; then
+#  version=$(grep "PLUGIN_VERSION" < build.plugin_version | cut -d= -f2 )
+#  export PLUGIN_VERSION=${version:?}
+#fi
 
 #remove old logs and test data
 [ -f nosetest.xml ] && sudo rm -f nosetests.xml
@@ -44,11 +44,10 @@ export VENV_PATH="${HOME}/${FUEL_RELEASE:?}-venv"
 sh -x "utils/jenkins/system_tests.sh" \
    -k                                 \
    -K                                 \
-   - w "{$WORKSPACE}"                 \
+   -w "$WORKSPACE"                   \
    -t test                            \
-   -o                                 \
-   --group="${TEST_GROUP}"            \
-   -i ${ISO_PATH:?}                   \
+   -o --group="${TEST_GROUP}"         \
+   -i ${ISO_PATH:?}
 
 echo "ENVIRONMENT NAME is $ENV_NAME"
 dos.py list --ips | grep ${ENV_NAME}
