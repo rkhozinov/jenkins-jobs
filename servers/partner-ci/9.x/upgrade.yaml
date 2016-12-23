@@ -20,9 +20,7 @@
             ENABLE_MOS_UBUNTU_PROPOSED=false;
             ENABLE_MOS_UBUNTU_SECURITY=false;
             ENABLE_MOS_UBUNTU_UPDATES=false;
-            UPDATE_MASTER=True;
             UPDATE_MASTER_VIA_MOS_MU=False;
-            FUEL_RELEASE_VERSION=9.0;
             FORCE_DISABLE_UPDATES=False;
             USE_MOS_MU_FOR_UPGRADE=True;
             REPLACE_DEFAULT_REPOS=True;
@@ -212,8 +210,9 @@
       - test-property
     builders:
       - get-refs
-      - get-props
       - get-updates
+      - get-props
+      - get-snapshots
       - shell:
           !include-raw-escape: ../builders/common.prepare.sh
       - shell:
