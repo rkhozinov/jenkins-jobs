@@ -207,7 +207,9 @@
       - test-property
     builders:
       - get-refs
+      - get-updates
       - get-props
+      - get-snapshots
       - conditional-step:
           condition-kind: shell
           condition-command: |

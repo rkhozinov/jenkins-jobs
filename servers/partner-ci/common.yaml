@@ -334,6 +334,7 @@
     builders:
       - shell: |
           #!/bin/bash
+          BACKUP_IFS=$IFS
           IFS=';'
           echo > common.properties
           if [ ! -z "${COMMON_PROPS}" ]; then
@@ -347,7 +348,7 @@
               echo $param >> specific.properties
             done
           fi
-          IFS=''
+          IFS=$BACKUP_IFS
       - inject:
           properties-file: common.properties
       - inject:

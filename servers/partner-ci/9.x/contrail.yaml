@@ -323,8 +323,10 @@
       - test-property
     builders:
       - get-refs
-      - get-props
+      - get-updates
       - get-baremetal-props
+      - get-props
+      - get-snapshots
       - conditional-step:
            condition-kind: shell
            condition-command: |
