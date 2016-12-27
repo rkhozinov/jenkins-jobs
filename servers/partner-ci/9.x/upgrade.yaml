@@ -1,4 +1,14 @@
 ---
+#
+#USE_MOS_MU_FOR_UPGRADE=          ##checker (switch cudet/playbook update-mode) 'playbook if true'
+#REPLACE_DEFAULT_REPOS=           ## replace default urls to CZ-mirrors
+#REPLACE_DEFAULT_REPOS_ONLY_ONCE= ## as above
+#UPGRADE_CLUSTER_FROM_PROPOSED=   ## custom for testis (default - true)
+#CUDET_UBUNTU_DB_URL=             ## not neccessary (only cudet case)
+#CUDET_CENTOS_DB_URL=             ## not neccessary (only cudet case)
+#
+#
+#
 - parameter:
     name: plugin-specific-parameters
     parameters:
@@ -216,6 +226,7 @@
       - get-updates
       - get-props
       - get-snapshots
+      - get-mirror-id
       - shell:
           !include-raw-escape: ../builders/common.prepare.sh
       - shell:

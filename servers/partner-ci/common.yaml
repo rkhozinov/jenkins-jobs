@@ -601,6 +601,22 @@
                 echo "snapshot_id_number=" $snapshots_id
                 echo "SNAPSHOTS_ID=${snapshots_id}" >> build_number
 - builder:
+    name: get-mirror-id
+    builders:
+      - conditional-step:
+          condition-kind: shell
+          condition-command: |
+            [[ "${SNAPSHOTS_ID}" != *"released"* ]]
+          steps:
+            - shell: |
+                [[ -z "${SNAPSHOTS_ID}" ]] && { echo "SNAPSHOTS_ID is empty"; exit 1; }
+                wget --no-check-certificate -O ${SNAPSHOT_ARTIFACTS_FILE} \
+                ${SNAPSHOTS_URL/SNAPSHOTS_ID/$SNAPSHOTS_ID}
+                MOS_UBUNTU_MIRROR_ID=$(grep "^MOS_UBUNTU_MIRROR_ID" < snapshots.params | cut -d= -f2)
+                MOS_CENTOS_PROPOSED_MIRROR_ID=$(grep "^MOS_CENTOS_PROPOSED_MIRROR_ID" < snapshots.params | cut -d= -f2)
+                echo "MOS_UBUNTU_MIRROR_ID=$MOS_UBUNTU_MIRROR_ID"
+                echo "MOS_CENTOS_PROPOSED_MIRROR_ID=$MOS_CENTOS_PROPOSED_MIRROR_ID"
+- builder:
     name: runner-condition
     builders:
       - conditional-step:
