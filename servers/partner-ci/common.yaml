@@ -536,6 +536,22 @@
           properties-file: specific.properties
 
 - builder:
+    name: get-specific-mirrors
+    builders:
+      - shell: |
+          #!/bin/bash
+          if [ ! -f "snapshots.params" ]; then
+            wget --no-check-certificate -O ${SNAPSHOT_ARTIFACTS_FILE} \
+            ${SNAPSHOTS_URL/SNAPSHOTS_ID/$SNAPSHOTS_ID}
+          fi
+          echo "MOS_UBUNTU_MIRROR_ID=$(grep "^MOS_UBUNTU_MIRROR_ID" < snapshots.params | cut -d= -f2)" \
+          >>  specific.properties
+          echo "MOS_CENTOS_PROPOSED_MIRROR_ID=$(grep "^MOS_CENTOS_PROPOSED_MIRROR_ID" < snapshots.params | cut -d= -f2)" \
+          >>  specific.properties
+      - inject:
+          properties-file: specific.properties
+
+- builder:
     name: get-baremetal-props
     builders:
       - inject:

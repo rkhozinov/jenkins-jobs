@@ -3,9 +3,6 @@
 [[ "${DEBUG}" == "true" ]] && set -x || set +x
 
 export ISO_PATH=${ISO_PATH:-"$ISO_STORAGE/$ISO_FILE"}
-export MOS_UBUNTU_MIRROR_ID=$(grep "^MOS_UBUNTU_MIRROR_ID" < snapshots.params | cut -d= -f2)
-export MOS_CENTOS_PROPOSED_MIRROR_ID=$(grep "^MOS_CENTOS_PROPOSED_MIRROR_ID" < snapshots.params | cut -d= -f2)
-
 fuel_release=$(echo $ISO_FILE | cut -d- -f2 | tr -d '.iso')
 export FUEL_RELEASE=$fuel_release
 

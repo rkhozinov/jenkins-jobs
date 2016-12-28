@@ -226,6 +226,7 @@
       - get-updates
       - get-props
       - get-snapshots
+      - get-specific-mirrors
       - shell:
           !include-raw-escape: ../builders/common.prepare.sh
       - shell:
