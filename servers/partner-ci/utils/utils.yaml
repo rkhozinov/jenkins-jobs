@@ -150,7 +150,7 @@
       - git:
           url: https://github.com/rkhozinov/jenkins-jobs
           branches:
-            - tox-test
+            - master
     wrappers:
       - ansicolor:
           colormap: xterm
