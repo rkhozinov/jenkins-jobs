@@ -148,9 +148,9 @@
     disabled: false
     scm:
       - git:
-          url: https://github.com/rkhozinov/jenkins-jobs.git
+          url: https://github.com/rkhozinov/jenkins-jobs
           branches:
-            - master
+            - tox-test
     wrappers:
       - ansicolor:
           colormap: xterm
