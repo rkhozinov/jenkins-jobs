@@ -129,6 +129,93 @@
             WORKSTATION_USERNAME=vmware;
 
 - parameter:
+    name: common-fuel-parameters
+    parameters:
+      - bool:
+          name: UPDATE_MASTER
+          default: '{update_master}'
+          description: "turns on update fuel master node to maintenance update"
+      - bool:
+          name: ENABLE_PROPOSED
+          default: '{enable_proposed}'
+          description: 'related to update_master. Turns on support additional repositories for maintenance update'
+      - bool:
+          name: PUBLISH_RESULTS
+          default: '{obj:publish_results}'
+          description: 'Reports results to testrail'
+      - bool:
+          name: DEBUG
+          default: '{debug}'
+          description: "Set -x (xtrace) for jobs' bash scripts"
+      - bool:
+          name: FORCE_ERASE
+          default: '{force_erase}'
+          description: "Erase all envs before test"
+      - bool:
+          name: FORCE_REUSE
+          default: '{force_reuse}'
+          description: "enable reuse-only mode for envs, disable force-erasing/snap-reverting"
+      - bool:
+          name: RECREATE_VENV
+          default: '{recreate_venv}'
+          description: "Recreate virtual environemnt before tests"
+      - bool:
+          name: SKIP_VOTE_FAILED
+          default: '{skip_vote_failed}'
+          description: "configure gerrit voting"
+      - bool:
+          name: DISCONNECT_ON_FAILURE
+          default: False
+          description: "disconnect node after failure"
+      - string:
+          name: FUEL_UI_BRANCH
+          default: 'origin/stable/mitaka'
+      - string:
+          name: FUEL_UI_REFS
+          default: '{fuel_ui_refs}'
+          description: "Multiple Refspecs for commits in fuel-ui gerrit separated with spaces"
+      - string:
+          name: FUEL_QA_BRANCH
+          default: 'stable/mitaka'
+      - string:
+          name: FUEL_QA_REFS
+          description: "Multiple Refspecs for commits in fuel-qa gerrit separated with spaces"
+      - string:
+          name: DOCKER_BRANCH
+          default: 'master'
+      - string:
+          name: SNAPSHOTS_ID
+          default: '{snapshots_id}'
+          description: 'snapshots number, "lastSuccessfulBuild" or "released"'
+      - text:
+          name: COMMON_PROPS
+          default: |
+            KVM_USE={kvm_use};
+            FUEL_RELEASE_VERSION={fuel_release_checker};
+            SNAPSHOTS_URL=https://product-ci.infra.mirantis.net/job/9.x.snapshot/SNAPSHOTS_ID/artifact/snapshots.params;
+            ISO_FILE=/storage/downloads/MirantisOpenStack-9.0.iso;
+            MIRROR_HOST=mirror.seed-cz1.fuel-infra.org;
+            ENV_PREFIX={env_prefix};
+            ADMIN_NODE_CPU=4;
+            ADMIN_NODE_MEMORY=3192;
+            ALWAYS_CREATE_DIAGNOSTIC_SNAPSHOT=true;
+            CONV_SNAP_PATH=plugin_test/fuel-qa/utils/jenkins/conv_snapshot_file.py;
+            DEBUG_MODE=true;
+            DESTROY_ENV_AFTER=0;
+            DISABLE_SSL=true;
+            DRIVER_ENABLE_ACPI=true;
+            FORCE_DISABLE_UPDATES=false;
+            FUEL_STATS_ENABLED=false;
+            GIT_CURL_VERBOSE=false;
+            MAKE_SNAPSHOT=true;
+            NODES_COUNT=10;
+            OPENSTACK_RELEASE=Ubuntu;
+            SLAVE_NODE_CPU=4;
+            SLAVE_NODE_MEMORY=3192;
+            SNAPSHOT_ARTIFACTS_FILE=snapshots.params;
+            SNAPSHOT_OUTPUT_FILE=extra_repos.sh;
+
+- parameter:
     name: vcenter-specific-parameters
     parameters:
       - text:
@@ -330,6 +417,28 @@
           fi
 
 - builder:
+    name: get-ui-refs
+    builders:
+      - shell: |
+          #!/bin/bash
+          cherrypick(){
+              git_url=$1
+              ref=$2
+              git fetch $git_url "$ref" && git cherry-pick FETCH_HEAD ||  { git status; exit 1; }
+              git log --pretty=oneline | head
+          }
+          if [[ ! -z "${FUEL_UI_REFS}" ]]; then
+            cd ${WORKSPACE}/fuel-ui
+            git_url=$(git config --get remote.origin.url)
+            for ref in ${FUEL_UI_REFS:?}; do cherrypick $git_url $ref; done
+          fi
+          if [[ ! -z "${FUEL_QA_REFS}" ]]; then
+            cd ${WORKSPACE}/fuel-qa
+            git_url=$(git config --get remote.origin.url)
+            for ref in ${FUEL_QA_REFS:?}; do cherrypick $git_url $ref; done
+          fi
+
+- builder:
     name: get-props
     builders:
       - shell: |
@@ -364,6 +473,7 @@
             BM_IPMI_PASSWORD=Ba2Ie23#GHgho;
             BM_IPMI_USER=engineer;
             BM_TARGET_MACS=00:1b:21:87:21:99;00:1b:21:87:21:98;
+
 - builder:
     name: get-updates
     builders:
@@ -386,6 +496,7 @@
                   ENABLE_MOS_UBUNTU_HOLDBACK=true
                   ENABLE_MOS_UBUNTU_HOTFIX=false
                   ENABLE_MOS_UBUNTU_SECURITY=true
+
 - builder:
     name: get-snapshots
     builders:
@@ -395,12 +506,13 @@
             [[ "${SNAPSHOTS_ID}" != *"released"* ]]
           steps:
             - shell: |
-                [[ -z "${SNAPSHOTS_ID}" ]] && { echo "SNAPSHOTS_ID is empty"; exit 1; }
-                wget --no-check-certificate -O ${SNAPSHOT_ARTIFACTS_FILE} \
-                ${SNAPSHOTS_URL/SNAPSHOTS_ID/$SNAPSHOTS_ID}
+                #!/bin/bash -xeu
+                wget --no-check-certificate -O ${SNAPSHOT_ARTIFACTS_FILE:?} \
+                ${SNAPSHOTS_URL/SNAPSHOTS_ID/${SNAPSHOTS_ID:?}}
                 snapshots_id=$(grep "^CUSTOM_VERSION=" < snapshots.params | cut -d= -f2 | cut -d'#' -f2)
                 echo "snapshot_id_number=${snapshots_id}"
-                python "${CONV_SNAP_PATH}"
+                python "${CONV_SNAP_PATH:?}"
+
 - builder:
     name: runner-condition
     builders:
@@ -1081,6 +1193,7 @@
           name: MODERN_MODEL
           default: '{doc_modern_model}'
           description: "enable use modern-testing-model, default = classic-testing-model"
+
 - property:
     name: doc-properties
     properties:

@@ -1,0 +1,23 @@
+- get-snapshots
+- multijob:
+    name: 'UI tests for {fuel_release}'
+    condition: SUCCESSFUL
+    projects:
+     - name: '{fuel_release}.{plugin-name}.test_nics'
+       property-file: build_number
+       current-parameters: true
+       predefined-parameters: |
+         TEST_PREFIX=test_nics*
+       kill-phase-on: NEVER
+     - name: '{fuel_release}.{plugin-name}.test_nodes'
+       property-file: build_number
+       current-parameters: true
+       predefined-parameters: |
+         TEST_PREFIX=test_nodes*
+       kill-phase-on: NEVER
+     - name: '{fuel_release}.{plugin-name}.test_bonds'
+       property-file: build_number
+       current-parameters: true
+       predefined-parameters: |
+         TEST_PREFIX=test_bonds*
+       kill-phase-on: NEVER
