@@ -1,4 +1,4 @@
-#---
+---
 - parameter:
     name: plugin-specific-parameters
     parameters:

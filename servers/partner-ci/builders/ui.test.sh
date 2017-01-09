@@ -3,7 +3,7 @@
 [[ "${DEBUG}" == "true" ]] && set -x || set +x
 
 fuel_release=$(echo $ISO_FILE | cut -d- -f2 | tr -d '.iso')
-export FUEL_RELEASE=$fuel_release
+export FUEL_RELEASE=${fuel_release:?}
 
 if [ "${SNAPSHOTS_ID}" != "released" ]; then
   if [[ "${UPDATE_MASTER}" == "true" ]] && [[ ${FUEL_RELEASE} != *"80"* ]]; then
