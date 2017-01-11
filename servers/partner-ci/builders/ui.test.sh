@@ -46,3 +46,15 @@ pip install --upgrade docker-compose
 ln -s ${WORKSPACE}/fuel-ui fuel-ui
 docker-compose down -v
 docker-compose up --remove-orphans --build --abort-on-container-exit
+
+cat << REPORTER_PROPERTIES > reporter.properties
+ISO_VERSION=${SNAPSHOTS_ID:?}
+SNAPSHOTS_ID=${SNAPSHOTS_ID:?}
+ISO_FILE=${ISO_FILE:?}
+TEST_GROUP=${TEST_GROUP:?}
+TEST_JOB_BUILD_NUMBER=${BUILD_NUMBER:?}
+TEST_JOB_NAME=${JOB_NAME:?}
+DATE=$(date +'%B-%d')
+REPORTER_PROPERTIES
+
+exit 0
