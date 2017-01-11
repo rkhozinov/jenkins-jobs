@@ -12,6 +12,7 @@
     name: 'predefined_parameters'
     fuel_release: '9.x'
     fuel_release_checker: '9.2'
+    plugin_version: ''
     plugin-name: 'ui'
     regression-name: '{fuel_release}.{plugin-name}.regression'
     nightly-name: '{fuel_release}.{plugin-name}.nightly'
@@ -80,6 +81,8 @@
 
       - '{fuel_release}.{plugin-name}.{testgroup}':
           scm_submodule_disabled: false
+
+      - '{reporter-name}'
 
 - runner-parameters: &runner-parameters
     name: 'runner-parameters'
@@ -189,7 +192,7 @@
       - runner-publisher:
           properties_name: properties
           email_to: '{email_to}'
-      - test-publisher:
+      - ui-publisher:
           reporter_name: '{reporter-name}'
 
 - job-template:

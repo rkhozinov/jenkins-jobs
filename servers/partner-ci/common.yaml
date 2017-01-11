@@ -395,6 +395,64 @@
                     fail-on-missing: true
                     condition: FAILED_OR_BETTER
 
+
+- publisher:
+    name: ui-publisher
+    publishers:
+      - description-setter:
+          regexp-for-failed: '^ERROR:.*'
+      - postbuildscript:
+          script-only-if-succeeded: False
+          script-only-if-failed: False
+          builders:
+            - shell:
+                !include-raw-escape: builders/ui.converter.sh
+            - shell: |
+                path='$(find fuel-ui/test_run/ -name '*.xml')'
+                python converter.py $path ${{WORKSPACE}}/nosetests.xml
+       - archive:
+           artifacts: '${{WORKSPACE}}fuel-ui/test_run/**'
+           allow-empty: true
+      - conditional-publisher:
+          - condition-kind: file-exists
+            condition-filename: 'nosetests.xml'
+            action:
+              - xunit:
+                  types:
+                    - junit:
+                        pattern: 'nosetests.xml'
+                        skip-if-no-test-files: true
+              - junit:
+                  results: 'nosetests.xml'
+                  health-scale-factor: 1.0
+              - archive:
+                  artifacts: 'nosetests.xml'
+                  allow-empty: false
+      - postbuildscript:
+          script-only-if-succeeded: False
+          script-only-if-failed: True
+          builders:
+              - shell: |
+                  [[ "${{DISCONNECT_ON_FAILURE}}" == "true" ]] && \
+                  python -c "import jenkins; jenkins.Jenkins(\"${{JENKINS_URL}}\", username=\"${{JENKINS_USERNAME}}\", password=\"${{JENKINS_PASSWORD}}\").disable_node(\"${{NODE_NAME}}\")"
+      - description-setter:
+          regexp-for-failed: '"error":(.*) \1 "AssertionError":(.*) \2'
+          description-for-failed: '\1 \2'
+      - slack:
+          notify-success: True
+          notify-failure: True
+          commit-info-choice: 'AUTHORS_AND_TITLES'
+          include-test-summary: True
+          build-server-url: 'http://jenkins-tpi.bud.mirantis.net:8080/'
+      - conditional-publisher:
+          - condition-kind: boolean-expression
+            condition-expression: "${{PUBLISH_RESULTS}}"
+            action:
+              - trigger-parameterized-builds:
+                  - project: '{reporter_name}'
+                    property-file: reporter.properties
+                    fail-on-missing: true
+                    condition: FAILED_OR_BETTER
 - builder:
     name: get-refs
     builders:
