@@ -24,7 +24,7 @@
     nightly_disabled: false
     regression_disabled: true
     force_erase: false
-    force_reuse: false
+    force_reuse: true
     recreate_venv: false
     kvm_use: false
     update_master: true
