@@ -23,15 +23,14 @@ export ENV_NAME="${ENV_PREFIX:?}.${SNAPSHOTS_ID:?}"
 export VENV_PATH="${HOME}/${FUEL_RELEASE:?}-venv"
 
 . "${VENV_PATH}/bin/activate"
-
-cd fuel-qa
-bash -x "./utils/jenkins/system_tests.sh" \
-   -k                                     \
-   -K                                     \
-   -V ${VENV_PATH}                        \
-   -w $(pwd)                              \
-   -t test                                \
-   -o --group="${FUEL_QA_TEST_GROUP:?}"   \
+pip freeze
+cd ${WORKSPACE}/fuel-qa
+sh -ex "utils/jenkins/system_tests.sh"  \
+   -k                                   \
+   -K                                   \
+   -w "$(pwd)"                          \
+   -t test                              \
+   -o --group="${FUEL_QA_TEST_GROUP:?}" \
    -i ${ISO_FILE:?}
 
 echo "ENVIRONMENT NAME is $ENV_NAME"
@@ -40,3 +39,10 @@ dos.py list --ips | grep ${ENV_NAME}
 #remove old logs and test data
 [ -f nosetest.xml ] && sudo rm -f nosetests.xml
 sudo rm -rf logs/*
+
+
+cd ${WORKSPACE}/docker/
+pip install --upgrade docker-compose
+ln -s ${WORKSPACE}/fuel-ui fuel-ui
+docker-compose down -v
+docker-compose up --remove-orphans --build --abort-on-container-exit
