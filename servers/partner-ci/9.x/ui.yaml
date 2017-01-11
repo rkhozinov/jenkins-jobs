@@ -31,10 +31,10 @@
     enable_proposed: true
     debug: true
     publish_results: true
-    fuel_ui_refs: ''
+    fuel_ui_refs: 'refs/changes/40/414540/20'
     snapshots_id: 'lastSuccessfulBuild'
     gerrit_repo: 'fuel-ui'
-    gerrit_branch: 'stable/mitaka'
+    gerrit_branch: 'origin/stable/mitaka'
     email_to: 'rkhozinov@mirantis.com ekhomyakova@mirantis.com'
     released_plugin_path: ''
     scm_submodule_disabled: true
