@@ -411,7 +411,7 @@
           if [[ "${MULTI_REFS}" != "none" ]]; then
             cd ${WORKSPACE}
             for refspec in ${MULTI_REFS}; do
-              git fetch ${GIT_URL} "$refspec" && git cherry-pick FETCH_HEAD ||  { git status; exit 1; }
+              git fetch ${GIT_URL} "$refspec" && git cherry-pick FETCH_HEAD || { git status; exit 1; }
               git log --pretty=oneline | head
             done
           fi
@@ -424,7 +424,7 @@
           cherrypick(){
               git_url=$1
               ref=$2
-              git fetch $git_url "$ref" && git cherry-pick FETCH_HEAD ||  { git status; exit 1; }
+              git fetch $git_url "$ref" && git cherry-pick FETCH_HEAD || { git status; exit 1; }
               git log --pretty=oneline | head
           }
           if [[ ! -z "${FUEL_UI_REFS}" ]]; then
