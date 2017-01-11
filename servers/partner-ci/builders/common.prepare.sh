@@ -171,10 +171,14 @@ wait_ws() {
 
 [[ "${RECREATE_VENV}" == "true" ]] && recreate_venv
 
+
 get_venv_requirements
 
-[ -d $VENV_PATH ] && prepare_venv || { echo "$VENV_PATH doesn't exist $VENV_PATH will be recreated"; recreate_venv; }
 
+
+if [[ "${FORCE_REUSE}" == "false" ]]; then
+  [ -d $VENV_PATH ] && prepare_venv || { echo "$VENV_PATH doesn't exist $VENV_PATH will be recreated"; recreate_venv; }
+fi
 
 source "$VENV_PATH/bin/activate"
 
