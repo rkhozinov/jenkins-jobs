@@ -150,36 +150,28 @@
     <<: *test-parameters
     scm:
       - git:
-          url: 'http://git.openstack.org/openstack/fuel-ui'
-          branches:
-            - $FUEL_UI_BRANCH
-          basedir: fuel-ui
-          choosing-strategy: gerrit
-          skip-tag: true
-          submodule:
-            disable: true
-            tracking: true
-            recursive: true
-          wipe-workspace: '{obj:scm_wipe_workspace}'
-      - git:
           url: 'http://git.openstack.org/openstack/fuel-qa'
           basedir: fuel-qa
           branches:
              - $FUEL_QA_BRANCH
-          wipe-workspace: 'false'
-          choosing-strategy: gerrit
+          wipe-workspace: true
+          choosing-strategy: default
+          skip-tag: true
+      - git:
+          url: 'http://git.openstack.org/openstack/fuel-ui'
+          basedir: fuel-ui
+          branches:
+            - $FUEL_UI_BRANCH
+          wipe-workspace: true
+          choosing-strategy: default
           skip-tag: true
       - git:
           url: 'http://github.com/rkhozinov/fuel-ui-tests-docker'
           basedir: docker
           branches:
              - $DOCKER_BRANCH
-          wipe-workspace: 'false'
+          wipe-workspace: true
           skip-tag: true
-          submodule:
-            disable: true
-            tracking: true
-            recursive: true
     wrappers:
       - test-wrapper
     properties:
