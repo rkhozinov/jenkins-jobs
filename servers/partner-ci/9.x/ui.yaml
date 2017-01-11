@@ -36,7 +36,7 @@
     snapshots_id: 'lastSuccessfulBuild'
     gerrit_repo: 'fuel-ui'
     gerrit_branch: 'origin/stable/mitaka'
-    email_to: 'rkhozinov@mirantis.com ekhomyakova@mirantis.com'
+    email_to: 'rkhozinov@mirantis.com'
     released_plugin_path: ''
     scm_submodule_disabled: true
     scm_wipe_workspace: false
