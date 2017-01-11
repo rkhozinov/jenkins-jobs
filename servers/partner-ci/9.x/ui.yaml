@@ -117,6 +117,10 @@
           name: TEST_GROUP
           '{testgroup_value_type}': '{obj:testgroup_value}'
           description: "test-group name"
+      - string:
+          name: TEST_PREFIX
+          default: '$TEST_GROUP*'
+          description: "test-group name"
       - common-fuel-parameters:
           debug:                 '{debug}'
           enable_proposed:       '{enable_proposed}'
