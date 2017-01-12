@@ -404,6 +404,18 @@
 - publisher:
     name: ui-publisher
     publishers:
+      - postbuildscript:
+          script-only-if-succeeded: False
+          builders:
+            - shell: env > {properties_name}
+      - archive:
+          artifacts: '*.properties'
+          allow-empty: true
+      - archive:
+          artifacts: 'fuel-ui/test_run/**'
+          allow-empty: true
+      - email:
+          recipients: '{email_to}'
       - description-setter:
           regexp-for-failed: '^ERROR:.*'
       - postbuildscript:
@@ -415,12 +427,6 @@
             - shell: |
                 path=$(find fuel-ui/test_run/ -name '*.xml')
                 python converter.py $path ${{WORKSPACE}}/nosetests.xml
-      - archive:
-          artifacts: 'fuel-ui/test_run/**'
-          allow-empty: true
-      - archive:
-          artifacts: '*.properties'
-          allow-empty: false
       - conditional-publisher:
           - condition-kind: file-exists
             condition-filename: 'nosetests.xml'

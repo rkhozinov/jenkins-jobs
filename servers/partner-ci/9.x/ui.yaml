@@ -189,11 +189,10 @@
       - shell:
           !include-raw-escape: ../builders/ui.test.sh
     publishers:
-      - runner-publisher:
-          properties_name: properties
-          email_to: '{email_to}'
       - ui-publisher:
           reporter_name: '{reporter-name}'
+          properties_name: properties
+          email_to: '{email_to}'
 
 - job-template:
     name: '{fuel_release}.{plugin-name}.{testgroup}'
