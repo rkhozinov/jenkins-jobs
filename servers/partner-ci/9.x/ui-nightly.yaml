@@ -1,4 +1,4 @@
-- get-snapshots
+- ui-condition
 - multijob:
     name: 'UI tests for {fuel_release}'
     condition: SUCCESSFUL

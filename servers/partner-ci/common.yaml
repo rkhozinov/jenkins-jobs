@@ -187,6 +187,10 @@
           name: SNAPSHOTS_ID
           default: '{snapshots_id}'
           description: 'snapshots number, "lastSuccessfulBuild" or "released"'
+      - string:
+          name: SNAPSHOTS_URL
+          default: 'https://product-ci.infra.mirantis.net/job/9.x.snapshot/SNAPSHOTS_ID/artifact/snapshots.params'
+          description: 'url to product-ci job with snapshots artifacts'
       - text:
           name: COMMON_PROPS
           default: |
@@ -573,6 +577,21 @@
                 echo "snapshot_id_number=${snapshots_id}"
                 python "${CONV_SNAP_PATH:?}"
 
+- builder:
+    name: ui-condition
+    builders:
+      - conditional-step:
+          condition-kind: shell
+          condition-command: |
+            [[ "${UPDATE_MASTER}" == "true" ]] && [[ $SNAPSHOTS_ID != *"released"* ]]
+          steps:
+            - shell: |
+                #!/bin/bash
+                SNAPSHOTS_ID=${SNAPSHOTS_ID:=lastSuccessfulBuild}
+                wget --no-check-certificate -O snapshots.params ${SNAPSHOTS_URL/SNAPSHOTS_ID/$SNAPSHOTS_ID}
+                snapshots_id=$(grep "^CUSTOM_VERSION=" < snapshots.params | cut -d= -f2 | cut -d'#' -f2)
+                echo "snapshot_id_number=" $snapshots_id
+                echo "SNAPSHOTS_ID=${snapshots_id}" >> build_number
 - builder:
     name: runner-condition
     builders:
