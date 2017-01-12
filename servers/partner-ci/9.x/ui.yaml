@@ -32,7 +32,7 @@
     enable_proposed: true
     debug: true
     publish_results: true
-    fuel_ui_refs: 'refs/changes/40/414540/20'
+    fuel_ui_refs: 'refs/changes/40/414540/21'
     snapshots_id: 'lastSuccessfulBuild'
     gerrit_repo: 'fuel-ui'
     gerrit_branch: 'origin/stable/mitaka'

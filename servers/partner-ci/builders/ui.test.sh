@@ -33,13 +33,14 @@ sh -ex "utils/jenkins/system_tests.sh"  \
    -o --group="${FUEL_QA_TEST_GROUP:?}" \
    -i ${ISO_FILE:?}
 
-echo "ENVIRONMENT NAME is $ENV_NAME"
-dos.py list --ips | grep ${ENV_NAME}
+env_data=$(dos.py list --ips | grep ${ENV_NAME})
+echo $env_data
+admin_node_ip=$(echo $env_data | cut -d' ' -f3)
+export NAILGUN_HOST=${NAIGLUN_HOST:-$admin_node_ip}
 
 #remove old logs and test data
 [ -f nosetest.xml ] && sudo rm -f nosetests.xml
 sudo rm -rf logs/*
-
 
 cd ${WORKSPACE}/docker/
 pip install --upgrade docker-compose
@@ -47,6 +48,7 @@ ln -s ${WORKSPACE}/fuel-ui fuel-ui
 docker-compose down -v
 docker-compose up --remove-orphans --build --abort-on-container-exit
 
+cd ${WORKSPACE}
 cat << REPORTER_PROPERTIES > reporter.properties
 ISO_VERSION=${SNAPSHOTS_ID:?}
 SNAPSHOTS_ID=${SNAPSHOTS_ID:?}
@@ -56,5 +58,3 @@ TEST_JOB_BUILD_NUMBER=${BUILD_NUMBER:?}
 TEST_JOB_NAME=${JOB_NAME:?}
 DATE=$(date +'%B-%d')
 REPORTER_PROPERTIES
-
-exit 0

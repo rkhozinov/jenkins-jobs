@@ -184,6 +184,8 @@
           name: DOCKER_BRANCH
           default: 'master'
       - string:
+          name: NAILGUN_HOST
+      - string:
           name: SNAPSHOTS_ID
           default: '{snapshots_id}'
           description: 'snapshots number, "lastSuccessfulBuild" or "released"'
