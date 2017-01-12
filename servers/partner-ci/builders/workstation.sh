@@ -98,59 +98,41 @@ sudo chmod +x $SSH_ENDPOINT
 
 }
 
+esxi_exec(){
+
+  set -x
+  host=$1
+  cmd=$2
+  echo "$cmd-------------------------------------------------------"
+  python2 $SSH_ENDPOINT $host $ESXI_USER $ESXI_PASSWORD "$cmd"
+
+}
 configure_nfs(){
   set -x
   create_ssh_endpoint
+  source $VENV_PATH/bin/activate
   for esxi_host in $ESXI_HOSTS; do
-    echo "restart services to avoid connection problems>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"
-    python2 $SSH_ENDPOINT $esxi_host $ESXI_USER $ESXI_PASSWORD './sbin/services.sh restart'
-    echo "restart scfsbd-watchdog>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"
-    python2 $SSH_ENDPOINT $esxi_host $ESXI_USER $ESXI_PASSWORD '/etc/init.d/sfcbd-watchdog stop; rm -rf /var/run/sfcb/*;/etc/init.d/sfcbd-watchdog start'
-    echo "esxcli network firewall set --enabled false, to avoid connection problems>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"
-    python2 $SSH_ENDPOINT $esxi_host $ESXI_USER $ESXI_PASSWORD 'esxcli network firewall set --enabled false'
-    echo "system syslog hostname get>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"
-    python2 $SSH_ENDPOINT $esxi_host $ESXI_USER $ESXI_PASSWORD 'esxcli system hostname get'
+    esxi_exec $esxi_host './sbin/services.sh restart'
+    esxi_exec $esxi_host '/etc/init.d/sfcbd-watchdog stop; rm -rf /var/run/sfcb/*;/etc/init.d/sfcbd-watchdog start'
+    esxi_exec $esxi_host 'esxcli network firewall set --enabled false'
+    esxi_exec $esxi_host 'esxcli system hostname get'
     echo "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
     if [[ ${DEBUG} == "true" ]]; then
-      echo "system syslog config get>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"
-      python2 $SSH_ENDPOINT $esxi_host $ESXI_USER $ESXI_PASSWORD 'esxcli system syslog config get'
-      echo "esxcli system module list>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"
-      python2 $SSH_ENDPOINT $esxi_host $ESXI_USER $ESXI_PASSWORD 'esxcli system module list'
-      echo "esxcli system process list>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"
-      python2 $SSH_ENDPOINT $esxi_host $ESXI_USER $ESXI_PASSWORD 'esxcli system process list'
-      echo "esxcli system process stats running get>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"
-      python2 $SSH_ENDPOINT $esxi_host $ESXI_USER $ESXI_PASSWORD 'esxcli system process stats running get'
-      echo "esxcli system secpolicy domain list>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"
-      python2 $SSH_ENDPOINT $esxi_host $ESXI_USER $ESXI_PASSWORD 'esxcli system secpolicy domain list'
-      echo "esxcli system settings advanced list>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"
-      python2 $SSH_ENDPOINT $esxi_host $ESXI_USER $ESXI_PASSWORD 'esxcli system settings advanced list'
-      echo "esxcli system syslog config logger list>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"
-      python2 $SSH_ENDPOINT $esxi_host $ESXI_USER $ESXI_PASSWORD 'esxcli system syslog config logger list'
-      echo "esxcli storage core claimrule list>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"
-      python2 $SSH_ENDPOINT $esxi_host $ESXI_USER $ESXI_PASSWORD 'esxcli storage nfs list'
-      echo "esxcli storage core claimrule list>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"
-      python2 $SSH_ENDPOINT $esxi_host $ESXI_USER $ESXI_PASSWORD 'esxcli storage nfs list'
+      esxi_exec $esxi_host 'esxcli storage nfs list'
       echo "----------------------------------------------------------------------------------------------------"
     fi
-    if python2 $SSH_ENDPOINT $esxi_host $ESXI_USER $ESXI_PASSWORD 'storages=$(esxcli storage nfs list | grep nfs | cut -d" " -f1); for storage in $storages; do esxcli storage nfs remove -v $storage; done';then
-      echo "nfs storages have been successfully removed for $esxi_host"
-    else
-      echo "there is trouble with removing nfs storages from $esxi_host"; exit 1;
-    fi
+    esxi_exec $esxi_host 'storages=$(esxcli storage nfs list | grep nfs | cut -d" " -f1); for storage in $storages; do esxcli storage nfs remove -v $storage; done'
 
     for nfs_share in $NFS_SHARES; do
-      if python2 $SSH_ENDPOINT $esxi_host $ESXI_USER $ESXI_PASSWORD "esxcli storage nfs add -H $NFS_SERVER -s /var/$nfs_share -v $nfs_share"; then
+      if esxi_exec $esxi_host "esxcli storage nfs add -H $NFS_SERVER -s /var/$nfs_share -v $nfs_share"; then
         echo "$nfs_share has been successfully connected for $esxi_host"
       else
         echo "there is trouble with $nfs_share, please check vmware configurations"; exit 1;
       fi
     done
 
-    if python2 $SSH_ENDPOINT $esxi_host $ESXI_USER $ESXI_PASSWORD 'esxcli storage core adapter rescan --all'; then
-      echo "Rescan all datastores for $esxi_host"
-    else
-      echo "there is trouble with rescaning datastores on $esxi_host"; exit 1;
-    fi
+    esxi_exec $esxi_host 'esxcli storage core adapter rescan --all'
+
   done
 
   if [[ "${NFS_CLEAN}" == "true" ]]; then
