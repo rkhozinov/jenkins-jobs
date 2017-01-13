@@ -30,3 +30,12 @@
      - name: '{fuel_release}.{plugin-name}.mos_mu_customization_included'
        current-parameters: true
        kill-phase-on: NEVER
+     - name: '{fuel_release}.{plugin-name}.mos_mu_customization_excluded'
+       current-parameters: true
+       kill-phase-on: NEVER
+     - name: '{fuel_release}.{plugin-name}.mos_mu_customization_pkg'
+       current-parameters: true
+       kill-phase-on: NEVER
+     - name: '{fuel_release}.{plugin-name}.install_mu_no_ha_scale_90'
+       current-parameters: true
+       kill-phase-on: NEVER
