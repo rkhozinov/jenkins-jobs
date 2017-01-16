@@ -19,6 +19,8 @@ new_doc = xml.Element('testsuite', attrib={
     'time': suite_info['time']
 })
 
+failed = 0
+passed = 0
 for tc in root.iter('testcase'):
     tc_info = tc.attrib
     new_tc = xml.SubElement(new_doc, 'testcase', attrib={
@@ -27,13 +29,20 @@ for tc in root.iter('testcase'):
         'time': tc_info['time']
     })
     if tc_info['status'] != '0':
+        failed += 1
         tc_err = tc[0].attrib
         err = xml.SubElement(new_tc, 'error', attrib={
             'type': tc_err['type'],
             'message': tc_err['message']
         })
         err.text = tc[0].text
+    else:
+        passed += 1
 
+failures = int(suite_info['failures'])
+if failed < failures:
+    new_doc.attrib['failures'] = str(failures)
+    new_doc.attrib['errors'] = str(passed - failures)
 
 with open(path_dst, 'w') as f:
     f.write('<?xml version="1.0" encoding="UTF-8"?>')
