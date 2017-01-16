@@ -35,7 +35,7 @@ sh -ex "utils/jenkins/system_tests.sh"  \
 
 env_data=$(dos.py list --ips | grep ${ENV_NAME})
 echo $env_data
-admin_node_ip=$(echo $env_data | cut -d' ' -f3)
+admin_node_ip=$(echo $env_data | cut -d' ' -f2)
 export NAILGUN_HOST=${NAIGLUN_HOST:-$admin_node_ip}
 
 #remove old logs and test data
