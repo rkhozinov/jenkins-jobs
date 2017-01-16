@@ -58,3 +58,9 @@ TEST_JOB_BUILD_NUMBER=${BUILD_NUMBER:?}
 TEST_JOB_NAME=${JOB_NAME:?}
 DATE=$(date +'%B-%d')
 REPORTER_PROPERTIES
+
+docker-compose ps -q | xargs docker inspect -f '{{ .State.ExitCode }}' | while read code; do
+  if [ "$code" == "1" ]; then
+    exit 1
+  fi
+done
