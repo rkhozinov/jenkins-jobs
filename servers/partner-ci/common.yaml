@@ -431,17 +431,12 @@
           - condition-kind: file-exists
             condition-filename: 'nosetests.xml'
             action:
-              - xunit:
-                  types:
-                    - junit:
-                        pattern: 'nosetests.xml'
-                        skip-if-no-test-files: true
-              - junit:
-                  results: 'nosetests.xml'
-                  health-scale-factor: 1.0
               - archive:
                   artifacts: 'nosetests.xml'
                   allow-empty: false
+      - junit:
+          results: '**/test_run/feature_nics/*.xml'
+          health-scale-factor: 1.0
       - postbuildscript:
           script-only-if-succeeded: False
           script-only-if-failed: True
