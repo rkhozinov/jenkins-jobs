@@ -60,7 +60,7 @@ DATE=$(date +'%B-%d')
 REPORTER_PROPERTIES
 
 cd ${WORKSPACE}/docker/
-docker-compose ps -q | xargs docker inspect -f '{{ .State.ExitCode }}' | while -r read code; do
+docker-compose ps -q | xargs docker inspect -f '{{ .State.ExitCode }}' | while read -r code; do
   if [ "$code" == "1" ]; then
     exit 1
   fi
