@@ -20,6 +20,6 @@ addons:
 script:
   - bash -c 'shopt -s globstar; shellcheck -e SC1091,SC2086,SC2046,SC2015,SC2155,SC1090,SC2012,SC2035,SC2016 **/*.sh'
   - tox -e 9.x,9.1,9.0
-
+  - bash -c 'grep -R -E "[^$]{[a-zA-Z0-9_-]+}" ./output && exit 1 || echo "there is no undefined variables"'
 matrix:
   fast_finish: true
