@@ -91,6 +91,13 @@ client.connect(hostname=host, username=user, password=secret, port=port)
 stdin, stdout, stderr = client.exec_command(command)
 data = stdout.read() + stderr.read()
 print data
+exit_code = stdout.channel.recv_exit_status()
+if (exit_code == 0):
+  print '{} {}'.format('command successful, exit code = ',exit_code)
+else:
+  print '{} {}'.format('command failed, exit code = ',exit_code)
+    sys.exit(exit_code)
+
 client.close()
 CONTENT
 
@@ -107,6 +114,7 @@ esxi_exec(){
   python2 $SSH_ENDPOINT $host $ESXI_USER $ESXI_PASSWORD "$cmd"
 
 }
+
 configure_nfs(){
   set -x
   create_ssh_endpoint
