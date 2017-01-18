@@ -96,7 +96,7 @@ if (exit_code == 0):
   print '{} {}'.format('command successful, exit code = ',exit_code)
 else:
   print '{} {}'.format('command failed, exit code = ',exit_code)
-    sys.exit(exit_code)
+  sys.exit(exit_code)
 
 client.close()
 CONTENT
