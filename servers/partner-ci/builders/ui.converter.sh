@@ -26,7 +26,8 @@ for tc in root.iter('testcase'):
     new_tc = xml.SubElement(new_doc, 'testcase', attrib={
         'classname': tc_info['name'],
         'name': tc_info['name'],
-        'time': tc_info['time']
+        'time': tc_info['time'],
+        'status': tc_info['status']
     })
     if tc_info['status'] != '0':
         failed += 1
