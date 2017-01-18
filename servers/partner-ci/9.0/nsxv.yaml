@@ -43,7 +43,7 @@
     nightly_timer: 'H 22 * * *'
     regression_timer: 'H 18 * * *'
     nightly_disabled: true
-    regression_disabled: false
+    regression_disabled: true
     force_erase: true
     recreate_venv: false
     ws_norevert: false
@@ -331,7 +331,7 @@
     name: '{build-name}'
     node: 'runner'
     concurrent: true
-    disabled: false
+    disabled: true
     triggers:
       - draft-gerrit-trigger:
           gerrit_repo: '{gerrit_repo}'
@@ -379,7 +379,7 @@
     name: '{build-driver-name}'
     node: 'runner'
     concurrent: false
-    disabled: false
+    disabled: true
     scm:
       - git:
           url: $URL

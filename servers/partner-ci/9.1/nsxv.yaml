@@ -42,7 +42,7 @@
     nightly_timer: 'H 22 * * *'
     regression_timer: 'H 18 * * *'
     nightly_disabled: true
-    regression_disabled: false
+    regression_disabled: true
     force_erase: true
     force_reuse: false
     recreate_venv: false
@@ -330,7 +330,7 @@
     name: '{build-name}'
     node: 'runner'
     concurrent: true
-    disabled: false
+    disabled: true
     triggers:
       - draft-gerrit-trigger:
           gerrit_repo: '{gerrit_repo}'
@@ -378,7 +378,7 @@
     name: '{build-driver-name}'
     node: 'runner'
     concurrent: false
-    disabled: false
+    disabled: true
     scm:
       - git:
           url: $URL
@@ -485,7 +485,7 @@
 
 - job-template:
     name: '{smoke-name}'
-    disabled: false
+    disabled: true
     description: 'The Smoke test for {fuel_release}.{plugin-name}.{plugin_version}'
     concurrent: true
     quiet-period: 5
@@ -524,7 +524,7 @@
 - job-template:
     name: '{bvt-name}'
     description: 'The BVT test for {fuel_release}.{plugin-name}.{plugin_version}'
-    disabled: false
+    disabled: true
     concurrent: true
     project-type: multijob
     node: runner
