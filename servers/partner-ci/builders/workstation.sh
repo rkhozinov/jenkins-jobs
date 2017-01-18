@@ -125,10 +125,7 @@ configure_nfs(){
     esxi_exec $esxi_host 'esxcli network firewall set --enabled false'
     esxi_exec $esxi_host 'esxcli system hostname get'
     echo "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
-    if [[ ${DEBUG} == "true" ]]; then
-      esxi_exec $esxi_host 'esxcli storage nfs list'
-      echo "----------------------------------------------------------------------------------------------------"
-    fi
+
     esxi_exec $esxi_host 'storages=$(esxcli storage nfs list | grep nfs | cut -d" " -f1); for storage in $storages; do esxcli storage nfs remove -v $storage; done'
 
     for nfs_share in $NFS_SHARES; do
@@ -140,6 +137,7 @@ configure_nfs(){
     done
 
     esxi_exec $esxi_host 'esxcli storage core adapter rescan --all'
+    esxi_exec $esxi_host 'esxcli storage nfs list'
 
   done
 
