@@ -110,7 +110,7 @@ esxi_exec(){
   set -x
   host=$1
   cmd=$2
-  echo "$cmd-------------------------------------------------------"
+  echo -e "$cmd\n-------------------------------------------------------"
   python2 $SSH_ENDPOINT $host $ESXI_USER $ESXI_PASSWORD "$cmd"
 
 }
