@@ -269,7 +269,7 @@
     properties:
       - test-property
     builders:
-      - get-refs
+      - get-refs-vcenter
       - get-updates
       - get-props
       - get-snapshots

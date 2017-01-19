@@ -484,11 +484,28 @@
           fi
 
 - builder:
+    name: get-refs-vcenter
+    builders:
+      - shell: |
+          #!/bin/bash
+          cherrypick() {
+              git_url=$1
+              ref=$2
+              git fetch $git_url "$ref" && git cherry-pick FETCH_HEAD || { git status; exit 1; }
+              git log --pretty=oneline | head
+          }
+          if [[ ! -z "${FUEL_QA_REFS}" ]]; then
+            cd ${WORKSPACE}
+            git_url=$(git config --get remote.origin.url)
+            for ref in ${FUEL_QA_REFS:?}; do cherrypick $git_url $ref; done
+          fi
+
+- builder:
     name: get-ui-refs
     builders:
       - shell: |
           #!/bin/bash
-          cherrypick(){
+          cherrypick() {
               git_url=$1
               ref=$2
               git fetch $git_url "$ref" && git cherry-pick FETCH_HEAD || { git status; exit 1; }
