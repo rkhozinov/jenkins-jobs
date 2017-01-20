@@ -412,6 +412,9 @@
           artifacts: '*.properties'
           allow-empty: true
       - archive:
+          artifacts: 'fuel-ui/*.log'
+          allow-empty: true
+      - archive:
           artifacts: 'fuel-ui/test_run/**'
           allow-empty: true
       - email:
