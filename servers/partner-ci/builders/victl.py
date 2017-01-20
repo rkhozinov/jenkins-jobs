@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
 """Copyright 2016 Mirantis, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License"); you may
@@ -19,7 +19,6 @@ import atexit
 import logging as log
 import ssl
 import sys
-import textwrap
 
 from os import environ
 
@@ -91,11 +90,19 @@ class Victl(object):
         raise Exception("Cluster '{cl_name}' is empty".format(cl_name=cluster))
 
     def get_cluster_hosts_objects(self, dc, cluster):
-        """Return list of hosts names in specified cluster."""
+        """Return list of hosts objects in specified cluster."""
         host_folder = dc.hostFolder
         for _cluster in host_folder.childEntity:
             if _cluster.name == cluster:
                 return _cluster.host
+
+    def get_hosts(self, dc):
+        """Return list of all hosts objects"""
+        host_folder = dc.hostFolder
+        hosts = []
+        for _cluster in host_folder.childEntity:
+            hosts += _cluster.host
+        return hosts
 
     def get_vds_object(self, dc, vds):
         """Return dvSwitch object with specified name."""
@@ -359,6 +366,15 @@ def datastore_list(args, inst):
 
     return 0
 
+def rescan_datastores(args, inst):
+    """Rescan all datastores."""
+    dc = inst.get_dc_object(args.datacenter)
+    ds = inst.get_hosts(dc)
+    for _ds in ds:
+        _ds.configManager.storageSystem.RescanAllHba()
+
+    return 0
+
 
 _script_name = sys.argv[0]  # is used for help message
 
@@ -522,6 +538,10 @@ setup_func(name='datastore-list',
            params=_common_params + ['cluster'],
            func=datastore_list)
 
+setup_func(name='rescan-datastores',
+           params=_common_params,
+           func=rescan_datastores)
+
 
 def _form_env_help():
     """Return message about exported and available env variables."""
@@ -621,7 +641,7 @@ def _def_parser(func_name):
 
     sub_parser = _subparser.add_parser(
         func_name, formatter_class=argparse.RawDescriptionHelpFormatter,
-        epilog=textwrap.indent(help_msg, '')
+        epilog=help_msg
     )
 
     for arg in sorted(func_params):
@@ -655,7 +675,7 @@ def _form_help_msg():
 
 _parser = argparse.ArgumentParser(
     formatter_class=argparse.RawDescriptionHelpFormatter,
-    epilog=textwrap.indent(_form_help_msg(), '')
+    epilog=_form_help_msg()
 )
 _subparser = _parser.add_subparsers()
 
@@ -664,6 +684,7 @@ for _func in _functions:
 
 
 if __name__ == '__main__':
+
     args = _parser.parse_args()
     if len(sys.argv) == 1:
         _parser.print_help()
