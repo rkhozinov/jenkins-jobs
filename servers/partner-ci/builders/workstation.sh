@@ -139,6 +139,15 @@ configure_nfs(){
     esxi_exec $esxi_host 'esxcli storage core adapter rescan --all'
     esxi_exec $esxi_host 'esxcli storage nfs list'
 
+    #vcenter-control wrapper
+    BACKUP_IFS=$IFS
+    IFS=','
+    for cluster in $VCENTER_CLUSTERS; do
+      python /btsync/victl.py rescan-datastores -d 'Datacenter' -s '172.16.0.145' -p 'vmware' -o '443' -u 'root'
+      python /btsync/victl.py datastore-list -c $cluster -d 'Datacenter' -s '172.16.0.145' -p 'vmware' -o '443' -u 'root'
+    done
+    IFS=$BACKUP_IFS
+
   done
 
   if [[ "${NFS_CLEAN}" == "true" ]]; then
