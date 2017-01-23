@@ -32,7 +32,7 @@
       - bool:
           name: RECREATE_VENV
           default: '{recreate_venv}'
-          description: "Recreate virtual environemnt before tests"
+          description: "Recreate virtual environement before tests, download and install all requirements for venv"
       - bool:
           name: WS_NOREVERT
           default: '{ws_norevert}'
