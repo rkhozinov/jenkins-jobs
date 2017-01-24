@@ -32,7 +32,7 @@
       - bool:
           name: RECREATE_VENV
           default: '{recreate_venv}'
-          description: "Recreate virtual environemnt before tests"
+          description: "Recreate virtual environement before tests, download and install all requirements for venv"
       - bool:
           name: WS_NOREVERT
           default: '{ws_norevert}'
@@ -232,7 +232,7 @@
             CONV_SNAP_PATH=utils/jenkins/conv_snapshot_file.py;
             DISABLE_STP=true;
             ESXI_HOSTS=172.16.0.250 172.16.0.252 172.16.0.253;
-            FORCE_DISABLE_UPDATES=false;
+            FORCE_DISABLE_UPDATES=true;
             NFS_SERVER=172.16.0.1;
             NFS_SHARES=nfs nfs2;
             SLAVE_NODE_MEMORY=8192;
