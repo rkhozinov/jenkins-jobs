@@ -232,7 +232,7 @@
             CONV_SNAP_PATH=utils/jenkins/conv_snapshot_file.py;
             DISABLE_STP=true;
             ESXI_HOSTS=172.16.0.250 172.16.0.252 172.16.0.253;
-            FORCE_DISABLE_UPDATES=true;
+            FORCE_DISABLE_UPDATES=false;
             NFS_SERVER=172.16.0.1;
             NFS_SHARES=nfs nfs2;
             SLAVE_NODE_MEMORY=8192;
