@@ -38,9 +38,6 @@ export MANILA_PLUGIN_VERSION=${PLUGIN_VERSION:?}
 build_version=$(grep "BUILD_NUMBER" < build.properties | cut -d= -f2 )
 export PKG_JOB_BUILD_NUMBER=${PKG_JOB_BUILD_NUMBER:-$build_version}
 
-#remove old logs and test data
-[ -f nosetest.xml ] && sudo rm -f nosetests.xml
-sudo rm -rf logs/*
 
 export ENV_NAME="${ENV_PREFIX:?}.${SNAPSHOTS_ID:?}"
 export VENV_PATH="${HOME}/${FUEL_RELEASE:?}-venv"

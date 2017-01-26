@@ -25,9 +25,6 @@ fi
 [[ $SNAPSHOTS_ID == *"lastSuccessfulBuild"* ]] && \
   export SNAPSHOTS_ID=$(grep -Po '#\K[^ ]+' < snapshots.params)
 
-#remove old logs and test data
-[ -f nosetest.xml ] && sudo rm -f nosetests.xml
-sudo rm -rf logs/*
 
 export ENV_NAME="${ENV_PREFIX:?}.${SNAPSHOTS_ID:?}"
 export VENV_PATH="${HOME}/${FUEL_RELEASE:?}-venv"
