@@ -22,6 +22,7 @@
             VSRX_ORIGINAL_IMAGE_PATH=/storage/contrail/vSRX.400.img;
             VSRX_TARGET_IMAGE_PATH=/var/lib/libvirt/images/vSRX.400.img;
             VSRX_TEMPLATE_PATH=/storage/contrail/vSRX_400.template;
+            UPDATE_MASTER_VIA_MOS_MU=False;
 
 - project:
     name: 'predefined_parameters'
@@ -46,6 +47,7 @@
     smoke-test-name: 'contrail_smoke'
     bvt-test-name: 'contrail_bvt'
     pkg_job_name: '{fuel_release}.{plugin-name}.{plugin_version}.build'
+    pkg_job_build_number: 'released'
     nightly_timer: 'H 21 * * *'
     full_timer: 'H 21 * * *'
     regression_timer: 'H 18 * * *'
@@ -250,6 +252,7 @@
           testrail_run: "$TREP_TESTRAIL_SUITE"
           testrail_run_desc: "Test run description"
           pkg_job_name: ''
+          pkg_job_build_number: 'released'
           iso_job_name: ''
           multijob_build_pkg: false
 
@@ -276,6 +279,7 @@
           kvm_use:               '{kvm_use}'
           nfs_clean:             '{nfs_clean}'
           pkg_job_name:          '{pkg_job_name}'
+          pkg_job_build_number:  '{pkg_job_build_number}'
           plugin_version:        '{plugin_version}'
           publish_results:       '{publish_results}'
           recreate_venv:         '{recreate_venv}'
@@ -310,6 +314,7 @@
           kvm_use:               '{kvm_use}'
           nfs_clean:             '{nfs_clean}'
           pkg_job_name:          '{pkg_job_name}'
+          pkg_job_build_number:  '{pkg_job_build_number}'
           plugin_version:        '{plugin_version}'
           publish_results:       '{publish_results}'
           recreate_venv:         '{recreate_venv}'
@@ -353,6 +358,7 @@
           kvm_use:               '{kvm_use}'
           nfs_clean:             '{nfs_clean}'
           pkg_job_name:          '{pkg_job_name}'
+          pkg_job_build_number:  '{pkg_job_build_number}'
           plugin_version:        '{plugin_version}'
           publish_results:       '{publish_results}'
           recreate_venv:         '{recreate_venv}'
