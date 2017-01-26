@@ -252,7 +252,6 @@
           testrail_run: "$TREP_TESTRAIL_SUITE"
           testrail_run_desc: "Test run description"
           pkg_job_name: ''
-          pkg_job_build_number: 'released'
           iso_job_name: ''
           multijob_build_pkg: false
 
