@@ -94,6 +94,7 @@
           description: 'The name of job for copying of plugin pkg artefacts'
       - string:
           name: PKG_JOB_BUILD_NUMBER
+          default: '{pkg_job_build_number}'
           description: 'The name of job for copying of plugin pkg artefacts'
       - string:
           name: ENV_PREFIX
