@@ -8,7 +8,7 @@
             BONDING=False;
             CONTRAIL_DISTRIBUTION=;
             CONTRAIL_PLUGIN_PACK_UB_PATH=;
-            CONTRAIL_PLUGIN_PATH=;
+            CONTRAIL_PLUGIN_PATH=/storage/contrail/released/contrail-5.0-5.0.0-1.noarch.rpm;
             CONTRAIL_VERSION=5.0;
             DISABLE_SSL=false;
             FORCE_DISABLE_UPDATES=true;
@@ -74,7 +74,7 @@
     snapshots_id: 'released'
     gerrit_repo: 'fuel-plugin-contrail'
     gerrit_branch: 'stable/5.0.0'
-    email_to: 'rkhozinov@mirantis.com okosse@mirantis.com '
+    email_to: 'rkhozinov@mirantis.com okosse@mirantis.com'
     released_plugin_path: '/storage/contrail/released/contrail-5.0-5.0.0-1.noarch.rpm'
     scm_submodule_disabled: false
     scm_wipe_workspace: false
@@ -568,7 +568,7 @@
           TEST_GROUP=contrail_bvt
           CONTRAIL_DISTRIBUTION=juniper
           CONTRAIL_PLUGIN_PATH={released_plugin_path}
-          PLUGIN_VERSION={plugin_version}
+          PLUGIN_VERSION=5.0.0
           PKG_JOB_BUILD_NUMBER=released
           EOF
       - multijob:

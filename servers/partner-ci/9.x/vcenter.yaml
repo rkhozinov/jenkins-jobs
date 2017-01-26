@@ -1,43 +1,4 @@
 ---
-- parameter:
-    name: plugin-specific-parameters
-    parameters:
-      - text:
-          name: SPECIFIC_PROPS
-          default: |
-            ADMIN_NODE_MEMORY=8192;
-            CLEAN_IPTABLES=true;
-            CONV_SNAP_PATH=utils/jenkins/conv_snapshot_file.py;
-            DISABLE_STP=true;
-            ESXI_HOSTS=172.16.0.250 172.16.0.252 172.16.0.253;
-            NFS_SERVER=172.16.0.1;
-            NFS_SHARES=nfs nfs2;
-            SLAVE_NODE_MEMORY=8192;
-            VCENTER_CERT_BYPASS=True;
-            VCENTER_CERT_URL="http://tpi-s2.bud.mirantis.net:5000/downloads/certs/server.pem";
-            VCENTER_CLUSTERS=Cluster1,Cluster2;
-            VCENTER_DATACENTER=Datacenter;
-            VCENTER_DATASTORE=nfs;
-            VCENTER_GLANCE_CERT_BYPASS=True;
-            VCENTER_GLANCE_CERT_URL="http://tpi-s2.bud.mirantis.net:5000/downloads/certs/server.pem";
-            VCENTER_GLANCE_IP=172.16.0.145;
-            VCENTER_GLANCE_PASSWORD=vmware;
-            VCENTER_GLANCE_USERNAME=openstack;
-            VCENTER_IP=172.16.0.145;
-            VCENTER_PASSWORD=vmware;
-            VCENTER_USE=true;
-            VCENTER_USERNAME=openstack;
-            VC_IMAGE_DIR=openstack_glance;
-            VMWARE_IMG_LOGIN=root;
-            VMWARE_IMG_NAME=shaker.vmdk;
-            VMWARE_IMG_PASSWORD=r00tme;
-            VMWARE_IMG_URL="http://pce-storage.bud.mirantis.net:5000/distr/$VMWARE_IMG_NAME";
-            VSPHERE_VERSION=5.5;
-            WORKSTATION_IFS=vmnet2,vmnet3,vmnet4;
-            WORKSTATION_NODES=esxi1 esxi2 esxi3 vcenter;
-            WORKSTATION_PASSWORD=VMware01;
-            WORKSTATION_SNAPSHOT=doubledvs;
-            WORKSTATION_USERNAME=vmware;
 - project:
     name: 'predefined_parameters'
     fuel_release: '9.x'
@@ -203,7 +164,7 @@
           testrail_suite_desc:   '{testrail_suite_desc}'
           update_master:         '{update_master}'
           ws_norevert:           '{ws_norevert}'
-      - plugin-specific-parameters
+      - vcenter-specific-parameters
 
 - test-parameters: &test-parameters
     name: 'test-parameters'
@@ -250,7 +211,7 @@
           testrail_suite_desc:   '{testrail_suite_desc}'
           update_master:         '{update_master}'
           ws_norevert:           '{ws_norevert}'
-      - plugin-specific-parameters
+      - vcenter-specific-parameters
 
 - defaults:
     name: global
