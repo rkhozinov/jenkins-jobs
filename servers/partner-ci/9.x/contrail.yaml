@@ -330,7 +330,6 @@
       - get-baremetal-props
       - get-props
       - get-snapshots
-      - get-specific-mirrors
       - conditional-step:
            condition-kind: shell
            condition-command: |
