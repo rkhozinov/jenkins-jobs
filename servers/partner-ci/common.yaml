@@ -960,7 +960,12 @@
           fail: true
           type: no-activity
           write-description: "Test-timeout is exceeded"
-      - workspace-cleanup
+      - workspace-cleanup:
+          include:
+            - "*.xml"
+            - "*.log"
+          dirmatch: true
+
 
 - property:
     name: runner-property
