@@ -382,7 +382,7 @@ v_user = environ.get('VCENTER_USERNAME', 'openstack')
 v_passw = environ.get('VCENTER_PASSWORD', 'vmware')
 v_dcenter = environ.get('VC_DATACENTER', 'Datacenter')
 v_datastore = environ.get('VC_DATASTORE', 'nfs')
-v_clusters = environ.get('VC_CLUSTERS', 'Cluster1')
+v_clusters = environ.get('VCENTER_CLUSTERS', 'Cluster1')
 
 
 class Params(object):
@@ -400,12 +400,11 @@ class Params(object):
 
 if __name__ == '__main__':
     args = Params()
+    inst = Victl(args.host, args.user, args.password, args.port)
+
+    rescan_datastores(args, inst)
 
     for cluster in args.clusters.split(','):
         args.cluster = cluster
-
-        inst = Victl(args.host, args.user, args.password, args.port)
-
         datastore_list(args, inst)
-    rescan_datastores(args, inst)
 

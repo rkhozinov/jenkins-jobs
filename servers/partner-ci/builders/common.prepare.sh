@@ -92,8 +92,7 @@ function get_venv_requirements {
   export SPEC_REQS_PATH="${WORKSPACE}/plugin_test/requirement.txt"
   sed -i 's/2.9.23/release\/2.9/g' $REQS_PATH_DEVOPS
   # additional libraries associated with vcenter-control wrapper
-  echo "pyvim" >> $REQS_PATH
-  echo "pyvmomi" >> $REQS_PATH
+  echo -e "pyvim\npyvmomi" >> $REQS_PATH
 }
 
 function prepare_venv {
