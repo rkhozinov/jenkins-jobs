@@ -136,16 +136,6 @@ configure_nfs(){
       fi
     done
 
-
-   # #vcenter-control wrapper
-   # BACKUP_IFS=$IFS
-   # IFS=','
-   # for cluster in $VCENTER_CLUSTERS; do
-   #   python /btsync/victl.py rescan-datastores -d 'Datacenter' -s $VCENTER_IP -p $VCENTER_PASSWORD -o '443' -u $VCENTER_USERNAME
-   #   python /btsync/victl.py datastore-list -c $cluster -d 'Datacenter' -s $VCENTER_IP -p $VCENTER_PASSWORD -o '443' -u $VCENTER_USERNAME
-   # done
-   # IFS=$BACKUP_IFS
-
   done
 
   if [[ "${NFS_CLEAN}" == "true" ]]; then
