@@ -29,6 +29,7 @@
     bvt-test-name: 'manila_bvt'
     regression-test-name: 'manila_bvt'
     pkg_job_name: '{fuel_release}.{plugin-name}.build'
+    pkg_job_build_number: 'released'
     nightly_timer: 'H 22 * * *'
     regression_timer: 'H 16 * * *'
     nightly_disabled: true
@@ -173,6 +174,7 @@
           kvm_use:               '{kvm_use}'
           nfs_clean:             '{nfs_clean}'
           pkg_job_name:          '{pkg_job_name}'
+          pkg_job_build_number:  '{pkg_job_build_number}'
           plugin_version:        '{plugin_version}'
           publish_results:       '{publish_results}'
           recreate_venv:         '{recreate_venv}'
@@ -217,6 +219,7 @@
           kvm_use:               '{kvm_use}'
           nfs_clean:             '{nfs_clean}'
           pkg_job_name:          '{pkg_job_name}'
+          pkg_job_build_number:  '{pkg_job_build_number}'
           plugin_version:        '{plugin_version}'
           publish_results:       '{publish_results}'
           recreate_venv:         '{recreate_venv}'

@@ -49,6 +49,7 @@
     bvt-test-name: 'dvs_vcenter_bvt'
     regression-test-name: 'dvs_regression'
     pkg_job_name: '{fuel_release}.{plugin-name}.build'
+    pkg_job_build_number: ''
     nightly_timer: 'H 22 * * *'
     regression_timer: 'H 18 * * *'
     nightly_disabled: false
@@ -205,6 +206,7 @@
           kvm_use:               '{kvm_use}'
           nfs_clean:             '{nfs_clean}'
           pkg_job_name:          '{pkg_job_name}'
+          pkg_job_build_number:  '{pkg_job_build_number}'
           plugin_version:        '{plugin_version}'
           publish_results:       '{publish_results}'
           recreate_venv:         '{recreate_venv}'
@@ -254,6 +256,7 @@
           kvm_use:               '{kvm_use}'
           nfs_clean:             '{nfs_clean}'
           pkg_job_name:          '{pkg_job_name}'
+          pkg_job_build_number:  '{pkg_job_build_number}'
           plugin_version:        '{plugin_version}'
           publish_results:       '{publish_results}'
           recreate_venv:         '{recreate_venv}'
@@ -289,7 +292,6 @@
       - get-updates
       - get-props
       - get-snapshots
-      - get-specific-mirrors
       - conditional-step:
            condition-kind: shell
            condition-command: |

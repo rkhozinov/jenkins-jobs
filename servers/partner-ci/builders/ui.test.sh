@@ -41,9 +41,6 @@ export NAILGUN_HOST=${NAIGLUN_HOST:-$admin_node_ip}
 last_snapshot=$(dos.py snapshot-list ${ENV_NAME} | tail -1 | cut -d' ' -f1)
 dos.py revert-resume ${ENV_NAME} "${last_snapshot}"
 
-#remove old logs and test data
-[ -f nosetest.xml ] && sudo rm -f nosetests.xml
-sudo rm -rf logs/*
 
 cd ${WORKSPACE}/docker/
 pip install --upgrade docker-compose
