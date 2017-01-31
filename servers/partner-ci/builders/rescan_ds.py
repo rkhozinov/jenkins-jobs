@@ -102,7 +102,6 @@ class Victl(object):
 
 
 if __name__ == '__main__':
-
     host = environ.get('VCENTER_IP', '172.16.0.145')
     port = environ.get('VCENTER_PORT', '443')
     user = environ.get('VCENTER_USERNAME', 'openstack')
@@ -112,7 +111,8 @@ if __name__ == '__main__':
     clusters = environ.get('VCENTER_CLUSTERS', 'Cluster1')
 
     victl = Victl(host=host, dc_name=dc_name, user=user,
-                    password=password, port=port)
+                  password=password, port=port)
 
     victl.rescan_datastores()
     victl.datastore_list()
+
