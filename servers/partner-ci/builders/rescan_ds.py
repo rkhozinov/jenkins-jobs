@@ -19,7 +19,8 @@ import atexit
 import logging as log
 import ssl
 import sys
-from os import environ,path
+from os import environ
+from os import path
 
 jenkins_venv = "/home/jenkins/90-venv/bin/activate_this.py"
 execfile(jenkins_venv, dict(__file__=jenkins_venv))
@@ -102,7 +103,6 @@ class Victl(object):
 
 
 if __name__ == '__main__':
-
     host = environ.get('VCENTER_IP', '172.16.0.145')
     port = environ.get('VCENTER_PORT', '443')
     user = environ.get('VCENTER_USERNAME', 'openstack')
@@ -112,7 +112,8 @@ if __name__ == '__main__':
     clusters = environ.get('VCENTER_CLUSTERS', 'Cluster1')
 
     victl = Victl(host=host, dc_name=dc_name, user=user,
-                    password=password, port=port)
+                  password=password, port=port)
 
     victl.rescan_datastores()
     victl.datastore_list()
+
