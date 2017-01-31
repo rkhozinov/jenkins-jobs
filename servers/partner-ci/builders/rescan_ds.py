@@ -22,6 +22,7 @@ from os import environ
 
 import requests
 from pyVim import connect
+from pyVmomi import vim
 from pyVmomi import vmodl
 
 requests.packages.urllib3.disable_warnings()
@@ -64,27 +65,23 @@ class Victl(object):
         except vmodl.MethodFault as e:
             raise Exception('Caught vmodl fault: ' + e.msg)
 
-        self.dc_name = dc_name
 
     @property
     def datacenter(self):
-        return self._datacenter
-
-    @datacenter.setter
-    def datacenter(self, value):
-        self._datacenter = [dc for dc
-                            in self.content.rootFolder.childEntity
-                            if dc.name == value]
         if not self._datacenter:
-            raise NotFoundException("There's no datacenter "
-                                    "with '{0}' name".format(value))
+            self._datacenter = self.content.rootFolder
+        return self._datacenter
 
     @property
     def hosts(self):
         if not self._hosts:
-            self._hosts = [cluster.host for cluster
-                           in self.datacenter.hostFolder.childEntity]
-        return self.hosts
+            host_view = self.content.viewManager.CreateContainerView(self.datacenter,
+                                                                     [vim.HostSystem],
+                                                                     True)
+            self._hosts = [host for host in host_view.view]
+            host_view.Destroy()
+
+        return self._hosts
 
     def rescan_datastores(self):
         """Rescan all datastores."""
