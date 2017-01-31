@@ -19,7 +19,8 @@ import atexit
 import logging as log
 import ssl
 import sys
-from os import environ,path
+from os import environ
+from os import path
 
 sys.path.append(path.join(sys.path[0], "{0}/bin".format(environ.get('VIRTUAL_ENV'))))
 
