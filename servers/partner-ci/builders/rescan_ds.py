@@ -18,7 +18,10 @@ under the License.
 import atexit
 import logging as log
 import ssl
-from os import environ
+import sys
+from os import environ,path
+
+sys.path.append(path.join(sys.path[0], "{0}/bin".format(environ.get('VIRTUAL_ENV'))))
 
 import requests
 from pyVim import connect
