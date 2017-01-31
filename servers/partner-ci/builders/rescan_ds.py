@@ -78,7 +78,7 @@ class Victl(object):
                 return dc
 
         raise NotFoundException("Can not find dc "
-                                "'{dc_name}'".format(dc_name=datacenter))
+                                "'{0}'".format(datacenter))
 
     def get_cluster_hosts(self, dc, cluster):
         """Return list of hosts names in specified cluster."""
@@ -87,7 +87,7 @@ class Victl(object):
             if _cluster.name == cluster:
                 return [host.name for host in _cluster.host]
 
-        raise Exception("Cluster '{cl_name}' is empty".format(cl_name=cluster))
+        raise Exception("Cluster '{0}' is empty".format(cluster))
 
     def get_cluster_hosts_objects(self, dc, cluster):
         """Return list of hosts objects in specified cluster."""
@@ -112,7 +112,7 @@ class Victl(object):
                 if net.name == vds:
                     return net
 
-        raise NotFoundException("dvSwitch '{vds}' not found".format(vds=vds))
+        raise NotFoundException("dvSwitch '{0}' not found".format(vds))
 
     def get_vds_hosts(self, datacenter, vdswitch):
         """Return list of hosts names in specified dvSwitch."""
@@ -158,14 +158,14 @@ class Victl(object):
         out = self._exec_command(host, user, password, cmd)
         if not out:
             if print_error:
-                raise Exception("Host '{host}' not connected to nsxv "
-                                "controller".format(host=host))
+                raise Exception("Host '{0}' not connected to nsxv "
+                                "controller".format(host))
             return False
         return True
 
     def restart_netcpad(self, host, user, password):
         """Restart netcpad."""
-        log.info("Host '{host}', try restart netcpad".format(host=host))
+        log.info("Host '{0}', try restart netcpad".format(host))
 
         cmd = r"/etc/init.d/netcpad restart"
         self._exec_command(host, user, password, cmd)
@@ -177,9 +177,8 @@ class Victl(object):
         hosts = self.get_cluster_hosts_objects(dc, cluster)
         for esxi in hosts:
             if portgroup not in [pg.name for pg in esxi.network]:
-                err += "On esxi '{esxi}' portgroup '{portgr}' "\
-                       "not found".format(esxi=esxi.name,
-                                          portgr=portgroup)
+                err += "On esxi '{0}' portgroup '{1}' "\
+                       "not found".format(esxi.name, portgroup)
         if err:
             raise NotFoundException(err)
         return True
@@ -196,8 +195,8 @@ class Victl(object):
                 if ds.name == datastore:
                     break
             else:
-                log.error('ERROR: On esxi "{esxi}" datastore "{ds}" is not '
-                          'found'.format(esxi=esxi.name, ds=datastore))
+                log.error('ERROR: On esxi "{0}" datastore "{1}" is not '
+                          'found'.format(esxi.name, datastore))
                 err[0] = 'Some datastores not found'
                 continue
 
@@ -206,19 +205,19 @@ class Victl(object):
                     break
 
             if attached_host.mountInfo.mounted:
-                log.info('On esxi "{esxi}" datastore "{ds}" is mounted'
-                         ''.format(ds=ds.name, esxi=esxi.name))
+                log.info('On esxi "{0}" datastore "{1}" is mounted'
+                         ''.format(ds.name, esxi.name))
             else:
-                log.error('ERROR: On esxi "{esxi}" datastore "{ds}" is NOT '
-                          'mounted'.format(ds=ds.name, esxi=esxi.name))
+                log.error('ERROR: On esxi "{0}" datastore "{1}" is NOT '
+                          'mounted'.format(ds.name, esxi.name))
                 err[1] = 'Some datastores not mounted'
 
             if attached_host.mountInfo.accessible:
-                log.info('On esxi "{esxi}" datastore "{ds}" is accessible'
-                         ''.format(ds=ds.name, esxi=esxi.name))
+                log.info('On esxi "{0}" datastore "{1}" is accessible'
+                         ''.format(ds.name, esxi.name))
             else:
-                log.error('ERROR: On esxi "{esxi}" datastore "{ds}" is NOT '
-                          'accessible'.format(ds=ds.name, esxi=esxi.name))
+                log.error('ERROR: On esxi "{0}" datastore "{1}" is NOT '
+                          'accessible'.format(ds.name, esxi.name))
                 err[2] = 'Some datastores not accessible'
 
         if err:
@@ -230,15 +229,13 @@ class Victl(object):
         """Put the file with test data to specified datastore."""
         dc = self.get_dc_object(datacenter)
         if datastore not in [ds.name for ds in dc.datastore]:
-            raise NotFoundException("Datastore '{ds}' not found on '{dc}' "
-                                    "datacenter".format(ds=datastore,
-                                                        dc=datacenter))
+            raise NotFoundException("Datastore '{0}' not found on '{1}' "
+                                    "datacenter".format(datastore, datacenter))
 
         # Build the url to put the file - https://hostname:port/resource?params
         resource = '/folder/test_upload'
         params = {'dsName': datastore, 'dcPath': datacenter}
-        http_url = 'https://{vcenter}:443{resource}'.format(vcenter=host,
-                                                            resource=resource)
+        http_url = 'https://{0}:443{1}'.format(host, resource)
 
         # Get the cookie built from the current session
         client_cookie = self._service_instance._stub.cookie
@@ -249,8 +246,7 @@ class Victl(object):
         _path_etc = client_cookie.split('=', 1)[1]
         cookie_value = _path_etc.split(';', 1)[0]
         cookie_path = _path_etc.split(';', 1)[1].split(';', 1)[0].lstrip()
-        cookie_text = " {value}; ${path}".format(value=cookie_value,
-                                                 path=cookie_path)
+        cookie_text = " {0}; ${1}".format(cookie_value, cookie_path)
         # Make a cookie
         cookie = dict()
         cookie[cookie_name] = cookie_text
@@ -269,7 +265,7 @@ class Victl(object):
                                verify=False)
         if not request.ok:
             raise Exception("Can not write test file to datastore "
-                            "'{ds}'".format(ds=datastore))
+                            "'{0}'".format(datastore))
 
         return True
 
@@ -293,26 +289,26 @@ def check_dvs_attached(args, inst):
     # Check up whether all cluster hosts are in dvSwitch
     host_not_in_vds = set(hosts_in_cluster) - set(hosts_in_vds)
     if host_not_in_vds:
-        err = "In cluster '{cl_name}' on dvSwitch '{vds}' not found " \
-              "hosts:".format(cl_name=args.cluster, vds=args.vdswitch)
+        err = "In cluster '{0}' on dvSwitch '{1}' not found " \
+              "hosts:".format(args.cluster, args.vdswitch)
         for host in host_not_in_vds:
-            err += "\n  {host}".format(host=host)
+            err += "\n  {0}".format(host)
         raise NotFoundException(err)
 
     # Check up whether all cluster hosts have vmnic attached
     nics = inst.get_nics_for_hosts_in_vds(hosts_in_cluster, vds)
     for hostname, host_nics in zip(hosts_in_cluster, nics):
         if args.vmnic not in host_nics:
-            raise Exception("Host '{host}' has not attached nic '{nic}' to "
-                            "dvSwitch '{vds}'".format(host=hostname,
-                                                      nic=args.vmnic,
-                                                      vds=vds.name))
+            raise Exception("Host '{0}' has not attached nic '{1}' to "
+                            "dvSwitch '{2}'".format(hostname,
+                                                      args.vmnic,
+                                                      vds.name))
         extra_nic = set(host_nics) - {args.vmnic}
         if extra_nic:
-            log.info("Host '{host}' has extra nic '{nic}' attached to "
-                     "dvSwitch '{vds}'".format(host=hostname,
-                                               nic=','.join(extra_nic),
-                                               vds=vds.name))
+            log.info("Host '{0}' has extra nic '{1}' attached to "
+                     "dvSwitch '{2}'".format(hostname,
+                                               ','.join(extra_nic),
+                                               vds.name))
 
     return 0
 
@@ -328,11 +324,11 @@ def check_esxi(args, inst):
             inst.restart_netcpad(host, args.user, args.password)
 
             if inst.check_netcpad(host, args.user, args.password, True):
-                log.info('Host {host} reconnected to nsxv '
-                         'controller'.format(host=host))
+                log.info('Host {0} reconnected to nsxv '
+                         'controller'.format(host))
             else:
-                log.info('Host {host} NOT reconnected to nsxv '
-                         'controller'.format(host=host))
+                log.info('Host {0} NOT reconnected to nsxv '
+                         'controller'.format(host))
 
     return 0
 
@@ -356,13 +352,13 @@ def datastore_list(args, inst):
     """Print list of datastores."""
     dc = inst.get_dc_object(args.datacenter)
     hosts = inst.get_cluster_hosts_objects(dc, args.cluster)
-    log.info("In cluster '{cl_name}'".format(cl_name=args.cluster))
+    log.info("In cluster '{0}'".format(args.cluster))
 
     for esxi in hosts:
-        log.info("  On esxi '{esxi}' datastores:".format(esxi=esxi.name))
+        log.info("  On esxi '{0}' datastores:".format(esxi.name))
 
         for ds in esxi.datastore:
-            log.info("    '{ds}'".format(ds=ds.name))
+            log.info("    '{0}'".format(ds.name))
 
     return 0
 
