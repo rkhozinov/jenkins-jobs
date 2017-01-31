@@ -306,6 +306,8 @@
           !include-raw-escape: ../builders/common.prepare.sh
       - shell:
           !include-raw-escape: ../builders/workstation.sh
+      - python:
+          !include-raw-escape: ../builders/rescan_ds.py
       - shell:
           !include-raw-escape: ../builders/vcenter.test.sh
     publishers:
