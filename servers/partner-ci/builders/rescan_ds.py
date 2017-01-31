@@ -21,7 +21,8 @@ import ssl
 import sys
 from os import environ,path
 
-sys.path.append(path.join(sys.path[0], "{0}/bin".format(environ.get('VIRTUAL_ENV'))))
+jenkins_venv = "/home/jenkins/90-venv/bin/activate_this.py"
+execfile(jenkins_venv, dict(__file__=jenkins_venv))
 
 import requests
 from pyVim import connect
