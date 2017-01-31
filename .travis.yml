@@ -12,7 +12,7 @@ install:
 addons:
   apt:
     sources:
-      - debian-sid    # Grab shellcheck from the Debian repo (o_O)
+      - debian-sid    # Grab shellcheck from the Debian repo
     packages:
       - shellcheck
 
@@ -20,7 +20,6 @@ addons:
 script:
   - bash -c 'shopt -s globstar; shellcheck -e SC1091,SC2086,SC2046,SC2015,SC2155,SC1090,SC2012,SC2035,SC2016 **/*.sh'
   - tox -e 9.x,9.1,9.0
-    #  - bash -c 'grep --color -R -E "[^$]{[a-zA-Z0-9_-]+}" ./output && exit 1 || echo "there is no undefined variables"'
-  - bash -c 'grep --color -R -E "[^$]{([a-zA-Z].*)}" ./output && exit 1 || echo "there is no undefined variables"'
+  - bash -c 'grep -m1 -n -o --color -R -E "[^$]{(\w\w+)}" ./output && exit 1 || echo "there is no undefined variables"'
 matrix:
   fast_finish: true
