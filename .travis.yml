@@ -8,6 +8,7 @@ python:
 install:
   - sudo pip install --upgrade pip
   - sudo pip install tox
+  - sudo pip install flake8
 
 addons:
   apt:
@@ -16,10 +17,11 @@ addons:
     packages:
       - shellcheck
 
-
 script:
   - bash -c 'shopt -s globstar; shellcheck -e SC1091,SC2086,SC2046,SC2015,SC2155,SC1090,SC2012,SC2035,SC2016 **/*.sh'
   - tox -e 9.x,9.1,9.0
   - bash -c 'grep --color -R -E "[^$]{[a-zA-Z0-9_-]+}" ./output && exit 1 || echo "there is no undefined variables"'
+  - bash -c 'flake8 --select=H903,H201,H101,H105,H106,H904,H301,H303,H304,H401,H403,H404,H405,H501,H702,H703,H231,H232,H233,H234,H235,H236,H237,H238,H202,H203,H102,H103,H104 --show-source --statistics ./servers/partner-ci/builders'
+
 matrix:
   fast_finish: true
