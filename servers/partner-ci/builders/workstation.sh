@@ -120,11 +120,7 @@ configure_nfs(){
   create_ssh_endpoint
   source $VENV_PATH/bin/activate
   for esxi_host in $ESXI_HOSTS; do
-    esxi_exec $esxi_host './sbin/services.sh restart'
-    esxi_exec $esxi_host '/etc/init.d/sfcbd-watchdog stop; rm -rf /var/run/sfcb/*;/etc/init.d/sfcbd-watchdog start'
-    esxi_exec $esxi_host 'esxcli network firewall set --enabled false'
     esxi_exec $esxi_host 'esxcli system hostname get'
-    echo "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
 
     esxi_exec $esxi_host 'storages=$(esxcli storage nfs list | grep nfs | cut -d" " -f1); for storage in $storages; do esxcli storage nfs remove -v $storage; done'
 
