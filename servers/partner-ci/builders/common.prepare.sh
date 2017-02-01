@@ -52,8 +52,7 @@ fi
 export REQUIRED_FREE_SPACE=200
 
 export ENV_NAME="${ENV_PREFIX}.${SNAPSHOTS_ID}"
-export VENV_PATH="${HOME}/${FUEL_RELEASE}-venv"
-
+export VENV_PATH=${VENV_PATH:-"$HOME/$FUEL_RELEASE-venv"}
 ## For plugins we should get a valid version of requrements of python-venv
 ## This requirements could be got from the github repo
 ## but for each branch of a plugin we should map specific branch of the fuel-qa repo
@@ -91,6 +90,8 @@ function get_venv_requirements {
   export REQS_PATH_DEVOPS="$(pwd)/requirements-devops-source.txt"
   export SPEC_REQS_PATH="${WORKSPACE}/plugin_test/requirement.txt"
   sed -i 's/2.9.23/release\/2.9/g' $REQS_PATH_DEVOPS
+  # additional libraries associated with vcenter-control wrapper
+  echo -e "pyvim\npyvmomi" >> $REQS_PATH
 }
 
 function prepare_venv {
