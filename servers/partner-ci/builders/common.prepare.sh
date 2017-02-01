@@ -52,8 +52,7 @@ fi
 export REQUIRED_FREE_SPACE=200
 
 export ENV_NAME="${ENV_PREFIX}.${SNAPSHOTS_ID}"
-[ -z ${VENV_PATH} ] && { export VENV_PATH="${HOME}/${FUEL_RELEASE}-venv"; }
-
+export VENV_PATH=${VENV_PATH:-"$HOME/$FUEL_RELEASE-venv"}
 ## For plugins we should get a valid version of requrements of python-venv
 ## This requirements could be got from the github repo
 ## but for each branch of a plugin we should map specific branch of the fuel-qa repo
@@ -251,6 +250,3 @@ fi
 [[ "${DEBUG}" == "true" ]] && virsh list --all
 sudo cp /var/log/libvirt/libvirtd.log ${WORKSPACE}/libvirtd_before_test.log
 sudo chown jenkins:jenkins ${WORKSPACE}/libvirtd_before_test.log
-
-
-

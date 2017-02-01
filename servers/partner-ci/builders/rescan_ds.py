@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-
 """Copyright 2016 Mirantis, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License"); you may
@@ -21,9 +20,11 @@ import ssl
 import sys
 from os import environ
 from os import path
+
 venv_path = environ.get('VENV_PATH')
 jenkins_venv = str(venv_path + "/bin/activate_this.py")
 execfile(jenkins_venv, dict(__file__=jenkins_venv))
+
 import requests
 from pyVim import connect
 from pyVmomi import vim
