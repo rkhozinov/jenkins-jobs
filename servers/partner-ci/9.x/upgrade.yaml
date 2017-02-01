@@ -56,7 +56,7 @@
     pkg_job_build_number: ''
     nightly_timer: 'H 21 * * *'
     regression_timer: 'H 18 * * *'
-    nightly_disabled: false
+    nightly_disabled: true
     regression_disabled: true
     force_erase: false
     force_reuse: false
