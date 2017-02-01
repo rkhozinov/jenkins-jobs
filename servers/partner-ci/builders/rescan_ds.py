@@ -18,9 +18,10 @@ import atexit
 import logging as log
 import ssl
 from os import environ
+from os import path
 
-venv_path = environ.get('VENV_PATH')
-jenkins_venv = str(venv_path + "/bin/activate_this.py")
+venv_path = environ.get('VENV_PATH', '/home/jenkins/90-venv')
+jenkins_venv = path.join(venv_path, "bin/activate_this.py")
 execfile(jenkins_venv, dict(__file__=jenkins_venv))
 
 import requests
