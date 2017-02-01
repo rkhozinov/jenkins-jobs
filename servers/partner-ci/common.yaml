@@ -128,7 +128,7 @@
             SNAPSHOT_OUTPUT_FILE=extra_repos.sh;
             WORKSTATION_PASSWORD=VMware01;
             WORKSTATION_USERNAME=vmware;
-            VENV_PATH=${HOME}/90-venv;
+            VENV_PATH=$HOME/90-venv;
 
 - parameter:
     name: common-fuel-parameters
