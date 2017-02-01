@@ -17,9 +17,7 @@ under the License.
 import atexit
 import logging as log
 import ssl
-import sys
 from os import environ
-from os import path
 
 venv_path = environ.get('VENV_PATH')
 jenkins_venv = str(venv_path + "/bin/activate_this.py")
@@ -48,7 +46,6 @@ class Victl(object):
     content = None
     _datacenter = None
     _hosts = []
-    _clusters = []
 
     def __init__(self, host, dc_name, user, password, port):
         """Create ssl context."""
@@ -57,8 +54,9 @@ class Victl(object):
             # workaround https://github.com/vmware/pyvmomi/issues/235
             context = ssl.SSLContext(ssl.PROTOCOL_TLSv1)
             context.verify_mode = ssl.CERT_NONE
-            self._service_instance = connect.SmartConnect(host=host, user=user, pwd=password,
-                                                          port=int(port), sslContext=context)
+            self._service_instance = connect.SmartConnect(
+                host=host, user=user, pwd=password,
+                port=int(port), sslContext=context)
 
             if not self._service_instance:
                 raise Exception('Could not connect to the specified host using'
@@ -70,7 +68,6 @@ class Victl(object):
         except vmodl.MethodFault as e:
             raise Exception('Caught vmodl fault: ' + e.msg)
 
-
     @property
     def datacenter(self):
         if not self._datacenter:
@@ -80,9 +77,8 @@ class Victl(object):
     @property
     def hosts(self):
         if not self._hosts:
-            host_view = self.content.viewManager.CreateContainerView(self.datacenter,
-                                                                     [vim.HostSystem],
-                                                                     True)
+            host_view = self.content.viewManager.CreateContainerView(
+                self.datacenter, [vim.HostSystem], True)
             self._hosts = [host for host in host_view.view]
             host_view.Destroy()
 
@@ -90,7 +86,8 @@ class Victl(object):
 
     def rescan_datastores(self):
         """Rescan all datastores."""
-        [host.configManager.storageSystem.RescanAllHba() for host in self.hosts]
+        for host in self.hosts:
+            host.configManager.storageSystem.RescanAllHba()
         log.info('Rescan was successful')
         return 0
 
