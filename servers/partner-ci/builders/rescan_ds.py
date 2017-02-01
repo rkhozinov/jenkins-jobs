@@ -21,10 +21,9 @@ import ssl
 import sys
 from os import environ
 from os import path
-
-jenkins_venv = "/home/jenkins/90-venv/bin/activate_this.py"
+venv_path = environ.get('VENV_PATH')
+jenkins_venv = str(venv_path + "/bin/activate_this.py")
 execfile(jenkins_venv, dict(__file__=jenkins_venv))
-
 import requests
 from pyVim import connect
 from pyVmomi import vim
@@ -113,7 +112,6 @@ if __name__ == '__main__':
 
     victl = Victl(host=host, dc_name=dc_name, user=user,
                   password=password, port=port)
-
     victl.rescan_datastores()
     victl.datastore_list()
 
