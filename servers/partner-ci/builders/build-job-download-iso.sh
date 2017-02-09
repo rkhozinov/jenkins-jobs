@@ -9,7 +9,8 @@ FUEL_RELEASE=$(echo $VERSION | tr -d . )
 echo fuel release $FUEL_RELEASE, version $VERSION
 echo "Description string: $NODE_NAME $VERSION"
 
-seedclient-wrapper -d -m "${MAGNET_LINK}" -v --force-set-symlink -o "${WORKSPACE}"
+#seedclient-wrapper -d -m "${MAGNET_LINK}" -v --force-set-symlink -o "${WORKSPACE}"
+aria2c --seed-time 0 "${MAGNET_LINK}" -d "${WORKSPACE}"
 ISO_STORAGE="/srv/downloads"
 ISO_FILE=$(ls *iso)
 ISO_PATH="${ISO_STORAGE}/${ISO_FILE}"
