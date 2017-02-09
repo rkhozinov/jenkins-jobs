@@ -25,7 +25,7 @@
     parameters:
       - string:
           name: RELEASE
-          default: '9.0-mos'
+          default: '10.0'
     properties:
       - heavy-job:
           weight: 1
@@ -37,6 +37,12 @@
           project: "{download_iso}"
           which-build: last-successful
           fingerprint: true
+      - shell: |
+          JENKINS_URL="https://product-ci.infra.mirantis.net"
+          magneturl="$JENKINS_URL/job/$RELEASE.test_all/lastSuccessfulBuild/artifact/magnet_link.txt"
+          wget -O link.inject $magneturl
+      - inject:
+          properties-file: link.inject
       - shell:
           !include-raw-escape: ../builders/build-job-download-iso.sh
     publishers:

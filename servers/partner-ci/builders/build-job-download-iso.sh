@@ -2,11 +2,6 @@
 #[[ $RELEASE != '9.0-mos' ]] && { exit 1; }
 rm -f *.iso || true
 
-JENKINS_URL="https://product-ci.infra.mirantis.net"
-
-magneturl="$JENKINS_URL/job/$RELEASE.test_all/lastSuccessfulBuild/artifact/magnet_link.txt"
-res=$(curl --retry 10 -sf $magneturl) || { echo "Cannot download release ISO"; exit 1; }
-export res
 
 VERSION=$RELEASE
 
