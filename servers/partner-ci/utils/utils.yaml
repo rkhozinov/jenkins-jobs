@@ -32,22 +32,25 @@
     wrappers:
       - ansicolor:
           colormap: xterm
+      - workspace-cleanup
     builders:
-      - copyartifact:
-          project: "{download_iso}"
-          which-build: last-successful
-          fingerprint: true
       - shell: |
+          rm -rf iso_archive
           JENKINS_URL="https://product-ci.infra.mirantis.net"
-          magneturl="$JENKINS_URL/job/$RELEASE.test_all/lastSuccessfulBuild/artifact/magnet_link.txt"
-          wget -O link.inject $magneturl
+          archiveurl="$JENKINS_URL/job/$RELEASE.test_all/lastSuccessfulBuild/artifact/*zip*/archive.zip"
+          wget -O iso_archive.zip $archiveurl
+          unzip iso_archive.zip -d iso_archive
       - inject:
-          properties-file: link.inject
+          properties-file: iso_archive/archive/properties_file.txt
       - shell:
           !include-raw-escape: ../builders/build-job-download-iso.sh
+      - shell: |
+          cat iso_file >> iso_archive/archive/properties_file.txt
     publishers:
       - archive:
           artifacts: '*.txt, iso_file, iso_version'
+      - archive:
+          artifacts: 'iso_archive/archive/*'
       - description-setter:
           regexp: "ISO_FILE=.*"
       - email:

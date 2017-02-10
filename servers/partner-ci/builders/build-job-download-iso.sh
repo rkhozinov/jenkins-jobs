@@ -28,11 +28,3 @@ ln -rs $ISO_PATH $ISO_SYMLINK_PATH
 echo ISO_FILE=$ISO_FILE
 echo ISO_FILE=$ISO_FILE > iso_file
 echo ISO_VERSION=$VERSION > iso_version
-
-# clear latest iso by release
-sed -i "/ISO_FILE_${FUEL_RELEASE}.*/d" latest_isos.txt || true
-echo ISO_FILE_${FUEL_RELEASE}=${ISO_FILE} >> latest_isos.txt
-
-# ISO_FILE by default is iso for the latest fuel-release
-sed -i "/ISO_FILE.*/d" latest_isos.txt || true
-echo ISO_FILE=${ISO_FILE} >> latest_isos.txt
