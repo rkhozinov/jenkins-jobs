@@ -35,7 +35,6 @@
       - workspace-cleanup
     builders:
       - shell: |
-          rm -rf iso_archive
           JENKINS_URL="https://product-ci.infra.mirantis.net"
           archiveurl="$JENKINS_URL/job/$RELEASE.test_all/lastSuccessfulBuild/artifact/*zip*/archive.zip"
           wget -O iso_archive.zip $archiveurl
