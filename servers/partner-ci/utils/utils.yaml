@@ -37,19 +37,18 @@
       - shell: |
           JENKINS_URL="https://product-ci.infra.mirantis.net"
           archiveurl="$JENKINS_URL/job/$RELEASE.test_all/lastSuccessfulBuild/artifact/*zip*/archive.zip"
-          wget -O iso_archive.zip $archiveurl
-          unzip iso_archive.zip -d iso_archive
+          wget -O archive.zip $archiveurl
+          unzip archive.zip
+          mv archive/* ./
       - inject:
-          properties-file: iso_archive/archive/properties_file.txt
+          properties-file: properties_file.txt
       - shell:
           !include-raw-escape: ../builders/build-job-download-iso.sh
       - shell: |
-          cat iso_file >> iso_archive/archive/properties_file.txt
+          cat iso_file >> properties_file.txt
     publishers:
       - archive:
           artifacts: '*.txt, iso_file, iso_version'
-      - archive:
-          artifacts: 'iso_archive/archive/*'
       - description-setter:
           regexp: "ISO_FILE=.*"
       - email:
