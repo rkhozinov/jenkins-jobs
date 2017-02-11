@@ -5,8 +5,12 @@
       - text:
           name: SPECIFIC_PROPS
           default: |
-            FUEL_QA_TEST_GROUP=prepare_slaves_9;
             CONV_SNAP_PATH=fuel-qa/utils/jenkins/conv_snapshot_file.py;
+            FUEL_QA_TEST_GROUP=prepare_slaves_9;
+            ISO_FILE=/storage/downloads/MirantisOpenStack-9.0.iso;
+            SNAPSHOTS_URL=https://product-ci.infra.mirantis.net/job/9.x.snapshot/SNAPSHOTS_ID/artifact/snapshots.params;
+            SNAPSHOT_ARTIFACTS_FILE=snapshots.params;
+            SNAPSHOT_OUTPUT_FILE=extra_repos.sh;
 
 - project:
     name: 'predefined_parameters'
@@ -34,9 +38,11 @@
     debug: true
     publish_results: true
     fuel_ui_refs: ''
+    fuel_qa_refs: ''
     snapshots_id: 'lastSuccessfulBuild'
-    gerrit_repo: 'fuel-ui'
-    gerrit_branch: 'origin/stable/mitaka'
+    fuel_qa_branch: 'origin/stable/mitaka'
+    fuel_ui_branch: 'origin/stable/mitaka'
+    docker_branch: 'master'
     email_to: 'rkhozinov@mirantis.com'
     released_plugin_path: ''
     scm_submodule_disabled: true
@@ -95,8 +101,11 @@
           force_erase:           '{force_erase}'
           force_reuse:           '{force_reuse}'
           fuel_release_checker:  '{fuel_release_checker}'
+          fuel_ui_branch:        '{fuel_ui_branch}'
           fuel_ui_refs:          '{fuel_ui_refs}'
-          gerrit_branch:         '{gerrit_branch}'
+          fuel_qa_branch:        '{fuel_qa_branch}'
+          fuel_qa_refs:          '{fuel_qa_refs}'
+          docker_branch:         '{docker_branch}'
           kvm_use:               '{kvm_use}'
           publish_results:       '{publish_results}'
           recreate_venv:         '{recreate_venv}'
@@ -133,8 +142,11 @@
           force_erase:           '{force_erase}'
           force_reuse:           '{force_reuse}'
           fuel_release_checker:  '{fuel_release_checker}'
+          fuel_ui_branch:        '{fuel_ui_branch}'
           fuel_ui_refs:          '{fuel_ui_refs}'
-          gerrit_branch:         '{gerrit_branch}'
+          fuel_qa_branch:        '{fuel_qa_branch}'
+          fuel_qa_refs:          '{fuel_qa_refs}'
+          docker_branch:         '{docker_branch}'
           kvm_use:               '{kvm_use}'
           publish_results:       '{publish_results}'
           recreate_venv:         '{recreate_venv}'
@@ -152,7 +164,7 @@
 - defaults:
     name: global
     disabled: false
-    node: upgrade
+    node: ui
     <<: *test-parameters
     scm:
       - git:
@@ -222,8 +234,7 @@
     triggers:
       - timed: '{nightly_timer}'
     properties:
-      - runner-property:
-          build-name: '{build-name}'
+      - ui-runner-property
     wrappers:
       - runner-wrapper
     publishers:

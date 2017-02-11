@@ -171,57 +171,53 @@
           description: "disconnect node after failure"
       - string:
           name: FUEL_UI_BRANCH
-          default: 'origin/stable/mitaka'
+          default: '{fuel_ui_branch}'
       - string:
           name: FUEL_UI_REFS
           default: '{fuel_ui_refs}'
           description: "Multiple Refspecs for commits in fuel-ui gerrit separated with spaces"
       - string:
           name: FUEL_QA_BRANCH
-          default: 'origin/stable/mitaka'
+          default: '{fuel_qa_branch}'
       - string:
           name: FUEL_QA_REFS
           description: "Multiple Refspecs for commits in fuel-qa gerrit separated with spaces"
       - string:
           name: DOCKER_BRANCH
-          default: 'master'
+          default: '{docker_branch}'
       - string:
           name: NAILGUN_HOST
+      - string:
+          name: ISO_JOB_BUILD_NUMBER
+          description: "Fuel10 depends on ubuntu-mirror snapshots, it's a build of ISO_JOB_NAME"
       - string:
           name: SNAPSHOTS_ID
           default: '{snapshots_id}'
           description: 'snapshots number, "lastSuccessfulBuild" or "released"'
-      - string:
-          name: SNAPSHOTS_URL
-          default: 'https://product-ci.infra.mirantis.net/job/9.x.snapshot/SNAPSHOTS_ID/artifact/snapshots.params'
-          description: 'url to product-ci job with snapshots artifacts'
       - text:
           name: COMMON_PROPS
           default: |
-            KVM_USE={kvm_use};
-            FUEL_RELEASE_VERSION={fuel_release_checker};
-            SNAPSHOTS_URL=https://product-ci.infra.mirantis.net/job/9.x.snapshot/SNAPSHOTS_ID/artifact/snapshots.params;
-            ISO_FILE=/storage/downloads/MirantisOpenStack-9.0.iso;
-            MIRROR_HOST=mirror.seed-cz1.fuel-infra.org;
-            ENV_PREFIX={env_prefix};
             ADMIN_NODE_CPU=4;
-            ADMIN_NODE_MEMORY=3192;
+            ADMIN_NODE_MEMORY=3968;
             ALWAYS_CREATE_DIAGNOSTIC_SNAPSHOT=true;
             CONV_SNAP_PATH=plugin_test/fuel-qa/utils/jenkins/conv_snapshot_file.py;
             DEBUG_MODE=true;
             DESTROY_ENV_AFTER=0;
             DISABLE_SSL=true;
             DRIVER_ENABLE_ACPI=true;
+            ENV_PREFIX={env_prefix};
             FORCE_DISABLE_UPDATES=false;
+            FUEL_RELEASE_VERSION={fuel_release_checker};
             FUEL_STATS_ENABLED=false;
             GIT_CURL_VERBOSE=false;
+            ISO_JOB_NAME=download_iso;
+            KVM_USE={kvm_use};
             MAKE_SNAPSHOT=true;
+            MIRROR_HOST=mirror.seed-cz1.fuel-infra.org;
             NODES_COUNT=10;
             OPENSTACK_RELEASE=Ubuntu;
             SLAVE_NODE_CPU=4;
-            SLAVE_NODE_MEMORY=3192;
-            SNAPSHOT_ARTIFACTS_FILE=snapshots.params;
-            SNAPSHOT_OUTPUT_FILE=extra_repos.sh;
+            SLAVE_NODE_MEMORY=3968;
 
 - parameter:
     name: vcenter-specific-parameters
@@ -610,6 +606,45 @@
 
             - inject:
                 properties-file: specific.properties
+- builder:
+    name: get-ubuntu-mirror
+    builders:
+      - conditional-step:
+          condition-kind: shell
+          condition-command: >
+            [ -z  ${ISO_JOB_BUILD_NUMBER} ]
+          steps:
+            - copyartifact:
+                project: ${ISO_JOB_NAME}
+                which-build: last-successful
+      - conditional-step:
+          condition-kind: shell
+          condition-command: >
+            [ ! -z ${ISO_JOB_BUILD_NUMBER} ]
+          steps:
+            - copyartifact:
+                project: ${ISO_JOB_NAME}
+                which-build: specific-build
+                build-number: ${ISO_JOB_BUILD_NUMBER}
+      - inject:
+          properties-file: properties_file.txt
+      - shell: |
+          #!/bin/bash -xeu
+          UBUNTU_MIRROR_URL="${MIRROR_HOST:?}${UBUNTU_MIRROR_ID:?}/"
+
+          UBUNTU_REPOS="deb ${UBUNTU_MIRROR_URL} ${UBUNTU_DIST:?} main universe multiverse|deb ${UBUNTU_MIRROR_URL} ${UBUNTU_DIST}-updates main universe multiverse|deb ${UBUNTU_MIRROR_URL} ${UBUNTU_DIST}-security main universe multiverse"
+
+          ENABLE_PROPOSED="${ENABLE_PROPOSED:-true}"
+
+          if [ "$ENABLE_PROPOSED" = true ]; then
+              UBUNTU_PROPOSED="deb ${UBUNTU_MIRROR_URL} ${UBUNTU_DIST}-proposed main universe multiverse"
+              UBUNTU_REPOS="$UBUNTU_REPOS|$UBUNTU_PROPOSED"
+          fi
+
+          echo "MIRROR_UBUNTU="${UBUNTU_REPOS:?}" >> specific.properties
+      - inject:
+          properties-file: specific.properties
+
 
 - builder:
     name: ui-condition
@@ -967,6 +1002,16 @@
             - "*.log"
           dirmatch: true
 
+- property:
+    name: ui-runner-property
+    properties:
+      - build-discarder:
+          days-to-keep: 40
+          num-to-keep: 40
+          artifact-days-to-keep: 30
+          artifact-num-to-keep: 20
+      - heavy-job:
+          weight: 1
 
 - property:
     name: runner-property
