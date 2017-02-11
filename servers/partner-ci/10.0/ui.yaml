@@ -1,11 +1,10 @@
 ---
 - parameter:
-    name: plugin-specific-parameters
+    name: specific-parameters
     parameters:
       - text:
           name: SPECIFIC_PROPS
           default: |
-            ISO_JOB_NAME=download_iso;
             FUEL_QA_TEST_GROUP=prepare_slaves_9;
             UBUNTU_DIST=xenial;
 
@@ -13,13 +12,11 @@
     name: 'predefined_parameters'
     fuel_release: '10.0'
     fuel_release_checker: '10'
-    plugin-name: 'ui'
-    nightly-name: '{fuel_release}.{plugin-name}.nightly'
-    custom-name: '{fuel_release}.{plugin-name}.custom'
-    reporter-name: '{fuel_release}.{plugin-name}.reporter'
-    build-name: ''
+    job_name: 'ui'
+    nightly-name: '{fuel_release}.{job_name}.nightly'
+    custom_name: '{fuel_release}.{job_name}.custom'
+    reporter-name: '{fuel_release}.{job_name}.reporter'
     nightly_timer: 'H 21 * * *'
-    regression_timer: 'H 18 * * *'
     nightly_disabled: true
     force_erase: false
     force_reuse: true
@@ -30,11 +27,11 @@
     debug: true
     publish_results: true
     fuel_ui_refs: ''
-    snapshots_id: 'lastSuccessfulBuild'
-    gerrit_repo: 'fuel-ui'
-    gerrit_branch: 'origin/stable/mitaka'
+    fuel_qa_refs: ''
+    fuel_qa_branch: 'origin/stable/newton'
+    fuel_ui_branch: 'origin/stable/newton'
+    docker_branch: 'master'
     email_to: 'rkhozinov@mirantis.com'
-    released_plugin_path: ''
     scm_submodule_disabled: true
     scm_wipe_workspace: false
     skip_vote_successfull: false
@@ -44,7 +41,7 @@
     testrail_suite: "[10.0][PCE] Mechanism for providing additional properties for NICs and Nodes via plugin"
     testrail_suite_desc: "Suite description"
     testrail_milestone: "10.0"
-    testrail_plan: "${{TREP_TESTRAIL_MILESTONE}} snapshot #${{SNAPSHOTS_ID}}"
+    testrail_plan: "${{TREP_TESTRAIL_MILESTONE}} #${{SNAPSHOTS_ID}}"
     testrail_plan_desc: "Test plan description"
     testrail_run: "${{TREP_TESTRAIL_SUITE}}"
     testrail_run_desc: "Test run description"
@@ -65,21 +62,23 @@
       - '{nightly-name}':
           multijob_build_pkg: false
 
-      - '{custom-name}.qa':
+      - '{custom_name}.qa':
           publish_results: false
           scm_submodule_disabled: false
 
-      - '{custom-name}.dev':
+      - '{custom_name}.dev':
           scm_submodule_disabled: false
           publish_results: false
           testgroup_parameter_type: choice
           testgroup_value_type: choices
           testgroup_value: '{obj:testgroup}'
 
-      - '{fuel_release}.{plugin-name}.{testgroup}':
+      - '{fuel_release}.{job_name}.{testgroup}':
           scm_submodule_disabled: false
 
-      - '{reporter-name}'
+      - '{reporter-name}':
+          plugin_version: ''
+          plugin-name: {job_name}
 
 - runner-parameters: &runner-parameters
     name: 'runner-parameters'
@@ -87,25 +86,27 @@
       - common-fuel-parameters:
           debug:                 '{debug}'
           enable_proposed:       '{enable_proposed}'
-          env_prefix:            '{fuel_release}.{plugin-name}'
+          snapshots_id:           ''
+          env_prefix:            '{fuel_release}.{job_name}'
           force_erase:           '{force_erase}'
           force_reuse:           '{force_reuse}'
           fuel_release_checker:  '{fuel_release_checker}'
+          fuel_ui_branch:        '{fuel_ui_branch}'
           fuel_ui_refs:          '{fuel_ui_refs}'
-          gerrit_branch:         '{gerrit_branch}'
+          fuel_qa_branch:        '{fuel_qa_branch}'
+          fuel_qa_refs:          '{fuel_qa_refs}'
+          docker_branch:         '{docker_branch}'
           kvm_use:               '{kvm_use}'
           publish_results:       '{publish_results}'
           recreate_venv:         '{recreate_venv}'
-          pkg_job_build_number:  '{pkg_job_build_number}'
           skip_vote_failed:      '{skip_vote_failed}'
           skip_vote_successfull: '{skip_vote_successfull}'
-          snapshots_id:          '{snapshots_id}'
           testrail_plan:         '{testrail_plan}'
           testrail_plan_desc:    '{testrail_plan_desc}'
           testrail_suite:        '{testrail_suite}'
           testrail_suite_desc:   '{testrail_suite_desc}'
           update_master:         '{update_master}'
-      - plugin-specific-parameters
+      - specific-parameters
 
 - test-parameters: &test-parameters
     name: 'test-parameters'
@@ -125,30 +126,32 @@
       - common-fuel-parameters:
           debug:                 '{debug}'
           enable_proposed:       '{enable_proposed}'
-          env_prefix:            '{fuel_release}.{plugin-name}'
+          snapshots_id:           ''
+          env_prefix:            '{fuel_release}.{job_name}'
           force_erase:           '{force_erase}'
           force_reuse:           '{force_reuse}'
           fuel_release_checker:  '{fuel_release_checker}'
+          fuel_ui_branch:        '{fuel_ui_branch}'
           fuel_ui_refs:          '{fuel_ui_refs}'
-          gerrit_branch:         '{gerrit_branch}'
+          fuel_qa_branch:        '{fuel_qa_branch}'
+          fuel_qa_refs:          '{fuel_qa_refs}'
+          docker_branch:         '{docker_branch}'
           kvm_use:               '{kvm_use}'
           publish_results:       '{publish_results}'
           recreate_venv:         '{recreate_venv}'
-          pkg_job_build_number:  '{pkg_job_build_number}'
           skip_vote_failed:      '{skip_vote_failed}'
           skip_vote_successfull: '{skip_vote_successfull}'
-          snapshots_id:          '{snapshots_id}'
           testrail_plan:         '{testrail_plan}'
           testrail_plan_desc:    '{testrail_plan_desc}'
           testrail_suite:        '{testrail_suite}'
           testrail_suite_desc:   '{testrail_suite_desc}'
           update_master:         '{update_master}'
-      - plugin-specific-parameters
+      - specific-parameters
 
 - defaults:
     name: global
     disabled: false
-    node: upgrade
+    node: ui
     <<: *test-parameters
     scm:
       - git:
@@ -181,18 +184,8 @@
     builders:
       - get-props
       - get-ui-refs
-      - get-updates
-      - get-snapshots
-      - conditional-step:
-          condition-kind: shell
-          condition-command: |
-            [ ! -z ${{ISO_JOB_NAME}}         ] && \
-            [   -z ${{ISO_PATH}}             ]
-          steps:
-            - copyartifact:
-                project: ${{ISO_JOB_NAME}}
-                which-build: specific-build
-                which-build: last-successful
+#     - get-updates
+      - get-ubuntu-mirror
       - shell:
           !include-raw-escape: ../builders/common.prepare.sh
       - shell:
@@ -204,18 +197,18 @@
           email_to: '{email_to}'
 
 - job-template:
-    name: '{fuel_release}.{plugin-name}.{testgroup}'
-    description: 'The test "{testgroup}" for {fuel_release}.{plugin-name}'
+    name: '{fuel_release}.{job_name}.{testgroup}'
+    description: 'The test "{testgroup}" for {fuel_release}.{job_name}'
     concurrent: true
 
 - job-template:
-    name: '{custom-name}.qa'
-    description: 'The custom test for {fuel_release}.{plugin-name}'
+    name: '{custom_name}.qa'
+    description: 'The custom test for {fuel_release}.{job_name}'
     concurrent: true
 
 - job-template:
-    name: '{custom-name}.dev'
-    description: 'The custom test for {fuel_release}.{plugin-name}'
+    name: '{custom_name}.dev'
+    description: 'The custom test for {fuel_release}.{job_name}'
     concurrent: true
 
 - job-template:
@@ -228,8 +221,7 @@
     triggers:
       - timed: '{nightly_timer}'
     properties:
-      - runner-property:
-          build-name: '{build-name}'
+      - ui-runner-property
     wrappers:
       - runner-wrapper
     publishers:
