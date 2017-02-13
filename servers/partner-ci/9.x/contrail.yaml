@@ -10,6 +10,7 @@
             CONTRAIL_PLUGIN_PACK_UB_PATH=;
             CONTRAIL_PLUGIN_PATH=;
             CONTRAIL_VERSION=5.0;
+            CONTRAIL_PLUGIN_VERSION=5.0.1;
             DISABLE_SSL=false;
             FORCE_VSRX_COPY=False;
             KVM_USE=True;
