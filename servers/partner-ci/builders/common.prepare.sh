@@ -20,22 +20,25 @@ fi
 [ -z $ISO_FILE ] && (echo "ISO_FILE variable is empty"; exit 1)
 
 
-if [[ $ISO_FILE == *"Mirantis"* ]]; then
+if [[ $ISO_FILE == *"Mirantis"* ]] || [[ "${FUEL_RELEASE_VERSION}" == "10" ]] ; then
   export FUEL_RELEASE=$(echo $ISO_FILE | cut -d- -f2 | tr -d '.iso')
-fi
-if [[ $ISO_FILE == *"custom"* ]]; then
+else
   export FUEL_RELEASE=90
 fi
 
-if [[ "${UPDATE_MASTER}" == "true" ]] && [[ ${FUEL_RELEASE} != *"80"* ]]; then
-  [ ${SNAPSHOTS_ID} ] && export SNAPSHOTS_ID=${SNAPSHOTS_ID} || export SNAPSHOTS_ID=${CUSTOM_VERSION:10}
-else
-  export SNAPSHOTS_ID="released"
+if [[ "${UPDATE_MASTER}" == "true" ]]; then
+  case "${FUEL_RELEASE}" in
+    *100* ) export SNAPSHOTS_ID=$(echo $ISO | cut -d- -f3 | tr -d '.iso') ;;
+    *90* ) export SNAPSHOTS_ID=${${SNAPSHOTS_ID}:=${CUSTOM_VERSION:10}} ;;
+    *80* ) echo "incompatible version for snapshots_id" ;;
+    *70* ) echo "incompatible version for snapshots_id" ;;
+    *61* ) echo "incompatible version for snapshots_id" ;;
+     *   ) export SNAPSHOTS_ID="released"
+  esac
 fi
 
 [ -z "${SNAPSHOTS_ID}" ] && { echo SNAPSHOTS_ID is empty; exit 1; }
-#remove old logs and test data
-[ -f nosetest.xml ] && rm -f nosetests.xml
+
 [ -d logs ] && rm -rf logs/* || mkdir logs
 
 export ISO_PATH="${ISO_STORAGE}/${ISO_FILE}"
@@ -45,21 +48,19 @@ if [[ $ISO_FILE == *"Mirantis"* ]]; then
   export FUEL_RELEASE=$(echo $ISO_FILE | cut -d- -f2 | tr -d '.iso')
 fi
 
-if [[ $ISO_FILE == *"custom"* ]]; then
-  export FUEL_RELEASE=90
-fi
-
 export REQUIRED_FREE_SPACE=200
 
 export ENV_NAME="${ENV_PREFIX}.${SNAPSHOTS_ID}"
 export VENV_PATH=${VENV_PATH:-"$HOME/$FUEL_RELEASE-venv"}
+
+test -d $VENV_PATH || virtualenv --clear "${VENV_PATH}"
 ## For plugins we should get a valid version of requrements of python-venv
 ## This requirements could be got from the github repo
 ## but for each branch of a plugin we should map specific branch of the fuel-qa repo
 ## the fuel-qa branch is determined by a fuel-iso name.
 
 case "${FUEL_RELEASE}" in
-  *10* ) export REQS_BRANCH="stable/newton" ;;
+  *100* ) export REQS_BRANCH="stable/newton" ;;
   *90* ) export REQS_BRANCH="stable/mitaka" ;;
   *80* ) export REQS_BRANCH="stable/8.0"    ;;
   *70* ) export REQS_BRANCH="stable/7.0"    ;;

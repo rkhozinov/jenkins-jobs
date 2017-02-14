@@ -77,10 +77,6 @@
           default: '{iso_file}'
           description: 'ISO file name that is on the tpi-s1 in /storage/downloads'
       - string:
-          name: ISO_STORAGE
-          default: '/storage/downloads'
-          description: 'Storage for iso files'
-      - string:
           name: GERRIT_REFSPEC
           default: 'refs/heads/{gerrit_branch}'
           description: 'Single Refspec for commits in plugin repo gerrit'
@@ -119,6 +115,7 @@
             FORCE_DISABLE_UPDATES=false;
             FUEL_STATS_ENABLED=false;
             GIT_CURL_VERBOSE=false;
+            ISO_STORAGE=/storage/downloads;
             MAKE_SNAPSHOT=true;
             NODES_COUNT=10;
             OPENSTACK_RELEASE=Ubuntu;
@@ -126,9 +123,9 @@
             SLAVE_NODE_MEMORY=4096;
             SNAPSHOT_ARTIFACTS_FILE=snapshots.params;
             SNAPSHOT_OUTPUT_FILE=extra_repos.sh;
+            VENV_PATH=$HOME/90-venv;
             WORKSTATION_PASSWORD=VMware01;
             WORKSTATION_USERNAME=vmware;
-            VENV_PATH=$HOME/90-venv;
 
 - parameter:
     name: common-fuel-parameters
@@ -210,10 +207,11 @@
             FUEL_RELEASE_VERSION={fuel_release_checker};
             FUEL_STATS_ENABLED=false;
             GIT_CURL_VERBOSE=false;
+            ISO_STORAGE=/storage/downloads;
             ISO_JOB_NAME=download_iso;
             KVM_USE={kvm_use};
             MAKE_SNAPSHOT=true;
-            MIRROR_HOST=mirror.seed-cz1.fuel-infra.org;
+            MIRROR_HOST=http://mirror.seed-cz1.fuel-infra.org/pkgs/snapshots/;
             NODES_COUNT=10;
             OPENSTACK_RELEASE=Ubuntu;
             SLAVE_NODE_CPU=4;
@@ -641,7 +639,7 @@
               UBUNTU_REPOS="$UBUNTU_REPOS|$UBUNTU_PROPOSED"
           fi
 
-          echo "MIRROR_UBUNTU="${UBUNTU_REPOS:?}" >> specific.properties
+          echo "MIRROR_UBUNTU=${UBUNTU_REPOS:?}" >> specific.properties
       - inject:
           properties-file: specific.properties
 

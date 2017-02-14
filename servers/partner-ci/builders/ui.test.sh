@@ -6,7 +6,7 @@ fuel_release=$(echo $ISO_FILE | cut -d- -f2 | tr -d '.iso')
 export FUEL_RELEASE=${fuel_release:?}
 
 if [ "${SNAPSHOTS_ID}" != "released" ]; then
-  if [[ "${UPDATE_MASTER}" == "true" ]] && [[ ${FUEL_RELEASE} != *"80"* ]]; then
+  if [[ "${UPDATE_MASTER}" == "true" ]] && [[ ${FUEL_RELEASE} != *"80"* ]] && [[ ${FUEL_RELEASE} != *"100"* ]]; then
       . $SNAPSHOT_OUTPUT_FILE
       export EXTRA_RPM_REPOS
       export UPDATE_FUEL_MIRROR
@@ -31,7 +31,7 @@ sh -ex "utils/jenkins/system_tests.sh"  \
    -w "$(pwd)"                          \
    -t test                              \
    -o --group="${FUEL_QA_TEST_GROUP:?}" \
-   -i ${ISO_FILE:?}
+   -i ${ISO_STORAGE:?}/${ISO_FILE:?}
 
 env_data=$(dos.py list --ips | grep ${ENV_NAME})
 echo $env_data
