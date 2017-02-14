@@ -55,10 +55,10 @@
     full_disabled: true
     baremetal_disabled: true
     regression_disabled: true
-    force_erase: true
+    force_erase: false
     force_reuse: false
     force_vsrx_copy: false
-    recreate_venv: true
+    recreate_venv: false
     ws_norevert: false
     nfs_clean: false
     bonding: false
