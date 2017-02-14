@@ -17,10 +17,8 @@ fi
 # activate bash xtrace for script
 [[ "${DEBUG}" == "true" ]] && set -x || set +x
 
-[ -z $ISO_FILE ] && (echo "ISO_FILE variable is empty"; exit 1)
 
-
-if [[ $ISO_FILE == *"Mirantis"* ]] || [[ "${FUEL_RELEASE_VERSION}" == "10" ]] ; then
+if [[ ${ISO_FILE:?} == *"Mirantis"* ]] || [[ "${FUEL_RELEASE_VERSION}" == "10" ]] ; then
   export FUEL_RELEASE=$(echo $ISO_FILE | cut -d- -f2 | tr -d '.iso')
 else
   export FUEL_RELEASE=90
@@ -28,16 +26,21 @@ fi
 
 if [[ "${UPDATE_MASTER}" == "true" ]]; then
   case "${FUEL_RELEASE}" in
-    *100* ) export SNAPSHOTS_ID=$(echo $ISO | cut -d- -f3 | tr -d '.iso') ;;
-    *90* ) export SNAPSHOTS_ID=${${SNAPSHOTS_ID}:=${CUSTOM_VERSION:10}} ;;
-    *80* ) echo "incompatible version for snapshots_id" ;;
-    *70* ) echo "incompatible version for snapshots_id" ;;
-    *61* ) echo "incompatible version for snapshots_id" ;;
+    *100* ) export SNAPSHOTS_ID=$(echo $ISO | cut -d- -f3 | tr -d '.iso')
+            export REQS_BRANCH="stable/newton" ;;
+    *90* ) export SNAPSHOTS_ID=${${SNAPSHOTS_ID}:=${CUSTOM_VERSION:10}}
+           export REQS_BRANCH="stable/mitaka" ;;
+    *80* ) echo "incompatible version for snapshots_id"
+           export REQS_BRANCH="stable/8.0" ;;
+    *70* ) echo "incompatible version for snapshots_id"
+           export REQS_BRANCH="stable/7.0" ;;
+    *61* ) echo "incompatible version for snapshots_id"
+           export REQS_BRANCH="stable/6.1" ;;
      *   ) export SNAPSHOTS_ID="released"
+           export REQS_BRANCH="stable/mitaka" ;;
   esac
 fi
 
-[ -z "${SNAPSHOTS_ID}" ] && { echo SNAPSHOTS_ID is empty; exit 1; }
 
 [ -d logs ] && rm -rf logs/* || mkdir logs
 
@@ -58,15 +61,6 @@ test -d $VENV_PATH || virtualenv --clear "${VENV_PATH}"
 ## This requirements could be got from the github repo
 ## but for each branch of a plugin we should map specific branch of the fuel-qa repo
 ## the fuel-qa branch is determined by a fuel-iso name.
-
-case "${FUEL_RELEASE}" in
-  *100* ) export REQS_BRANCH="stable/newton" ;;
-  *90* ) export REQS_BRANCH="stable/mitaka" ;;
-  *80* ) export REQS_BRANCH="stable/8.0"    ;;
-  *70* ) export REQS_BRANCH="stable/7.0"    ;;
-  *61* ) export REQS_BRANCH="stable/6.1"    ;;
-   *   ) export REQS_BRANCH="master"
-esac
 
 REQS_PATH="https://raw.githubusercontent.com/openstack/fuel-qa/${REQS_BRANCH}/fuelweb_test/requirements.txt"
 

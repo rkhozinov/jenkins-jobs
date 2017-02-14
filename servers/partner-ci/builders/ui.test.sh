@@ -5,15 +5,13 @@
 fuel_release=$(echo $ISO_FILE | cut -d- -f2 | tr -d '.iso')
 export FUEL_RELEASE=${fuel_release:?}
 
-if [ "${SNAPSHOTS_ID}" != "released" ]; then
-  if [[ "${UPDATE_MASTER}" == "true" ]] && [[ ${FUEL_RELEASE} != *"80"* ]] && [[ ${FUEL_RELEASE} != *"100"* ]]; then
-      . $SNAPSHOT_OUTPUT_FILE
-      export EXTRA_RPM_REPOS
-      export UPDATE_FUEL_MIRROR
-      export EXTRA_DEB_REPOS
-  else
-    export SNAPSHOTS_ID="released"
-  fi
+if [ "${SNAPSHOTS_ID}" != "released" ] && \
+[[ "${UPDATE_MASTER}" == "true" ]] && \
+[[ ${FUEL_RELEASE} == *"90"* ]]; then
+  . $SNAPSHOT_OUTPUT_FILE
+  export EXTRA_RPM_REPOS
+  export UPDATE_FUEL_MIRROR
+  export EXTRA_DEB_REPOS
 fi
 
 [[ $SNAPSHOTS_ID == *"lastSuccessfulBuild"* ]] && \
