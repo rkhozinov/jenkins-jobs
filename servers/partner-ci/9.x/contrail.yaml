@@ -52,8 +52,8 @@
     full_timer: 'H 21 * * *'
     regression_timer: 'H 18 * * *'
     nightly_disabled: true
-    full_disabled: true
-    baremetal_disabled: true
+    full_disabled: false
+    baremetal_disabled: false
     regression_disabled: true
     force_erase: false
     force_reuse: false
