@@ -187,10 +187,6 @@
       - string:
           name: ISO_JOB_BUILD_NUMBER
           description: "Fuel10 depends on ubuntu-mirror snapshots, it's a build of ISO_JOB_NAME"
-      - string:
-          name: SNAPSHOTS_ID
-          default: '{snapshots_id}'
-          description: 'snapshots number, "lastSuccessfulBuild" or "released"'
       - text:
           name: COMMON_PROPS
           default: |
