@@ -10,6 +10,7 @@
             CONTRAIL_PLUGIN_PACK_UB_PATH=;
             CONTRAIL_PLUGIN_PATH=;
             CONTRAIL_VERSION=5.0;
+            CONTRAIL_PLUGIN_VERSION=$PLUGIN_VERSION;
             DISABLE_SSL=false;
             FORCE_VSRX_COPY=False;
             KVM_USE=True;
@@ -51,13 +52,13 @@
     full_timer: 'H 21 * * *'
     regression_timer: 'H 18 * * *'
     nightly_disabled: true
-    full_disabled: true
-    baremetal_disabled: true
+    full_disabled: false
+    baremetal_disabled: false
     regression_disabled: true
-    force_erase: true
+    force_erase: false
     force_reuse: false
     force_vsrx_copy: false
-    recreate_venv: true
+    recreate_venv: false
     ws_norevert: false
     nfs_clean: false
     bonding: false
@@ -189,6 +190,17 @@
           skip_vote_successfull: '{skip_vote_successfull}'
           skip_vote_failed: '{skip_vote_failed}'
 
+      - '{nightly-name}':
+          multijob_build_pkg: true
+          testrail_suite: "[9.x][PCE] Fuel plugin contrail v5.0.1 nightly"
+
+      - '{full-name}':
+          multijob_build_pkg: true
+          testrail_suite: "[9.x][PCE] Fuel plugin contrail v5.0.1 Release Acceptance"
+
+      - '{baremetal-name}':
+          multijob_build_pkg: true
+
       - '{custom-name}.qa':
           publish_results: false
 
@@ -200,6 +212,8 @@
           testgroup_value: '{obj:testgroup}'
 
       - '{reporter-name}'
+
+      - '{fuel_release}.{plugin-name}.{plugin_version}.{testgroup}.juniper'
 
       - '{smoke-name}':
           publish_results: false
@@ -230,6 +244,41 @@
 # parameters for smoke, bvt and nightly multijobs
 - runner-parameters: &runner-parameters
     name: 'runner-parameters'
+    parameters:
+      - bool:
+          name: MJ_BUILD_PKG
+          default: '{multijob_build_pkg}'
+          description: "Triggers build of pkg of $PKG_JOB_NAME before run of tests"
+      - common-parameters:
+          debug:                 '{debug}'
+          enable_proposed:       '{enable_proposed}'
+          env_prefix:            '{fuel_release}.{plugin-name}'
+          force_erase:           '{force_erase}'
+          force_reuse:           '{force_reuse}'
+          fuel_qa_refs:          '{fuel_qa_refs}'
+          fuel_release_checker:  '{fuel_release_checker}'
+          gerrit_branch:         '{gerrit_branch}'
+          iso_file:              '{iso_file}'
+          kvm_use:               '{kvm_use}'
+          nfs_clean:             '{nfs_clean}'
+          pkg_job_name:          '{pkg_job_name}'
+          pkg_job_build_number:  '{pkg_job_build_number}'
+          plugin_version:        '{plugin_version}'
+          publish_results:       '{publish_results}'
+          recreate_venv:         '{recreate_venv}'
+          skip_vote_failed:      '{skip_vote_failed}'
+          skip_vote_successfull: '{skip_vote_successfull}'
+          snapshots_id:          '{snapshots_id}'
+          testrail_plan:         '{testrail_plan}'
+          testrail_plan_desc:    '{testrail_plan_desc}'
+          testrail_suite:        '{testrail_suite}'
+          testrail_suite_desc:   '{testrail_suite_desc}'
+          update_master:         '{update_master}'
+          ws_norevert:           '{ws_norevert}'
+      - plugin-specific-parameters
+
+- runner-parameters: &baremetal-parameters
+    name: 'baremetal-parameters'
     parameters:
       - bool:
           name: MJ_BUILD_PKG
@@ -451,6 +500,11 @@
           email_to: '{email_to}'
 
 - job-template:
+    name: '{fuel_release}.{plugin-name}.{plugin_version}.{testgroup}.juniper'
+    description: 'The test "{testgroup}" for {fuel_release}.{plugin-name}.{plugin_version} juniper contrail'
+    concurrent: true
+
+- job-template:
     name: '{fuel_release}.{plugin-name}.{plugin_version}.bvt.test.juniper'
     description: 'The test for {fuel_release}.{plugin-name}.{plugin_version} juniper contrail'
     concurrent: true
@@ -590,4 +644,67 @@
       - runner-publisher:
           properties_name: bvt.properties
           email_to: '{email_to}'
+
+- job-template:
+    name: '{nightly-name}'
+    project-type: multijob
+    disabled: '{obj:nightly_disabled}'
+    node: runner
+    <<: *runner-parameters
+    scm: []
+    triggers:
+      - timed: '{nightly_timer}'
+    properties:
+      - runner-property:
+          build-name: '{build-name}'
+    wrappers:
+      - runner-wrapper
+    publishers:
+      - runner-publisher:
+          properties_name: nightly.properties
+          email_to: '{email_to}'
+    builders:
+      !include: contrail-nightly.yaml
+
+- job-template:
+    name: '{full-name}'
+    project-type: multijob
+    disabled: '{obj:full_disabled}'
+    node: runner
+    <<: *runner-parameters
+    scm: []
+#    triggers:
+#      - timed: '{full_timer}'
+    properties:
+      - runner-property:
+          build-name: '{build-name}'
+    wrappers:
+      - runner-wrapper
+    publishers:
+      - runner-publisher:
+          properties_name: full.properties
+          email_to: '{email_to}'
+    builders:
+      !include: contrail-full.yaml
+
+- job-template:
+    name: '{baremetal-name}'
+    project-type: multijob
+    disabled: '{obj:baremetal_disabled}'
+    node: runner
+    <<: *baremetal-parameters
+    scm: []
+#   triggers:
+#     - timed: '{nightly_timer}'
+    properties:
+      - runner-property:
+          build-name: '{build-name}'
+    wrappers:
+      - runner-wrapper
+    publishers:
+      - runner-publisher:
+          properties_name: baremetal.properties
+          email_to: '{email_to}'
+    builders:
+      !include: contrail-baremetal.yaml
 
