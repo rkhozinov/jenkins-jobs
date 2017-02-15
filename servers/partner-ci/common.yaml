@@ -126,6 +126,7 @@
             VENV_PATH=$HOME/90-venv;
             WORKSTATION_PASSWORD=VMware01;
             WORKSTATION_USERNAME=vmware;
+            REQUIRED_FREE_SPACE=200;
 
 - parameter:
     name: common-fuel-parameters
@@ -212,6 +213,7 @@
             OPENSTACK_RELEASE=Ubuntu;
             SLAVE_NODE_CPU=4;
             SLAVE_NODE_MEMORY=3968;
+            REQUIRED_FREE_SPACE=200;
 
 - parameter:
     name: vcenter-specific-parameters
@@ -457,8 +459,9 @@
                     property-file: reporter.properties
                     fail-on-missing: true
                     condition: FAILED_OR_BETTER
+
 - builder:
-    name: get-refs
+    name: 10-get-refs
     builders:
       - shell: |
           #!/bin/bash
@@ -479,24 +482,7 @@
           fi
 
 - builder:
-    name: get-refs-vcenter
-    builders:
-      - shell: |
-          #!/bin/bash
-          cherrypick() {
-              git_url=$1
-              ref=$2
-              git fetch $git_url "$ref" && git cherry-pick FETCH_HEAD || { git status; exit 1; }
-              git log --pretty=oneline | head
-          }
-          if [[ ! -z "${FUEL_QA_REFS}" ]]; then
-            cd ${WORKSPACE}
-            git_url=$(git config --get remote.origin.url)
-            for ref in ${FUEL_QA_REFS:?}; do cherrypick $git_url $ref; done
-          fi
-
-- builder:
-    name: get-ui-refs
+    name: 10-get-ui-refs
     builders:
       - shell: |
           #!/bin/bash
@@ -516,9 +502,26 @@
             git_url=$(git config --get remote.origin.url)
             for ref in ${FUEL_QA_REFS:?}; do cherrypick $git_url $ref; done
           fi
+- builder:
+    name: 10-get-vcenter-refs
+    builders:
+      - shell: |
+          #!/bin/bash
+          cherrypick() {
+              git_url=$1
+              ref=$2
+              git fetch $git_url "$ref" && git cherry-pick FETCH_HEAD || { git status; exit 1; }
+              git log --pretty=oneline | head
+          }
+          if [[ ! -z "${FUEL_QA_REFS}" ]]; then
+            cd ${WORKSPACE}
+            git_url=$(git config --get remote.origin.url)
+            for ref in ${FUEL_QA_REFS:?}; do cherrypick $git_url $ref; done
+          fi
+
 
 - builder:
-    name: get-props
+    name: 20-get-props
     builders:
       - shell: |
           #!/bin/bash
@@ -543,7 +546,7 @@
           properties-file: specific.properties
 
 - builder:
-    name: get-baremetal-props
+    name: 21-get-baremetal-props
     builders:
       - inject:
           properties: |
@@ -554,7 +557,7 @@
             BM_TARGET_MACS=00:1b:21:87:21:99;00:1b:21:87:21:98;
 
 - builder:
-    name: get-updates
+    name: 30-get-additional-updates
     builders:
       - conditional-step:
           condition-kind: shell
@@ -577,7 +580,7 @@
                   ENABLE_MOS_UBUNTU_SECURITY=true
 
 - builder:
-    name: get-snapshots
+    name: 40-get-snapshots
     builders:
       - conditional-step:
           condition-kind: shell
@@ -592,6 +595,11 @@
                 echo "snapshot_id_number=${snapshots_id}"
                 python "${CONV_SNAP_PATH:?}"
 
+                . $SNAPSHOT_OUTPUT_FILE
+                echo "EXTRA_RPM_REPOS=${EXTRA_RPM_REPOS}" >> specific.properties
+                echo "UPDATE_FUEL_MIRROR=${UPDATE_FUEL_MIRROR}" >> specific.properties
+                echo "EXTRA_DEB_REPOS=${EXTRA_DEB_REPOS}" >> specific.properties
+
                 mos_ubuntu_mirror_id=$(grep "^MOS_UBUNTU_MIRROR_ID" < snapshots.params | cut -d= -f2)
                 echo "MOS_UBUNTU_MIRROR_ID=${mos_ubuntu_mirror_id:?}" >> specific.properties
 
@@ -600,8 +608,9 @@
 
             - inject:
                 properties-file: specific.properties
+
 - builder:
-    name: get-ubuntu-mirror
+    name: 40-get-ubuntu-mirror
     builders:
       - conditional-step:
           condition-kind: shell
@@ -636,9 +645,49 @@
           fi
 
           echo "MIRROR_UBUNTU=${UBUNTU_REPOS:?}" >> specific.properties
+          echo "SNAPSHOTS_ID=$(echo $ISO_FILE | cut -d- -f3 | tr -d '.iso')" >> specific.properties
       - inject:
           properties-file: specific.properties
 
+- builder:
+    name: 50-get-env-variables
+    builders:
+      - shell: |
+          # determine release specific variables
+          case "${ISO_FILE:?}" in
+            *fuel-10.0* )
+                    export FUEL_RELEASE=100
+                    export REQS_BRANCH="stable/newton" ;;
+
+            *MirantisOpenStack-9.0* | *fuel-9.0* )
+                    export FUEL_RELEASE=90
+                    export REQS_BRANCH="stable/mitaka" ;;
+
+            *MirantisOpenStack-8.0* | *fuel-8.0* )
+                    export FUEL_RELEASE=80
+                    export REQS_BRANCH="stable/8.0" ;;
+
+            *MirantisOpenStack-7.0* | *fuel-7.0* )
+                    export FUEL_RELEASE=70
+                    export REQS_BRANCH="stable/7.0" ;;
+
+            *MirantisOpenStack-6.1* | *fuel-6.1* )
+                    export FUEL_RELEASE=61
+                    export REQS_BRANCH="stable/6.1" ;;
+
+            * )
+                    export FUEL_RELEASE=90
+                    export SNAPSHOTS_ID="released"
+                    export REQS_BRANCH="stable/mitaka" ;;
+          esac
+          echo "REQS_BRANCH=${REQS_BRANCH:?}" >> specific.properties
+          echo "FUEL_RELEASE=${FUEL_RELEASE:?}" >> specific.properties
+          echo "ISO_PATH=${ISO_STORAGE:?}/${ISO_FILE:?}" >> specific.properties
+          echo "ENV_NAME=${ENV_PREFIX:?}.${SNAPSHOTS_ID:?}" >> specific.properties
+          venv_path="$HOME/${FUEL_RELEASE:?}-venv" >> specific.properties
+          echo "VENV_PATH=${VENV_PATH:-$venv_path}"  >> specific.properties
+      - inject:
+          properties-file: specific.properties
 
 - builder:
     name: ui-condition
@@ -655,6 +704,7 @@
                 snapshots_id=$(grep "^CUSTOM_VERSION=" < snapshots.params | cut -d= -f2 | cut -d'#' -f2)
                 echo "snapshot_id_number=" $snapshots_id
                 echo "SNAPSHOTS_ID=${snapshots_id}" >> build_number
+
 - builder:
     name: runner-condition
     builders:
@@ -844,6 +894,7 @@
            notbuilt: true
 
 # build and smoke should trigger on patchset event
+
 - trigger:
     name: draft-test-gerrit-trigger
     triggers:
@@ -861,6 +912,7 @@
                 exclude-no-code-change: true
 
 # bvt should trigger on merge event
+
 - trigger:
     name: merge-gerrit-trigger
     triggers:
@@ -917,6 +969,7 @@
                   pattern: 'spec/**'
 
 # smoke should trigger on draft event
+
 - trigger:
     name: draft-gerrit-trigger
     triggers:
@@ -934,6 +987,7 @@
                 exclude-no-code-change: true
 
 # doc checks should trigger on patchset event
+
 - trigger:
     name: draft-doc-trigger
     triggers:
@@ -951,6 +1005,7 @@
                 exclude-no-code-change: true
 
 # doc checks and update should trigger on merge event
+
 - trigger:
     name: merge-doc-trigger
     triggers:
@@ -965,6 +1020,7 @@
             - change-merged-event
 
 # properties for smoke, bvt and nightly multijobs
+
 - wrapper:
     name: runner-wrapper
     wrappers:
@@ -977,6 +1033,7 @@
           write-description: "Runner-timeout is exceeded"
 
 # properties for smoke, bvt and nightly multijobs
+
 - wrapper:
     name: test-wrapper
     wrappers:
@@ -1025,6 +1082,7 @@
           queue-scanning: 'BUILDABLE'
 
 # properties for test jobs
+
 - property:
     name: test-property
     properties:
