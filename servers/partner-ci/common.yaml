@@ -188,10 +188,6 @@
       - string:
           name: ISO_JOB_BUILD_NUMBER
           description: "Fuel10 depends on ubuntu-mirror snapshots, it's a build of ISO_JOB_NAME"
-      - string:
-          name: SNAPSHOTS_ID
-          default: '{snapshots_id}'
-          description: 'snapshots number, "lastSuccessfulBuild" or "released"'
       - text:
           name: COMMON_PROPS
           default: |
@@ -465,7 +461,7 @@
                     condition: FAILED_OR_BETTER
 
 - builder:
-    name: get-refs
+    name: 10-get-refs
     builders:
       - shell: |
           #!/bin/bash
@@ -486,24 +482,7 @@
           fi
 
 - builder:
-    name: get-refs-vcenter
-    builders:
-      - shell: |
-          #!/bin/bash
-          cherrypick() {
-              git_url=$1
-              ref=$2
-              git fetch $git_url "$ref" && git cherry-pick FETCH_HEAD || { git status; exit 1; }
-              git log --pretty=oneline | head
-          }
-          if [[ ! -z "${FUEL_QA_REFS}" ]]; then
-            cd ${WORKSPACE}
-            git_url=$(git config --get remote.origin.url)
-            for ref in ${FUEL_QA_REFS:?}; do cherrypick $git_url $ref; done
-          fi
-
-- builder:
-    name: get-ui-refs
+    name: 10-get-ui-refs
     builders:
       - shell: |
           #!/bin/bash
@@ -523,9 +502,26 @@
             git_url=$(git config --get remote.origin.url)
             for ref in ${FUEL_QA_REFS:?}; do cherrypick $git_url $ref; done
           fi
+- builder:
+    name: 10-get-vcenter-refs
+    builders:
+      - shell: |
+          #!/bin/bash
+          cherrypick() {
+              git_url=$1
+              ref=$2
+              git fetch $git_url "$ref" && git cherry-pick FETCH_HEAD || { git status; exit 1; }
+              git log --pretty=oneline | head
+          }
+          if [[ ! -z "${FUEL_QA_REFS}" ]]; then
+            cd ${WORKSPACE}
+            git_url=$(git config --get remote.origin.url)
+            for ref in ${FUEL_QA_REFS:?}; do cherrypick $git_url $ref; done
+          fi
+
 
 - builder:
-    name: get-props
+    name: 20-get-props
     builders:
       - shell: |
           #!/bin/bash
@@ -550,7 +546,7 @@
           properties-file: specific.properties
 
 - builder:
-    name: get-baremetal-props
+    name: 21-get-baremetal-props
     builders:
       - inject:
           properties: |
@@ -561,7 +557,7 @@
             BM_TARGET_MACS=00:1b:21:87:21:99;00:1b:21:87:21:98;
 
 - builder:
-    name: get-updates
+    name: 30-get-additional-updates
     builders:
       - conditional-step:
           condition-kind: shell
@@ -584,7 +580,7 @@
                   ENABLE_MOS_UBUNTU_SECURITY=true
 
 - builder:
-    name: get-snapshots
+    name: 40-get-snapshots
     builders:
       - conditional-step:
           condition-kind: shell
@@ -614,7 +610,7 @@
                 properties-file: specific.properties
 
 - builder:
-    name: get-ubuntu-mirror
+    name: 40-get-ubuntu-mirror
     builders:
       - conditional-step:
           condition-kind: shell
@@ -654,7 +650,7 @@
           properties-file: specific.properties
 
 - builder:
-    name: prepare-env-variables
+    name: 50-get-env-variables
     builders:
       - shell: |
           # determine release specific variables
@@ -684,6 +680,8 @@
                     export SNAPSHOTS_ID="released"
                     export REQS_BRANCH="stable/mitaka" ;;
           esac
+          echo "REQS_BRANCH=${REQS_BRANCH:?}" >> specific.properties
+          echo "FUEL_RELEASE=${FUEL_RELEASE:?}" >> specific.properties
           echo "ISO_PATH=${ISO_STORAGE:?}/${ISO_FILE:?}" >> specific.properties
           echo "ENV_NAME=${ENV_PREFIX:?}.${SNAPSHOTS_ID:?}" >> specific.properties
           venv_path="$HOME/${FUEL_RELEASE:?}-venv" >> specific.properties
