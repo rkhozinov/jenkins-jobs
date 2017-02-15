@@ -186,6 +186,7 @@
       - get-ui-refs
 #     - get-updates
       - get-ubuntu-mirror
+      - prepare-env-variables
       - shell:
           !include-raw-escape: ../builders/common.prepare.sh
       - inject:
