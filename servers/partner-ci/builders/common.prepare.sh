@@ -1,29 +1,35 @@
 #!/bin/bash -e
 
 git log  --pretty=oneline | head
+##check kvm virtualization status###############
 IS_NESTED=$(cat /sys/module/kvm_intel/parameters/nested)
 IS_IGNORE_MSRS=$(cat /sys/module/kvm/parameters/ignore_msrs)
 IS_EPT=$(cat /sys/module/kvm_intel/parameters/ept)
-echo 'nested option enable = '$IS_NESTED
-echo 'ignore msrs option enable = '$IS_IGNORE_MSRS
-echo 'ept option enable = '$IS_EPT
 
-if [[ $IS_NESTED == *"Y"* ]] && [[ $IS_IGNORE_MSRS == *"Y"* ]] && [[ $IS_EPT == *"Y"* ]]; then
+if [[ $IS_NESTED == *"Y"* ]] && \
+[[ $IS_IGNORE_MSRS == *"Y"* ]] && \
+[[ $IS_EPT == *"Y"* ]]; then
   echo 'nested kvm virtuallization succesfully enabled '
 else
   echo 'nested kvm virtualization disabled or works incorrect, please check configuration'
+  echo 'nested option enable = '$IS_NESTED
+  echo 'ignore msrs option enable = '$IS_IGNORE_MSRS
+  echo 'ept option enable = '$IS_EPT
 fi
-
+################################################
 # activate bash xtrace for script
 [[ "${DEBUG}" == "true" ]] && set -x || set +x
 
-
+##determine fuel_release avriable################
 if [[ ${ISO_FILE:?} == *"Mirantis"* ]] || [[ "${FUEL_RELEASE_VERSION}" == "10" ]] ; then
   export FUEL_RELEASE=$(echo $ISO_FILE | cut -d- -f2 | tr -d '.iso')
 else
   export FUEL_RELEASE=90
 fi
+################################################
 
+
+##determine branch and snapshots_id#############
 if [[ "${UPDATE_MASTER}" == "true" ]]; then
   case "${FUEL_RELEASE}" in
     *100* ) export SNAPSHOTS_ID=$(echo $ISO_FILE | cut -d- -f3 | tr -d '.iso')
@@ -40,7 +46,10 @@ if [[ "${UPDATE_MASTER}" == "true" ]]; then
            export REQS_BRANCH="stable/mitaka" ;;
   esac
 fi
+################################################
 
+
+##determine additional features with snapshots id#
 if [ "${SNAPSHOTS_ID}" != "released" ] && \
 [[ "${UPDATE_MASTER}" == "true" ]] && \
 [[ ${FUEL_RELEASE} == *"90"* ]]; then
@@ -52,25 +61,27 @@ fi
 
 [[ $SNAPSHOTS_ID == *"lastSuccessfulBuild"* ]] && \
   export SNAPSHOTS_ID=$(grep -Po '#\K[^ ]+' < snapshots.params)
+################################################
 
-[ -d logs ] && rm -rf logs/* || mkdir logs
-
+##export useful variables and not-null-check####
 export ISO_PATH="${ISO_STORAGE:?}/${ISO_FILE:?}"
-
-
 export REQUIRED_FREE_SPACE=200
-
 export ENV_NAME="${ENV_PREFIX}.${SNAPSHOTS_ID}"
 export VENV_PATH=${VENV_PATH:-"$HOME/$FUEL_RELEASE-venv"}
+################################################
 
+##preparing workspace###########################
+[ -d logs ] && rm -rf logs/* || mkdir logs
 test -d $VENV_PATH || virtualenv --clear "${VENV_PATH}"
-##write parameters to inject in subsequent build-steps
+################################################
 
+##write parameters to inject in subsequent build-steps
 cat << SPECIFIC_PROPERTIES >> specific.properties
 ENV_NAME=${ENV_NAME:?}
 VENV_PATH=${VENV_PATH:?}
 SNAPSHOTS_ID=${SNAPSHOTS_ID:?}
 SPECIFIC_PROPERTIES
+################################################
 ## For plugins we should get a valid version of requrements of python-venv
 ## This requirements could be got from the github repo
 ## but for each branch of a plugin we should map specific branch of the fuel-qa repo
@@ -163,7 +174,6 @@ function smart_erase {
   dos.py sync
 }
 
-#################################################################
 ## Gets dospy environments
 ## with prefix the function returns all env except envs like prefix
 function dospy_list {
@@ -174,7 +184,6 @@ function dospy_list {
     dos.py list | tail -n +3 | grep $prefix
 }
 
-##################################################################
 wait_ws() {
   while [ $(pgrep vmrun | wc -l) -ne 0 ] ; do sleep 5; done
 }
@@ -255,7 +264,8 @@ if [[ "${FORCE_REUSE}" == "false" ]]; then
     [[ "$env"  != "$USEFUL_ENV" ]] && [[ $env  != *"released"* ]] && smart_erase $env
   done
 fi
-##########################################################
+###additional logs for better testing###########
 [[ "${DEBUG}" == "true" ]] && virsh list --all
 sudo cp /var/log/libvirt/libvirtd.log ${WORKSPACE}/libvirtd_before_test.log
 sudo chown jenkins:jenkins ${WORKSPACE}/libvirtd_before_test.log
+################################################
