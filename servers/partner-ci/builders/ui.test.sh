@@ -2,24 +2,6 @@
 # activate bash xtrace for script
 [[ "${DEBUG}" == "true" ]] && set -x || set +x
 
-fuel_release=$(echo $ISO_FILE | cut -d- -f2 | tr -d '.iso')
-export FUEL_RELEASE=${fuel_release:?}
-
-if [ "${SNAPSHOTS_ID}" != "released" ] && \
-[[ "${UPDATE_MASTER}" == "true" ]] && \
-[[ ${FUEL_RELEASE} == *"90"* ]]; then
-  . $SNAPSHOT_OUTPUT_FILE
-  export EXTRA_RPM_REPOS
-  export UPDATE_FUEL_MIRROR
-  export EXTRA_DEB_REPOS
-fi
-
-[[ $SNAPSHOTS_ID == *"lastSuccessfulBuild"* ]] && \
-  export SNAPSHOTS_ID=$(grep -Po '#\K[^ ]+' < snapshots.params)
-
-export ENV_NAME="${ENV_PREFIX:?}.${SNAPSHOTS_ID:?}"
-export VENV_PATH="${HOME}/${FUEL_RELEASE:?}-venv"
-
 . "${VENV_PATH}/bin/activate"
 pip freeze
 cd ${WORKSPACE}/fuel-qa

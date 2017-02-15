@@ -26,7 +26,7 @@ fi
 
 if [[ "${UPDATE_MASTER}" == "true" ]]; then
   case "${FUEL_RELEASE}" in
-    *100* ) export SNAPSHOTS_ID=$(echo $ISO | cut -d- -f3 | tr -d '.iso')
+    *100* ) export SNAPSHOTS_ID=$(echo $ISO_FILE | cut -d- -f3 | tr -d '.iso')
             export REQS_BRANCH="stable/newton" ;;
     *90* ) export SNAPSHOTS_ID=${${SNAPSHOTS_ID}:=${CUSTOM_VERSION:10}}
            export REQS_BRANCH="stable/mitaka" ;;
@@ -41,15 +41,22 @@ if [[ "${UPDATE_MASTER}" == "true" ]]; then
   esac
 fi
 
+if [ "${SNAPSHOTS_ID}" != "released" ] && \
+[[ "${UPDATE_MASTER}" == "true" ]] && \
+[[ ${FUEL_RELEASE} == *"90"* ]]; then
+  . $SNAPSHOT_OUTPUT_FILE
+  export EXTRA_RPM_REPOS
+  export UPDATE_FUEL_MIRROR
+  export EXTRA_DEB_REPOS
+fi
+
+[[ $SNAPSHOTS_ID == *"lastSuccessfulBuild"* ]] && \
+  export SNAPSHOTS_ID=$(grep -Po '#\K[^ ]+' < snapshots.params)
 
 [ -d logs ] && rm -rf logs/* || mkdir logs
 
-export ISO_PATH="${ISO_STORAGE}/${ISO_FILE}"
-[ ! -f $ISO_PATH ] && { echo "The $ISO_PATH isn't exist"; exit 1; }
+export ISO_PATH="${ISO_STORAGE:?}/${ISO_FILE:?}"
 
-if [[ $ISO_FILE == *"Mirantis"* ]]; then
-  export FUEL_RELEASE=$(echo $ISO_FILE | cut -d- -f2 | tr -d '.iso')
-fi
 
 export REQUIRED_FREE_SPACE=200
 
@@ -57,6 +64,13 @@ export ENV_NAME="${ENV_PREFIX}.${SNAPSHOTS_ID}"
 export VENV_PATH=${VENV_PATH:-"$HOME/$FUEL_RELEASE-venv"}
 
 test -d $VENV_PATH || virtualenv --clear "${VENV_PATH}"
+##write parameters to inject in subsequent build-steps
+
+cat << SPECIFIC_PROPERTIES >> specific.properties
+ENV_NAME=${ENV_NAME:?}
+VENV_PATH=${VENV_PATH:?}
+SNAPSHOTS_ID=${SNAPSHOTS_ID:?}
+SPECIFIC_PROPERTIES
 ## For plugins we should get a valid version of requrements of python-venv
 ## This requirements could be got from the github repo
 ## but for each branch of a plugin we should map specific branch of the fuel-qa repo

@@ -188,6 +188,8 @@
       - get-ubuntu-mirror
       - shell:
           !include-raw-escape: ../builders/common.prepare.sh
+      - inject:
+          properties-file: specific.properties
       - shell:
           !include-raw-escape: ../builders/ui.test.sh
     publishers:
