@@ -150,7 +150,7 @@
       - contrail_different_ha_in_multinet
 
       - https_tls_selected
-      - contrail_private_gateway
+      - contrail_ostf_net_provisioning_off
 
       - contrail_dpdk_add_controller
       - contrail_dpdk_delete_controller
