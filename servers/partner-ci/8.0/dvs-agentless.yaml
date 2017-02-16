@@ -269,8 +269,8 @@
     properties:
       - test-property
     builders:
-      - get-refs
-      - get-props
+      - 10-get-refs
+      - 20-get-props
       - conditional-step:
            condition-kind: shell
            condition-command: |

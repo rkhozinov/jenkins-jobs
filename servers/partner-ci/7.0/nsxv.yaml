@@ -237,8 +237,8 @@
     properties:
       - test-property
     builders:
-      - get-refs
-      - get-props
+      - 10-get-refs
+      - 20-get-props
       - conditional-step:
            condition-kind: shell
            condition-command: |
@@ -270,7 +270,6 @@
                 project: ${{PKG_JOB_NAME}}
                 which-build: specific-build
                 build-number: ${{PKG_JOB_BUILD_NUMBER}}
-      - get-updates
       - shell:
           !include-raw-escape: ../builders/common.prepare.sh
       - shell:

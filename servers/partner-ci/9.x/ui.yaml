@@ -195,10 +195,11 @@
     properties:
       - test-property
     builders:
-      - get-props
-      - get-ui-refs
-      - get-updates
-      - get-snapshots
+      - 10-get-ui-refs
+      - 20-get-props
+      - 30-get-additional-updates
+      - 40-get-snapshots
+      - 50-get-env-variables
       - shell:
           !include-raw-escape: ../builders/common.prepare.sh
       - shell:
