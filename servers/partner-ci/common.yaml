@@ -549,12 +549,12 @@
     name: 21-get-baremetal-props
     builders:
       - inject:
-          properties: |
-            BM_HOST_BRIDGE_INTERFACES=eth2:10.109.0.0/24;eth3:10.109.4.0/24;
-            BM_IPMI_ADDR=cz7660-kvm.host-telecom.com;
-            BM_IPMI_PASSWORD=Ba2Ie23#GHgho;
-            BM_IPMI_USER=engineer;
-            BM_TARGET_MACS=00:1b:21:87:21:99;00:1b:21:87:21:98;
+          properties-content: |
+            BM_HOST_BRIDGE_INTERFACES=eth2:10.109.0.0/24;eth3:10.109.4.0/24
+            BM_IPMI_ADDR=cz7660-kvm.host-telecom.com
+            BM_IPMI_PASSWORD=Ba2Ie23#GHgho
+            BM_IPMI_USER=engineer
+            BM_TARGET_MACS=00:1b:21:87:21:99;00:1b:21:87:21:98
 
 - builder:
     name: 30-get-snapshots
@@ -564,25 +564,23 @@
           condition-command: |
             [[ "${SNAPSHOTS_ID}" != *"released"* ]]
           steps:
+            - inject:
+                properties-content: |
+                  ENABLE_MOS_CENTOS_OS=true
+                  ENABLE_MOS_CENTOS_PROPOSED=$ENABLE_PROPOSED
+                  ENABLE_MOS_CENTOS_UPDATES=true
+                  ENABLE_MOS_CENTOS_HOLDBACK=true
+                  ENABLE_MOS_CENTOS_HOTFIX=false
+                  ENABLE_MOS_CENTOS_SECURITY=true
+                  ENABLE_MOS_UBUNTU_OS=true
+                  ENABLE_MOS_UBUNTU_PROPOSED=$ENABLE_PROPOSED
+                  ENABLE_MOS_UBUNTU_UPDATES=true
+                  ENABLE_MOS_UBUNTU_HOLDBACK=true
+                  ENABLE_MOS_UBUNTU_HOTFIX=false
+                  ENABLE_MOS_UBUNTU_SECURITY=true
+
             - shell: |
                 #!/bin/bash -xeu
-                if [[ "${UPDATE_MASTER}" == "true" ]]; then
-                cat << SPECIFIC_PROPERTIES > specific.properties
-                ENABLE_MOS_CENTOS_OS=true
-                ENABLE_MOS_CENTOS_PROPOSED=${ENABLE_PROPOSED}
-                ENABLE_MOS_CENTOS_UPDATES=true
-                ENABLE_MOS_CENTOS_HOLDBACK=true
-                ENABLE_MOS_CENTOS_HOTFIX=false
-                ENABLE_MOS_CENTOS_SECURITY=true
-                ENABLE_MOS_UBUNTU_OS=true
-                ENABLE_MOS_UBUNTU_PROPOSED=${ENABLE_PROPOSED}
-                ENABLE_MOS_UBUNTU_UPDATES=true
-                ENABLE_MOS_UBUNTU_HOLDBACK=true
-                ENABLE_MOS_UBUNTU_HOTFIX=false
-                ENABLE_MOS_UBUNTU_SECURITY=true
-                SPECIFIC_PROPERTIES
-                fi
-
                 wget --no-check-certificate -O ${SNAPSHOT_ARTIFACTS_FILE:?} \
                 ${SNAPSHOTS_URL/SNAPSHOTS_ID/${SNAPSHOTS_ID:?}}
                 snapshots_id=$(grep "^CUSTOM_VERSION=" < snapshots.params | cut -d= -f2 | cut -d'#' -f2)
@@ -590,18 +588,18 @@
                 python "${CONV_SNAP_PATH:?}"
 
                 . $SNAPSHOT_OUTPUT_FILE
-                echo "EXTRA_RPM_REPOS=${EXTRA_RPM_REPOS}" >> specific.properties
-                echo "UPDATE_FUEL_MIRROR=${UPDATE_FUEL_MIRROR}" >> specific.properties
-                echo "EXTRA_DEB_REPOS=${EXTRA_DEB_REPOS}" >> specific.properties
+                echo "EXTRA_RPM_REPOS=${EXTRA_RPM_REPOS}" >> get-snapshots.properties
+                echo "UPDATE_FUEL_MIRROR=${UPDATE_FUEL_MIRROR}" >> get-snapshots.properties
+                echo "EXTRA_DEB_REPOS=${EXTRA_DEB_REPOS}" >> get-snapshots.properties
 
                 mos_ubuntu_mirror_id=$(grep "^MOS_UBUNTU_MIRROR_ID" < snapshots.params | cut -d= -f2)
-                echo "MOS_UBUNTU_MIRROR_ID=${mos_ubuntu_mirror_id:?}" >> specific.properties
+                echo "MOS_UBUNTU_MIRROR_ID=${mos_ubuntu_mirror_id:?}" >> get-snapshots.properties
 
                 mos_centos_proposed_mirror_id=$(grep "^MOS_CENTOS_PROPOSED_MIRROR_ID" < snapshots.params | cut -d= -f2)
-                echo "MOS_CENTOS_PROPOSED_MIRROR_ID=${mos_centos_proposed_mirror_id:?}" >> specific.properties
+                echo "MOS_CENTOS_PROPOSED_MIRROR_ID=${mos_centos_proposed_mirror_id:?}" >> get-snapshots.properties
 
             - inject:
-                properties-file: specific.properties
+                properties-file: get-snapshots.properties
 
 - builder:
     name: 30-get-ubuntu-mirror
@@ -638,10 +636,10 @@
               UBUNTU_REPOS="$UBUNTU_REPOS|$UBUNTU_PROPOSED"
           fi
 
-          echo "MIRROR_UBUNTU=${UBUNTU_REPOS:?}" >> specific.properties
-          echo "SNAPSHOTS_ID=$(echo $ISO_FILE | cut -d- -f3 | tr -d '.iso')" >> specific.properties
+          echo "MIRROR_UBUNTU=${UBUNTU_REPOS:?}" >> get-ubuntu-mirror.properties
+          echo "SNAPSHOTS_ID=$(echo $ISO_FILE | cut -d- -f3 | tr -d '.iso')" >> get-ubuntu-mirror.properties
       - inject:
-          properties-file: specific.properties
+          properties-file: get-ubuntu-mirror.properties
 
 - builder:
     name: 40-get-env-variables
@@ -674,14 +672,14 @@
                     export SNAPSHOTS_ID="released"
                     export REQS_BRANCH="stable/mitaka" ;;
           esac
-          echo "REQS_BRANCH=${REQS_BRANCH:?}" >> specific.properties
-          echo "FUEL_RELEASE=${FUEL_RELEASE:?}" >> specific.properties
-          echo "ISO_PATH=${ISO_STORAGE:?}/${ISO_FILE:?}" >> specific.properties
-          echo "ENV_NAME=${ENV_PREFIX:?}.${SNAPSHOTS_ID:?}" >> specific.properties
-          venv_path="$HOME/${FUEL_RELEASE:?}-venv" >> specific.properties
-          echo "VENV_PATH=${VENV_PATH:-$venv_path}"  >> specific.properties
+          echo "REQS_BRANCH=${REQS_BRANCH:?}" >> get-env-variables.properties
+          echo "FUEL_RELEASE=${FUEL_RELEASE:?}" >> get-env-variables.properties
+          echo "ISO_PATH=${ISO_STORAGE:?}/${ISO_FILE:?}" >> get-env-variables.properties
+          echo "ENV_NAME=${ENV_PREFIX:?}.${SNAPSHOTS_ID:?}" >> get-env-variables.properties
+          venv_path="$HOME/${FUEL_RELEASE:?}-venv" >> get-env-variables.properties
+          echo "VENV_PATH=${VENV_PATH:-$venv_path}"  >> get-env-variables.properties
       - inject:
-          properties-file: specific.properties
+          properties-file: get-env-variables.properties
 
 - builder:
     name: ui-condition
