@@ -588,16 +588,16 @@
                 python "${CONV_SNAP_PATH:?}"
 
                 . $SNAPSHOT_OUTPUT_FILE
-                echo "EXTRA_RPM_REPOS=${EXTRA_RPM_REPOS}" >> get-snapshots.properties
-                echo "UPDATE_FUEL_MIRROR=${UPDATE_FUEL_MIRROR}" >> get-snapshots.properties
-                echo "EXTRA_DEB_REPOS=${EXTRA_DEB_REPOS}" >> get-snapshots.properties
-
-                mos_ubuntu_mirror_id=$(grep "^MOS_UBUNTU_MIRROR_ID" < snapshots.params | cut -d= -f2)
-                echo "MOS_UBUNTU_MIRROR_ID=${mos_ubuntu_mirror_id:?}" >> get-snapshots.properties
-
                 mos_centos_proposed_mirror_id=$(grep "^MOS_CENTOS_PROPOSED_MIRROR_ID" < snapshots.params | cut -d= -f2)
-                echo "MOS_CENTOS_PROPOSED_MIRROR_ID=${mos_centos_proposed_mirror_id:?}" >> get-snapshots.properties
+                mos_ubuntu_mirror_id=$(grep "^MOS_UBUNTU_MIRROR_ID" < snapshots.params | cut -d= -f2)
 
+                cat << GET_SNAPSHOTS >> get-snapshots.properties
+                EXTRA_RPM_REPOS=${EXTRA_RPM_REPOS}
+                UPDATE_FUEL_MIRROR=${UPDATE_FUEL_MIRROR}
+                EXTRA_DEB_REPOS=${EXTRA_DEB_REPOS}
+                MOS_UBUNTU_MIRROR_ID=${mos_ubuntu_mirror_id:?}
+                MOS_CENTOS_PROPOSED_MIRROR_ID=${mos_centos_proposed_mirror_id:?}
+                GET_SNAPSHOTS
             - inject:
                 properties-file: get-snapshots.properties
 
@@ -672,12 +672,16 @@
                     export SNAPSHOTS_ID="released"
                     export REQS_BRANCH="stable/mitaka" ;;
           esac
-          echo "REQS_BRANCH=${REQS_BRANCH:?}" >> get-env-variables.properties
-          echo "FUEL_RELEASE=${FUEL_RELEASE:?}" >> get-env-variables.properties
-          echo "ISO_PATH=${ISO_STORAGE:?}/${ISO_FILE:?}" >> get-env-variables.properties
-          echo "ENV_NAME=${ENV_PREFIX:?}.${SNAPSHOTS_ID:?}" >> get-env-variables.properties
-          venv_path="$HOME/${FUEL_RELEASE:?}-venv" >> get-env-variables.properties
-          echo "VENV_PATH=${VENV_PATH:-$venv_path}"  >> get-env-variables.properties
+
+          venv_path="$HOME/${FUEL_RELEASE:?}-venv"
+
+          cat << GET_ENV >> get-env-variables.properties
+          REQS_BRANCH=${REQS_BRANCH:?}
+          FUEL_RELEASE=${FUEL_RELEASE:?}
+          ISO_PATH=${ISO_STORAGE:?}/${ISO_FILE:?}
+          ENV_NAME=${ENV_PREFIX:?}.${SNAPSHOTS_ID:?}
+          VENV_PATH=${VENV_PATH:-$venv_path}
+          GET_ENV
       - inject:
           properties-file: get-env-variables.properties
 
