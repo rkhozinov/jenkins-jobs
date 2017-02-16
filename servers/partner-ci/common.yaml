@@ -557,30 +557,7 @@
             BM_TARGET_MACS=00:1b:21:87:21:99;00:1b:21:87:21:98;
 
 - builder:
-    name: 30-get-additional-updates
-    builders:
-      - conditional-step:
-          condition-kind: shell
-          condition-command: |
-            [[ "${UPDATE_MASTER}" == "true" ]]
-          steps:
-            - inject:
-                properties-content: |
-                  ENABLE_MOS_CENTOS_OS=true
-                  ENABLE_MOS_CENTOS_PROPOSED=$ENABLE_PROPOSED
-                  ENABLE_MOS_CENTOS_UPDATES=true
-                  ENABLE_MOS_CENTOS_HOLDBACK=true
-                  ENABLE_MOS_CENTOS_HOTFIX=false
-                  ENABLE_MOS_CENTOS_SECURITY=true
-                  ENABLE_MOS_UBUNTU_OS=true
-                  ENABLE_MOS_UBUNTU_PROPOSED=$ENABLE_PROPOSED
-                  ENABLE_MOS_UBUNTU_UPDATES=true
-                  ENABLE_MOS_UBUNTU_HOLDBACK=true
-                  ENABLE_MOS_UBUNTU_HOTFIX=false
-                  ENABLE_MOS_UBUNTU_SECURITY=true
-
-- builder:
-    name: 40-get-snapshots
+    name: 30-get-snapshots
     builders:
       - conditional-step:
           condition-kind: shell
@@ -589,6 +566,23 @@
           steps:
             - shell: |
                 #!/bin/bash -xeu
+                if [[ "${UPDATE_MASTER}" == "true" ]]; then
+                cat << SPECIFIC_PROPERTIES > specific.properties
+                ENABLE_MOS_CENTOS_OS=true
+                ENABLE_MOS_CENTOS_PROPOSED=${ENABLE_PROPOSED}
+                ENABLE_MOS_CENTOS_UPDATES=true
+                ENABLE_MOS_CENTOS_HOLDBACK=true
+                ENABLE_MOS_CENTOS_HOTFIX=false
+                ENABLE_MOS_CENTOS_SECURITY=true
+                ENABLE_MOS_UBUNTU_OS=true
+                ENABLE_MOS_UBUNTU_PROPOSED=${ENABLE_PROPOSED}
+                ENABLE_MOS_UBUNTU_UPDATES=true
+                ENABLE_MOS_UBUNTU_HOLDBACK=true
+                ENABLE_MOS_UBUNTU_HOTFIX=false
+                ENABLE_MOS_UBUNTU_SECURITY=true
+                SPECIFIC_PROPERTIES
+                fi
+
                 wget --no-check-certificate -O ${SNAPSHOT_ARTIFACTS_FILE:?} \
                 ${SNAPSHOTS_URL/SNAPSHOTS_ID/${SNAPSHOTS_ID:?}}
                 snapshots_id=$(grep "^CUSTOM_VERSION=" < snapshots.params | cut -d= -f2 | cut -d'#' -f2)
@@ -610,7 +604,7 @@
                 properties-file: specific.properties
 
 - builder:
-    name: 40-get-ubuntu-mirror
+    name: 30-get-ubuntu-mirror
     builders:
       - conditional-step:
           condition-kind: shell
@@ -650,7 +644,7 @@
           properties-file: specific.properties
 
 - builder:
-    name: 50-get-env-variables
+    name: 40-get-env-variables
     builders:
       - shell: |
           # determine release specific variables

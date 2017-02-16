@@ -184,9 +184,8 @@
     builders:
       - 10-get-ui-refs
       - 20-get-props
-#     - 30-get-additional-updates
-      - 40-get-ubuntu-mirror
-      - 50-get-env-variables
+      - 30-get-ubuntu-mirror
+      - 40-get-env-variables
       - shell:
           !include-raw-escape: ../builders/common.prepare.sh
       - shell:

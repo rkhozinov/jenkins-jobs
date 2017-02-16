@@ -395,9 +395,8 @@
       - 10-get-refs
       - 20-get-props
       - 21-get-baremetal-props
-      - 30-get-additional-updates
-      - 40-get-snapshots
-      - 50-get-env-variables
+      - 30-get-snapshots
+      - 40-get-env-variables
       - conditional-step:
            condition-kind: shell
            condition-command: |
