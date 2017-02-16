@@ -12,7 +12,7 @@
             CONTRAIL_VERSION=5.0;
             CONTRAIL_PLUGIN_VERSION=$PLUGIN_VERSION;
             DISABLE_SSL=false;
-            FORCE_VSRX_COPY=False;
+            FORCE_VSRX_COPY=True;
             KVM_USE=True;
             MIRROR=http://mirror.seed-cz1.fuel-infra.org;
             MULTIPLE_NETWORKS=;
