@@ -11,7 +11,7 @@
     name: 'predefined_parameters'
     fuel_release: '10.0'
     fuel_release_checker: '10'
-    job_name: 'pure'
+    job_name: 'fuel'
     custom_name: '{fuel_release}.{job_name}.custom'
     reporter-name: '{fuel_release}.{job_name}.reporter'
     smoke-name: '{fuel_release}.{job_name}.smoke'
@@ -169,7 +169,7 @@
       - shell:
           !include-raw-escape: ../builders/common.prepare.sh
       - shell:
-          !include-raw-escape: ../builders/pure_10.0.test.sh
+          !include-raw-escape: ../builders/fuel.test.sh
     publishers:
       - test-publisher:
           reporter_name: '{reporter-name}'
