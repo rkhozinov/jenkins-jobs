@@ -1,34 +1,23 @@
 ---
 - parameter:
-    name: plugin-specific-parameters
+    name: specific-parameters
     parameters:
       - text:
           name: SPECIFIC_PROPS
           default: |
-            CONV_SNAP_PATH=fuel-qa/utils/jenkins/conv_snapshot_file.py;
-            FUEL_QA_TEST_GROUP=prepare_slaves_9;
-            ISO_FILE=/storage/downloads/MirantisOpenStack-9.0.iso;
-            SNAPSHOTS_URL=https://product-ci.infra.mirantis.net/job/9.x.snapshot/SNAPSHOTS_ID/artifact/snapshots.params;
-            SNAPSHOT_ARTIFACTS_FILE=snapshots.params;
-            SNAPSHOT_OUTPUT_FILE=extra_repos.sh;
+            UBUNTU_DIST=xenial;
 
 - project:
     name: 'predefined_parameters'
-    fuel_release: '9.x'
-    fuel_release_checker: '9.2'
-    plugin_version: ''
-    plugin-name: 'ui'
-    regression-name: '{fuel_release}.{plugin-name}.regression'
-    nightly-name: '{fuel_release}.{plugin-name}.nightly'
-    custom-name: '{fuel_release}.{plugin-name}.custom'
-    reporter-name: '{fuel_release}.{plugin-name}.reporter'
-    pkg_job_name: '{fuel_release}.dvs.build'
-    pkg_job_build_number: ''
-    build-name: ''
-    nightly_timer: 'H 21 * * *'
-    regression_timer: 'H 18 * * *'
-    nightly_disabled: true
-    regression_disabled: true
+    fuel_release: '10.0'
+    fuel_release_checker: '10'
+    job_name: 'pure'
+    custom_name: '{fuel_release}.{job_name}.custom'
+    reporter-name: '{fuel_release}.{job_name}.reporter'
+    smoke-name: '{fuel_release}.{job_name}.smoke'
+    bvt-name: '{fuel_release}.{job_name}.bvt'
+    smoke-test-name: 'smoke_neutron'
+    bvt-test-name: 'bvt_2'
     force_erase: false
     force_reuse: true
     recreate_venv: false
@@ -39,22 +28,20 @@
     publish_results: true
     fuel_ui_refs: ''
     fuel_qa_refs: ''
-    snapshots_id: 'lastSuccessfulBuild'
-    fuel_qa_branch: 'origin/stable/mitaka'
-    fuel_ui_branch: 'origin/stable/mitaka'
+    fuel_qa_branch: 'origin/stable/newton'
+    fuel_ui_branch: 'origin/stable/newton'
     docker_branch: 'master'
     email_to: 'rkhozinov@mirantis.com'
-    released_plugin_path: ''
     scm_submodule_disabled: true
     scm_wipe_workspace: false
     skip_vote_successfull: false
     skip_vote_failed: false
 
     testrail_project: "Mirantis OpenStack"
-    testrail_suite: "[9.2][PCE] Mechanism for providing additional properties for NICs and Nodes via plugin"
+    testrail_suite: ""
     testrail_suite_desc: "Suite description"
-    testrail_milestone: "9.2"
-    testrail_plan: "${{TREP_TESTRAIL_MILESTONE}} snapshot #${{SNAPSHOTS_ID}}"
+    testrail_milestone: "10.0"
+    testrail_plan: "${{TREP_TESTRAIL_MILESTONE}} #${{SNAPSHOTS_ID}}"
     testrail_plan_desc: "Test plan description"
     testrail_run: "${{TREP_TESTRAIL_SUITE}}"
     testrail_run_desc: "Test run description"
@@ -67,29 +54,36 @@
     testgroup_value: '{testgroup}'
 
     testgroup:
-      - test_nics
-      - test_nodes
-      - test_bonds
+      - bvt_2
+      - smoke_neutron
 
     jobs:
-      - '{nightly-name}':
-          multijob_build_pkg: false
-
-      - '{custom-name}.qa':
+      - '{custom_name}.qa':
           publish_results: false
           scm_submodule_disabled: false
 
-      - '{custom-name}.dev':
+      - '{custom_name}.dev':
           scm_submodule_disabled: false
           publish_results: false
           testgroup_parameter_type: choice
           testgroup_value_type: choices
           testgroup_value: '{obj:testgroup}'
 
-      - '{fuel_release}.{plugin-name}.{testgroup}':
-          scm_submodule_disabled: false
+      - '{smoke-name}':
+          publish_results: false
+          multijob_build_pkg: false
 
-      - '{reporter-name}'
+      - '{fuel_release}.{job_name}.smoke.test'
+
+      - '{bvt-name}':
+          publish_results: false
+          multijob_build_pkg: true
+
+      - '{fuel_release}.{job_name}.bvt.test'
+
+      - '{reporter-name}':
+          plugin_version: ''
+          plugin-name: {job_name}
 
 - runner-parameters: &runner-parameters
     name: 'runner-parameters'
@@ -97,28 +91,24 @@
       - common-fuel-parameters:
           debug:                 '{debug}'
           enable_proposed:       '{enable_proposed}'
-          env_prefix:            '{fuel_release}.{plugin-name}'
+          snapshots_id:           ''
+          env_prefix:            '{fuel_release}.{job_name}'
           force_erase:           '{force_erase}'
           force_reuse:           '{force_reuse}'
           fuel_release_checker:  '{fuel_release_checker}'
-          fuel_ui_branch:        '{fuel_ui_branch}'
-          fuel_ui_refs:          '{fuel_ui_refs}'
           fuel_qa_branch:        '{fuel_qa_branch}'
           fuel_qa_refs:          '{fuel_qa_refs}'
-          docker_branch:         '{docker_branch}'
           kvm_use:               '{kvm_use}'
           publish_results:       '{publish_results}'
           recreate_venv:         '{recreate_venv}'
-          pkg_job_build_number:  '{pkg_job_build_number}'
           skip_vote_failed:      '{skip_vote_failed}'
           skip_vote_successfull: '{skip_vote_successfull}'
-          snapshots_id:          '{snapshots_id}'
           testrail_plan:         '{testrail_plan}'
           testrail_plan_desc:    '{testrail_plan_desc}'
           testrail_suite:        '{testrail_suite}'
           testrail_suite_desc:   '{testrail_suite_desc}'
           update_master:         '{update_master}'
-      - plugin-specific-parameters
+      - specific-parameters
 
 - test-parameters: &test-parameters
     name: 'test-parameters'
@@ -131,35 +121,27 @@
           name: TEST_GROUP
           '{testgroup_value_type}': '{obj:testgroup_value}'
           description: "test-group name"
-      - string:
-          name: TEST_PREFIX
-          default: '$TEST_GROUP*'
-          description: "test-group name"
       - common-fuel-parameters:
           debug:                 '{debug}'
           enable_proposed:       '{enable_proposed}'
-          env_prefix:            '{fuel_release}.{plugin-name}'
+          snapshots_id:           ''
+          env_prefix:            '{fuel_release}.{job_name}'
           force_erase:           '{force_erase}'
           force_reuse:           '{force_reuse}'
           fuel_release_checker:  '{fuel_release_checker}'
-          fuel_ui_branch:        '{fuel_ui_branch}'
-          fuel_ui_refs:          '{fuel_ui_refs}'
           fuel_qa_branch:        '{fuel_qa_branch}'
           fuel_qa_refs:          '{fuel_qa_refs}'
-          docker_branch:         '{docker_branch}'
           kvm_use:               '{kvm_use}'
           publish_results:       '{publish_results}'
           recreate_venv:         '{recreate_venv}'
-          pkg_job_build_number:  '{pkg_job_build_number}'
           skip_vote_failed:      '{skip_vote_failed}'
           skip_vote_successfull: '{skip_vote_successfull}'
-          snapshots_id:          '{snapshots_id}'
           testrail_plan:         '{testrail_plan}'
           testrail_plan_desc:    '{testrail_plan_desc}'
           testrail_suite:        '{testrail_suite}'
           testrail_suite_desc:   '{testrail_suite_desc}'
           update_master:         '{update_master}'
-      - plugin-specific-parameters
+      - specific-parameters
 
 - defaults:
     name: global
@@ -175,71 +157,111 @@
           wipe-workspace: true
           choosing-strategy: default
           skip-tag: true
-      - git:
-          url: 'http://git.openstack.org/openstack/fuel-ui'
-          basedir: fuel-ui
-          branches:
-            - $FUEL_UI_BRANCH
-          wipe-workspace: true
-          choosing-strategy: default
-          skip-tag: true
-      - git:
-          url: 'http://github.com/rkhozinov/fuel-ui-tests-docker'
-          basedir: docker
-          branches:
-             - $DOCKER_BRANCH
-          wipe-workspace: true
-          skip-tag: true
     wrappers:
       - test-wrapper
     properties:
       - test-property
     builders:
-      - 10-get-ui-refs
+      - 10-get-refs
       - 20-get-props
-      - 30-get-snapshots
+      - 30-get-ubuntu-mirror
       - 40-get-env-variables
       - shell:
           !include-raw-escape: ../builders/common.prepare.sh
       - shell:
-          !include-raw-escape: ../builders/ui.test.sh
+          !include-raw-escape: ../builders/pure_10.0.test.sh
     publishers:
-      - ui-publisher:
+      - test-publisher:
           reporter_name: '{reporter-name}'
           properties_name: properties
           email_to: '{email_to}'
 
+
 - job-template:
-    name: '{fuel_release}.{plugin-name}.{testgroup}'
-    description: 'The test "{testgroup}" for {fuel_release}.{plugin-name}'
+    name: '{custom_name}.qa'
+    description: 'The custom test for {fuel_release}.{job_name}'
     concurrent: true
 
 - job-template:
-    name: '{custom-name}.qa'
-    description: 'The custom test for {fuel_release}.{plugin-name}'
+    name: '{custom_name}.dev'
+    description: 'The custom test for {fuel_release}.{job_name}'
     concurrent: true
 
 - job-template:
-    name: '{custom-name}.dev'
-    description: 'The custom test for {fuel_release}.{plugin-name}'
+    name: '{fuel_release}.{job_name}.bvt.test'
+    description: 'The BVT test for {fuel_release}.{job_name}'
     concurrent: true
 
 - job-template:
-    name: '{nightly-name}'
+    name: '{fuel_release}.{job_name}.smoke.test'
+    description: 'The Smoke test for {fuel_release}.{job_name}'
+    concurrent: true
+
+- job-template:
+    name: '{smoke-name}'
+    disabled: false
+    description: 'The Smoke test for {fuel_release}.{job_name}'
+    concurrent: true
+    quiet-period: 5
     project-type: multijob
-    disabled: '{obj:nightly_disabled}'
     node: runner
     <<: *runner-parameters
-    scm: []
     triggers:
-      - timed: '{nightly_timer}'
+      - draft-gerrit-trigger:
+          gerrit_repo: '{gerrit_repo}'
+          gerrit_branch: '{gerrit_branch}'
+          skip_vote_successfull: '{skip_vote_successfull}'
+          skip_vote_failed: '{skip_vote_failed}'
     properties:
       - ui-runner-property
     wrappers:
       - runner-wrapper
+    scm: []
+    builders:
+      - multijob:
+          name: 'The smoke test for {fuel_release}.{job_name}'
+          condition: COMPLETED
+          projects:
+            - name: '{fuel_release}.{job_name}.smoke.test'
+              current-parameters: true
+              predefined-parameters: |
+                TEST_GROUP={smoke-test-name}
+              kill-phase-on: NEVER
     publishers:
       - runner-publisher:
-          properties_name: nightly.properties
+          properties_name: smoke.properties
           email_to: '{email_to}'
+
+- job-template:
+    name: '{bvt-name}'
+    description: 'The BVT test for {fuel_release}.{job_name}'
+    disabled: false
+    concurrent: true
+    project-type: multijob
+    node: runner
+    <<: *runner-parameters
+    scm: []
+    triggers:
+      - merge-gerrit-trigger:
+          gerrit_repo: '{gerrit_repo}'
+          gerrit_branch: '{gerrit_branch}'
+          skip_vote_successfull: '{skip_vote_successfull}'
+          skip_vote_failed: '{skip_vote_failed}'
+    properties:
+      - ui-runner-property
+    wrappers:
+      - runner-wrapper
     builders:
-      !include: ui-nightly.yaml
+      - multijob:
+          name: 'The BVT test for {fuel_release}.{job_name}'
+          condition: COMPLETED
+          projects:
+            - name: '{fuel_release}.{job_name}.bvt.test'
+              current-parameters: true
+              predefined-parameters: |
+                 TEST_GROUP={bvt-test-name}
+              kill-phase-on: NEVER
+    publishers:
+      - runner-publisher:
+          properties_name: bvt.properties
+          email_to: '{email_to}'

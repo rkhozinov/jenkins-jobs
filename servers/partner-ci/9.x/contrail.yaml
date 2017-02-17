@@ -335,11 +335,11 @@
     properties:
       - test-property
     builders:
-      - get-refs
-      - get-updates
-      - get-baremetal-props
-      - get-props
-      - get-snapshots
+      - 10-get-refs
+      - 20-get-props
+      - 21-get-baremetal-props
+      - 30-get-snapshots
+      - 40-get-env-variables
       - conditional-step:
            condition-kind: shell
            condition-command: |
@@ -395,7 +395,6 @@
                 project: ${{PKG_JOB_NAME}}
                 which-build: specific-build
                 build-number: ${{PKG_JOB_BUILD_NUMBER}}
-      - get-updates
       - shell:
           !include-raw-escape: ../builders/common.prepare.sh
       - conditional-step:
