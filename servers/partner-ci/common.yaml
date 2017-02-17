@@ -123,7 +123,6 @@
             SLAVE_NODE_MEMORY=4096;
             SNAPSHOT_ARTIFACTS_FILE=snapshots.params;
             SNAPSHOT_OUTPUT_FILE=extra_repos.sh;
-            VENV_PATH=$HOME/90-venv;
             WORKSTATION_PASSWORD=VMware01;
             WORKSTATION_USERNAME=vmware;
             REQUIRED_FREE_SPACE=200;
