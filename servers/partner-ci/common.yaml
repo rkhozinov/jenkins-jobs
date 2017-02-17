@@ -77,10 +77,6 @@
           default: '{iso_file}'
           description: 'ISO file name that is on the tpi-s1 in /storage/downloads'
       - string:
-          name: ISO_STORAGE
-          default: '/storage/downloads'
-          description: 'Storage for iso files'
-      - string:
           name: GERRIT_REFSPEC
           default: 'refs/heads/{gerrit_branch}'
           description: 'Single Refspec for commits in plugin repo gerrit'
@@ -119,6 +115,7 @@
             FORCE_DISABLE_UPDATES=false;
             FUEL_STATS_ENABLED=false;
             GIT_CURL_VERBOSE=false;
+            ISO_STORAGE=/storage/downloads;
             MAKE_SNAPSHOT=true;
             NODES_COUNT=10;
             OPENSTACK_RELEASE=Ubuntu;
@@ -128,7 +125,7 @@
             SNAPSHOT_OUTPUT_FILE=extra_repos.sh;
             WORKSTATION_PASSWORD=VMware01;
             WORKSTATION_USERNAME=vmware;
-            VENV_PATH=$HOME/90-venv;
+            REQUIRED_FREE_SPACE=200;
 
 - parameter:
     name: common-fuel-parameters
@@ -190,10 +187,6 @@
       - string:
           name: ISO_JOB_BUILD_NUMBER
           description: "Fuel10 depends on ubuntu-mirror snapshots, it's a build of ISO_JOB_NAME"
-      - string:
-          name: SNAPSHOTS_ID
-          default: '{snapshots_id}'
-          description: 'snapshots number, "lastSuccessfulBuild" or "released"'
       - text:
           name: COMMON_PROPS
           default: |
@@ -210,14 +203,16 @@
             FUEL_RELEASE_VERSION={fuel_release_checker};
             FUEL_STATS_ENABLED=false;
             GIT_CURL_VERBOSE=false;
+            ISO_STORAGE=/storage/downloads;
             ISO_JOB_NAME=download_iso;
             KVM_USE={kvm_use};
             MAKE_SNAPSHOT=true;
-            MIRROR_HOST=mirror.seed-cz1.fuel-infra.org;
+            MIRROR_HOST=http://mirror.seed-cz1.fuel-infra.org/pkgs/snapshots/;
             NODES_COUNT=10;
             OPENSTACK_RELEASE=Ubuntu;
             SLAVE_NODE_CPU=4;
             SLAVE_NODE_MEMORY=3968;
+            REQUIRED_FREE_SPACE=200;
 
 - parameter:
     name: vcenter-specific-parameters
@@ -463,8 +458,9 @@
                     property-file: reporter.properties
                     fail-on-missing: true
                     condition: FAILED_OR_BETTER
+
 - builder:
-    name: get-refs
+    name: 10-get-refs
     builders:
       - shell: |
           #!/bin/bash
@@ -485,24 +481,7 @@
           fi
 
 - builder:
-    name: get-refs-vcenter
-    builders:
-      - shell: |
-          #!/bin/bash
-          cherrypick() {
-              git_url=$1
-              ref=$2
-              git fetch $git_url "$ref" && git cherry-pick FETCH_HEAD || { git status; exit 1; }
-              git log --pretty=oneline | head
-          }
-          if [[ ! -z "${FUEL_QA_REFS}" ]]; then
-            cd ${WORKSPACE}
-            git_url=$(git config --get remote.origin.url)
-            for ref in ${FUEL_QA_REFS:?}; do cherrypick $git_url $ref; done
-          fi
-
-- builder:
-    name: get-ui-refs
+    name: 10-get-ui-refs
     builders:
       - shell: |
           #!/bin/bash
@@ -522,9 +501,26 @@
             git_url=$(git config --get remote.origin.url)
             for ref in ${FUEL_QA_REFS:?}; do cherrypick $git_url $ref; done
           fi
+- builder:
+    name: 10-get-vcenter-refs
+    builders:
+      - shell: |
+          #!/bin/bash
+          cherrypick() {
+              git_url=$1
+              ref=$2
+              git fetch $git_url "$ref" && git cherry-pick FETCH_HEAD || { git status; exit 1; }
+              git log --pretty=oneline | head
+          }
+          if [[ ! -z "${FUEL_QA_REFS}" ]]; then
+            cd ${WORKSPACE}
+            git_url=$(git config --get remote.origin.url)
+            for ref in ${FUEL_QA_REFS:?}; do cherrypick $git_url $ref; done
+          fi
+
 
 - builder:
-    name: get-props
+    name: 20-get-props
     builders:
       - shell: |
           #!/bin/bash
@@ -549,23 +545,23 @@
           properties-file: specific.properties
 
 - builder:
-    name: get-baremetal-props
+    name: 21-get-baremetal-props
     builders:
       - inject:
-          properties: |
-            BM_HOST_BRIDGE_INTERFACES=eth2:10.109.0.0/24;eth3:10.109.4.0/24;
-            BM_IPMI_ADDR=cz7660-kvm.host-telecom.com;
-            BM_IPMI_PASSWORD=Ba2Ie23#GHgho;
-            BM_IPMI_USER=engineer;
-            BM_TARGET_MACS=00:1b:21:87:21:99;00:1b:21:87:21:98;
+          properties-content: |
+            BM_HOST_BRIDGE_INTERFACES=eth2:10.109.0.0/24;eth3:10.109.4.0/24
+            BM_IPMI_ADDR=cz7660-kvm.host-telecom.com
+            BM_IPMI_PASSWORD=Ba2Ie23#GHgho
+            BM_IPMI_USER=engineer
+            BM_TARGET_MACS=00:1b:21:87:21:99;00:1b:21:87:21:98
 
 - builder:
-    name: get-updates
+    name: 30-get-snapshots
     builders:
       - conditional-step:
           condition-kind: shell
           condition-command: |
-            [[ "${UPDATE_MASTER}" == "true" ]]
+            [[ "${SNAPSHOTS_ID}" != *"released"* ]]
           steps:
             - inject:
                 properties-content: |
@@ -582,14 +578,6 @@
                   ENABLE_MOS_UBUNTU_HOTFIX=false
                   ENABLE_MOS_UBUNTU_SECURITY=true
 
-- builder:
-    name: get-snapshots
-    builders:
-      - conditional-step:
-          condition-kind: shell
-          condition-command: |
-            [[ "${SNAPSHOTS_ID}" != *"released"* ]]
-          steps:
             - shell: |
                 #!/bin/bash -xeu
                 wget --no-check-certificate -O ${SNAPSHOT_ARTIFACTS_FILE:?} \
@@ -598,16 +586,22 @@
                 echo "snapshot_id_number=${snapshots_id}"
                 python "${CONV_SNAP_PATH:?}"
 
-                mos_ubuntu_mirror_id=$(grep "^MOS_UBUNTU_MIRROR_ID" < snapshots.params | cut -d= -f2)
-                echo "MOS_UBUNTU_MIRROR_ID=${mos_ubuntu_mirror_id:?}" >> specific.properties
-
+                . $SNAPSHOT_OUTPUT_FILE
                 mos_centos_proposed_mirror_id=$(grep "^MOS_CENTOS_PROPOSED_MIRROR_ID" < snapshots.params | cut -d= -f2)
-                echo "MOS_CENTOS_PROPOSED_MIRROR_ID=${mos_centos_proposed_mirror_id:?}" >> specific.properties
+                mos_ubuntu_mirror_id=$(grep "^MOS_UBUNTU_MIRROR_ID" < snapshots.params | cut -d= -f2)
 
+                cat << GET_SNAPSHOTS >> get-snapshots.properties
+                EXTRA_RPM_REPOS=${EXTRA_RPM_REPOS}
+                UPDATE_FUEL_MIRROR=${UPDATE_FUEL_MIRROR}
+                EXTRA_DEB_REPOS=${EXTRA_DEB_REPOS}
+                MOS_UBUNTU_MIRROR_ID=${mos_ubuntu_mirror_id:?}
+                MOS_CENTOS_PROPOSED_MIRROR_ID=${mos_centos_proposed_mirror_id:?}
+                GET_SNAPSHOTS
             - inject:
-                properties-file: specific.properties
+                properties-file: get-snapshots.properties
+
 - builder:
-    name: get-ubuntu-mirror
+    name: 30-get-ubuntu-mirror
     builders:
       - conditional-step:
           condition-kind: shell
@@ -641,10 +635,54 @@
               UBUNTU_REPOS="$UBUNTU_REPOS|$UBUNTU_PROPOSED"
           fi
 
-          echo "MIRROR_UBUNTU="${UBUNTU_REPOS:?}" >> specific.properties
+          echo "MIRROR_UBUNTU=${UBUNTU_REPOS:?}" >> get-ubuntu-mirror.properties
+          echo "SNAPSHOTS_ID=$(echo $ISO_FILE | cut -d- -f3 | tr -d '.iso')" >> get-ubuntu-mirror.properties
       - inject:
-          properties-file: specific.properties
+          properties-file: get-ubuntu-mirror.properties
 
+- builder:
+    name: 40-get-env-variables
+    builders:
+      - shell: |
+          # determine release specific variables
+          case "${ISO_FILE:?}" in
+            *fuel-10.0* )
+                    export FUEL_RELEASE=100
+                    export REQS_BRANCH="stable/newton" ;;
+
+            *MirantisOpenStack-9.0* | *fuel-9.0* )
+                    export FUEL_RELEASE=90
+                    export REQS_BRANCH="stable/mitaka" ;;
+
+            *MirantisOpenStack-8.0* | *fuel-8.0* )
+                    export FUEL_RELEASE=80
+                    export REQS_BRANCH="stable/8.0" ;;
+
+            *MirantisOpenStack-7.0* | *fuel-7.0* )
+                    export FUEL_RELEASE=70
+                    export REQS_BRANCH="stable/7.0" ;;
+
+            *MirantisOpenStack-6.1* | *fuel-6.1* )
+                    export FUEL_RELEASE=61
+                    export REQS_BRANCH="stable/6.1" ;;
+
+            * )
+                    export FUEL_RELEASE=90
+                    export SNAPSHOTS_ID="released"
+                    export REQS_BRANCH="stable/mitaka" ;;
+          esac
+
+          venv_path="$HOME/${FUEL_RELEASE:?}-venv"
+
+          cat << GET_ENV >> get-env-variables.properties
+          REQS_BRANCH=${REQS_BRANCH:?}
+          FUEL_RELEASE=${FUEL_RELEASE:?}
+          ISO_PATH=${ISO_STORAGE:?}/${ISO_FILE:?}
+          ENV_NAME=${ENV_PREFIX:?}.${SNAPSHOTS_ID:?}
+          VENV_PATH=${VENV_PATH:-$venv_path}
+          GET_ENV
+      - inject:
+          properties-file: get-env-variables.properties
 
 - builder:
     name: ui-condition
@@ -661,6 +699,7 @@
                 snapshots_id=$(grep "^CUSTOM_VERSION=" < snapshots.params | cut -d= -f2 | cut -d'#' -f2)
                 echo "snapshot_id_number=" $snapshots_id
                 echo "SNAPSHOTS_ID=${snapshots_id}" >> build_number
+
 - builder:
     name: runner-condition
     builders:
@@ -850,6 +889,7 @@
            notbuilt: true
 
 # build and smoke should trigger on patchset event
+
 - trigger:
     name: draft-test-gerrit-trigger
     triggers:
@@ -867,6 +907,7 @@
                 exclude-no-code-change: true
 
 # bvt should trigger on merge event
+
 - trigger:
     name: merge-gerrit-trigger
     triggers:
@@ -923,6 +964,7 @@
                   pattern: 'spec/**'
 
 # smoke should trigger on draft event
+
 - trigger:
     name: draft-gerrit-trigger
     triggers:
@@ -940,6 +982,7 @@
                 exclude-no-code-change: true
 
 # doc checks should trigger on patchset event
+
 - trigger:
     name: draft-doc-trigger
     triggers:
@@ -957,6 +1000,7 @@
                 exclude-no-code-change: true
 
 # doc checks and update should trigger on merge event
+
 - trigger:
     name: merge-doc-trigger
     triggers:
@@ -971,6 +1015,7 @@
             - change-merged-event
 
 # properties for smoke, bvt and nightly multijobs
+
 - wrapper:
     name: runner-wrapper
     wrappers:
@@ -983,6 +1028,7 @@
           write-description: "Runner-timeout is exceeded"
 
 # properties for smoke, bvt and nightly multijobs
+
 - wrapper:
     name: test-wrapper
     wrappers:
@@ -1031,6 +1077,7 @@
           queue-scanning: 'BUILDABLE'
 
 # properties for test jobs
+
 - property:
     name: test-property
     properties:
