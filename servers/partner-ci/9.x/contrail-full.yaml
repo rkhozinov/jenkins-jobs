@@ -185,12 +185,6 @@
         current-parameters: true
         kill-phase-on: NEVER
 
-      - name: '{fuel_release}.{plugin-name}.{plugin_version}.install_contrail.juniper'
-        property-file: build_number
-        predefined-parameters: |
-           CONTRAIL_DISTRIBUTION=juniper
-        current-parameters: true
-        kill-phase-on: NEVER
       - name: '{fuel_release}.{plugin-name}.{plugin_version}.contrail_uninstall.juniper'
         property-file: build_number
         predefined-parameters: |
@@ -220,13 +214,6 @@
         kill-phase-on: NEVER
 
       - name: '{fuel_release}.{plugin-name}.{plugin_version}.contrail_ostf_net_provisioning_disable.juniper'
-        property-file: build_number
-        predefined-parameters: |
-           CONTRAIL_DISTRIBUTION=juniper
-        current-parameters: true
-        kill-phase-on: NEVER
-
-      - name: '{fuel_release}.{plugin-name}.{plugin_version}.contrail_public_connectivity_from_instance_without_fip.juniper'
         property-file: build_number
         predefined-parameters: |
            CONTRAIL_DISTRIBUTION=juniper
