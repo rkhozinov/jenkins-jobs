@@ -128,6 +128,20 @@
             REQUIRED_FREE_SPACE=200;
 
 - parameter:
+    name: ui-parameters
+    parameters:
+      - string:
+          name: FUEL_UI_BRANCH
+          default: '{fuel_ui_branch}'
+      - string:
+          name: FUEL_UI_REFS
+          default: '{fuel_ui_refs}'
+          description: "Multiple Refspecs for commits in fuel-ui gerrit separated with spaces"
+      - string:
+          name: DOCKER_BRANCH
+          default: '{docker_branch}'
+
+- parameter:
     name: common-fuel-parameters
     parameters:
       - bool:
@@ -167,21 +181,11 @@
           default: False
           description: "disconnect node after failure"
       - string:
-          name: FUEL_UI_BRANCH
-          default: '{fuel_ui_branch}'
-      - string:
-          name: FUEL_UI_REFS
-          default: '{fuel_ui_refs}'
-          description: "Multiple Refspecs for commits in fuel-ui gerrit separated with spaces"
-      - string:
           name: FUEL_QA_BRANCH
           default: '{fuel_qa_branch}'
       - string:
           name: FUEL_QA_REFS
           description: "Multiple Refspecs for commits in fuel-qa gerrit separated with spaces"
-      - string:
-          name: DOCKER_BRANCH
-          default: '{docker_branch}'
       - string:
           name: NAILGUN_HOST
       - string:

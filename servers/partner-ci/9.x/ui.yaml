@@ -101,11 +101,8 @@
           force_erase:           '{force_erase}'
           force_reuse:           '{force_reuse}'
           fuel_release_checker:  '{fuel_release_checker}'
-          fuel_ui_branch:        '{fuel_ui_branch}'
-          fuel_ui_refs:          '{fuel_ui_refs}'
           fuel_qa_branch:        '{fuel_qa_branch}'
           fuel_qa_refs:          '{fuel_qa_refs}'
-          docker_branch:         '{docker_branch}'
           kvm_use:               '{kvm_use}'
           publish_results:       '{publish_results}'
           recreate_venv:         '{recreate_venv}'
@@ -118,6 +115,10 @@
           testrail_suite:        '{testrail_suite}'
           testrail_suite_desc:   '{testrail_suite_desc}'
           update_master:         '{update_master}'
+      - ui-parameters:
+          docker_branch:         '{docker_branch}'
+          fuel_ui_branch:        '{fuel_ui_branch}'
+          fuel_ui_refs:          '{fuel_ui_refs}'
       - plugin-specific-parameters
 
 - test-parameters: &test-parameters
@@ -142,11 +143,8 @@
           force_erase:           '{force_erase}'
           force_reuse:           '{force_reuse}'
           fuel_release_checker:  '{fuel_release_checker}'
-          fuel_ui_branch:        '{fuel_ui_branch}'
-          fuel_ui_refs:          '{fuel_ui_refs}'
           fuel_qa_branch:        '{fuel_qa_branch}'
           fuel_qa_refs:          '{fuel_qa_refs}'
-          docker_branch:         '{docker_branch}'
           kvm_use:               '{kvm_use}'
           publish_results:       '{publish_results}'
           recreate_venv:         '{recreate_venv}'
@@ -159,6 +157,10 @@
           testrail_suite:        '{testrail_suite}'
           testrail_suite_desc:   '{testrail_suite_desc}'
           update_master:         '{update_master}'
+      - ui-parameters:
+          docker_branch:         '{docker_branch}'
+          fuel_ui_branch:        '{fuel_ui_branch}'
+          fuel_ui_refs:          '{fuel_ui_refs}'
       - plugin-specific-parameters
 
 - defaults:
