@@ -1,0 +1,62 @@
+- runner-condition
+- multijob:
+    name: 'Smoke/BVT test for {fuel_release}.{plugin_name}.{plugin_version}'
+    condition: SUCCESSFUL
+    projects:
+      - name: '{fuel_release}.{plugin_name}.deploy_zabbix_monitoring_ha'
+        property-file: build_number
+        current-parameters: true
+        kill-phase-on: NEVER
+
+- multijob:
+    name: 'System tests for {fuel_release}.{plugin_name}.{plugin_version}'
+    condition: COMPLETED
+    projects:
+      - name: '{fuel_release}.{plugin_name}.check_zabbix_api'
+        property-file: build_number
+        current-parameters: true
+        kill-phase-on: NEVER
+      - name: '{fuel_release}.{plugin_name}.check_zabbix_dashboard_configuration'
+        property-file: build_number
+        current-parameters: true
+        kill-phase-on: NEVER
+      - name: '{fuel_release}.{plugin_name}.deploy_zabbix_ha_offline'
+        property-file: build_number
+        current-parameters: true
+        kill-phase-on: NEVER
+      - name: '{fuel_release}.{plugin_name}.deploy_zabbix_monitoring_ha'
+        property-file: build_number
+        current-parameters: true
+        kill-phase-on: NEVER
+      - name: '{fuel_release}.{plugin_name}.install_zabbix'
+        property-file: build_number
+        current-parameters: true
+        kill-phase-on: NEVER
+      - name: '{fuel_release}.{plugin_name}.test_dependant_plugins'
+        property-file: build_number
+        current-parameters: true
+        kill-phase-on: NEVER
+      - name: '{fuel_release}.{plugin_name}.test_host_failover'
+        property-file: build_number
+        current-parameters: true
+        kill-phase-on: NEVER
+      - name: '{fuel_release}.{plugin_name}.test_trigger_api'
+        property-file: build_number
+        current-parameters: true
+        kill-phase-on: NEVER
+      - name: '{fuel_release}.{plugin_name}.test_triggers'
+        property-file: build_number
+        current-parameters: true
+        kill-phase-on: NEVER
+      - name: '{fuel_release}.{plugin_name}.test_zabbix_deployment'
+        property-file: build_number
+        current-parameters: true
+        kill-phase-on: NEVER
+      - name: '{fuel_release}.{plugin_name}.uninstall_deployed_zabbix'
+        property-file: build_number
+        current-parameters: true
+        kill-phase-on: NEVER
+      - name: '{fuel_release}.{plugin_name}.uninstall_zabbix_monitoring'
+        property-file: build_number
+        current-parameters: true
+        kill-phase-on: NEVER

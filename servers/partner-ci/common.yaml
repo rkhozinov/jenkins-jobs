@@ -335,7 +335,7 @@
                 plugin_version=$(grep '^version' metadata.yaml | cut -d ' ' -f2)
                 version=$(echo PLUGIN_VERSION=${{plugin_version}} | tr -d "'")
                 echo $version > {plugin_name}.plugin_version
-                env > build.properties
+                env > {plugin_name}.properties
                 echo $version >> {plugin_name}.properties
       - archive:
           artifacts: '*.rpm'
