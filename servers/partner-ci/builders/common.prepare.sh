@@ -159,6 +159,8 @@ if [[ "${FORCE_REUSE}" == "false" ]]; then
   done
 
   for env in $(dospy_list); do
-    [[ "$env"  != "$USEFUL_ENV" ]] && [[ $env  != *"released"* ]] && smart_erase $env
+    if [[ "$env"  != "$USEFUL_ENV" ]] && [[ $env  != *"released"* ]]; then
+      smart_erase $env
+    fi
   done
 fi
