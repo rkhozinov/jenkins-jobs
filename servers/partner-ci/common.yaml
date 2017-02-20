@@ -325,6 +325,34 @@
           description-for-failed: '\1 \2'
 
 - publisher:
+    name: generic-build-publisher
+    publishers:
+      - postbuildscript:
+          script-only-if-succeeded: False
+          builders:
+            - shell: |
+                #!/bin/bash
+                plugin_version=$(grep '^version' metadata.yaml | cut -d ' ' -f2)
+                version=$(echo PLUGIN_VERSION=${{plugin_version}} | tr -d "'")
+                echo $version > {plugin_name}.plugin_version
+                env > build.properties
+                echo $version >> {plugin_name}.properties
+      - archive:
+          artifacts: '*.rpm'
+          allow-empty: false
+      - archive:
+          artifacts: '{plugin_name}.properties'
+          allow-empty: false
+      - archive:
+          artifacts: '{plugin_name}.plugin_version'
+          allow-empty: false
+      - email:
+          recipients: '{email_to}'
+      - description-setter:
+          regexp-for-failed: '"error":(.*) \1 "AssertionError":(.*) \2'
+          description-for-failed: '\1 \2'
+
+- publisher:
     name: doc-publisher
     publishers:
       - description-setter:
