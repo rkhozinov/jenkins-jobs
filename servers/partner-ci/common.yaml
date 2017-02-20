@@ -1091,6 +1091,8 @@
             - gcs
             - mistral
             - manila
+            - emc
+            - zabbix
           option: category
 
 - publisher:
