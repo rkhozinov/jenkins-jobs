@@ -17,11 +17,11 @@
     fuel_release: '9.x'
     fuel_release_checker: '9.2'
     plugin_version: ''
-    plugin-name: 'ui'
-    regression-name: '{fuel_release}.{plugin-name}.regression'
-    nightly-name: '{fuel_release}.{plugin-name}.nightly'
-    custom-name: '{fuel_release}.{plugin-name}.custom'
-    reporter-name: '{fuel_release}.{plugin-name}.reporter'
+    plugin_name: 'ui'
+    regression-name: '{fuel_release}.{plugin_name}.regression'
+    nightly-name: '{fuel_release}.{plugin_name}.nightly'
+    custom-name: '{fuel_release}.{plugin_name}.custom'
+    reporter-name: '{fuel_release}.{plugin_name}.reporter'
     pkg_job_name: '{fuel_release}.dvs.build'
     pkg_job_build_number: ''
     build-name: ''
@@ -86,7 +86,7 @@
           testgroup_value_type: choices
           testgroup_value: '{obj:testgroup}'
 
-      - '{fuel_release}.{plugin-name}.{testgroup}':
+      - '{fuel_release}.{plugin_name}.{testgroup}':
           scm_submodule_disabled: false
 
       - '{reporter-name}'
@@ -97,7 +97,7 @@
       - common-fuel-parameters:
           debug:                 '{debug}'
           enable_proposed:       '{enable_proposed}'
-          env_prefix:            '{fuel_release}.{plugin-name}'
+          env_prefix:            '{fuel_release}.{plugin_name}'
           force_erase:           '{force_erase}'
           force_reuse:           '{force_reuse}'
           fuel_release_checker:  '{fuel_release_checker}'
@@ -139,7 +139,7 @@
       - common-fuel-parameters:
           debug:                 '{debug}'
           enable_proposed:       '{enable_proposed}'
-          env_prefix:            '{fuel_release}.{plugin-name}'
+          env_prefix:            '{fuel_release}.{plugin_name}'
           force_erase:           '{force_erase}'
           force_reuse:           '{force_reuse}'
           fuel_release_checker:  '{fuel_release_checker}'
@@ -212,18 +212,18 @@
           email_to: '{email_to}'
 
 - job-template:
-    name: '{fuel_release}.{plugin-name}.{testgroup}'
-    description: 'The test "{testgroup}" for {fuel_release}.{plugin-name}'
+    name: '{fuel_release}.{plugin_name}.{testgroup}'
+    description: 'The test "{testgroup}" for {fuel_release}.{plugin_name}'
     concurrent: true
 
 - job-template:
     name: '{custom-name}.qa'
-    description: 'The custom test for {fuel_release}.{plugin-name}'
+    description: 'The custom test for {fuel_release}.{plugin_name}'
     concurrent: true
 
 - job-template:
     name: '{custom-name}.dev'
-    description: 'The custom test for {fuel_release}.{plugin-name}'
+    description: 'The custom test for {fuel_release}.{plugin_name}'
     concurrent: true
 
 - job-template:

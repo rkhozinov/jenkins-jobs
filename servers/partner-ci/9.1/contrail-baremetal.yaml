@@ -9,10 +9,10 @@
       KVM_USE=True
 - multijob:
     name: >
-      'Baremetal DPDK for {fuel_release}.{plugin-name}.{plugin_version}'
+      'Baremetal DPDK for {fuel_release}.{plugin_name}.{plugin_version}'
     condition: COMPLETED
     projects:
-      - name: '{fuel_release}.{plugin-name}.{plugin_version}.contrail_ha_dpdk.juniper'
+      - name: '{fuel_release}.{plugin_name}.{plugin_version}.contrail_ha_dpdk.juniper'
         property-file: build_number
         node-label-name: 'label'
         node-label: 'contrail-baremetal'
@@ -22,7 +22,7 @@
         current-parameters: true
         kill-phase-on: NEVER
 
-      - name: '{fuel_release}.{plugin-name}.{plugin_version}.contrail_dpdk_add_compute.juniper'
+      - name: '{fuel_release}.{plugin_name}.{plugin_version}.contrail_dpdk_add_compute.juniper'
         property-file: build_number
         node-label-name: 'label'
         node-label: 'contrail-baremetal'
@@ -32,7 +32,7 @@
         current-parameters: true
         kill-phase-on: NEVER
 
-      - name: '{fuel_release}.{plugin-name}.{plugin_version}.contrail_dpdk_delete_compute.juniper'
+      - name: '{fuel_release}.{plugin_name}.{plugin_version}.contrail_dpdk_delete_compute.juniper'
         property-file: build_number
         node-label-name: 'label'
         node-label: 'contrail-baremetal'
@@ -42,7 +42,7 @@
         current-parameters: true
         kill-phase-on: NEVER
 
-      - name: '{fuel_release}.{plugin-name}.{plugin_version}.contrail_dpdk_add_dpdk.juniper'
+      - name: '{fuel_release}.{plugin_name}.{plugin_version}.contrail_dpdk_add_dpdk.juniper'
         property-file: build_number
         node-label-name: 'label'
         node-label: 'contrail-baremetal'
@@ -52,7 +52,7 @@
         current-parameters: true
         kill-phase-on: NEVER
 
-      - name: '{fuel_release}.{plugin-name}.{plugin_version}.contrail_dpdk_delete_dpdk.juniper'
+      - name: '{fuel_release}.{plugin_name}.{plugin_version}.contrail_dpdk_delete_dpdk.juniper'
         property-file: build_number
         node-label-name: 'label'
         node-label: 'contrail-baremetal'
@@ -62,7 +62,7 @@
         current-parameters: true
         kill-phase-on: NEVER
 
-      - name: '{fuel_release}.{plugin-name}.{plugin_version}.contrail_dpdk_add_controller.juniper'
+      - name: '{fuel_release}.{plugin_name}.{plugin_version}.contrail_dpdk_add_controller.juniper'
         property-file: build_number
         node-label-name: 'label'
         node-label: 'contrail-baremetal'
@@ -72,7 +72,7 @@
         current-parameters: true
         kill-phase-on: NEVER
 
-      - name: '{fuel_release}.{plugin-name}.{plugin_version}.contrail_dpdk_delete_controller.juniper'
+      - name: '{fuel_release}.{plugin_name}.{plugin_version}.contrail_dpdk_delete_controller.juniper'
         property-file: build_number
         node-label-name: 'label'
         node-label: 'contrail-baremetal'
@@ -82,7 +82,7 @@
         current-parameters: true
         kill-phase-on: NEVER
 
-      - name: '{fuel_release}.{plugin-name}.{plugin_version}.contrail_add_to_dpdk_sriov.juniper'
+      - name: '{fuel_release}.{plugin_name}.{plugin_version}.contrail_add_to_dpdk_sriov.juniper'
         property-file: build_number
         node-label-name: 'label'
         node-label: 'contrail-baremetal'
@@ -94,11 +94,11 @@
 
 - multijob:
     name: >
-      'Baremetal SRIOV for {fuel_release}.{plugin-name}.{plugin_version}'
+      'Baremetal SRIOV for {fuel_release}.{plugin_name}.{plugin_version}'
     condition: COMPLETED
     projects:
 
-      - name: '{fuel_release}.{plugin-name}.{plugin_version}.contrail_ha_sriov.juniper'
+      - name: '{fuel_release}.{plugin_name}.{plugin_version}.contrail_ha_sriov.juniper'
         property-file: build_number
         node-label-name: 'label'
         node-label: 'contrail-baremetal'
@@ -108,7 +108,7 @@
         current-parameters: true
         kill-phase-on: NEVER
 
-      - name: '{fuel_release}.{plugin-name}.{plugin_version}.contrail_sriov_add_compute.juniper'
+      - name: '{fuel_release}.{plugin_name}.{plugin_version}.contrail_sriov_add_compute.juniper'
         property-file: build_number
         node-label-name: 'label'
         node-label: 'contrail-baremetal'
@@ -118,7 +118,7 @@
         current-parameters: true
         kill-phase-on: NEVER
 
-      - name: '{fuel_release}.{plugin-name}.{plugin_version}.contrail_sriov_delete_compute.juniper'
+      - name: '{fuel_release}.{plugin_name}.{plugin_version}.contrail_sriov_delete_compute.juniper'
         property-file: build_number
         node-label-name: 'label'
         node-label: 'contrail-baremetal'
@@ -128,7 +128,7 @@
         current-parameters: true
         kill-phase-on: NEVER
 
-      - name: '{fuel_release}.{plugin-name}.{plugin_version}.contrail_sriov_add_sriov.juniper'
+      - name: '{fuel_release}.{plugin_name}.{plugin_version}.contrail_sriov_add_sriov.juniper'
         property-file: build_number
         node-label-name: 'label'
         node-label: 'contrail-baremetal'
@@ -138,7 +138,7 @@
         current-parameters: true
         kill-phase-on: NEVER
 
-      - name: '{fuel_release}.{plugin-name}.{plugin_version}.contrail_sriov_delete_sriov.juniper'
+      - name: '{fuel_release}.{plugin_name}.{plugin_version}.contrail_sriov_delete_sriov.juniper'
         property-file: build_number
         node-label-name: 'label'
         node-label: 'contrail-baremetal'
@@ -148,7 +148,7 @@
         current-parameters: true
         kill-phase-on: NEVER
 
-      - name: '{fuel_release}.{plugin-name}.{plugin_version}.contrail_sriov_add_controller.juniper'
+      - name: '{fuel_release}.{plugin_name}.{plugin_version}.contrail_sriov_add_controller.juniper'
         property-file: build_number
         node-label-name: 'label'
         node-label: 'contrail-baremetal'
@@ -158,7 +158,7 @@
         current-parameters: true
         kill-phase-on: NEVER
 
-      - name: '{fuel_release}.{plugin-name}.{plugin_version}.contrail_sriov_delete_controller.juniper'
+      - name: '{fuel_release}.{plugin_name}.{plugin_version}.contrail_sriov_delete_controller.juniper'
         property-file: build_number
         node-label-name: 'label'
         node-label: 'contrail-baremetal'
@@ -168,7 +168,7 @@
         current-parameters: true
         kill-phase-on: NEVER
 
-      - name: '{fuel_release}.{plugin-name}.{plugin_version}.contrail_dpdk_update_core_repos.juniper'
+      - name: '{fuel_release}.{plugin_name}.{plugin_version}.contrail_dpdk_update_core_repos.juniper'
         property-file: build_number
         node-label-name: 'label'
         node-label: 'contrail-baremetal'
@@ -178,7 +178,7 @@
         current-parameters: true
         kill-phase-on: NEVER
 
-      - name: '{fuel_release}.{plugin-name}.{plugin_version}.contrail_sriov_update_core_repos.juniper'
+      - name: '{fuel_release}.{plugin_name}.{plugin_version}.contrail_sriov_update_core_repos.juniper'
         property-file: build_number
         node-label-name: 'label'
         node-label: 'contrail-baremetal'
@@ -190,10 +190,10 @@
 
 - multijob:
     name: >
-      'Baremetal DPDK on VF for {fuel_release}.{plugin-name}.{plugin_version}'
+      'Baremetal DPDK on VF for {fuel_release}.{plugin_name}.{plugin_version}'
     condition: COMPLETED
     projects:
-      - name: '{fuel_release}.{plugin-name}.{plugin_version}.contrail_ha_dpdk_on_vf.juniper'
+      - name: '{fuel_release}.{plugin_name}.{plugin_version}.contrail_ha_dpdk_on_vf.juniper'
         property-file: build_number
         node-label-name: 'label'
         node-label: 'contrail-baremetal'
@@ -203,7 +203,7 @@
         current-parameters: true
         kill-phase-on: never
 
-      - name: '{fuel_release}.{plugin-name}.{plugin_version}.contrail_dpdk_on_vf_add_compute.juniper'
+      - name: '{fuel_release}.{plugin_name}.{plugin_version}.contrail_dpdk_on_vf_add_compute.juniper'
         property-file: build_number
         node-label-name: 'label'
         node-label: 'contrail-baremetal'
@@ -213,7 +213,7 @@
         current-parameters: true
         kill-phase-on: never
 
-      - name: '{fuel_release}.{plugin-name}.{plugin_version}.contrail_dpdk_on_vf_delete_compute.juniper'
+      - name: '{fuel_release}.{plugin_name}.{plugin_version}.contrail_dpdk_on_vf_delete_compute.juniper'
         property-file: build_number
         node-label-name: 'label'
         node-label: 'contrail-baremetal'
@@ -223,7 +223,7 @@
         current-parameters: true
         kill-phase-on: never
 
-      - name: '{fuel_release}.{plugin-name}.{plugin_version}.contrail_dpdk_on_vf_add_dpdk.juniper'
+      - name: '{fuel_release}.{plugin_name}.{plugin_version}.contrail_dpdk_on_vf_add_dpdk.juniper'
         property-file: build_number
         node-label-name: 'label'
         node-label: 'contrail-baremetal'
@@ -233,7 +233,7 @@
         current-parameters: true
         kill-phase-on: never
 
-      - name: '{fuel_release}.{plugin-name}.{plugin_version}.contrail_dpdk_on_vf_delete_dpdk.juniper'
+      - name: '{fuel_release}.{plugin_name}.{plugin_version}.contrail_dpdk_on_vf_delete_dpdk.juniper'
         property-file: build_number
         node-label-name: 'label'
         node-label: 'contrail-baremetal'
@@ -243,7 +243,7 @@
         current-parameters: true
         kill-phase-on: never
 
-      - name: '{fuel_release}.{plugin-name}.{plugin_version}.contrail_dpdk_on_vf_add_controller.juniper'
+      - name: '{fuel_release}.{plugin_name}.{plugin_version}.contrail_dpdk_on_vf_add_controller.juniper'
         property-file: build_number
         node-label-name: 'label'
         node-label: 'contrail-baremetal'
@@ -254,7 +254,7 @@
         kill-phase-on: never
 
 
-      - name: '{fuel_release}.{plugin-name}.{plugin_version}.contrail_dpdk_on_vf_delete_controller.juniper'
+      - name: '{fuel_release}.{plugin_name}.{plugin_version}.contrail_dpdk_on_vf_delete_controller.juniper'
         property-file: build_number
         node-label-name: 'label'
         node-label: 'contrail-baremetal'

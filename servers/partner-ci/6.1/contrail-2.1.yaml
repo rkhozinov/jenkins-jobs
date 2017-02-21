@@ -67,25 +67,25 @@
     name: 'predefined_parameters'
     fuel_release: 6.1
     plugin_version: 2.1
-    plugin-name: 'contrail'
+    plugin_name: 'contrail'
 
-    build-name: '{fuel_release}.{plugin-name}.{plugin_version}.build'
-    flake8-name: '{fuel_release}.{plugin-name}.{plugin_version}.flake8'
-    radon-name: '{fuel_release}.{plugin-name}.{plugin_version}.radon'
-    shellcheck-name: '{fuel_release}.{plugin-name}.{plugin_version}.shellcheck'
-    smoke-name: '{fuel_release}.{plugin-name}.{plugin_version}.smoke'
-    bvt-name: '{fuel_release}.{plugin-name}.{plugin_version}.bvt'
-    regression-name: '{fuel_release}.{plugin-name}.{plugin_version}.regression'
-    nightly-name: '{fuel_release}.{plugin-name}.{plugin_version}.nightly'
-    custom-name: '{fuel_release}.{plugin-name}.{plugin_version}.custom'
-    reporter-name: '{fuel_release}.{plugin-name}.{plugin_version}.reporter'
+    build-name: '{fuel_release}.{plugin_name}.{plugin_version}.build'
+    flake8-name: '{fuel_release}.{plugin_name}.{plugin_version}.flake8'
+    radon-name: '{fuel_release}.{plugin_name}.{plugin_version}.radon'
+    shellcheck-name: '{fuel_release}.{plugin_name}.{plugin_version}.shellcheck'
+    smoke-name: '{fuel_release}.{plugin_name}.{plugin_version}.smoke'
+    bvt-name: '{fuel_release}.{plugin_name}.{plugin_version}.bvt'
+    regression-name: '{fuel_release}.{plugin_name}.{plugin_version}.regression'
+    nightly-name: '{fuel_release}.{plugin_name}.{plugin_version}.nightly'
+    custom-name: '{fuel_release}.{plugin_name}.{plugin_version}.custom'
+    reporter-name: '{fuel_release}.{plugin_name}.{plugin_version}.reporter'
     smoke-test-name: 'contrail_smoke'
     bvt-test-name: 'contrail_bvt'
     admin_node_memory: '4096'
     slave_node_memory: '4096'
     admin_node_cpu: '4'
     slave_node_cpu: '4'
-    pkg_job_name: '{fuel_release}.{plugin-name}.{plugin_version}.build'
+    pkg_job_name: '{fuel_release}.{plugin_name}.{plugin_version}.build'
     iso_job_name: ''
     nightly-timer: 'H 22 * * *'
     regression-timer: 'H 18 * * *'
@@ -150,19 +150,19 @@
       - '{reporter-name}'
 
       - '{smoke-name}'
-      - '{fuel_release}.{plugin-name}.{plugin_version}.smoke.test.open'
-      - '{fuel_release}.{plugin-name}.{plugin_version}.smoke.test.juniper'
+      - '{fuel_release}.{plugin_name}.{plugin_version}.smoke.test.open'
+      - '{fuel_release}.{plugin_name}.{plugin_version}.smoke.test.juniper'
 
       - '{bvt-name}'
-      - '{fuel_release}.{plugin-name}.{plugin_version}.bvt.test.open'
-      - '{fuel_release}.{plugin-name}.{plugin_version}.bvt.test.juniper'
+      - '{fuel_release}.{plugin_name}.{plugin_version}.bvt.test.open'
+      - '{fuel_release}.{plugin_name}.{plugin_version}.bvt.test.juniper'
 
       - '{regression-name}'
-      - '{fuel_release}.{plugin-name}.{plugin_version}.regression.test.open'
-      - '{fuel_release}.{plugin-name}.{plugin_version}.regression.test.juniper'
+      - '{fuel_release}.{plugin_name}.{plugin_version}.regression.test.open'
+      - '{fuel_release}.{plugin_name}.{plugin_version}.regression.test.juniper'
 
-      - '{fuel_release}.{plugin-name}.{plugin_version}.{testgroup}.open'
-      - '{fuel_release}.{plugin-name}.{plugin_version}.{testgroup}.juniper'
+      - '{fuel_release}.{plugin_name}.{plugin_version}.{testgroup}.open'
+      - '{fuel_release}.{plugin_name}.{plugin_version}.{testgroup}.juniper'
 
 ## common git settings to get sources
 - common-scm: &common-scm
@@ -352,7 +352,7 @@
           description: 'The branch for fuel-qa gerrit'
       - string:
           name: ENV_PREFIX
-          default: '{fuel_release}.{plugin-name}'
+          default: '{fuel_release}.{plugin_name}'
           description: 'The name of devops env. Needed to properly work of existing mode of devops'
 
 # parameters for jobs created per test-group and custom test job
@@ -467,7 +467,7 @@
           description: 'Amount of vitrual CPUs per slave node'
       - string:
           name: ENV_PREFIX
-          default: '{fuel_release}.{plugin-name}'
+          default: '{fuel_release}.{plugin_name}'
           description: 'The name of devops env. Needed to properly work of existing mode of devops'
       - string:
           name: TESTRAIL_PLAN_NAME
@@ -547,7 +547,7 @@
     disabled: false
     description: |
       '<a href=https://github.com/openstack/{gerrit-repo}>
-      Build {plugin-name} plugin from fuel-plugins project</a>'
+      Build {plugin_name} plugin from fuel-plugins project</a>'
     <<: *common-scm
     triggers:
       - gerrit:
@@ -585,52 +585,52 @@
 
 # jobs for system test
 - job-template:
-    name: '{fuel_release}.{plugin-name}.{plugin_version}.{testgroup}.open'
-    description: 'The test "{testgroup}" for {fuel_release}.{plugin-name}.{plugin_version} open contrail'
+    name: '{fuel_release}.{plugin_name}.{plugin_version}.{testgroup}.open'
+    description: 'The test "{testgroup}" for {fuel_release}.{plugin_name}.{plugin_version} open contrail'
     concurrent: true
 
 # jobs for regression test
 - job-template:
-    name: '{fuel_release}.{plugin-name}.{plugin_version}.{testgroup}.juniper'
-    description: 'The test "{testgroup}" for {fuel_release}.{plugin-name}.{plugin_version} juniper contrail'
+    name: '{fuel_release}.{plugin_name}.{plugin_version}.{testgroup}.juniper'
+    description: 'The test "{testgroup}" for {fuel_release}.{plugin_name}.{plugin_version} juniper contrail'
     concurrent: true
 
 # jobs for bvt tests
 - job-template:
-    name: '{fuel_release}.{plugin-name}.{plugin_version}.bvt.test.open'
-    description: 'The test for {fuel_release}.{plugin-name}.{plugin_version} open contrail'
+    name: '{fuel_release}.{plugin_name}.{plugin_version}.bvt.test.open'
+    description: 'The test for {fuel_release}.{plugin_name}.{plugin_version} open contrail'
     concurrent: true
 
 - job-template:
-    name: '{fuel_release}.{plugin-name}.{plugin_version}.bvt.test.juniper'
-    description: 'The test for {fuel_release}.{plugin-name}.{plugin_version} juniper contrail'
+    name: '{fuel_release}.{plugin_name}.{plugin_version}.bvt.test.juniper'
+    description: 'The test for {fuel_release}.{plugin_name}.{plugin_version} juniper contrail'
     concurrent: true
 
 # jobs for smoke tests
 - job-template:
-    name: '{fuel_release}.{plugin-name}.{plugin_version}.smoke.test.open'
-    description: 'The test for {fuel_release}.{plugin-name}.{plugin_version} open contrail'
+    name: '{fuel_release}.{plugin_name}.{plugin_version}.smoke.test.open'
+    description: 'The test for {fuel_release}.{plugin_name}.{plugin_version} open contrail'
     concurrent: true
 
 - job-template:
-    name: '{fuel_release}.{plugin-name}.{plugin_version}.smoke.test.juniper'
-    description: 'The test for {fuel_release}.{plugin-name}.{plugin_version} juniper contrail'
+    name: '{fuel_release}.{plugin_name}.{plugin_version}.smoke.test.juniper'
+    description: 'The test for {fuel_release}.{plugin_name}.{plugin_version} juniper contrail'
     concurrent: true
 
 # jobs for regression tests
 - job-template:
-    name: '{fuel_release}.{plugin-name}.{plugin_version}.regression.test.open'
-    description: 'The test for {fuel_release}.{plugin-name}.{plugin_version} open contrail'
+    name: '{fuel_release}.{plugin_name}.{plugin_version}.regression.test.open'
+    description: 'The test for {fuel_release}.{plugin_name}.{plugin_version} open contrail'
     concurrent: true
 
 - job-template:
-    name: '{fuel_release}.{plugin-name}.{plugin_version}.regression.test.juniper'
-    description: 'The test for {fuel_release}.{plugin-name}.{plugin_version} juniper contrail'
+    name: '{fuel_release}.{plugin_name}.{plugin_version}.regression.test.juniper'
+    description: 'The test for {fuel_release}.{plugin_name}.{plugin_version} juniper contrail'
     concurrent: true
 
 - job-template:
     name: '{custom-name}'
-    description: 'The custom test for {fuel_release}.{plugin-name}.{plugin_version}'
+    description: 'The custom test for {fuel_release}.{plugin_name}.{plugin_version}'
     concurrent: true
     publishers:
       - postbuildscript:
@@ -669,7 +669,7 @@
 #- job-template:
 #    name: '{reporter-name}'
 #    disabled: false
-#    description: 'Testrail reporter for {fuel_release}.{plugin-name}.{plugin_version}'
+#    description: 'Testrail reporter for {fuel_release}.{plugin_name}.{plugin_version}'
 #    concurrent: true
 #    project-type: multijob
 #    node: runner
@@ -793,7 +793,7 @@
     name: '{smoke-name}'
     disabled: false
     description: >
-      'The Smoke test for {fuel_release}.{plugin-name}.{plugin_version}'
+      'The Smoke test for {fuel_release}.{plugin_name}.{plugin_version}'
     concurrent: true
     project-type: multijob
     node: runner
@@ -814,14 +814,14 @@
           name: 'Smoke test for open/juniper contrail'
           condition: COMPLETED
           projects:
-            - name: '{fuel_release}.{plugin-name}.{plugin_version}.smoke.test.open'
+            - name: '{fuel_release}.{plugin_name}.{plugin_version}.smoke.test.open'
               current-parameters: true
               predefined-parameters: |
                 TEST_GROUP=deploy_contrail
                 CONTRAIL_DISTRIBUTION=open
               kill-phase-on: NEVER
 
-            - name: '{fuel_release}.{plugin-name}.{plugin_version}.smoke.test.juniper'
+            - name: '{fuel_release}.{plugin_name}.{plugin_version}.smoke.test.juniper'
               current-parameters: true
               predefined-parameters: |
                 TEST_GROUP=deploy_contrail
@@ -843,7 +843,7 @@
 
 - job-template:
     name: '{bvt-name}'
-    description: 'The BVT test for {fuel_release}.{plugin-name}.{plugin_version}'
+    description: 'The BVT test for {fuel_release}.{plugin_name}.{plugin_version}'
     disabled: false
     concurrent: true
     project-type: multijob
@@ -865,14 +865,14 @@
           name: 'BVT test for open/juniper contrail'
           condition: COMPLETED
           projects:
-            - name: '{fuel_release}.{plugin-name}.{plugin_version}.bvt.test.open'
+            - name: '{fuel_release}.{plugin_name}.{plugin_version}.bvt.test.open'
               current-parameters: true
               predefined-parameters: |
                 TEST_GROUP=contrail_bvt
                 CONTRAIL_DISTRIBUTION=open
               kill-phase-on: NEVER
 
-            - name: '{fuel_release}.{plugin-name}.{plugin_version}.bvt.test.juniper'
+            - name: '{fuel_release}.{plugin_name}.{plugin_version}.bvt.test.juniper'
               current-parameters: true
               predefined-parameters: |
                 TEST_GROUP=contrail_bvt
@@ -897,7 +897,7 @@
 
 - job-template:
     name: '{regression-name}'
-    description: 'The regression test for {fuel_release}.{plugin-name}.{plugin_version}'
+    description: 'The regression test for {fuel_release}.{plugin_name}.{plugin_version}'
     disabled: true
     concurrent: true
     project-type: multijob
@@ -925,7 +925,7 @@
           name: 'regression test for open/juniper contrail'
           condition: FAILURE
           projects:
-            - name: '{fuel_release}.{plugin-name}.{plugin_version}.regression.test.open'
+            - name: '{fuel_release}.{plugin_name}.{plugin_version}.regression.test.open'
               predefined-parameters: |
                 TEST_GROUP=contrail_bvt
                 CONTRAIL_DISTRIBUTION=open
@@ -933,7 +933,7 @@
               current-parameters: true
               kill-phase-on: NEVER
 
-            - name: '{fuel_release}.{plugin-name}.{plugin_version}.regression.test.juniper'
+            - name: '{fuel_release}.{plugin_name}.{plugin_version}.regression.test.juniper'
               predefined-parameters: |
                 TEST_GROUP=contrail_bvt
                 CONTRAIL_DISTRIBUTION=juniper
@@ -977,124 +977,124 @@
           name: 'Smoke tests for open/juniper contrail. Juniper or contrail version is provided in variable by multijob'
           condition: COMPLETED
           projects:
-            - name: '{fuel_release}.{plugin-name}.{plugin_version}.deploy_ha_contrail_plugin.juniper'
+            - name: '{fuel_release}.{plugin_name}.{plugin_version}.deploy_ha_contrail_plugin.juniper'
               predefined-parameters: CONTRAIL_DISTRIBUTION=open
               current-parameters: true
               kill-phase-on: NEVER
 
-            - name: '{fuel_release}.{plugin-name}.{plugin_version}.check_bonding_with_contrail.juniper'
+            - name: '{fuel_release}.{plugin_name}.{plugin_version}.check_bonding_with_contrail.juniper'
               predefined-parameters: |
                 CONTRAIL_DISTRIBUTION=juniper
                 BONDING=true
               current-parameters: true
               kill-phase-on: NEVER
 
-            - name: '{fuel_release}.{plugin-name}.{plugin_version}.contrail_jumbo_frame.juniper'
+            - name: '{fuel_release}.{plugin_name}.{plugin_version}.contrail_jumbo_frame.juniper'
               predefined-parameters: CONTRAIL_DISTRIBUTION=juniper
               current-parameters: true
               kill-phase-on: NEVER
 
-            - name: '{fuel_release}.{plugin-name}.{plugin_version}.contrail_plugin_add_delete_compute_node.juniper'
+            - name: '{fuel_release}.{plugin_name}.{plugin_version}.contrail_plugin_add_delete_compute_node.juniper'
               predefined-parameters: CONTRAIL_DISTRIBUTION=juniper
               current-parameters: true
-            - name: '{fuel_release}.{plugin-name}.{plugin_version}.contrail_plugin_add_contrail_controller_node.juniper'
-              predefined-parameters: CONTRAIL_DISTRIBUTION=juniper
-              current-parameters: true
-              kill-phase-on: NEVER
-
-            - name: '{fuel_release}.{plugin-name}.{plugin_version}.contrail_plugin_add_delete_controller_node.juniper'
+            - name: '{fuel_release}.{plugin_name}.{plugin_version}.contrail_plugin_add_contrail_controller_node.juniper'
               predefined-parameters: CONTRAIL_DISTRIBUTION=juniper
               current-parameters: true
               kill-phase-on: NEVER
 
-            - name: '{fuel_release}.{plugin-name}.{plugin_version}.deploy_contrail_with_base_os_ceph.juniper'
+            - name: '{fuel_release}.{plugin_name}.{plugin_version}.contrail_plugin_add_delete_controller_node.juniper'
               predefined-parameters: CONTRAIL_DISTRIBUTION=juniper
               current-parameters: true
               kill-phase-on: NEVER
 
-            - name: '{fuel_release}.{plugin-name}.{plugin_version}.deploy_contrail_with_ceilometer.juniper'
+            - name: '{fuel_release}.{plugin_name}.{plugin_version}.deploy_contrail_with_base_os_ceph.juniper'
               predefined-parameters: CONTRAIL_DISTRIBUTION=juniper
               current-parameters: true
               kill-phase-on: NEVER
 
-            - name: '{fuel_release}.{plugin-name}.{plugin_version}.deploy_ha_with_pub_net_all_nodes.juniper'
+            - name: '{fuel_release}.{plugin_name}.{plugin_version}.deploy_contrail_with_ceilometer.juniper'
               predefined-parameters: CONTRAIL_DISTRIBUTION=juniper
               current-parameters: true
               kill-phase-on: NEVER
 
-            - name: '{fuel_release}.{plugin-name}.{plugin_version}.deploy_ha_with_vlan_tagging.juniper'
+            - name: '{fuel_release}.{plugin_name}.{plugin_version}.deploy_ha_with_pub_net_all_nodes.juniper'
               predefined-parameters: CONTRAIL_DISTRIBUTION=juniper
               current-parameters: true
               kill-phase-on: NEVER
 
-            - name: '{fuel_release}.{plugin-name}.{plugin_version}.deploy_ha_contrail_plugin.open'
+            - name: '{fuel_release}.{plugin_name}.{plugin_version}.deploy_ha_with_vlan_tagging.juniper'
+              predefined-parameters: CONTRAIL_DISTRIBUTION=juniper
+              current-parameters: true
+              kill-phase-on: NEVER
+
+            - name: '{fuel_release}.{plugin_name}.{plugin_version}.deploy_ha_contrail_plugin.open'
               predefined-parameters: CONTRAIL_DISTRIBUTION=open
               current-parameters: true
               kill-phase-on: NEVER
 
-            - name: '{fuel_release}.{plugin-name}.{plugin_version}.check_bonding_with_contrail.open'
+            - name: '{fuel_release}.{plugin_name}.{plugin_version}.check_bonding_with_contrail.open'
               predefined-parameters: |
                 CONTRAIL_DISTRIBUTION=open
                 BONDING=true
               current-parameters: true
               kill-phase-on: NEVER
 
-            - name: '{fuel_release}.{plugin-name}.{plugin_version}.deploy_contrail_plugin_with_the_same_names.juniper'
+            - name: '{fuel_release}.{plugin_name}.{plugin_version}.deploy_contrail_plugin_with_the_same_names.juniper'
               predefined-parameters: CONTRAIL_DISTRIBUTION=juniper
               current-parameters: true
               kill-phase-on: NEVER
 
-            - name: '{fuel_release}.{plugin-name}.{plugin_version}.contrail_spec_pass.juniper'
+            - name: '{fuel_release}.{plugin_name}.{plugin_version}.contrail_spec_pass.juniper'
               predefined-parameters: CONTRAIL_DISTRIBUTION=juniper
               current-parameters: true
               kill-phase-on: NEVER
 
-            - name: '{fuel_release}.{plugin-name}.{plugin_version}.contrail_jumbo_frame.open'
+            - name: '{fuel_release}.{plugin_name}.{plugin_version}.contrail_jumbo_frame.open'
               predefined-parameters: CONTRAIL_DISTRIBUTION=open
               current-parameters: true
               kill-phase-on: NEVER
 
-            - name: '{fuel_release}.{plugin-name}.{plugin_version}.contrail_plugin_add_delete_compute_node.open'
+            - name: '{fuel_release}.{plugin_name}.{plugin_version}.contrail_plugin_add_delete_compute_node.open'
               predefined-parameters: CONTRAIL_DISTRIBUTION=open
               current-parameters: true
               kill-phase-on: NEVER
 
-            - name: '{fuel_release}.{plugin-name}.{plugin_version}.contrail_plugin_add_contrail_controller_node.open'
+            - name: '{fuel_release}.{plugin_name}.{plugin_version}.contrail_plugin_add_contrail_controller_node.open'
               predefined-parameters: CONTRAIL_DISTRIBUTION=open
               current-parameters: true
               kill-phase-on: NEVER
 
-            - name: '{fuel_release}.{plugin-name}.{plugin_version}.contrail_plugin_add_delete_controller_node.open'
+            - name: '{fuel_release}.{plugin_name}.{plugin_version}.contrail_plugin_add_delete_controller_node.open'
               predefined-parameters: CONTRAIL_DISTRIBUTION=open
               current-parameters: true
               kill-phase-on: NEVER
 
-            - name: '{fuel_release}.{plugin-name}.{plugin_version}.deploy_contrail_with_base_os_ceph.open'
+            - name: '{fuel_release}.{plugin_name}.{plugin_version}.deploy_contrail_with_base_os_ceph.open'
               predefined-parameters: CONTRAIL_DISTRIBUTION=open
               current-parameters: true
               kill-phase-on: NEVER
 
-            - name: '{fuel_release}.{plugin-name}.{plugin_version}.deploy_contrail_with_ceilometer.open'
+            - name: '{fuel_release}.{plugin_name}.{plugin_version}.deploy_contrail_with_ceilometer.open'
               predefined-parameters: CONTRAIL_DISTRIBUTION=open
               current-parameters: true
               kill-phase-on: NEVER
 
-            - name: '{fuel_release}.{plugin-name}.{plugin_version}.deploy_ha_with_pub_net_all_nodes.open'
+            - name: '{fuel_release}.{plugin_name}.{plugin_version}.deploy_ha_with_pub_net_all_nodes.open'
               predefined-parameters: CONTRAIL_DISTRIBUTION=open
               current-parameters: true
               kill-phase-on: NEVER
 
-            - name: '{fuel_release}.{plugin-name}.{plugin_version}.deploy_ha_with_vlan_tagging.open'
+            - name: '{fuel_release}.{plugin_name}.{plugin_version}.deploy_ha_with_vlan_tagging.open'
               predefined-parameters: CONTRAIL_DISTRIBUTION=open
               current-parameters: true
               kill-phase-on: NEVER
 
-            - name: '{fuel_release}.{plugin-name}.{plugin_version}.deploy_contrail_plugin_with_the_same_names.open'
+            - name: '{fuel_release}.{plugin_name}.{plugin_version}.deploy_contrail_plugin_with_the_same_names.open'
               predefined-parameters: CONTRAIL_DISTRIBUTION=open
               current-parameters: true
               kill-phase-on: NEVER
 
-            - name: '{fuel_release}.{plugin-name}.{plugin_version}.contrail_spec_pass.open'
+            - name: '{fuel_release}.{plugin_name}.{plugin_version}.contrail_spec_pass.open'
               predefined-parameters: CONTRAIL_DISTRIBUTION=open
               current-parameters: true
               kill-phase-on: NEVER

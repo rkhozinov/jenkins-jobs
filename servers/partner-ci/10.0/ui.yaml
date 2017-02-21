@@ -78,7 +78,7 @@
 
       - '{reporter-name}':
           plugin_version: ''
-          plugin-name: {job_name}
+          plugin_name: {job_name}
 
 - runner-parameters: &runner-parameters
     name: 'runner-parameters'

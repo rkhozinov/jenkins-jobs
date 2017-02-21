@@ -5,14 +5,14 @@
        The nightly tests scope will be runned only if smoke/bvt will have successful state'
     condition: SUCCESSFUL
     projects:
-      - name: '{fuel_release}.{plugin-name}.{plugin_version}.contrail_smoke.juniper'
+      - name: '{fuel_release}.{plugin_name}.{plugin_version}.contrail_smoke.juniper'
         property-file: build_number
         predefined-parameters: |
            CONTRAIL_DISTRIBUTION=juniper
         current-parameters: true
         kill-phase-on: FAILURE
 
-      - name: '{fuel_release}.{plugin-name}.{plugin_version}.contrail_bvt.juniper'
+      - name: '{fuel_release}.{plugin_name}.{plugin_version}.contrail_bvt.juniper'
         property-file: build_number
         predefined-parameters: |
            CONTRAIL_DISTRIBUTION=juniper
@@ -21,150 +21,150 @@
 
 - multijob:
     name: >
-      'Nightly tests for {fuel_release}.{plugin-name}.{plugin_version}'
+      'Nightly tests for {fuel_release}.{plugin_name}.{plugin_version}'
     condition: COMPLETED
     projects:
-      - name: '{fuel_release}.{plugin-name}.{plugin_version}.contrail_ha.juniper'
+      - name: '{fuel_release}.{plugin_name}.{plugin_version}.contrail_ha.juniper'
         property-file: build_number
         predefined-parameters: |
            CONTRAIL_DISTRIBUTION=juniper
         current-parameters: true
         kill-phase-on: NEVER
 
-      - name: '{fuel_release}.{plugin-name}.{plugin_version}.contrail_ha_baseos.juniper'
+      - name: '{fuel_release}.{plugin_name}.{plugin_version}.contrail_ha_baseos.juniper'
         property-file: build_number
         predefined-parameters: |
            CONTRAIL_DISTRIBUTION=juniper
         current-parameters: true
         kill-phase-on: NEVER
 
-      - name: '{fuel_release}.{plugin-name}.{plugin_version}.contrail_ceilometer.juniper'
+      - name: '{fuel_release}.{plugin_name}.{plugin_version}.contrail_ceilometer.juniper'
         property-file: build_number
         predefined-parameters: |
            CONTRAIL_DISTRIBUTION=juniper
         current-parameters: true
         kill-phase-on: NEVER
 
-      - name: '{fuel_release}.{plugin-name}.{plugin_version}.contrail_vlan.juniper'
+      - name: '{fuel_release}.{plugin_name}.{plugin_version}.contrail_vlan.juniper'
         property-file: build_number
         predefined-parameters: |
            CONTRAIL_DISTRIBUTION=juniper
         current-parameters: true
         kill-phase-on: NEVER
 
-      - name: '{fuel_release}.{plugin-name}.{plugin_version}.contrail_jumbo.juniper'
+      - name: '{fuel_release}.{plugin_name}.{plugin_version}.contrail_jumbo.juniper'
         property-file: build_number
         predefined-parameters: |
            CONTRAIL_DISTRIBUTION=juniper
         current-parameters: true
         kill-phase-on: NEVER
 
-      - name: '{fuel_release}.{plugin-name}.{plugin_version}.contrail_bonding.juniper'
+      - name: '{fuel_release}.{plugin_name}.{plugin_version}.contrail_bonding.juniper'
         property-file: build_number
         predefined-parameters: |
            CONTRAIL_DISTRIBUTION=juniper
         current-parameters: true
         kill-phase-on: NEVER
 
-      - name: '{fuel_release}.{plugin-name}.{plugin_version}.contrail_ceph_multirole.juniper'
+      - name: '{fuel_release}.{plugin_name}.{plugin_version}.contrail_ceph_multirole.juniper'
         property-file: build_number
         predefined-parameters: |
            CONTRAIL_DISTRIBUTION=juniper
         current-parameters: true
         kill-phase-on: NEVER
 
-      - name: '{fuel_release}.{plugin-name}.{plugin_version}.contrail_cinder_multirole.juniper'
+      - name: '{fuel_release}.{plugin_name}.{plugin_version}.contrail_cinder_multirole.juniper'
         property-file: build_number
         predefined-parameters: |
            CONTRAIL_DISTRIBUTION=juniper
         current-parameters: true
         kill-phase-on: NEVER
 
-      - name: '{fuel_release}.{plugin-name}.{plugin_version}.contrail_cinder_ceph_multirole.juniper'
+      - name: '{fuel_release}.{plugin_name}.{plugin_version}.contrail_cinder_ceph_multirole.juniper'
         property-file: build_number
         predefined-parameters: |
            CONTRAIL_DISTRIBUTION=juniper
         current-parameters: true
         kill-phase-on: NEVER
 
-      - name: '{fuel_release}.{plugin-name}.{plugin_version}.contrail_plugin_add_delete_controller_node.juniper'
+      - name: '{fuel_release}.{plugin_name}.{plugin_version}.contrail_plugin_add_delete_controller_node.juniper'
         property-file: build_number
         predefined-parameters: |
            CONTRAIL_DISTRIBUTION=juniper
         current-parameters: true
         kill-phase-on: NEVER
 
-      - name: '{fuel_release}.{plugin-name}.{plugin_version}.contrail_plugin_add_delete_compute_node.juniper'
+      - name: '{fuel_release}.{plugin_name}.{plugin_version}.contrail_plugin_add_delete_compute_node.juniper'
         property-file: build_number
         predefined-parameters: |
            CONTRAIL_DISTRIBUTION=juniper
         current-parameters: true
         kill-phase-on: NEVER
 
-      - name: '{fuel_release}.{plugin-name}.{plugin_version}.contrail_add_control.juniper'
+      - name: '{fuel_release}.{plugin_name}.{plugin_version}.contrail_add_control.juniper'
         property-file: build_number
         predefined-parameters: |
            CONTRAIL_DISTRIBUTION=juniper
         current-parameters: true
         kill-phase-on: NEVER
 
-      - name: '{fuel_release}.{plugin-name}.{plugin_version}.contrail_ha_with_shutdown_contrail_node.juniper'
+      - name: '{fuel_release}.{plugin_name}.{plugin_version}.contrail_ha_with_shutdown_contrail_node.juniper'
         property-file: build_number
         predefined-parameters: |
            CONTRAIL_DISTRIBUTION=juniper
         current-parameters: true
         kill-phase-on: NEVER
 
-      - name: '{fuel_release}.{plugin-name}.{plugin_version}.cannot_deploy_only_contrail_db.juniper'
+      - name: '{fuel_release}.{plugin_name}.{plugin_version}.cannot_deploy_only_contrail_db.juniper'
         property-file: build_number
         predefined-parameters: |
            CONTRAIL_DISTRIBUTION=juniper
         current-parameters: true
         kill-phase-on: NEVER
 
-      - name: '{fuel_release}.{plugin-name}.{plugin_version}.cannot_deploy_only_contrail_config.juniper'
+      - name: '{fuel_release}.{plugin_name}.{plugin_version}.cannot_deploy_only_contrail_config.juniper'
         property-file: build_number
         predefined-parameters: |
            CONTRAIL_DISTRIBUTION=juniper
         current-parameters: true
         kill-phase-on: NEVER
 
-      - name: '{fuel_release}.{plugin-name}.{plugin_version}.cannot_deploy_only_contrail_control.juniper'
+      - name: '{fuel_release}.{plugin_name}.{plugin_version}.cannot_deploy_only_contrail_control.juniper'
         property-file: build_number
         predefined-parameters: |
            CONTRAIL_DISTRIBUTION=juniper
         current-parameters: true
         kill-phase-on: NEVER
 
-      - name: '{fuel_release}.{plugin-name}.{plugin_version}.contrail_add_config.juniper'
+      - name: '{fuel_release}.{plugin_name}.{plugin_version}.contrail_add_config.juniper'
         property-file: build_number
         predefined-parameters: |
            CONTRAIL_DISTRIBUTION=juniper
         current-parameters: true
         kill-phase-on: NEVER
 
-      - name: '{fuel_release}.{plugin-name}.{plugin_version}.contrail_delete_control.juniper'
+      - name: '{fuel_release}.{plugin_name}.{plugin_version}.contrail_delete_control.juniper'
         property-file: build_number
         predefined-parameters: |
            CONTRAIL_DISTRIBUTION=juniper
         current-parameters: true
         kill-phase-on: NEVER
 
-      - name: '{fuel_release}.{plugin-name}.{plugin_version}.contrail_delete_config.juniper'
+      - name: '{fuel_release}.{plugin_name}.{plugin_version}.contrail_delete_config.juniper'
         property-file: build_number
         predefined-parameters: |
            CONTRAIL_DISTRIBUTION=juniper
         current-parameters: true
         kill-phase-on: NEVER
 
-      - name: '{fuel_release}.{plugin-name}.{plugin_version}.contrail_add_db.juniper'
+      - name: '{fuel_release}.{plugin_name}.{plugin_version}.contrail_add_db.juniper'
         property-file: build_number
         predefined-parameters: |
            CONTRAIL_DISTRIBUTION=juniper
         current-parameters: true
         kill-phase-on: NEVER
 
-      - name: '{fuel_release}.{plugin-name}.{plugin_version}.contrail_net_template.juniper'
+      - name: '{fuel_release}.{plugin_name}.{plugin_version}.contrail_net_template.juniper'
         property-file: build_number
         predefined-parameters: |
            CONTRAIL_DISTRIBUTION=juniper

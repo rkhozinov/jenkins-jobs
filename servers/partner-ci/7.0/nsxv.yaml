@@ -22,20 +22,20 @@
     fuel_release: '7.0'
     fuel_release_checker: '7.0'
     plugin_version: '1.1'
-    plugin-name: 'nsxv'
-    build-name: '{fuel_release}.{plugin-name}.build'
-    flake8-name: '{fuel_release}.{plugin-name}.flake8'
-    radon-name: '{fuel_release}.{plugin-name}.radon'
-    shellcheck-name: '{fuel_release}.{plugin-name}.shellcheck'
-    smoke-name: '{fuel_release}.{plugin-name}.smoke'
-    bvt-name: '{fuel_release}.{plugin-name}.bvt'
-    regression-name: '{fuel_release}.{plugin-name}.regression'
-    nightly-name: '{fuel_release}.{plugin-name}.nightly'
-    custom-name: '{fuel_release}.{plugin-name}.custom'
-    reporter-name: '{fuel_release}.{plugin-name}.reporter'
+    plugin_name: 'nsxv'
+    build-name: '{fuel_release}.{plugin_name}.build'
+    flake8-name: '{fuel_release}.{plugin_name}.flake8'
+    radon-name: '{fuel_release}.{plugin_name}.radon'
+    shellcheck-name: '{fuel_release}.{plugin_name}.shellcheck'
+    smoke-name: '{fuel_release}.{plugin_name}.smoke'
+    bvt-name: '{fuel_release}.{plugin_name}.bvt'
+    regression-name: '{fuel_release}.{plugin_name}.regression'
+    nightly-name: '{fuel_release}.{plugin_name}.nightly'
+    custom-name: '{fuel_release}.{plugin_name}.custom'
+    reporter-name: '{fuel_release}.{plugin_name}.reporter'
     smoke-test-name: 'nsxv_smoke'
     bvt-test-name: 'nsxv_bvt'
-    pkg_job_name: '{fuel_release}.{plugin-name}.build'
+    pkg_job_name: '{fuel_release}.{plugin_name}.build'
     nightly_timer: 'H 22 * * *'
     regression_timer: 'H 18 * * *'
     nightly_disabled: true
@@ -112,19 +112,19 @@
 
       - '{reporter-name}'
 
-      - '{fuel_release}.{plugin-name}.{testgroup}':
+      - '{fuel_release}.{plugin_name}.{testgroup}':
           scm_submodule_disabled: false
 
       - '{smoke-name}':
           multijob_build_pkg: false
 
-      - '{fuel_release}.{plugin-name}.smoke.test':
+      - '{fuel_release}.{plugin_name}.smoke.test':
           scm_submodule_disabled: false
 
       - '{bvt-name}':
           multijob_build_pkg: true
 
-      - '{fuel_release}.{plugin-name}.bvt.test':
+      - '{fuel_release}.{plugin_name}.bvt.test':
           scm_submodule_disabled: false
 
       - '{regression-name}':
@@ -137,7 +137,7 @@
           pkg_job_name: ''
           multijob_build_pkg: false
 
-      - '{fuel_release}.{plugin-name}.regression.test':
+      - '{fuel_release}.{plugin_name}.regression.test':
           scm_submodule_disabled: false
 
 - runner-parameters: &runner-parameters
@@ -150,7 +150,7 @@
       - common-parameters:
           debug:                 '{debug}'
           enable_proposed:       '{enable_proposed}'
-          env_prefix:            '{fuel_release}.{plugin-name}'
+          env_prefix:            '{fuel_release}.{plugin_name}'
           force_erase:           '{force_erase}'
           force_reuse:           '{force_reuse}'
           fuel_qa_refs:          '{fuel_qa_refs}'
@@ -194,7 +194,7 @@
       - common-parameters:
           debug:                 '{debug}'
           enable_proposed:       '{enable_proposed}'
-          env_prefix:            '{fuel_release}.{plugin-name}'
+          env_prefix:            '{fuel_release}.{plugin_name}'
           force_erase:           '{force_erase}'
           force_reuse:           '{force_reuse}'
           fuel_qa_refs:          '{fuel_qa_refs}'
@@ -329,19 +329,19 @@
       - pce-build-publisher:
           email_to: '{email_to}'
 - job-template:
-    name: '{fuel_release}.{plugin-name}.{testgroup}'
+    name: '{fuel_release}.{plugin_name}.{testgroup}'
     concurrent: true
 
 - job-template:
-    name: '{fuel_release}.{plugin-name}.bvt.test'
+    name: '{fuel_release}.{plugin_name}.bvt.test'
     concurrent: true
 
 - job-template:
-    name: '{fuel_release}.{plugin-name}.smoke.test'
+    name: '{fuel_release}.{plugin_name}.smoke.test'
     concurrent: true
 
 - job-template:
-    name: '{fuel_release}.{plugin-name}.regression.test'
+    name: '{fuel_release}.{plugin_name}.regression.test'
     concurrent: true
 
 - job-template:
@@ -384,7 +384,7 @@
           name: '1st phase - regression test'
           condition: COMPLETED
           projects:
-            - name: '{fuel_release}.{plugin-name}.regression.test'
+            - name: '{fuel_release}.{plugin_name}.regression.test'
               property-file: property
               current-parameters: true
               kill-phase-on: NEVER
@@ -392,7 +392,7 @@
 - job-template:
     name: '{smoke-name}'
     disabled: true
-    description: 'The Smoke test for {fuel_release}.{plugin-name}.{plugin_version}'
+    description: 'The Smoke test for {fuel_release}.{plugin_name}.{plugin_version}'
     concurrent: true
     quiet-period: 5
     project-type: multijob
@@ -413,10 +413,10 @@
     builders:
       - runner-condition
       - multijob:
-          name: 'The smoke test for {fuel_release}.{plugin-name}.{plugin_version}'
+          name: 'The smoke test for {fuel_release}.{plugin_name}.{plugin_version}'
           condition: COMPLETED
           projects:
-            - name: '{fuel_release}.{plugin-name}.smoke.test'
+            - name: '{fuel_release}.{plugin_name}.smoke.test'
               current-parameters: true
               property-file: build_number
               predefined-parameters: |
@@ -429,7 +429,7 @@
 
 - job-template:
     name: '{bvt-name}'
-    description: 'The BVT test for {fuel_release}.{plugin-name}.{plugin_version}'
+    description: 'The BVT test for {fuel_release}.{plugin_name}.{plugin_version}'
     disabled: true
     concurrent: true
     project-type: multijob
@@ -450,10 +450,10 @@
     builders:
       - runner-condition
       - multijob:
-          name: 'The BVT test for {fuel_release}.{plugin-name}.{plugin_version}'
+          name: 'The BVT test for {fuel_release}.{plugin_name}.{plugin_version}'
           condition: COMPLETED
           projects:
-            - name: '{fuel_release}.{plugin-name}.bvt.test'
+            - name: '{fuel_release}.{plugin_name}.bvt.test'
               current-parameters: true
               property-file: build_number
               predefined-parameters: |

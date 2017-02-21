@@ -1,22 +1,22 @@
 - runner-condition
 - multijob:
-    name: 'Pre-check for {plugin-name} {fuel_release}.{plugin_version}'
+    name: 'Pre-check for {plugin_name} {fuel_release}.{plugin_version}'
     condition: SUCCESSFUL
     projects:
-     - name: '{fuel_release}.{plugin-name}.{plugin_version}.mistral_smoke'
+     - name: '{fuel_release}.{plugin_name}.{plugin_version}.mistral_smoke'
        current-parameters: true
        kill-phase-on: NEVER
        property-file: build_number
-     - name: '{fuel_release}.{plugin-name}.{plugin_version}.mistral_bvt'
+     - name: '{fuel_release}.{plugin_name}.{plugin_version}.mistral_bvt'
        current-parameters: true
        kill-phase-on: NEVER
        property-file: build_number
 
        #- multijob:
-       #    name: 'Nightly suite {plugin-name} {fuel_release}.{plugin_version}'
+       #    name: 'Nightly suite {plugin_name} {fuel_release}.{plugin_version}'
        #    condition: COMPLETED
        #    projects:
-       #     - name: '{fuel_release}.{plugin-name}.{plugin_version}.mistral_ceph'
+       #     - name: '{fuel_release}.{plugin_name}.{plugin_version}.mistral_ceph'
        #       current-parameters: true
        #       kill-phase-on: NEVER
        #       property-file: build_number

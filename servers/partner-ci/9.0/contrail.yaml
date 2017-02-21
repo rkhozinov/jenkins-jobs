@@ -28,24 +28,24 @@
     fuel_release: '9.0'
     fuel_release_checker: '9.0'
     plugin_version: '5.0.0'
-    plugin-name: 'contrail'
-    build-name: '{fuel_release}.{plugin-name}.{plugin_version}.build'
-    flake8-name: '{fuel_release}.{plugin-name}.{plugin_version}.flake8'
-    radon-name: '{fuel_release}.{plugin-name}.{plugin_version}.radon'
-    shellcheck-name: '{fuel_release}.{plugin-name}.{plugin_version}.shellcheck'
-    smoke-name: '{fuel_release}.{plugin-name}.{plugin_version}.smoke'
-    bvt-name: '{fuel_release}.{plugin-name}.{plugin_version}.bvt'
-    regression-name: '{fuel_release}.{plugin-name}.{plugin_version}.regression'
-    nightly-name: '{fuel_release}.{plugin-name}.{plugin_version}.nightly'
-    full-name: '{fuel_release}.{plugin-name}.{plugin_version}.full'
-    doc-check-name: '{fuel_release}.{plugin-name}.{plugin_version}.doc.check'
-    doc-update-name: '{fuel_release}.{plugin-name}.{plugin_version}.doc.update'
-    baremetal-name: '{fuel_release}.{plugin-name}.{plugin_version}.baremetal'
-    custom-name: '{fuel_release}.{plugin-name}.{plugin_version}.custom'
-    reporter-name: '{fuel_release}.{plugin-name}.{plugin_version}.reporter'
+    plugin_name: 'contrail'
+    build-name: '{fuel_release}.{plugin_name}.{plugin_version}.build'
+    flake8-name: '{fuel_release}.{plugin_name}.{plugin_version}.flake8'
+    radon-name: '{fuel_release}.{plugin_name}.{plugin_version}.radon'
+    shellcheck-name: '{fuel_release}.{plugin_name}.{plugin_version}.shellcheck'
+    smoke-name: '{fuel_release}.{plugin_name}.{plugin_version}.smoke'
+    bvt-name: '{fuel_release}.{plugin_name}.{plugin_version}.bvt'
+    regression-name: '{fuel_release}.{plugin_name}.{plugin_version}.regression'
+    nightly-name: '{fuel_release}.{plugin_name}.{plugin_version}.nightly'
+    full-name: '{fuel_release}.{plugin_name}.{plugin_version}.full'
+    doc-check-name: '{fuel_release}.{plugin_name}.{plugin_version}.doc.check'
+    doc-update-name: '{fuel_release}.{plugin_name}.{plugin_version}.doc.update'
+    baremetal-name: '{fuel_release}.{plugin_name}.{plugin_version}.baremetal'
+    custom-name: '{fuel_release}.{plugin_name}.{plugin_version}.custom'
+    reporter-name: '{fuel_release}.{plugin_name}.{plugin_version}.reporter'
     smoke-test-name: 'contrail_smoke'
     bvt-test-name: 'contrail_bvt'
-    pkg_job_name: '{fuel_release}.{plugin-name}.{plugin_version}.build'
+    pkg_job_name: '{fuel_release}.{plugin_name}.{plugin_version}.build'
     pkg_job_build_number: 'released'
     nightly_timer: 'H 21 * * *'
     full_timer: 'H 21 * * *'
@@ -229,19 +229,19 @@
           skip_vote_successfull: false
           skip_vote_failed: false
 
-      - '{fuel_release}.{plugin-name}.{plugin_version}.{testgroup}.juniper'
+      - '{fuel_release}.{plugin_name}.{plugin_version}.{testgroup}.juniper'
 
       - '{smoke-name}':
           publish_results: false
           multijob_build_pkg: false
 
-      - '{fuel_release}.{plugin-name}.{plugin_version}.smoke.test.juniper'
+      - '{fuel_release}.{plugin_name}.{plugin_version}.smoke.test.juniper'
 
       - '{bvt-name}':
           publish_results: false
           multijob_build_pkg: true
 
-      - '{fuel_release}.{plugin-name}.{plugin_version}.bvt.test.juniper'
+      - '{fuel_release}.{plugin_name}.{plugin_version}.bvt.test.juniper'
 
       - '{regression-name}':
           testrail_suite: "[9.0][PCE] Fuel plugin contrail v5.0.0 Regression"
@@ -255,7 +255,7 @@
           iso_job_name: ''
           multijob_build_pkg: false
 
-      - '{fuel_release}.{plugin-name}.{plugin_version}.regression.test.juniper'
+      - '{fuel_release}.{plugin_name}.{plugin_version}.regression.test.juniper'
 
 # parameters for smoke, bvt and nightly multijobs
 - runner-parameters: &runner-parameters
@@ -268,7 +268,7 @@
       - common-parameters:
           debug:                 '{debug}'
           enable_proposed:       '{enable_proposed}'
-          env_prefix:            '{fuel_release}.{plugin-name}'
+          env_prefix:            '{fuel_release}.{plugin_name}'
           force_erase:           '{force_erase}'
           force_reuse:           '{force_reuse}'
           fuel_qa_refs:          '{fuel_qa_refs}'
@@ -303,7 +303,7 @@
       - common-parameters:
           debug:                 '{debug}'
           enable_proposed:       '{enable_proposed}'
-          env_prefix:            '{fuel_release}.{plugin-name}'
+          env_prefix:            '{fuel_release}.{plugin_name}'
           force_erase:           '{force_erase}'
           force_reuse:           '{force_reuse}'
           fuel_qa_refs:          '{fuel_qa_refs}'
@@ -349,7 +349,7 @@
       - common-parameters:
           debug:                 '{debug}'
           enable_proposed:       '{enable_proposed}'
-          env_prefix:            '{fuel_release}.{plugin-name}'
+          env_prefix:            '{fuel_release}.{plugin_name}'
           force_erase:           '{force_erase}'
           force_reuse:           '{force_reuse}'
           fuel_qa_refs:          '{fuel_qa_refs}'
@@ -517,38 +517,38 @@
           email_to: '{email_to}'
 
 - job-template:
-    name: '{fuel_release}.{plugin-name}.{plugin_version}.{testgroup}.juniper'
-    description: 'The test "{testgroup}" for {fuel_release}.{plugin-name}.{plugin_version} juniper contrail'
+    name: '{fuel_release}.{plugin_name}.{plugin_version}.{testgroup}.juniper'
+    description: 'The test "{testgroup}" for {fuel_release}.{plugin_name}.{plugin_version} juniper contrail'
     concurrent: true
 
 - job-template:
-    name: '{fuel_release}.{plugin-name}.{plugin_version}.bvt.test.juniper'
-    description: 'The test for {fuel_release}.{plugin-name}.{plugin_version} juniper contrail'
+    name: '{fuel_release}.{plugin_name}.{plugin_version}.bvt.test.juniper'
+    description: 'The test for {fuel_release}.{plugin_name}.{plugin_version} juniper contrail'
     concurrent: true
 
 - job-template:
-    name: '{fuel_release}.{plugin-name}.{plugin_version}.smoke.test.juniper'
-    description: 'The test for {fuel_release}.{plugin-name}.{plugin_version} juniper contrail'
+    name: '{fuel_release}.{plugin_name}.{plugin_version}.smoke.test.juniper'
+    description: 'The test for {fuel_release}.{plugin_name}.{plugin_version} juniper contrail'
     concurrent: true
 
 - job-template:
-    name: '{fuel_release}.{plugin-name}.{plugin_version}.regression.test.juniper'
-    description: 'The regression test for {fuel_release}.{plugin-name}.{plugin_version}'
+    name: '{fuel_release}.{plugin_name}.{plugin_version}.regression.test.juniper'
+    description: 'The regression test for {fuel_release}.{plugin_name}.{plugin_version}'
     concurrent: true
 
 - job-template:
     name: '{custom-name}.qa'
-    description: 'The custom test for {fuel_release}.{plugin-name}.{plugin_version}'
+    description: 'The custom test for {fuel_release}.{plugin_name}.{plugin_version}'
     concurrent: true
 
 - job-template:
     name: '{custom-name}.dev'
-    description: 'The custom test for {fuel_release}.{plugin-name}.{plugin_version}'
+    description: 'The custom test for {fuel_release}.{plugin_name}.{plugin_version}'
     concurrent: true
 
 - job-template:
     name: '{regression-name}'
-    description: 'The regression test for {fuel_release}.{plugin-name}.{plugin_version}'
+    description: 'The regression test for {fuel_release}.{plugin_name}.{plugin_version}'
     disabled: '{obj:regression_disabled}'
     concurrent: true
     project-type: multijob
@@ -580,7 +580,7 @@
           name: '1st phase - regression test'
           condition: COMPLETED
           projects:
-            - name: '{fuel_release}.{plugin-name}.{plugin_version}.regression.test.juniper'
+            - name: '{fuel_release}.{plugin_name}.{plugin_version}.regression.test.juniper'
               property-file: property
               current-parameters: true
               kill-phase-on: NEVER
@@ -671,7 +671,7 @@
 - job-template:
     name: '{smoke-name}'
     disabled: true
-    description: 'The Smoke test for {fuel_release}.{plugin-name}.{plugin_version}'
+    description: 'The Smoke test for {fuel_release}.{plugin_name}.{plugin_version}'
     concurrent: true
     quiet-period: 5
     project-type: multijob
@@ -692,10 +692,10 @@
     builders:
       - runner-condition
       - multijob:
-          name: 'The smoke test for {fuel_release}.{plugin-name}.{plugin_version}'
+          name: 'The smoke test for {fuel_release}.{plugin_name}.{plugin_version}'
           condition: COMPLETED
           projects:
-            - name: '{fuel_release}.{plugin-name}.{plugin_version}.smoke.test.juniper'
+            - name: '{fuel_release}.{plugin_name}.{plugin_version}.smoke.test.juniper'
               current-parameters: true
               property-file: build_number
               predefined-parameters: |
@@ -709,7 +709,7 @@
 
 - job-template:
     name: '{bvt-name}'
-    description: 'The BVT test for {fuel_release}.{plugin-name}.{plugin_version}'
+    description: 'The BVT test for {fuel_release}.{plugin_name}.{plugin_version}'
     disabled: true
     concurrent: true
     project-type: multijob
@@ -730,10 +730,10 @@
     builders:
       - runner-condition
       - multijob:
-          name: 'The BVT test for {fuel_release}.{plugin-name}.{plugin_version}'
+          name: 'The BVT test for {fuel_release}.{plugin_name}.{plugin_version}'
           condition: COMPLETED
           projects:
-            - name: '{fuel_release}.{plugin-name}.{plugin_version}.bvt.test.juniper'
+            - name: '{fuel_release}.{plugin_name}.{plugin_version}.bvt.test.juniper'
               current-parameters: true
               property-file: build_number
               predefined-parameters: |

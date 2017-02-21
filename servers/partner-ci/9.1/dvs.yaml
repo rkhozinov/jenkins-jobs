@@ -34,21 +34,21 @@
     fuel_release: '9.1'
     fuel_release_checker: '9.0'
     plugin_version: '3.1.0'
-    plugin-name: 'dvs'
-    build-name: '{fuel_release}.{plugin-name}.build'
-    flake8-name: '{fuel_release}.{plugin-name}.flake8'
-    radon-name: '{fuel_release}.{plugin-name}.radon'
-    shellcheck-name: '{fuel_release}.{plugin-name}.shellcheck'
-    smoke-name: '{fuel_release}.{plugin-name}.smoke'
-    bvt-name: '{fuel_release}.{plugin-name}.bvt'
-    regression-name: '{fuel_release}.{plugin-name}.regression'
-    nightly-name: '{fuel_release}.{plugin-name}.nightly'
-    custom-name: '{fuel_release}.{plugin-name}.custom'
-    reporter-name: '{fuel_release}.{plugin-name}.reporter'
+    plugin_name: 'dvs'
+    build-name: '{fuel_release}.{plugin_name}.build'
+    flake8-name: '{fuel_release}.{plugin_name}.flake8'
+    radon-name: '{fuel_release}.{plugin_name}.radon'
+    shellcheck-name: '{fuel_release}.{plugin_name}.shellcheck'
+    smoke-name: '{fuel_release}.{plugin_name}.smoke'
+    bvt-name: '{fuel_release}.{plugin_name}.bvt'
+    regression-name: '{fuel_release}.{plugin_name}.regression'
+    nightly-name: '{fuel_release}.{plugin_name}.nightly'
+    custom-name: '{fuel_release}.{plugin_name}.custom'
+    reporter-name: '{fuel_release}.{plugin_name}.reporter'
     smoke-test-name: 'dvs_vcenter_smoke'
     bvt-test-name: 'dvs_vcenter_bvt'
     regression-test-name: 'dvs_regression'
-    pkg_job_name: '{fuel_release}.{plugin-name}.build'
+    pkg_job_name: '{fuel_release}.{plugin_name}.build'
     pkg_job_build_number: 'released'
     nightly_timer: 'H 22 * * *'
     regression_timer: 'H 18 * * *'
@@ -158,19 +158,19 @@
 
       - '{reporter-name}'
 
-      - '{fuel_release}.{plugin-name}.{testgroup}'
+      - '{fuel_release}.{plugin_name}.{testgroup}'
 
       - '{smoke-name}':
           publish_results: false
           multijob_build_pkg: false
 
-      - '{fuel_release}.{plugin-name}.smoke.test'
+      - '{fuel_release}.{plugin_name}.smoke.test'
 
       - '{bvt-name}':
           publish_results: false
           multijob_build_pkg: true
 
-      - '{fuel_release}.{plugin-name}.bvt.test'
+      - '{fuel_release}.{plugin_name}.bvt.test'
 
       - '{regression-name}':
           testrail_suite: "[{fuel_release}][PCE] VMware DVS plugin v{plugin_version} Regression"
@@ -182,7 +182,7 @@
           pkg_job_name: ''
           multijob_build_pkg: false
 
-      - '{fuel_release}.{plugin-name}.regression.test'
+      - '{fuel_release}.{plugin_name}.regression.test'
 
 # parameters for smoke, bvt and nightly multijobs
 - runner-parameters: &runner-parameters
@@ -195,7 +195,7 @@
       - common-parameters:
           debug:                 '{debug}'
           enable_proposed:       '{enable_proposed}'
-          env_prefix:            '{fuel_release}.{plugin-name}'
+          env_prefix:            '{fuel_release}.{plugin_name}'
           force_erase:           '{force_erase}'
           force_reuse:           '{force_reuse}'
           fuel_qa_refs:          '{fuel_qa_refs}'
@@ -245,7 +245,7 @@
       - common-parameters:
           debug:                 '{debug}'
           enable_proposed:       '{enable_proposed}'
-          env_prefix:            '{fuel_release}.{plugin-name}'
+          env_prefix:            '{fuel_release}.{plugin_name}'
           force_erase:           '{force_erase}'
           force_reuse:           '{force_reuse}'
           fuel_qa_refs:          '{fuel_qa_refs}'
@@ -389,38 +389,38 @@
           email_to: '{email_to}'
 
 - job-template:
-    name: '{fuel_release}.{plugin-name}.{testgroup}'
-    description: 'The test "{testgroup}" for {fuel_release}.{plugin-name}.{plugin_version}'
+    name: '{fuel_release}.{plugin_name}.{testgroup}'
+    description: 'The test "{testgroup}" for {fuel_release}.{plugin_name}.{plugin_version}'
     concurrent: true
 
 - job-template:
-    name: '{fuel_release}.{plugin-name}.bvt.test'
-    description: 'The BVT test for {fuel_release}.{plugin-name}.{plugin_version}'
+    name: '{fuel_release}.{plugin_name}.bvt.test'
+    description: 'The BVT test for {fuel_release}.{plugin_name}.{plugin_version}'
     concurrent: true
 
 - job-template:
-    name: '{fuel_release}.{plugin-name}.smoke.test'
-    description: 'The Smoke test for {fuel_release}.{plugin-name}.{plugin_version}'
+    name: '{fuel_release}.{plugin_name}.smoke.test'
+    description: 'The Smoke test for {fuel_release}.{plugin_name}.{plugin_version}'
     concurrent: true
 
 - job-template:
-    name: '{fuel_release}.{plugin-name}.regression.test'
-    description: 'The regression test for {fuel_release}.{plugin-name}.{plugin_version}'
+    name: '{fuel_release}.{plugin_name}.regression.test'
+    description: 'The regression test for {fuel_release}.{plugin_name}.{plugin_version}'
     concurrent: true
 
 - job-template:
     name: '{custom-name}.qa'
-    description: 'The custom test for {fuel_release}.{plugin-name}.{plugin_version}'
+    description: 'The custom test for {fuel_release}.{plugin_name}.{plugin_version}'
     concurrent: true
 
 - job-template:
     name: '{custom-name}.dev'
-    description: 'The custom test for {fuel_release}.{plugin-name}.{plugin_version}'
+    description: 'The custom test for {fuel_release}.{plugin_name}.{plugin_version}'
     concurrent: true
 
 - job-template:
     name: '{regression-name}'
-    description: 'The regression test for {fuel_release}.{plugin-name}.{plugin_version}'
+    description: 'The regression test for {fuel_release}.{plugin_name}.{plugin_version}'
     disabled: '{obj:regression_disabled}'
     concurrent: true
     project-type: multijob
@@ -451,7 +451,7 @@
           name: '1st phase - regression test'
           condition: COMPLETED
           projects:
-            - name: '{fuel_release}.{plugin-name}.regression.test'
+            - name: '{fuel_release}.{plugin_name}.regression.test'
               property-file: property
               current-parameters: true
               kill-phase-on: NEVER
@@ -459,7 +459,7 @@
 - job-template:
     name: '{smoke-name}'
     disabled: true
-    description: 'The Smoke test for {fuel_release}.{plugin-name}.{plugin_version}'
+    description: 'The Smoke test for {fuel_release}.{plugin_name}.{plugin_version}'
     concurrent: true
     quiet-period: 5
     project-type: multijob
@@ -480,10 +480,10 @@
     builders:
       - runner-condition
       - multijob:
-          name: 'The smoke test for {fuel_release}.{plugin-name}.{plugin_version}'
+          name: 'The smoke test for {fuel_release}.{plugin_name}.{plugin_version}'
           condition: COMPLETED
           projects:
-            - name: '{fuel_release}.{plugin-name}.smoke.test'
+            - name: '{fuel_release}.{plugin_name}.smoke.test'
               current-parameters: true
               property-file: build_number
               predefined-parameters: |
@@ -496,7 +496,7 @@
 
 - job-template:
     name: '{bvt-name}'
-    description: 'The BVT test for {fuel_release}.{plugin-name}.{plugin_version}'
+    description: 'The BVT test for {fuel_release}.{plugin_name}.{plugin_version}'
     disabled: true
     concurrent: true
     project-type: multijob
@@ -517,10 +517,10 @@
     builders:
       - runner-condition
       - multijob:
-          name: 'The BVT test for {fuel_release}.{plugin-name}.{plugin_version}'
+          name: 'The BVT test for {fuel_release}.{plugin_name}.{plugin_version}'
           condition: COMPLETED
           projects:
-            - name: '{fuel_release}.{plugin-name}.bvt.test'
+            - name: '{fuel_release}.{plugin_name}.bvt.test'
               current-parameters: true
               property-file: build_number
               predefined-parameters: |

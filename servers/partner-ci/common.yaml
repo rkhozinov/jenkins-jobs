@@ -1266,7 +1266,7 @@
 - job-template:
     name: '{reporter-name}'
     disabled: false
-    description: 'The reporter for the {fuel_release}.{plugin-name}.{plugin_version}'
+    description: 'The reporter for the {fuel_release}.{plugin_name}.{plugin_version}'
     concurrent: true
     node: runner
     properties:
