@@ -237,12 +237,12 @@
     project-type: multijob
     node: runner
     <<: *runner-parameters
-    triggers:
-      - draft-gerrit-trigger:
-          gerrit_repo: '{gerrit_repo}'
-          gerrit_branch: '{gerrit_branch}'
-          skip_vote_successfull: '{skip_vote_successfull}'
-          skip_vote_failed: '{skip_vote_failed}'
+#    triggers:
+#      - draft-gerrit-trigger:
+#          gerrit_repo: '{gerrit_repo}'
+#          gerrit_branch: '{gerrit_branch}'
+#          skip_vote_successfull: '{skip_vote_successfull}'
+#          skip_vote_failed: '{skip_vote_failed}'
     properties:
       - ui-runner-property
     wrappers:
@@ -273,11 +273,11 @@
     <<: *runner-parameters
     scm: []
     triggers:
-      - merge-gerrit-trigger:
-          gerrit_repo: '{gerrit_repo}'
-          gerrit_branch: '{gerrit_branch}'
-          skip_vote_successfull: '{skip_vote_successfull}'
-          skip_vote_failed: '{skip_vote_failed}'
+      #     - merge-gerrit-trigger:
+      #         gerrit_repo: '{gerrit_repo}'
+      #         gerrit_branch: '{gerrit_branch}'
+      #         skip_vote_successfull: '{skip_vote_successfull}'
+      #         skip_vote_failed: '{skip_vote_failed}'
     properties:
       - ui-runner-property
     wrappers:
