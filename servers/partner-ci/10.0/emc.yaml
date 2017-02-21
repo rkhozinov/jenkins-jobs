@@ -1,0 +1,118 @@
+---
+- project:
+    name: 'predefined_parameters'
+    fuel_release: '10.0'
+    fuel_release_checker: '10'
+    plugin_version: '4.0'
+    plugin_name: 'emc'
+    build-name: '{fuel_release}.{plugin_name}.build'
+    flake8-name: '{fuel_release}.{plugin_name}.flake8'
+    radon-name: '{fuel_release}.{plugin_name}.radon'
+    shellcheck-name: '{fuel_release}.{plugin_name}.shellcheck'
+    pkg_job_name: '{fuel_release}.{plugin_name}.build'
+    pkg_job_build_number: ''
+    force_erase: true
+    force_reuse: false
+    recreate_venv: true
+    ws_norevert: false
+    nfs_clean: false
+    kvm_use: false
+    update_master: true
+    enable_proposed: true
+    debug: true
+    build_debug: true
+    publish_results: true
+    multijob_build_pkg: true
+    testjob_build_pkg: false
+    fuel_qa_refs: ''
+    snapshots_id: ''
+    gerrit_repo: 'fuel-plugin-external-emc'
+    gerrit_branch: 'master'
+    email_to: 'rkhozinov@mirantis.com vnaumov@mirantis.com ibumarskov@mirantis.com'
+    released_plugin_path: ''
+    scm_submodule_disabled: false
+    scm_wipe_workspace: true
+    skip_vote_successfull: false
+    skip_vote_failed: false
+
+    testrail_project: "EMC VNX Plugin"
+    testrail_suite: "MOS Plugin EMC v{plugin_version}"
+    testrail_suite_desc: "Suite description"
+    testrail_milestone: "EMC VNX Plugin v{plugin_version}"
+    testrail_plan: "$TREP_TESTRAIL_SUITE build#${{PKG_JOB_BUILD_NUMBER}} snapshot#${{SNAPSHOTS_ID}}"
+    testrail_plan_desc: "Test plan description"
+    testrail_run: "$TREP_TESTRAIL_SUITE"
+    testrail_run_desc: "Test run description"
+    testrail_item_case: "$TEST_GROUP"
+    trep_results_source: "xunit"
+    trep_debug_level: "DEBUG"
+
+    testgroup_parameter_type: string
+    testgroup_value_type: default
+    testgroup_value: '{testgroup}'
+
+    testgroup:
+      - prepare_slaves_9
+
+    jobs:
+      - '{build-name}':
+          scm_submodule_disabled: true
+          scm_wipe_workspace: true
+      - '{flake8-name}':
+          scm_submodule_disabled: true
+      - '{radon-name}':
+          scm_submodule_disabled: true
+      - '{shellcheck-name}':
+          scm_submodule_disabled: true
+          skip_vote_successfull: '{skip_vote_successfull}'
+          skip_vote_failed: '{skip_vote_failed}'
+
+- job-template:
+    name: '{build-name}'
+    node: 'runner'
+    concurrent: true
+    disabled: false
+    triggers:
+      - draft-gerrit-trigger:
+          gerrit_repo: '{gerrit_repo}'
+          gerrit_branch: '{gerrit_branch}'
+          skip_vote_successfull: '{skip_vote_successfull}'
+          skip_vote_failed: '{skip_vote_failed}'
+    scm:
+      - common-scm:
+          scm_wipe_workspace: '{scm_wipe_workspace}'
+          scm_submodule_disabled: '{scm_submodule_disabled}'
+          gerrit_repo: '{gerrit_repo}'
+          skip_vote_successfull: '{skip_vote_successfull}'
+          skip_vote_failed: '{skip_vote_failed}'
+    wrapper:
+      - runner-wrapper
+    parameters:
+      - string:
+          name: GERRIT_BRANCH
+          default: 'origin/{gerrit_branch}'
+      - string:
+          name: GERRIT_REFSPEC
+          default: 'refs/heads/{gerrit_branch}'
+      - string:
+          name: PUPPETLINT_PATH
+          default: 'deployment_scripts/puppet/manifests ./deployment_scripts/puppet/modules/plugin_emc_vnx'
+      - string:
+          name: PUPPETLINT_IGNORE
+      - bool:
+          name: DEBUG
+          default: '{build_debug}'
+    properties:
+      - test-property
+    wrappers:
+      - ansicolor:
+          colormap: xterm
+    builders:
+      - shell:
+          !include-raw-escape: ../builders/build-plugin-emc.sh
+      - shell:
+          !include-raw-escape: ../builders/rpm-check.sh
+    publishers:
+      - generic-build-publisher:
+          email_to: '{email_to}'
+          plugin_name: '{plugin_name}'

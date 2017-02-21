@@ -1094,8 +1094,6 @@
           block-level: 'GLOBAL'
           queue-scanning: 'BUILDABLE'
 
-# properties for test jobs
-
 - property:
     name: test-property
     properties:
