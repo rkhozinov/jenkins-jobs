@@ -46,6 +46,9 @@
           !include-raw-escape: ../builders/build-job-download-iso.sh
       - shell: |
           cat iso_file >> properties_file.txt
+      - trigger-builds:
+          - project: "10.0.fuel.bvt"
+            current-parameters: true  
     publishers:
       - archive:
           artifacts: '*.txt, iso_file, iso_version'
