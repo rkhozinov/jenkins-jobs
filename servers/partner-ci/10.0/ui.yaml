@@ -17,7 +17,7 @@
     custom_name: '{fuel_release}.{job_name}.custom'
     reporter-name: '{fuel_release}.{job_name}.reporter'
     nightly_timer: 'H 21 * * *'
-    nightly_disabled: true
+    nightly_disabled: false
     force_erase: false
     force_reuse: true
     recreate_venv: false
