@@ -128,7 +128,7 @@
       - contrail_multiple_networks_delete_controller
       - contrail_murano
       - contrail_no_default
-      - contrail_ostf_net_provisioning_disable
+      - contrail_ostf_net_provisioning_off
       - contrail_plugin_add_delete_compute_node
       - contrail_plugin_add_delete_controller_node
       - contrail_sahara
