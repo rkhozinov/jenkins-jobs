@@ -41,7 +41,7 @@
     testrail_suite: "[10.0][PCE] Mechanism for providing additional properties for NICs and Nodes via plugin"
     testrail_suite_desc: "Suite description"
     testrail_milestone: "10.0"
-    testrail_plan: "${{TREP_TESTRAIL_MILESTONE}} #${{SNAPSHOTS_ID}}"
+    testrail_plan: "${{TREP_TESTRAIL_MILESTONE}} iso #${{SNAPSHOTS_ID}}"
     testrail_plan_desc: "Test plan description"
     testrail_run: "${{TREP_TESTRAIL_SUITE}}"
     testrail_run_desc: "Test run description"
