@@ -667,7 +667,7 @@
               UBUNTU_REPOS="$UBUNTU_REPOS|$UBUNTU_PROPOSED"
           fi
 
-          echo "MIRROR_UBUNTU=${UBUNTU_REPOS:?}" >> get-ubuntu-mirror.properties
+          echo "MIRROR_UBUNTU=${UBUNTU_REPOS:?}" > get-ubuntu-mirror.properties
           echo "SNAPSHOTS_ID=$(echo $ISO_FILE | cut -d- -f3 | tr -d '.iso')" >> get-ubuntu-mirror.properties
       - inject:
           properties-file: get-ubuntu-mirror.properties
@@ -719,6 +719,26 @@
 - builder:
     name: ui-condition
     builders:
+      - 20-get-props
+      - conditional-step:
+          condition-kind: shell
+          condition-command: >
+            [ -z  ${ISO_JOB_BUILD_NUMBER} ]
+          steps:
+            - copyartifact:
+                project: ${ISO_JOB_NAME}
+                which-build: last-successful
+      - conditional-step:
+          condition-kind: shell
+          condition-command: >
+            [ ! -z ${ISO_JOB_BUILD_NUMBER} ]
+          steps:
+            - copyartifact:
+                project: ${ISO_JOB_NAME}
+                which-build: specific-build
+                build-number: ${ISO_JOB_BUILD_NUMBER}
+      - inject:
+          properties-file: properties_file.txt
       - conditional-step:
           condition-kind: shell
           condition-command: |
@@ -726,9 +746,15 @@
           steps:
             - shell: |
                 #!/bin/bash
-                SNAPSHOTS_ID=${SNAPSHOTS_ID:=lastSuccessfulBuild}
-                wget --no-check-certificate -O snapshots.params ${SNAPSHOTS_URL/SNAPSHOTS_ID/$SNAPSHOTS_ID}
-                snapshots_id=$(grep "^CUSTOM_VERSION=" < snapshots.params | cut -d= -f2 | cut -d'#' -f2)
+                set -x
+                case "${ISO_FILE:?}" in
+                  *fuel-10.0* )
+                          snapshots_id=$(echo $ISO_FILE | cut -d- -f3 | tr -d '.iso') ;;
+                  * )
+                          SNAPSHOTS_ID=${SNAPSHOTS_ID:=lastSuccessfulBuild}
+                          wget --no-check-certificate -O snapshots.params ${SNAPSHOTS_URL/SNAPSHOTS_ID/$SNAPSHOTS_ID}
+                          snapshots_id=$(grep "^CUSTOM_VERSION=" < snapshots.params | cut -d= -f2 | cut -d'#' -f2) ;;
+                esac
                 echo "snapshot_id_number=" $snapshots_id
                 echo "SNAPSHOTS_ID=${snapshots_id}" >> build_number
 
