@@ -25,3 +25,4 @@ fpb --check  ./
 
 pkg_name=$(ls -t *.rpm | head -n1)
 mv $pkg_name $(echo $pkg_name | head -n 1 | sed s/.noarch/-$BUILD_NUMBER.noarch/)
+ln -s $pkg_name $(echo "$pkg_name" | cut -d'-' -f1) 
