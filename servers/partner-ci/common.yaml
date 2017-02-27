@@ -721,6 +721,11 @@
     name: ui-condition
     builders:
       - 20-get-props
+      - 30-get-iso
+
+- builder:
+    name: 30-get-iso
+    builders:
       - conditional-step:
           condition-kind: shell
           condition-command: >
@@ -758,7 +763,6 @@
                 esac
                 echo "snapshot_id_number=" $snapshots_id
                 echo "SNAPSHOTS_ID=${snapshots_id}" >> build_number
-
 - builder:
     name: runner-condition
     builders:

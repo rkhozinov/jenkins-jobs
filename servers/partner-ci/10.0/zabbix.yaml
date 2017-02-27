@@ -496,4 +496,4 @@
                  block: true
 
       - 20-get-props
-      - 30-get-ubuntu-mirror
+      - 30-get-iso
