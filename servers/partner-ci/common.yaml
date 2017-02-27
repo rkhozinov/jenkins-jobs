@@ -217,6 +217,7 @@
             SLAVE_NODE_CPU=4;
             SLAVE_NODE_MEMORY=3968;
             REQUIRED_FREE_SPACE=200;
+            UBUNTU_DIST=xenial;
 
 - parameter:
     name: vcenter-specific-parameters

@@ -1,14 +1,4 @@
 ---
-- parameter:
-    name: plugin-specific-parameters
-    parameters:
-      - text:
-          name: SPECIFIC_PROPS
-          default: |
-            ADMIN_NODE_MEMORY=3968;
-            SLAVE_NODE_MEMORY=3968;
-            UBUNTU_DIST=xenial;
-
 - project:
     name: 'predefined_parameters'
     fuel_release: '10.0'
@@ -177,7 +167,6 @@
           testrail_suite:        '{testrail_suite}'
           testrail_suite_desc:   '{testrail_suite_desc}'
           update_master:         '{update_master}'
-      - plugin-specific-parameters
 
 - test-parameters: &test-parameters
     name: 'test-parameters'
@@ -213,7 +202,6 @@
           testrail_suite:        '{testrail_suite}'
           testrail_suite_desc:   '{testrail_suite_desc}'
           update_master:         '{update_master}'
-      - plugin-specific-parameters
 
 - defaults:
     name: global
