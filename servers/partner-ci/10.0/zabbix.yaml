@@ -43,7 +43,6 @@
     skip_vote_successfull: false
     skip_vote_failed: false
     build_debug: true
-    puppelint_path: ''
     puppetlint_ignore: ''
 
     testrail_project: "Zabbix plugin"
@@ -64,16 +63,20 @@
 
     zbx_extreme_net_repo: 'fuel-plugin-zabbix-monitoring-extreme-networks'
     zbx_extreme_net_branch: 'master'
+    zbx_extreme_net_puppetlint_path: './deployment_scripts/puppet/manifests ./deployment_scripts/puppet/modules/plugin_zabbix_monitoring_extreme_networks'
 
     zbx_emc_repo: 'fuel-plugin-zabbix-monitoring-emc'
     zbx_emc_branch: 'master'
+    zbx_emc_puppetlint_path: './deployment_scripts/puppet/manifests ./deployment_scripts/puppet/modules/plugin_zabbix_monitoring_emc'
 
     zbx_snmp_repo: 'fuel-plugin-zabbix-snmptrapd'
     zbx_snmp_branch: 'master'
+    zbx_snmp_puppetlint_path: './deployment_scripts/puppet/manifests ./deployment_scripts/puppet/modules/plugin_zabbix_snmptrapd'
 
     zbx_ext_repo: 'fuel-plugin-external-zabbix'
     zbx_ext_branch: 'master'
     zbx_ext_refs: 'refs/changes/17/428617/6'
+    zbx_ext_puppetlint_path: './deployment_scripts/puppet/manifests ./deployment_scripts/puppet/modules/plugin_zabbix'
 
 
     testgroup:
@@ -95,21 +98,25 @@
           gerrit_repo:   '{zbx_emc_repo}'
           plugin_name:   '{zbx_emc_repo}'
           gerrit_branch: '{zbx_emc_branch}'
+          puppetlint_path:    '{zbx_emc_puppetlint_path}'
 
       - '{fuel_release}.{plugin_name}.build':
           gerrit_repo:   '{zbx_extreme_net_repo}'
           plugin_name:   '{zbx_extreme_net_repo}'
           gerrit_branch: '{zbx_extreme_net_branch}'
+          puppetlint_path:    '{zbx_extreme_net_puppetlint_path}'
 
       - '{fuel_release}.{plugin_name}.build':
           gerrit_repo:   '{zbx_snmp_repo}'
           plugin_name:   '{zbx_snmp_repo}'
           gerrit_branch: '{zbx_snmp_branch}'
+          puppetlint_path:    '{zbx_snmp_puppetlint_path}'
 
       - '{fuel_release}.{plugin_name}.build':
           gerrit_repo:   '{zbx_ext_repo}'
           plugin_name:   '{zbx_ext_repo}'
           gerrit_branch: '{zbx_ext_branch}'
+          puppetlint_path:    '{zbx_ext_puppetlint_path}'
 
       - '{nightly-name}':
           multijob_build_pkg: true
@@ -376,7 +383,7 @@
           default: 'refs/heads/{gerrit_branch}'
       - string:
           name: PUPPETLINT_PATH
-          default: '{puppelint_path}'
+          default: '{puppetlint_path}'
       - string:
           name: PUPPETLINT_IGNORE
           default: '{puppetlint_ignore}'
