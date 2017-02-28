@@ -6,14 +6,12 @@
     plugin_version: '2.5.2'
     plugin_name: 'zabbix'
     shellcheck-name: '{fuel_release}.{plugin_name}.shellcheck'
-    smoke-name: '{fuel_release}.{plugin_name}.smoke'
     bvt-name: '{fuel_release}.{plugin_name}.bvt'
     regression-name: '{fuel_release}.{plugin_name}.regression'
     nightly-name: '{fuel_release}.{plugin_name}.nightly'
     custom-name: '{fuel_release}.{plugin_name}.custom'
     reporter-name: '{fuel_release}.{plugin_name}.reporter'
-    smoke-test-name: 'deploy_zabbix_monitoring_ha'
-    bvt-test-name: 'zabbix_bvt'
+    bvt-test-name: 'deploy_zabbix_monitoring_ha'
     regression-test-name: 'zabbix_regression'
     pkg_job_name: '{fuel_release}.{plugin_name}.build'
     pkg_job_build_number: ''
@@ -128,12 +126,6 @@
       - '{reporter-name}'
 
       - '{fuel_release}.{plugin_name}.{testgroup}'
-
-      - '{smoke-name}':
-          publish_results: false
-          multijob_build_pkg: false
-
-      - '{fuel_release}.{plugin_name}.smoke.test'
 
       - '{bvt-name}':
           publish_results: false
@@ -281,11 +273,6 @@
     concurrent: true
 
 - job-template:
-    name: '{fuel_release}.{plugin_name}.smoke.test'
-    description: 'The Smoke test for {fuel_release}.{plugin_name}'
-    concurrent: true
-
-- job-template:
     name: '{custom-name}.qa'
     description: 'The custom test for {fuel_release}.{plugin_name}'
     concurrent: true
@@ -294,42 +281,6 @@
     name: '{custom-name}.dev'
     description: 'The custom test for {fuel_release}.{plugin_name}'
     concurrent: true
-
-- job-template:
-    name: '{smoke-name}'
-    disabled: false
-    description: 'The Smoke test for {fuel_release}.{plugin_name}.{plugin_version}'
-    concurrent: true
-    quiet-period: 5
-    project-type: multijob
-    node: runner
-    <<: *runner-parameters
-    properties:
-      - zabbix-runner-property
-    wrappers:
-      - runner-wrapper
-    scm: []
-    builders:
-      - zabbix-runner-condition:
-         zbx_extreme_net_repo: '{zbx_extreme_net_repo}'
-         fuel_release:         '{fuel_release}'
-         zbx_emc_repo:         '{zbx_emc_repo}'
-         zbx_snmp_repo:        '{zbx_snmp_repo}'
-         zbx_ext_repo:         '{zbx_ext_repo}'
-      - multijob:
-          name: 'The smoke test for {fuel_release}.{plugin_name}.{plugin_version}'
-          condition: COMPLETED
-          projects:
-            - name: '{fuel_release}.{plugin_name}.smoke.test'
-              current-parameters: true
-              property-file: build_number
-              predefined-parameters: |
-                TEST_GROUP={smoke-test-name}
-              kill-phase-on: NEVER
-    publishers:
-      - runner-publisher:
-          properties_name: smoke.properties
-          email_to: '{email_to}'
 
 - job-template:
     name: '{bvt-name}'
