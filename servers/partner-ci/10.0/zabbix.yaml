@@ -400,8 +400,6 @@
     builders:
       - shell:
           !include-raw-escape: ../builders/build-plugin-zabbix.sh
-      - shell:
-          !include-raw-escape: ../builders/rpm-check.sh
     publishers:
       - generic-build-publisher:
           plugin_name: '{plugin_name}'
