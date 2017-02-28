@@ -29,14 +29,12 @@ echo -e "test-group: ${TEST_GROUP}\n" \
 
 . "${VENV_PATH}/bin/activate"
 
-cd ${WORKSPACE}/fuel-qa
-sh -ex "tests/utils/jenkins/system_tests.sh"  \
-   -k                                   \
-   -K                                   \
-   -w "$(pwd)"                          \
-   -t test                              \
-   -o --group="${TEST_GROUP:?}" \
-   -i ${ISO_STORAGE:?}/${ISO_FILE:?}
+
+set -x
+export ISO_PATH=${ISO_STORAGE:?}/${ISO_FILE:?}
+export PYTHONPATH="${WORKSPACE}:${WORKSPACE}/tests"
+python tests/stacklight_tests/run_tests.py run -q --nologcapture --with-xunit --group="${TEST_GROUP:?}"
+echo "ENVIRONMENT NAME is $ENV_NAME"
 
 env_data=$(dos.py list --ips | grep ${ENV_NAME})
 echo $env_data
