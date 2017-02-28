@@ -28,8 +28,8 @@
     debug: true
     build_debug: true
     publish_results: true
-    multijob_build_pkg: true
-    testjob_build_pkg: false
+    multijob_build_pkg: true 
+    testjob_build_pkg: false 
     fuel_qa_refs: ''
     fuel_qa_branch: 'stable/newton'
     iso_file: ''
@@ -210,7 +210,6 @@
     scm:
       - git:
           url: 'http://git.openstack.org/openstack/fuel-qa'
-          basedir: fuel-qa
           branches:
              - $FUEL_QA_BRANCH
           wipe-workspace: false
