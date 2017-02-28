@@ -29,6 +29,8 @@ echo -e "test-group: ${TEST_GROUP}\n" \
 
 . "${VENV_PATH}/bin/activate"
 
+pip install -r ${WORKSPACE}/tests/requirements/requirements.txt --upgrade
+pip install -r ${WORKSPACE}/tests/requirements/mos9-requirements.txt --upgrade
 
 set -x
 export ISO_PATH=${ISO_STORAGE:?}/${ISO_FILE:?}
