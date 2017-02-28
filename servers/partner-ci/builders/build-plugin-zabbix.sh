@@ -1,9 +1,9 @@
 #!/bin/bash
-set -e
+set -xe
 
 git log  --pretty=oneline | head
 
-path="./deployment_scripts/puppet/manifests ./deployment_scripts/puppet/modules/zabbix"
+path="$PUPPETLINT_PATH"
 
 find $path -name '*.erb' -print0 | xargs -0 -P1 -L1 -I '%' erb -P -x -T '-' % | ruby -c
 find $path -name '*.pp'  -print0 | xargs -0 -P1 -L1 puppet parser validate --verbose
