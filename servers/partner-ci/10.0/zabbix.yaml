@@ -32,6 +32,8 @@
     testjob_build_pkg: false 
     fuel_qa_refs: ''
     fuel_qa_branch: 'stable/newton'
+    fuel_zabbix_refs: ''
+    fuel_zabbix_branch: 'master'
     iso_file: ''
     iso_storage: '/storage/downloads'
 
@@ -165,6 +167,9 @@
           testrail_suite:        '{testrail_suite}'
           testrail_suite_desc:   '{testrail_suite_desc}'
           update_master:         '{update_master}'
+      - zabbix-parameters:
+          fuel_zabbix_branch:        '{fuel_zabbix_branch}'
+          fuel_zabbix_refs:          '{fuel_zabbix_refs}'
 
 - test-parameters: &test-parameters
     name: 'test-parameters'
@@ -200,6 +205,9 @@
           testrail_suite:        '{testrail_suite}'
           testrail_suite_desc:   '{testrail_suite_desc}'
           update_master:         '{update_master}'
+      - zabbix-parameters:
+          fuel_zabbix_branch:        '{fuel_zabbix_branch}'
+          fuel_zabbix_refs:          '{fuel_zabbix_refs}'
 
 - defaults:
     name: global
@@ -215,10 +223,10 @@
           choosing-strategy: default
           skip-tag: true
       - git:
-          url: 'https://github.com/rkhozinov/stacklight-integration-tests.git'
+          url: 'http://git.openstack.org/openstack/stacklight-integration-tests'
           basedir: tests
           branches:
-            - master
+            - $FUEL_ZABBIX_BRANCH
           wipe-workspace: false
           choosing-strategy: default
           skip-tag: true
@@ -227,7 +235,7 @@
     properties:
       - test-property
     builders:
-      - 10-get-refs
+      - 10-get-zabbix-refs
       - 20-get-props
       - 30-get-ubuntu-mirror
       - 40-get-env-variables

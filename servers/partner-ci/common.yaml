@@ -136,10 +136,21 @@
       - string:
           name: FUEL_UI_REFS
           default: '{fuel_ui_refs}'
-          description: "Multiple Refspecs for commits in fuel-ui gerrit separated with spaces"
+          description: "Multiple Refspecs for commits in fuel-zabbix gerrit separated with spaces"
       - string:
           name: DOCKER_BRANCH
           default: '{docker_branch}'
+
+- parameter:
+    name: zabbix-parameters
+    parameters:
+      - string:
+          name: FUEL_ZABBIX_BRANCH
+          default: '{fuel_zabbix_branch}'
+      - string:
+          name: FUEL_ZABBIX_REFS
+          default: '{fuel_zabbix_refs}'
+          description: "Multiple Refspecs for commits in fuel-zabbix gerrit separated with spaces"
 
 - parameter:
     name: common-fuel-parameters
@@ -528,6 +539,28 @@
             cd ${WORKSPACE}/fuel-ui
             git_url=$(git config --get remote.origin.url)
             for ref in ${FUEL_UI_REFS:?}; do cherrypick $git_url $ref; done
+          fi
+          if [[ ! -z "${FUEL_QA_REFS}" ]]; then
+            cd ${WORKSPACE}/fuel-qa
+            git_url=$(git config --get remote.origin.url)
+            for ref in ${FUEL_QA_REFS:?}; do cherrypick $git_url $ref; done
+          fi
+
+- builder:
+    name: 10-get-zabbix-refs
+    builders:
+      - shell: |
+          #!/bin/bash
+          cherrypick() {
+              git_url=$1
+              ref=$2
+              git fetch $git_url "$ref" && git cherry-pick FETCH_HEAD || { git status; exit 1; }
+              git log --pretty=oneline | head
+          }
+          if [[ ! -z "${FUEL_ZABBIX_REFS}" ]]; then
+            cd ${WORKSPACE}/tests
+            git_url=$(git config --get remote.origin.url)
+            for ref in ${FUEL_ZABBIX_REFS:?}; do cherrypick $git_url $ref; done
           fi
           if [[ ! -z "${FUEL_QA_REFS}" ]]; then
             cd ${WORKSPACE}/fuel-qa
