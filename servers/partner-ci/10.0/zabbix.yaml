@@ -28,8 +28,8 @@
     debug: true
     build_debug: true
     publish_results: true
-    multijob_build_pkg: true 
-    testjob_build_pkg: false 
+    multijob_build_pkg: true
+    testjob_build_pkg: false
     fuel_qa_refs: ''
     fuel_qa_branch: 'stable/newton'
     fuel_zabbix_refs: ''
@@ -406,7 +406,7 @@
           weight: 1
     builders:
       - shell:
-          !include-raw-escape: ../builders/build-plugin-zabbix.sh
+          !include-raw-escape: ../builders/build-plugin-generic.sh
     publishers:
       - generic-build-publisher:
           plugin_name: '{plugin_name}'

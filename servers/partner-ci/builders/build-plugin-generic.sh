@@ -22,4 +22,6 @@ fpb --check  ./
 [[ "${DEBUG}" == "true" ]] && fpb --debug --build ./ | fpb --build ./
 
 pkg_name=$(ls -t *.rpm | head -n1)
-mv $pkg_name $(echo $pkg_name | head -n 1 | sed s/.noarch/-$BUILD_NUMBER.noarch/)
+new_pkg_name=$(echo $pkg_name | head -n 1 | sed s/.noarch/-$BUILD_NUMBER.noarch/)
+mv $pkg_name $new_pkg_name
+ln -s $new_pkg_name "$(echo $new_pkg_name | cut -d'-' -f1).rpm"

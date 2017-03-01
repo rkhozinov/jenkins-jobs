@@ -109,7 +109,7 @@
           colormap: xterm
     builders:
       - shell:
-          !include-raw-escape: ../builders/build-plugin-emc.sh
+          !include-raw-escape: ../builders/build-plugin-generic.sh
       - shell:
           !include-raw-escape: ../builders/rpm-check.sh
     publishers:
