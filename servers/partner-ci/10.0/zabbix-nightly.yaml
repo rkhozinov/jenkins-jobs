@@ -20,10 +20,6 @@
         property-file: build_number
         current-parameters: true
         kill-phase-on: NEVER
-      - name: '{fuel_release}.{plugin_name}.deploy_zabbix_ha_offline'
-        property-file: build_number
-        current-parameters: true
-        kill-phase-on: NEVER
       - name: '{fuel_release}.{plugin_name}.install_zabbix'
         property-file: build_number
         current-parameters: true

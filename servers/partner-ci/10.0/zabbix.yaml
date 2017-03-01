@@ -82,7 +82,6 @@
     testgroup:
       - check_zabbix_api
       - check_zabbix_dashboard_configuration
-      - deploy_zabbix_ha_offline
       - deploy_zabbix_monitoring_ha
       - install_zabbix
       - test_dependant_plugins
