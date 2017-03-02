@@ -232,6 +232,10 @@
           skip-tag: true
     wrappers:
       - test-wrapper
+      - workspace-cleanup:
+          include:
+            - "fuel-plugin-*"
+            - "*.rpm"
     properties:
       - test-property
     builders:
