@@ -27,7 +27,7 @@
     enable_proposed: true
     debug: true
     build_debug: true
-    publish_results: true
+    publish_results: false
     multijob_build_pkg: true
     testjob_build_pkg: false
     fuel_qa_refs: ''
