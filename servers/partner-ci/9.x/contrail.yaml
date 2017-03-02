@@ -9,7 +9,7 @@
             CONTRAIL_DISTRIBUTION=;
             CONTRAIL_PLUGIN_PACK_UB_PATH=;
             CONTRAIL_PLUGIN_PATH=;
-            CONTRAIL_VERSION=5.0;
+            CONTRAIL_VERSION=5.1.0;
             CONTRAIL_PLUGIN_VERSION=$PLUGIN_VERSION;
             DISABLE_SSL=false;
             FORCE_VSRX_COPY=True;
