@@ -201,7 +201,7 @@
 
 - job-template:
     name: '{smoke-name}'
-    disabled: false
+    disabled: true
     description: 'The Smoke test for {fuel_release}.{job_name}'
     concurrent: true
     quiet-period: 5
@@ -231,7 +231,7 @@
 - job-template:
     name: '{bvt-name}'
     description: 'The BVT test for {fuel_release}.{job_name}'
-    disabled: false
+    disabled: true
     concurrent: true
     project-type: multijob
     node: runner
