@@ -213,6 +213,7 @@
     wrappers:
       - runner-wrapper
     scm: []
+    triggers: []
     builders:
       - multijob:
           name: 'The smoke test for {fuel_release}.{job_name}'
@@ -237,6 +238,7 @@
     node: runner
     <<: *runner-parameters
     scm: []
+    triggers: []
     properties:
       - ui-runner-property
     wrappers:
