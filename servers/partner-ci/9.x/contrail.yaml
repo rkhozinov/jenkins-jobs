@@ -6,7 +6,7 @@
           name: SPECIFIC_PROPS
           default: |
             BONDING=False;
-            CONTRAIL_DISTRIBUTION=;
+            CONTRAIL_DISTRIBUTION=juniper;
             CONTRAIL_PLUGIN_PACK_UB_PATH=;
             CONTRAIL_PLUGIN_PATH=;
             CONTRAIL_VERSION=5.1.0;
