@@ -42,7 +42,7 @@
     snapshots_id: 'lastSuccessfulBuild'
     fuel_qa_branch: 'origin/stable/mitaka'
     fuel_ui_branch: 'origin/stable/mitaka'
-    docker_branch: 'master'
+    docker_branch: 'stable/mitaka'
     email_to: 'rkhozinov@mirantis.com'
     released_plugin_path: ''
     scm_submodule_disabled: true
