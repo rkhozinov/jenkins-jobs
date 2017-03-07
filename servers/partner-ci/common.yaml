@@ -873,6 +873,21 @@
             tracking: true
             recursive: true
           wipe-workspace: '{obj:scm_wipe_workspace}'
+- scm:
+    name: generic-scm
+    scm:
+      - git:
+          url: '{gerrit_server}/{gerrit_repo}'
+          refspec: $GERRIT_REFSPEC
+          branches:
+            - $GERRIT_BRANCH
+          choosing-strategy: '{choosing_strategy}'
+          skip-tag: true
+          submodule:
+            disable: '{obj:scm_submodule_disabled}'
+            tracking: true
+            recursive: true
+          wipe-workspace: '{obj:scm_wipe_workspace}'
 
 - trigger:
     name: test-gerrit-trigger
