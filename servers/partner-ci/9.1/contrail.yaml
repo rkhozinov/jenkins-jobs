@@ -54,7 +54,7 @@
     nightly_disabled: true
     full_disabled: true
     baremetal_disabled: true
-    regression_disabled: false
+    regression_disabled: true
     force_erase: true
     force_reuse: false
     force_vsrx_copy: false
@@ -586,7 +586,7 @@
     name: '{doc-check-name}'
     node: 'runner'
     concurrent: true
-    disabled: false
+    disabled: true
     parameters:
      - doc-parameters:
           gerrit_repo: '{gerrit_repo}'
@@ -667,19 +667,13 @@
 
 - job-template:
     name: '{smoke-name}'
-    disabled: false
+    disabled: true
     description: 'The Smoke test for {fuel_release}.{plugin_name}.{plugin_version}'
     concurrent: true
     quiet-period: 5
     project-type: multijob
     node: runner
     <<: *runner-parameters
-    triggers:
-      - draft-gerrit-trigger:
-          gerrit_repo: '{gerrit_repo}'
-          gerrit_branch: '{gerrit_branch}'
-          skip_vote_successfull: '{skip_vote_successfull}'
-          skip_vote_failed: '{skip_vote_failed}'
     properties:
       - runner-property:
           build-name: '{build-name}'
@@ -707,18 +701,12 @@
 - job-template:
     name: '{bvt-name}'
     description: 'The BVT test for {fuel_release}.{plugin_name}.{plugin_version}'
-    disabled: false
+    disabled: true
     concurrent: true
     project-type: multijob
     node: runner
     <<: *runner-parameters
     scm: []
-    triggers:
-      - merge-gerrit-trigger:
-          gerrit_repo: '{gerrit_repo}'
-          gerrit_branch: '{gerrit_branch}'
-          skip_vote_successfull: '{skip_vote_successfull}'
-          skip_vote_failed: '{skip_vote_failed}'
     properties:
       - runner-property:
           build-name: '{build-name}'
