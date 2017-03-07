@@ -30,7 +30,7 @@
     fuel_qa_refs: ''
     fuel_qa_branch: 'origin/stable/newton'
     fuel_ui_branch: 'origin/stable/newton'
-    docker_branch: 'master'
+    docker_branch: 'stable/newton'
     email_to: 'rkhozinov@mirantis.com'
     scm_submodule_disabled: true
     scm_wipe_workspace: false
