@@ -1,0 +1,137 @@
+---
+- project:
+    name: 'predefined_parameters'
+    fuel_release: '10.0'
+    fuel_release_checker: '10'
+    plugin_version: '0.2'
+    plugin_name: 'stub'
+    build-name: '{fuel_release}.{plugin_name}.{plugin_version}.build'
+    flake8-name: '{fuel_release}.{plugin_name}.{plugin_version}.flake8'
+    radon-name: '{fuel_release}.{plugin_name}.{plugin_version}.radon'
+    shellcheck-name: '{fuel_release}.{plugin_name}.{plugin_version}.shellcheck'
+    pkg_job_name: '{fuel_release}.{plugin_name}.{plugin_version}.build'
+    pkg_job_build_number: ''
+    force_erase: true
+    force_reuse: false
+    recreate_venv: true
+    ws_norevert: false
+    nfs_clean: false
+    kvm_use: false
+    update_master: true
+    enable_proposed: true
+    debug: true
+    build_debug: true
+    publish_results: true
+    multijob_build_pkg: true
+    testjob_build_pkg: false
+    fuel_qa_refs: ''
+    snapshots_id: ''
+    gerrit_repo: 'fuel-plugin-stub'
+    gerrit_server: 'https://review.gerrithub.io/rkhozinov'
+    gerrit_branch: 'stable/{plugin_version}'
+    project_pattern: 'rkhozinov/{gerrit_repo}'
+    email_to: 'rkhozinov@mirantis.com'
+    released_plugin_path: ''
+    scm_submodule_disabled: false
+    scm_wipe_workspace: true
+    skip_vote_successfull: false
+    skip_vote_failed: false
+
+    testgroup_parameter_type: string
+    testgroup_value_type: default
+    testgroup_value: '{testgroup}'
+
+    testgroup:
+      - prepare_slaves_9
+
+    jobs:
+      - '{build-name}':
+          scm_submodule_disabled: true
+          scm_wipe_workspace: true
+      - '{flake8-name}':
+          scm_submodule_disabled: true
+      - '{radon-name}':
+          scm_submodule_disabled: true
+      - '{shellcheck-name}':
+          scm_submodule_disabled: true
+          skip_vote_successfull: '{skip_vote_successfull}'
+          skip_vote_failed: '{skip_vote_failed}'
+
+- job-template:
+    name: '{build-name}'
+    node: 'runner'
+    concurrent: true
+    disabled: false
+    triggers:
+      - gerrit:
+          trigger_on:
+            - draft-published-event
+            - comment-added-contains-event:
+                comment-contains-value: 'recheck'
+            - patchset-created-event:
+                exclude-trivial-rebase: false
+                exclude-no-code-change: true
+          projects:
+            - project-compare-type: 'PLAIN'
+              project-pattern: '{project_pattern}'
+              branches:
+                - branch-compare-type: 'ANT'
+                  branch-pattern: '{gerrit_branch}'
+              forbidden-file-paths:
+                - compare-type: 'ANT'
+                  pattern: 'doc/**'
+                - compare-type: 'ANT'
+                  pattern: 'docs/**'
+                - compare-type: 'ANT'
+                  pattern: 'specs/**'
+              disable-strict-forbidden-file-verification: true
+          silent: false
+          override-votes: true
+          server-name: '{gerrit_server}'
+          custom-url: '* $JOB_NAME $BUILD_URL'
+          escape-quotes: true
+          readable-message: true
+          skip-vote:
+            successfull: '{skip_vote_successfull}'
+            failed: '{skip_vote_failed}'
+            unstable: true
+            notbuilt: true
+
+    scm:
+      - generic-scm:
+          scm_wipe_workspace: '{scm_wipe_workspace}'
+          scm_submodule_disabled: '{scm_submodule_disabled}'
+          choosing_strategy: 'gerrit'
+          gerrit_server: '{gerrit_server}'
+          gerrit_repo: '{gerrit_repo}'
+          skip_vote_successfull: '{skip_vote_successfull}'
+          skip_vote_failed: '{skip_vote_failed}'
+    wrapper:
+      - runner-wrapper
+    parameters:
+      - string:
+          name: GERRIT_BRANCH
+          default: 'origin/{gerrit_branch}'
+      - string:
+          name: GERRIT_REFSPEC
+          default: 'refs/heads/{gerrit_branch}'
+      - string:
+          name: PUPPETLINT_PATH
+          default: 'deployment_scripts/'
+      - string:
+          name: PUPPETLINT_IGNORE
+      - bool:
+          name: DEBUG
+          default: '{build_debug}'
+    properties:
+      - test-property
+    wrappers:
+      - ansicolor:
+          colormap: xterm
+    builders:
+      - shell:
+          !include-raw-escape: ../builders/build-plugin-generic.sh
+    publishers:
+      - generic-build-publisher:
+          email_to: '{email_to}'
+          plugin_name: '{plugin_name}'
