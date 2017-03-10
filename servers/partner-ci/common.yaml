@@ -134,6 +134,9 @@
           name: FUEL_UI_BRANCH
           default: '{fuel_ui_branch}'
       - string:
+          name: FUEL_WEB_BRANCH
+          default: '{fuel_web_branch}'
+      - string:
           name: FUEL_UI_REFS
           default: '{fuel_ui_refs}'
           description: "Multiple Refspecs for commits in fuel-zabbix gerrit separated with spaces"

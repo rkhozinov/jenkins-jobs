@@ -98,6 +98,7 @@
       - ui-parameters:
           docker_branch:         '{docker_branch}'
           fuel_ui_branch:        '{fuel_ui_branch}'
+          fuel_web_branch:       '{fuel_web_branch}'
           fuel_ui_refs:          '{fuel_ui_refs}'
       - specific-parameters
 
@@ -136,6 +137,7 @@
       - ui-parameters:
           docker_branch:         '{docker_branch}'
           fuel_ui_branch:        '{fuel_ui_branch}'
+          fuel_web_branch:       '{fuel_web_branch}'
           fuel_ui_refs:          '{fuel_ui_refs}'
       - specific-parameters
 
@@ -153,10 +155,10 @@
           wipe-workspace: true
           skip-tag: true
       - git:
-          url: 'http://git.openstack.org/openstack/fuel-web'
+          url: 'http://github.com/openstack/fuel-web'
           basedir: docker/fuel-web
           branches:
-            - $FUEL_QA_BRANCH
+            - $FUEL_WEB_BRANCH
           wipe-workspace: true
           choosing-strategy: default
           skip-tag: true
