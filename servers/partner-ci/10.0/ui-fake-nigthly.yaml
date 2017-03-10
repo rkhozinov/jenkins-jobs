@@ -3,21 +3,15 @@
     name: 'UI tests for {fuel_release}'
     condition: SUCCESSFUL
     projects:
-     - name: '{fuel_release}.{job_name}.test_nics'
-       property-file: build_number
-       current-parameters: true
-       predefined-parameters: |
-         TEST_PREFIX=test_nics*
-       kill-phase-on: NEVER
-     - name: '{fuel_release}.{job_name}.test_nodes'
-       property-file: build_number
-       current-parameters: true
-       predefined-parameters: |
-         TEST_PREFIX=test_nodes*
-       kill-phase-on: NEVER
-     - name: '{fuel_release}.{job_name}.test_bonds'
-       property-file: build_number
-       current-parameters: true
-       predefined-parameters: |
-         TEST_PREFIX=test_bonds*
-       kill-phase-on: NEVER
+      - name: '{fuel_release}.{job_name}.test_cluster_workflows'
+        property-file: build_number
+        current-parameters: true
+        predefined-parameters: |
+          TEST_PATH=static/tests/functional/nightly/test_cluster_workflows.js
+        kill-phase-on: NEVER
+      - name: '{fuel_release}.{job_name}.test_deployment_history'
+        property-file: build_number
+        current-parameters: true
+        predefined-parameters: |
+          TEST_PATH=static/tests/functional/nightly/test_deployment_history.js
+        kill-phase-on: NEVER

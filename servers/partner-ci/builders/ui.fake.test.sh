@@ -3,28 +3,9 @@
 [[ "${DEBUG}" == "true" ]] && set -x || set +x
 
 . "${VENV_PATH}/bin/activate"
-pip freeze
-cd ${WORKSPACE}/fuel-qa
-sh -ex "utils/jenkins/system_tests.sh"  \
-   -k                                   \
-   -K                                   \
-   -w "$(pwd)"                          \
-   -t test                              \
-   -o --group="${FUEL_QA_TEST_GROUP:?}" \
-   -i ${ISO_STORAGE:?}/${ISO_FILE:?}
-
-env_data=$(dos.py list --ips | grep ${ENV_NAME})
-echo $env_data
-admin_node_ip=$(echo $env_data | cut -d' ' -f2)
-export NAILGUN_HOST=${NAIGLUN_HOST:-$admin_node_ip}
-
-last_snapshot=$(dos.py snapshot-list ${ENV_NAME} | tail -1 | cut -d' ' -f1)
-dos.py revert-resume ${ENV_NAME} "${last_snapshot}"
-
-
 cd ${WORKSPACE}/docker/
 pip install --upgrade docker-compose
-ln -s ${WORKSPACE}/fuel-ui fuel-ui
+ln -s ${WORKSPACE}/docker/fuel-web fuel-web
 docker-compose down -v
 docker-compose up --remove-orphans --build --abort-on-container-exit
 
