@@ -73,7 +73,7 @@
 
       - '{reporter-name}':
           plugin_version: ''
-          plugin_name: {job_name}
+          plugin_name: '{job_name}'
 
 - runner-parameters: &runner-parameters
     name: 'runner-parameters'
@@ -84,8 +84,8 @@
           env_prefix:            '{fuel_release}.{job_name}'
           force_reuse:           '{force_reuse}'
           fuel_release_checker:  '{fuel_release_checker}'
-          fuel_web_branch:        '{fuel_web_branch}'
-          fuel_web_refs:          '{fuel_web_refs}'
+          fuel_web_branch:       '{fuel_web_branch}'
+          fuel_web_refs:         '{fuel_web_refs}'
           publish_results:       '{publish_results}'
           recreate_venv:         '{recreate_venv}'
           skip_vote_failed:      '{skip_vote_failed}'
@@ -126,8 +126,8 @@
           env_prefix:            '{fuel_release}.{job_name}'
           force_reuse:           '{force_reuse}'
           fuel_release_checker:  '{fuel_release_checker}'
-          fuel_web_branch:        '{fuel_web_branch}'
-          fuel_web_refs:          '{fuel_web_refs}'
+          fuel_web_branch:       '{fuel_web_branch}'
+          fuel_web_refs:         '{fuel_web_refs}'
           publish_results:       '{publish_results}'
           recreate_venv:         '{recreate_venv}'
           skip_vote_failed:      '{skip_vote_failed}'
