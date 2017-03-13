@@ -17,7 +17,6 @@
     reporter-name: '{fuel_release}.{job_name}.reporter'
     nightly_timer: 'H 21 * * *'
     nightly_disabled: false
-    force_erase: false
     force_reuse: true
     recreate_venv: false
     debug: true
@@ -82,7 +81,6 @@
           debug:                 '{debug}'
           snapshots_id:           ''
           env_prefix:            '{fuel_release}.{job_name}'
-          force_erase:           '{force_erase}'
           force_reuse:           '{force_reuse}'
           fuel_release_checker:  '{fuel_release_checker}'
           fuel_web_branch:        '{fuel_web_branch}'
@@ -121,7 +119,6 @@
           debug:                 '{debug}'
           snapshots_id:           ''
           env_prefix:            '{fuel_release}.{job_name}'
-          force_erase:           '{force_erase}'
           force_reuse:           '{force_reuse}'
           fuel_release_checker:  '{fuel_release_checker}'
           fuel_web_branch:        '{fuel_web_branch}'
