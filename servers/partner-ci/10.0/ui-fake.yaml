@@ -47,6 +47,7 @@
     testgroup_parameter_type: string
     testgroup_value_type: default
     testgroup_value: '{testgroup}'
+    test_prefix: 'static/tests/functional/nightly'
 
     testgroup:
       - test_cluster_workflows
@@ -93,6 +94,10 @@
           testrail_plan_desc:    '{testrail_plan_desc}'
           testrail_suite:        '{testrail_suite}'
           testrail_suite_desc:   '{testrail_suite_desc}'
+      - string:
+          name: TEST_PREFIX
+          default: '{test_prefix}'
+          description: "prefix for test path"
       - ui-parameters:
           docker_branch:         '{docker_branch}'
           fuel_ui_branch:        '{fuel_ui_branch}'
@@ -113,8 +118,8 @@
           description: "test-group name"
       - string:
           name: TEST_PREFIX
-          default: '$TEST_GROUP*'
-          description: "test-group name"
+          default: '{test_prefix}'
+          description: "prefix for test path"
       - common-fuel-parameters:
           debug:                 '{debug}'
           snapshots_id:           ''

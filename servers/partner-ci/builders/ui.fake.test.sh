@@ -2,6 +2,23 @@
 # activate bash xtrace for script
 [[ "${DEBUG}" == "true" ]] && set -x || set +x
 
+VENV_PATH='home/jenkins/fake-venv'
+function prepare_venv {
+    source "${VENV_PATH}/bin/activate"
+    easy_install -U pip
+    pip install --upgrade docker-compose
+    deactivate
+}
+
+
+if [[ "${RECREATE_VENV}" == "true" ]] || [[ ! -d ${VENV_PATH:?} ]]; then
+  virtualenv --clear "${VENV_PATH}"
+fi
+
+prepare_venv
+
+export TEST_PATH="${TEST_PREFIX:?}/${TEST_GROUP:?}.js"
+
 . "${VENV_PATH}/bin/activate"
 cd ${WORKSPACE}/docker/
 pip install --upgrade docker-compose
@@ -11,10 +28,9 @@ docker-compose up --remove-orphans --build --abort-on-container-exit
 
 cd ${WORKSPACE}
 cat << REPORTER_PROPERTIES > reporter.properties
-ISO_VERSION=${SNAPSHOTS_ID:?}
-SNAPSHOTS_ID=${SNAPSHOTS_ID:?}
-ISO_FILE=${ISO_FILE:?}
-TEST_GROUP=${TEST_GROUP:?}
+TEST_GROUP=${TEST_GROUP}
+TEST_PATH=${TEST_PATH:?}
+TEST_PREFIX=${TEST_PREFIX}
 TEST_JOB_BUILD_NUMBER=${BUILD_NUMBER:?}
 TEST_JOB_NAME=${JOB_NAME:?}
 DATE=$(date +'%B-%d')
