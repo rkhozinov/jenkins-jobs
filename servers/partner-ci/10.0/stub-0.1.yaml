@@ -125,6 +125,8 @@
     wrappers:
       - ansicolor:
           colormap: xterm
+      - workspace-cleanup:
+          dirmatch: true
     builders:
       - shell:
           !include-raw-escape: ../builders/build-plugin-generic.sh
