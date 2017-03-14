@@ -190,9 +190,6 @@
     builders:
       - 10-get-fake-ui-refs
       - 20-get-props
-      - 40-get-env-variables
-      - shell:
-          !include-raw-escape: ../builders/common.prepare.sh
       - shell:
           !include-raw-escape: ../builders/ui.fake.test.sh
     publishers:
