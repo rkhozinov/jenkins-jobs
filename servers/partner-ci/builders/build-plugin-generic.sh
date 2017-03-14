@@ -16,7 +16,6 @@ find $PUPPETLINT_PATH -name '*.pp' -print0  | xargs -0 -P1 -L1 -r puppet-lint \
          --no-class_inherits_from_params_class-check \
          --no-documentation-check \
          --no-arrow_alignment-check
-
 fpb --check  ./
 
 [[ "${DEBUG}" == "true" ]] && fpb --debug --build ./ || fpb --build ./
