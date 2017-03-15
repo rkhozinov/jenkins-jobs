@@ -42,6 +42,7 @@
     snapshots_id: 'lastSuccessfulBuild'
     fuel_qa_branch: 'origin/stable/mitaka'
     fuel_ui_branch: 'origin/stable/mitaka'
+    fuel_web_branch: ''
     docker_branch: 'stable/mitaka'
     email_to: 'rkhozinov@mirantis.com'
     released_plugin_path: ''
@@ -119,6 +120,7 @@
           docker_branch:         '{docker_branch}'
           fuel_ui_branch:        '{fuel_ui_branch}'
           fuel_ui_refs:          '{fuel_ui_refs}'
+          fuel_web_branch:        '{fuel_web_branch}'
       - plugin-specific-parameters
 
 - test-parameters: &test-parameters
@@ -161,6 +163,7 @@
           docker_branch:         '{docker_branch}'
           fuel_ui_branch:        '{fuel_ui_branch}'
           fuel_ui_refs:          '{fuel_ui_refs}'
+          fuel_web_branch:        '{fuel_web_branch}'
       - plugin-specific-parameters
 
 - defaults:
