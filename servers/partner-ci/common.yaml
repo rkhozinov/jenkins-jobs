@@ -543,7 +543,7 @@
                   artifacts: 'nosetests.xml'
                   allow-empty: false
       - junit:
-          results: '**/test_run/feature_nics/*.xml'
+          results: '**/test_run/ui_func/*.xml'
           health-scale-factor: 1.0
       - postbuildscript:
           script-only-if-succeeded: False
