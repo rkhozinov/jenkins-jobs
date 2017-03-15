@@ -19,7 +19,7 @@ find $PUPPETLINT_PATH -name '*.pp' -print0  | xargs -0 -P1 -L1 -r puppet-lint \
 
 fpb --check  ./
 
-[[ "${DEBUG}" == "true" ]] && fpb --debug --build ./ | fpb --build ./
+[[ "${DEBUG}" == "true" ]] && fpb --debug --build ./ || fpb --build ./
 
 pkg_name=$(ls -t *.rpm | head -n1)
 new_pkg_name=$(echo $pkg_name | head -n 1 | sed s/.noarch/-$BUILD_NUMBER.noarch/)
