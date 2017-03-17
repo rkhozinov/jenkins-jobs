@@ -2,13 +2,19 @@ language: bash
 
 # Use container-based infrastructure for quicker build start-up
 sudo: required
+language: python
+cache:
+  pip: true
+  apt: true
+
 python:
   - "3.5"
 
+
 install:
-  - sudo pip install --upgrade pip
-  - sudo pip install tox
-  - sudo pip install flake8
+  - pip install --upgrade pip
+  - pip install tox
+  - pip install flake8
 
 addons:
   apt:
