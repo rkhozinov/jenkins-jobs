@@ -70,16 +70,16 @@ function smart_erase {
       fi
     done
   fi
-  for vm in $vms; do
-    domstat=$(virsh domstate $vm)
-    if [[ $domstat != *"shut"* ]]; then
+
+  for vm in ${vms:?}; do
+    if virsh domstate $vm | grep -e '.*shut.*' -q; then
       if virsh destroy $vm; then
         echo "domain destroyed succesfully"
         virsh undefine --remove-all-storage --snapshots-metadata $vm
       else
         ref=$?
         echo "there are some troubles with virt stack, restart services and recheck"
-	sudo service libvirt-bin restart
+        sudo service libvirt-bin restart
         if virsh destroy $vm; then
           echo "domain destroyed succesfully"
           virsh undefine --remove-all-storage --snapshots-metadata $vm
