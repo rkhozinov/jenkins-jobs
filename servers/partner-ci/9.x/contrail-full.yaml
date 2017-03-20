@@ -159,7 +159,12 @@
         current-parameters: true
         kill-phase-on: NEVER
 
-      - name: '{fuel_release}.{plugin_name}.{plugin_version}.contrail_ostf_net_provisioning_disable.juniper'
+      - name: '{fuel_release}.{plugin_name}.{plugin_version}.contrail_ostf_net_provisioning_off.juniper'
+        property-file: build_number
+        current-parameters: true
+        kill-phase-on: NEVER
+
+      - name: '{fuel_release}.{plugin_name}.{plugin_version}.contrail_private_gateway.juniper'
         property-file: build_number
         current-parameters: true
         kill-phase-on: NEVER
