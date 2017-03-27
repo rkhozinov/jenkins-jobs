@@ -4,10 +4,10 @@
     condition: SUCCESSFUL
     projects:
       - name: '{fuel_release}.{job_name}.test_cluster_workflows'
-        property-file: build_number
+        property-file: timestamp.properties
         current-parameters: true
         kill-phase-on: NEVER
       - name: '{fuel_release}.{job_name}.test_deployment_history'
-        property-file: build_number
+        property-file: timestamp.properties
         current-parameters: true
         kill-phase-on: NEVER
