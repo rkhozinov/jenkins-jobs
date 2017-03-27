@@ -846,6 +846,11 @@
     builders:
       - 20-get-props
       - 30-get-iso
+      - generic-timestamp
+
+- builder:
+    name: generic-timestamp
+    builders:
       - shell: echo "COMMON_DATE=$(date +'%D %T %Z')" > timestamp.properties
 
 - builder:
