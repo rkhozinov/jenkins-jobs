@@ -25,7 +25,7 @@
     fuel_web_refs: ''
     fuel_web_branch: 'origin/stable/newton'
     fuel_ui_branch: 'origin/stable/newton'
-    docker_branch: 'fake-ui'
+    docker_branch: 'origin/stable/newton-fake'
     email_to: 'rkhozinov@mirantis.com'
     scm_submodule_disabled: true
     scm_wipe_workspace: false
@@ -150,7 +150,7 @@
     <<: *test-parameters
     scm:
       - git:
-          url: 'http://github.com/ekhomyakova/fuel-ui-tests-docker'
+          url: 'http://github.com/rkhozinov/fuel-ui-tests-docker'
           basedir: docker
           branches:
              - $DOCKER_BRANCH
