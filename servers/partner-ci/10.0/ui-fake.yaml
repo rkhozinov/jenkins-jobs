@@ -154,14 +154,14 @@
           basedir: docker
           branches:
              - $DOCKER_BRANCH
-          wipe-workspace: true
+          wipe-workspace: '{scm_wipe_workspace}'
           skip-tag: true
       - git:
           url: 'http://github.com/openstack/fuel-web'
           basedir: docker/fuel-web
           branches:
             - $FUEL_WEB_BRANCH
-          wipe-workspace: true
+          wipe-workspace: '{scm_wipe_workspace}'
           choosing-strategy: default
           skip-tag: true
       - git:
@@ -169,7 +169,7 @@
           basedir: docker/fuel-ui
           branches:
             - $FUEL_UI_BRANCH
-          wipe-workspace: true
+          wipe-workspace: '{scm_wipe_workspace}'
           choosing-strategy: default
           skip-tag: true
     wrappers:
