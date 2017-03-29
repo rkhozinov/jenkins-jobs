@@ -22,8 +22,10 @@ export TEST_PATH="${TEST_PREFIX:?}/${TEST_GROUP:?}.js"
 . "${VENV_PATH}/bin/activate"
 cd ${WORKSPACE}/docker/
 
-ln -s ${WORKSPACE}/docker/fuel-web fuel-web
-docker-compose down -v
+if [[ "${FORCE_REUSE}" == "false" ]]; then
+  ln -s ${WORKSPACE}/docker/fuel-web fuel-web
+  docker-compose down -v
+fi
 docker-compose up --remove-orphans --build --abort-on-container-exit
 
 cd ${WORKSPACE}
