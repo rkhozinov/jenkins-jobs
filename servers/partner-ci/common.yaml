@@ -1581,6 +1581,85 @@
           properties_name: reporter.properties
           email_to: '{email_to}'
 
+- job-template:
+    name: '{ui-reporter-name}'
+    disabled: false
+    description: 'The ui-reporter for the {fuel_release}.{plugin_name}.{plugin_version}'
+    concurrent: true
+    node: runner
+    properties:
+      - heavy-job:
+          weight: 1
+    wrappers:
+      - inject-passwords:
+          global: true
+          mask-password-params: true
+    parameters:
+      - string:
+          name: TEST_JOB_NAME
+          description: "The name of a test for getting test results"
+      - string:
+          name: TEST_GROUP
+          description: "The name of a test group"
+      - string:
+          name: DATE
+          description: "The date of a test run"
+          default: ''
+      - string:
+          name: TEST_JOB_BUILD_NUMBER
+          description: "The number of a test build"
+      - string:
+          name: TESTRAIL_URL
+          default: "https://mirantis.testrail.com"
+          description: "Mirantis testrail url"
+      - string:
+          name: TESTRAIL_PROJECT
+          default: "{testrail_project}"
+          description: "Project name"
+      - string:
+          name: TESTRAIL_MILESTONE
+          default: "{testrail_milestone}"
+          description: "Testrail milestone"
+      - string:
+          name: TESTRAIL_SUITE
+          default: "{testrail_suite}"
+          description: "The test suite name"
+      - string:
+          name: TESTRAIL_PLAN
+          default: "{testrail_plan}"
+          description: "Testrail testplan name"
+      - string:
+          name: TESTRAIL_RUN
+          default: "{testrail_run}"
+          description: "Testrail test run name"
+      - string:
+          name: XML_PATH
+          default: "nosetests.xml"
+          description: "File with tests results"
+    scm:
+      - git:
+          url: 'https://github.com/ekhomyakova/testrail-reporter.git'
+          branches:
+            - 'origin/master'
+          # choosing-strategy: default
+          skip-tag: true
+          clean:
+            before: false
+          wipe-workspace: false
+    builders:
+      - copyartifact:
+          project: ${{TEST_JOB_NAME}}
+          filter: ${{XML_PATH}}
+          which-build: specific-build
+          build-number: ${{TEST_JOB_BUILD_NUMBER}}
+          stable: true
+      - shell:
+          !include-raw-escape: builders/ui-reporter.sh
+    publishers:
+      - reporter-publisher:
+          properties_name: reporter.properties
+          email_to: '{email_to}'
+
 - parameter:
     name: doc-parameters
     parameters:

@@ -14,7 +14,7 @@
     job_name: 'ui-fake'
     nightly-name: '{fuel_release}.{job_name}.nightly'
     custom_name: '{fuel_release}.{job_name}.custom'
-    reporter-name: '{fuel_release}.{job_name}.reporter'
+    ui-reporter-name: '{fuel_release}.{job_name}.ui-reporter'
     nightly_timer: 'H 21 * * *'
     nightly_disabled: false
     force_reuse: true
@@ -36,9 +36,9 @@
     testrail_suite: "[10.0][Fuel] UI testing"
     testrail_suite_desc: "Suite description"
     testrail_milestone: "10.0"
-    testrail_plan: "${{TREP_TESTRAIL_MILESTONE}} fake-ui ${{DATE}}"
+    testrail_plan: "${{TESTRAIL_MILESTONE}} fake-ui ${{DATE}}"
     testrail_plan_desc: "Test plan description"
-    testrail_run: "${{TREP_TESTRAIL_SUITE}}"
+    testrail_run: "${{TESTRAIL_SUITE}}"
     testrail_run_desc: "Test run description"
     testrail_item_case: "${{TEST_GROUP}}"
     trep_results_source: "xunit"
@@ -71,7 +71,7 @@
       - '{fuel_release}.{job_name}.{testgroup}':
           scm_submodule_disabled: false
 
-      - '{reporter-name}':
+      - '{ui-reporter-name}':
           plugin_version: ''
           plugin_name: '{job_name}'
 
@@ -194,7 +194,7 @@
           !include-raw-escape: ../builders/ui.fake.test.sh
     publishers:
       - fake-ui-publisher:
-          reporter_name: '{reporter-name}'
+          reporter_name: '{ui-reporter-name}'
           properties_name: properties
           email_to: '{email_to}'
 
