@@ -22,10 +22,12 @@ export TEST_PATH="${TEST_PREFIX:?}/${TEST_GROUP:?}.js"
 . "${VENV_PATH}/bin/activate"
 cd ${WORKSPACE}/docker/
 
-if [[ "${FORCE_REUSE}" == "false" ]]; then
-  ln -s ${WORKSPACE}/docker/fuel-web fuel-web
-  docker-compose down -v
+if ln -s ${WORKSPACE}/docker/fuel-web fuel-web; then
+  echo "symlink to fuel-web created"
+else
+  echo "symlink to fuel-web already exists"
 fi
+docker-compose down -v
 docker-compose up --remove-orphans --build --abort-on-container-exit
 
 cd ${WORKSPACE}

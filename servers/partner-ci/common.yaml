@@ -533,6 +533,9 @@
           script-only-if-succeeded: False
           script-only-if-failed: False
           builders:
+            - shell: |
+                cd ${{WORKSPACE}}
+                sudo chown -R jenkins:jenkins .
             - shell:
                 !include-raw-escape: builders/ui.converter.sh
             - shell: |
