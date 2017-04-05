@@ -18,9 +18,9 @@
     reporter-name: '{fuel_release}.{job_name}.reporter'
     nightly_timer: 'H 21 * * *'
     nightly_disabled: false
-    force_erase: false
-    force_reuse: true
-    recreate_venv: false
+    force_erase: true
+    force_reuse: false
+    recreate_venv: true
     kvm_use: false
     update_master: true
     enable_proposed: true
