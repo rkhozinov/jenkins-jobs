@@ -118,7 +118,8 @@ source "$VENV_PATH/bin/activate" && echo ${VIRTUAL_ENV:?}
 if [[ "${FORCE_REUSE}" == "false" ]]; then
   if [[ "${FORCE_ERASE}" == "true" ]]; then
     for env in $(dospy_list); do
-      smart_erase $env
+#      smart_erase $env
+      dos.py erase $env
     done
   else
     # determine free space before run the cleaner
@@ -127,7 +128,8 @@ if [[ "${FORCE_REUSE}" == "false" ]]; then
     if (( free_space < REQUIRED_FREE_SPACE )); then
       for env in $(dospy_list $ENV_NAME); do
         if [[ $env  != *"released"* ]]; then
-          smart_erase $env
+#      smart_erase $env
+          dos.py erase $env
         fi
       done
     fi
@@ -147,11 +149,13 @@ if [[ "${FORCE_REUSE}" == "false" ]]; then
             USEFUL_ENV=$env
           else
             echo "$env is not suitable for test, it will be erased"
-            smart_erase $env
+#            smart_erase $env
+            dos.py erase $env
           fi
         else
           echo "there is no date-metadata, $env will be erased"
-          smart_erase $env
+#          smart_erase $env
+          dos.py erase $env
         fi
       else
         echo "there're no snapshots to reuse"
@@ -161,7 +165,8 @@ if [[ "${FORCE_REUSE}" == "false" ]]; then
 
   for env in $(dospy_list); do
     if [[ "$env"  != "$USEFUL_ENV" ]] && [[ $env  != *"released"* ]]; then
-      smart_erase $env
+#      smart_erase $env
+      dos.py erase $env
     fi
   done
 fi
